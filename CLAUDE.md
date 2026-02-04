@@ -11,6 +11,13 @@ npm run typecheck    # Type-check without emit
 npm run preview      # Run the dev server (shortcut for cli)
 ```
 
+## Project root files
+
+- **`package.json`** — Package config, scripts, dependencies. Two peer deps: react, react-dom.
+- **`tsconfig.json`** — TypeScript config. Target ES2022, `bundler` module resolution, strict mode, JSX via react-jsx. Used by `npm run typecheck`.
+- **`tsup.config.ts`** — Build config. Two entry points: `api/index` (library, ESM + dts) and `cli/index` (CLI binary with shebang).
+- **`.gitignore`** — Ignores `node_modules/`, `dist/`, `.vite/`, `*.tsbuildinfo`.
+
 ## Architecture
 
 ```
