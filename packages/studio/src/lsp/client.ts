@@ -125,20 +125,20 @@ export class TsgoClient {
    */
   async getComponentProps(
     filePath: string,
-    componentName: string,
   ): Promise<PropInfo[] | null> {
     const absPath = resolve(this.cwd, filePath)
     const content = readFileSync(absPath, 'utf-8')
     const lines = content.split('\n')
 
-    // Find the component reference in a setup() call
+    // Find "export default X" and hover on X to get SetupResult<Props> type
     for (let lineNum = 0; lineNum < lines.length; lineNum++) {
       const line = lines[lineNum]
-      const pattern = new RegExp(`setup\\(\\s*(${componentName})`)
-      const match = line.match(pattern)
+      const match = line.match(/export\s+default\s+(\w+)/)
       if (!match || match.index === undefined) continue
 
-      const charPos = match.index + match[0].indexOf(componentName)
+      const identifier = match[1]
+      const charPos = match.index + match[0].indexOf(identifier)
+
       const hoverResult = await this.hover(filePath, lineNum, charPos)
       if (!hoverResult) continue
 

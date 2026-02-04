@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import type {
+  Expand,
   SetupConfig,
   SetupResult,
   VariantsOptions,
@@ -13,13 +14,13 @@ import { DEFAULT_LAYOUT, DEFAULT_THEME } from '../types.js'
 export function setup<Props extends Record<string, any>>(
   component: ComponentType<Props>,
   config: SetupConfig<Props>,
-): SetupResult<Props> {
+): SetupResult<Expand<Props>> {
   const baseLayout = config.layout ?? DEFAULT_LAYOUT
   const baseTheme = config.theme ?? DEFAULT_THEME
   const defaults = (config.defaults ?? {}) as Record<string, unknown>
 
   return {
-    show(props: Partial<Props>): PreviewExport {
+    show(props: Partial<Expand<Props>>): PreviewExport {
       const merged = { ...defaults, ...props }
       return {
         __type: 'preview',
@@ -33,8 +34,8 @@ export function setup<Props extends Record<string, any>>(
     },
 
     showVariants(
-      prop: keyof Props,
-      options?: VariantsOptions<Props>,
+      prop: keyof Expand<Props>,
+      options?: VariantsOptions<Expand<Props>>,
     ): PreviewExport {
       const layout = options?.layout ?? baseLayout
       const theme = options?.theme ?? baseTheme

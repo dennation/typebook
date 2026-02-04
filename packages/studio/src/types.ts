@@ -23,6 +23,13 @@ export type Theme = 'light' | 'dark'
 
 // --- Setup Types ---
 
+/**
+ * Flattens composed interfaces and resolves string literal unions
+ * so that tsgo hover shows inline `{ size: "sm" | "md" | "lg"; ... }`
+ * instead of opaque type aliases like `ButtonProps`.
+ */
+export type Expand<T> = { [K in keyof T]: T[K] extends string ? T[K] & string : T[K] } & {}
+
 export interface SetupConfig<Props> {
   defaults: Partial<Props>
   layout?: Layout

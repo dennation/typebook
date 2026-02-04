@@ -46,7 +46,7 @@ export async function loadPreviewModules(
         componentName ??=
           exp.component.displayName || exp.component.name || 'Unknown'
 
-        const props = typeMap.get(componentName) ?? []
+        const props = typeMap.get(filePath) ?? []
 
         if (exp.kind === 'showVariants' && exp.prop) {
           const propInfo = props.find((p) => p.name === exp.prop)
@@ -75,10 +75,10 @@ export async function loadPreviewModules(
 
       if (componentName && previews.length > 0) {
         entries.push({
-          name: componentName.toLowerCase(),
+          name: componentName,
           filePath: relative(cwd, filePath),
           importPath: filePath,
-          props: typeMap.get(componentName) ?? [],
+          props: typeMap.get(filePath) ?? [],
           previews,
         })
       }

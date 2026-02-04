@@ -80,7 +80,7 @@ function PreviewRenderer({ data }: { data: RenderMessage }) {
   // PreviewExport with __type === 'preview'
   if (previewExport.__type === 'preview') {
     const PreviewComponent = previewExport.component
-    const variants = previewExport.variants ?? data.variants
+    const variants = data.variants ?? previewExport.variants
     const layout = data.layout ?? previewExport.layout ?? { type: 'row', gap: 16 }
 
     return (

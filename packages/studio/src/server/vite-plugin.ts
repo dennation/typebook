@@ -45,7 +45,7 @@ export function studioPlugin(options: StudioPluginOptions): Plugin {
         // API: single component
         if (pathname.startsWith('/api/component/')) {
           const name = pathname.slice('/api/component/'.length)
-          const entry = getRegistry().find((c) => c.name === name)
+          const entry = getRegistry().find((c) => c.name.toLowerCase() === name.toLowerCase())
           if (entry) {
             res.writeHead(200, {
               'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export function studioPlugin(options: StudioPluginOptions): Plugin {
         // SPA fallback: serve index.html for host routes
         if (
           pathname === '/' ||
-          pathname.match(/^\/[a-z0-9-]+\/[A-Za-z0-9]+$/)
+          pathname.match(/^\/[A-Za-z0-9-]+\/[A-Za-z0-9]+$/)
         ) {
           const indexPath = resolve(clientDir, 'index.html')
           let html = readFileSync(indexPath, 'utf-8')

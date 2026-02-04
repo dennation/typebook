@@ -79,12 +79,10 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
 
   // Extract types for discovered components
   if (lspReady) {
-    for (const entry of registry) {
-      for (const file of files) {
-        const props = await lspClient.getComponentProps(file, entry.name)
-        if (props) {
-          typeMap.set(entry.name, props)
-        }
+    for (const file of files) {
+      const props = await lspClient.getComponentProps(file)
+      if (props) {
+        typeMap.set(file, props)
       }
     }
     registry = await loadPreviewModules(vite, files, cwd, typeMap)
@@ -93,20 +91,19 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
   console.log(`[studio] Registered ${registry.length} component(s)`)
 
   // 6. LSP polling
+  let pollTimer: ReturnType<typeof setInterval> | null = null
   if (lspReady) {
-    setInterval(async () => {
+    pollTimer = setInterval(async () => {
       let changed = false
 
-      for (const entry of registry) {
-        for (const file of files) {
-          const props = await lspClient.getComponentProps(file, entry.name)
-          if (!props) continue
+      for (const file of files) {
+        const props = await lspClient.getComponentProps(file)
+        if (!props) continue
 
-          const existing = typeMap.get(entry.name)
-          if (JSON.stringify(existing) !== JSON.stringify(props)) {
-            typeMap.set(entry.name, props)
-            changed = true
-          }
+        const existing = typeMap.get(file)
+        if (JSON.stringify(existing) !== JSON.stringify(props)) {
+          typeMap.set(file, props)
+          changed = true
         }
       }
 
@@ -130,11 +127,16 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
   }
   console.log()
 
-  process.on('SIGINT', () => {
+  // 8. Graceful shutdown
+  const shutdown = async () => {
     console.log('\n[studio] Shutting down...')
+    if (pollTimer) clearInterval(pollTimer)
     sse.disconnectAll()
     lspClient.stop()
-    vite.close()
+    await vite.close()
     process.exit(0)
-  })
+  }
+
+  process.on('SIGINT', shutdown)
+  process.on('SIGTERM', shutdown)
 }

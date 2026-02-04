@@ -56,7 +56,7 @@ export function App() {
   // Parse URL on mount
   useEffect(() => {
     const parseUrl = () => {
-      const match = location.pathname.match(/^\/([a-z0-9-]+)\/([A-Za-z0-9]+)$/)
+      const match = location.pathname.match(/^\/([A-Za-z0-9-]+)\/([A-Za-z0-9]+)$/)
       if (match) {
         setActiveComponent(match[1])
         setActivePreview(match[2])
