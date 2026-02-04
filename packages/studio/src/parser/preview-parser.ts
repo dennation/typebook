@@ -3,10 +3,13 @@ import type { ParsedPreviewFile, ParsedSetup, ParsedExport, Theme } from '../typ
 
 /**
  * Parses a .preview.tsx file to extract:
- * - setup() calls with component name & import path
- * - Exported show() and showVariants() calls
+ * - The default-exported setup() call (component name, import path, config)
+ * - Named show() and showVariants() exports
  *
- * Uses oxc-parser for AST analysis.
+ * Expected file structure:
+ *   const x = setup(Component, { defaults: {...} })
+ *   export const Foo = x.showVariants('prop')
+ *   export default x
  */
 export async function parsePreviewFile(
   filePath: string,
@@ -14,7 +17,6 @@ export async function parsePreviewFile(
   const oxc = await import('oxc-parser')
   const source = readFileSync(filePath, 'utf-8')
   const result = oxc.parseSync(filePath, source)
-  // Work with loose types — we inspect node.type manually
   const ast: any = result.program
 
   const setups: ParsedSetup[] = []
@@ -36,40 +38,60 @@ export async function parsePreviewFile(
     }
   }
 
-  // Find variable declarations with setup() calls
+  // Collect all variable declarations: name -> init expression
+  const varMap = new Map<string, any>()
   for (const node of ast.body) {
-    if (node.type !== 'VariableDeclaration') continue
+    const varDecl =
+      node.type === 'VariableDeclaration'
+        ? node
+        : node.type === 'ExportNamedDeclaration' &&
+            node.declaration?.type === 'VariableDeclaration'
+          ? node.declaration
+          : null
+    if (!varDecl) continue
 
-    for (const decl of node.declarations ?? []) {
-      const init = decl.init
-      if (!init || init.type !== 'CallExpression') continue
-      if (init.callee?.name !== 'setup') continue
-
-      const args = init.arguments ?? []
-      if (args.length < 2) continue
-
-      const componentRef = args[0]
-      const componentName = componentRef?.name
-      if (!componentName) continue
-
-      const importPath = importMap.get(componentName) ?? ''
-      const variableName = decl.id?.name ?? ''
-
-      const configArg = args[1]
-      const setup: ParsedSetup = {
-        componentName,
-        importPath,
-        variableName,
-        defaults: extractObjectLiteral(configArg, 'defaults'),
-        layout: extractObjectLiteral(configArg, 'layout') as any,
-        theme: extractStringProperty(configArg, 'theme') as Theme | undefined,
+    for (const decl of varDecl.declarations ?? []) {
+      if (decl.id?.name && decl.init) {
+        varMap.set(decl.id.name, decl.init)
       }
-
-      setups.push(setup)
     }
   }
 
-  // Find exported show() and showVariants() calls
+  // Find export default — should reference the setup() variable
+  let setupVarName: string | undefined
+  for (const node of ast.body) {
+    if (node.type === 'ExportDefaultDeclaration') {
+      const decl = node.declaration
+      if (decl?.type === 'Identifier') {
+        setupVarName = decl.name
+      }
+      break
+    }
+  }
+
+  // Resolve the setup() call from the default export variable
+  if (setupVarName) {
+    const init = varMap.get(setupVarName)
+    if (init?.type === 'CallExpression' && init.callee?.name === 'setup') {
+      const args = init.arguments ?? []
+      if (args.length >= 2) {
+        const componentName = args[0]?.name
+        if (componentName) {
+          const configArg = args[1]
+          setups.push({
+            componentName,
+            importPath: importMap.get(componentName) ?? '',
+            variableName: setupVarName,
+            defaults: extractObjectLiteral(configArg, 'defaults'),
+            layout: extractObjectLiteral(configArg, 'layout') as any,
+            theme: extractStringProperty(configArg, 'theme') as Theme | undefined,
+          })
+        }
+      }
+    }
+  }
+
+  // Find named exports: show() and showVariants() calls
   for (const node of ast.body) {
     if (node.type !== 'ExportNamedDeclaration') continue
 

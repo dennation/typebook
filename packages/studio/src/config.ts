@@ -1,6 +1,6 @@
-import { pathToFileURL } from 'node:url'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { bundleRequire } from 'bundle-require'
 import type { StudioConfig, PreviewConfig } from './types.js'
 import { DEFAULT_BREAKPOINTS } from './types.js'
 
@@ -9,7 +9,6 @@ export function defineConfig(config: StudioConfig): StudioConfig {
 }
 
 const DEFAULT_PREVIEW: PreviewConfig = {
-  styles: './src/styles/globals.css',
   include: './src/components/**/*.preview.tsx',
   breakpoints: true,
 }
@@ -31,8 +30,7 @@ export async function loadConfig(cwd: string): Promise<StudioConfig> {
     return normalizeConfig({ preview: DEFAULT_PREVIEW })
   }
 
-  const configUrl = pathToFileURL(configPath).href
-  const mod = await import(configUrl)
+  const { mod } = await bundleRequire({ filepath: configPath })
   const raw: StudioConfig = mod.default ?? mod
 
   return normalizeConfig(raw)

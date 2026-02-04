@@ -3,9 +3,9 @@ import type { ComponentType, ReactNode } from 'react'
 // --- Config Types ---
 
 export interface PreviewConfig {
-  styles: string
-  include: string
-  breakpoints: boolean | Record<string, number>
+  styles?: string
+  include?: string
+  breakpoints?: boolean | Record<string, number>
 }
 
 export interface StudioConfig {

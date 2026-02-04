@@ -168,7 +168,7 @@ export default defineConfig({
 import { setup } from '@dennation/studio'
 import { Button } from './Button'
 
-export const button = setup(Button, {
+const button = setup(Button, {
   defaults: { children: 'Click me', onClick: () => {} },
   layout: { type: 'row', gap: 16 },
   theme: 'light',
@@ -177,4 +177,6 @@ export const button = setup(Button, {
 export const Sizes = button.showVariants('size')
 export const Variants = button.showVariants('variant', { props: { disabled: true } })
 export const WithIcon = button.show({ children: 'Add' })
+
+export default button
 ```

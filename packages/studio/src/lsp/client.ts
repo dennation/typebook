@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from 'node:child_process'
-import { resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
 import { readFileSync } from 'node:fs'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import type { PropInfo } from '../types.js'
 import { tryParseTypeString } from '../parser/type-parser.js'
 
@@ -57,15 +58,10 @@ export class TsgoClient {
   }
 
   private async findTsgo(): Promise<string> {
-    // Use @typescript/native-preview's getExePath to resolve the platform-specific binary
-    try {
-      const mod = await import('@typescript/native-preview/lib/getExePath.js')
-      const getExePath = mod.default ?? mod
-      return getExePath()
-    } catch {
-      // Fallback: try node_modules/.bin
-      return resolve(this.cwd, 'node_modules', '.bin', 'tsgo')
-    }
+    const pkgUrl = import.meta.resolve('@typescript/native-preview/package.json')
+    const pkgDir = dirname(fileURLToPath(pkgUrl))
+    const { default: getExePath } = await import(pathToFileURL(resolve(pkgDir, 'lib', 'getExePath.js')).href)
+    return getExePath()
   }
 
   private async initialize(): Promise<void> {

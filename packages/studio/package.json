@@ -22,6 +22,8 @@
 	},
 	"dependencies": {
 		"@typescript/native-preview": "^7.0.0-dev.20260203.1",
+		"bundle-require": "^5.1.0",
+		"esbuild": "^0.25.0",
 		"glob": "^11.0.0",
 		"oxc-parser": "^0.60.0",
 		"vite": "^6.0.0"

@@ -41,6 +41,12 @@ importers:
       '@typescript/native-preview':
         specifier: ^7.0.0-dev.20260203.1
         version: 7.0.0-dev.20260203.1
+      bundle-require:
+        specifier: ^5.1.0
+        version: 5.1.0(esbuild@0.25.12)
+      esbuild:
+        specifier: ^0.25.0
+        version: 0.25.12
       glob:
         specifier: ^11.0.0
         version: 11.1.0
@@ -1801,6 +1807,11 @@ snapshots:
       electron-to-chromium: 1.5.286
       node-releases: 2.0.27
       update-browserslist-db: 1.2.3(browserslist@4.28.1)
+
+  bundle-require@5.1.0(esbuild@0.25.12):
+    dependencies:
+      esbuild: 0.25.12
+      load-tsconfig: 0.2.5
 
   bundle-require@5.1.0(esbuild@0.27.2):
     dependencies:
