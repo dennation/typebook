@@ -123,12 +123,6 @@ export interface PreviewEntry {
 
 // --- SSE / Communication ---
 
-export interface TypesUpdatedEvent {
-  type: 'types_updated'
-  component: string
-  props: PropInfo[]
-}
-
 export interface RenderMessage {
   type: 'RENDER'
   component: string

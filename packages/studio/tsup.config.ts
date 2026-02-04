@@ -13,6 +13,6 @@ export default defineConfig([
     format: ['esm'],
     outDir: 'dist',
     banner: { js: '#!/usr/bin/env node' },
-    external: ['vite', 'express', 'fsevents'],
+    external: ['vite', 'fsevents'],
   },
 ])

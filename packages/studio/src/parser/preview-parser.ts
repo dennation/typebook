@@ -60,9 +60,9 @@ export async function parsePreviewFile(
         componentName,
         importPath,
         variableName,
-        defaults: extractObjectLiteral(configArg, 'defaults', source),
-        layout: extractObjectLiteral(configArg, 'layout', source) as any,
-        theme: extractStringProperty(configArg, 'theme', source) as Theme | undefined,
+        defaults: extractObjectLiteral(configArg, 'defaults'),
+        layout: extractObjectLiteral(configArg, 'layout') as any,
+        theme: extractStringProperty(configArg, 'theme') as Theme | undefined,
       }
 
       setups.push(setup)
@@ -100,9 +100,9 @@ export async function parsePreviewFile(
         let options: ParsedExport['options']
         if (args[1]) {
           options = {
-            props: extractObjectLiteral(args[1], 'props', source),
-            layout: extractObjectLiteral(args[1], 'layout', source) as any,
-            theme: extractStringProperty(args[1], 'theme', source) as Theme | undefined,
+            props: extractObjectLiteral(args[1], 'props'),
+            layout: extractObjectLiteral(args[1], 'layout') as any,
+            theme: extractStringProperty(args[1], 'theme') as Theme | undefined,
           }
         }
 
@@ -129,7 +129,6 @@ export async function parsePreviewFile(
 function extractObjectLiteral(
   node: any,
   propertyName: string,
-  _source: string,
 ): Record<string, unknown> {
   if (!node || node.type !== 'ObjectExpression') return {}
 
@@ -149,7 +148,6 @@ function extractObjectLiteral(
 function extractStringProperty(
   node: any,
   propertyName: string,
-  _source: string,
 ): string | undefined {
   if (!node || node.type !== 'ObjectExpression') return undefined
 

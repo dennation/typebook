@@ -34,24 +34,6 @@ export class SSEManager {
   }
 
   /**
-   * Push updated component data to all interested clients.
-   */
-  pushUpdate(entry: ComponentEntry): void {
-    const data = JSON.stringify({
-      type: 'types_updated',
-      component: entry.name,
-      props: entry.props,
-      previews: entry.previews,
-    })
-
-    for (const client of this.clients) {
-      if (client.component === null || client.component === entry.name) {
-        client.res.write(`data: ${data}\n\n`)
-      }
-    }
-  }
-
-  /**
    * Push full registry update to all clients.
    */
   pushFullUpdate(entries: ComponentEntry[]): void {
