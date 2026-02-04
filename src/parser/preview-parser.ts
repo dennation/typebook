@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs'
-import type { ParsedPreviewFile, ParsedSetup, ParsedExport } from '../types.js'
+import type { ParsedPreviewFile, ParsedSetup, ParsedExport, Theme } from '../types.js'
 
 /**
  * Parses a .preview.tsx file to extract:
@@ -14,7 +14,8 @@ export async function parsePreviewFile(
   const oxc = await import('oxc-parser')
   const source = readFileSync(filePath, 'utf-8')
   const result = oxc.parseSync(filePath, source)
-  const ast = JSON.parse(result.program)
+  // Work with loose types — we inspect node.type manually
+  const ast: any = result.program
 
   const setups: ParsedSetup[] = []
   const exports: ParsedExport[] = []
@@ -61,7 +62,7 @@ export async function parsePreviewFile(
         variableName,
         defaults: extractObjectLiteral(configArg, 'defaults', source),
         layout: extractObjectLiteral(configArg, 'layout', source) as any,
-        theme: extractStringProperty(configArg, 'theme', source),
+        theme: extractStringProperty(configArg, 'theme', source) as Theme | undefined,
       }
 
       setups.push(setup)
@@ -101,7 +102,7 @@ export async function parsePreviewFile(
           options = {
             props: extractObjectLiteral(args[1], 'props', source),
             layout: extractObjectLiteral(args[1], 'layout', source) as any,
-            theme: extractStringProperty(args[1], 'theme', source),
+            theme: extractStringProperty(args[1], 'theme', source) as Theme | undefined,
           }
         }
 

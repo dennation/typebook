@@ -15,7 +15,7 @@ export async function parseTypeString(raw: string): Promise<PropInfo[]> {
   // Normalize: ensure it's a type declaration oxc can parse
   const typeDecl = raw.startsWith('{') ? `type T = ${raw}` : `type T = { ${raw} }`
   const result = oxc.parseSync('virtual.ts', typeDecl)
-  const ast = JSON.parse(result.program)
+  const ast: any = result.program
 
   const props: PropInfo[] = []
 
