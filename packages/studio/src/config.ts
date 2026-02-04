@@ -4,6 +4,10 @@ import { bundleRequire } from 'bundle-require'
 import type { StudioConfig, PreviewConfig } from './types.js'
 import { DEFAULT_BREAKPOINTS } from './types.js'
 
+export function defineConfig(config: StudioConfig): StudioConfig {
+  return config
+}
+
 const DEFAULT_PREVIEW: PreviewConfig = {
   include: './src/components/**/*.preview.tsx',
   breakpoints: true,

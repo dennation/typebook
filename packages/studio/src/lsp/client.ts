@@ -15,6 +15,7 @@ export class TsgoClient {
   private process: ChildProcess | null = null
   private buffer = Buffer.alloc(0)
   private requestId = 0
+  private fileVersions = new Map<string, number>()
   private pending = new Map<
     number,
     { resolve: (value: any) => void; reject: (err: Error) => void }
@@ -82,6 +83,7 @@ export class TsgoClient {
     const content = readFileSync(absPath, 'utf-8')
     const uri = `file://${absPath}`
 
+    this.fileVersions.set(absPath, 1)
     this.notify('textDocument/didOpen', {
       textDocument: {
         uri,
@@ -93,6 +95,21 @@ export class TsgoClient {
 
     // Give tsgo time to process the file
     await this.sleep(200)
+  }
+
+  async notifyChange(filePath: string): Promise<void> {
+    const absPath = resolve(this.cwd, filePath)
+    const content = readFileSync(absPath, 'utf-8')
+    const uri = `file://${absPath}`
+    const version = (this.fileVersions.get(absPath) ?? 1) + 1
+    this.fileVersions.set(absPath, version)
+
+    this.notify('textDocument/didChange', {
+      textDocument: { uri, version },
+      contentChanges: [{ text: content }],
+    })
+
+    await this.sleep(100)
   }
 
   async hover(filePath: string, line: number, character: number): Promise<string | null> {

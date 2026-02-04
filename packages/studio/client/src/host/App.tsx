@@ -1,25 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-
-interface ComponentEntry {
-  name: string
-  filePath: string
-  importPath: string
-  previews: PreviewEntry[]
-}
-
-interface PreviewEntry {
-  name: string
-  kind: string
-  variants: { label: string; props: Record<string, unknown> }[]
-  layout: { type: string; gap?: number; columns?: number }
-  theme: string
-}
-
-interface Config {
-  breakpoints: Record<string, number>
-  port: number
-  stylesPath: string | null
-}
+import type { ComponentEntry, Config } from '../types'
 
 export function App() {
   const [components, setComponents] = useState<ComponentEntry[]>([])
@@ -136,9 +116,9 @@ export function App() {
   const comp = components.find((c) => c.name === activeComponent)
   const preview = comp?.previews.find((p) => p.name === activePreview)
 
-  const onIframeLoad = () => {
-    if (!comp || !preview) return
-    iframeRef.current?.contentWindow?.postMessage(
+  const sendRender = () => {
+    if (!iframeRef.current?.contentWindow || !comp || !preview) return
+    iframeRef.current.contentWindow.postMessage(
       {
         type: 'RENDER',
         component: comp.name,
@@ -155,21 +135,7 @@ export function App() {
 
   // Re-send render message when active preview changes
   useEffect(() => {
-    if (iframeRef.current?.contentWindow && comp && preview) {
-      iframeRef.current.contentWindow.postMessage(
-        {
-          type: 'RENDER',
-          component: comp.name,
-          preview: preview.name,
-          filePath: comp.filePath,
-          importPath: comp.importPath,
-          variants: preview.variants,
-          layout: preview.layout,
-          theme,
-        },
-        '*',
-      )
-    }
+    sendRender()
   }, [activeComponent, activePreview, components])
 
   return (
@@ -239,7 +205,7 @@ export function App() {
               <iframe
                 ref={iframeRef}
                 src="/frame.html"
-                onLoad={onIframeLoad}
+                onLoad={sendRender}
               />
             </div>
             <div className="variant-labels">

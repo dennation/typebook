@@ -1,21 +1,13 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { ComponentEntry } from '../types.js'
 
-type SSEClient = {
-  res: ServerResponse
-  component: string | null
-}
-
 /**
  * SSE manager for pushing type updates to connected browsers.
  */
 export class SSEManager {
-  private clients: SSEClient[] = []
+  private clients: ServerResponse[] = []
 
   handleRequest(req: IncomingMessage, res: ServerResponse): void {
-    const url = new URL(req.url ?? '/', `http://${req.headers.host}`)
-    const component = url.searchParams.get('component')
-
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
@@ -25,17 +17,13 @@ export class SSEManager {
 
     res.write('data: {"type":"connected"}\n\n')
 
-    const client: SSEClient = { res, component }
-    this.clients.push(client)
+    this.clients.push(res)
 
     req.on('close', () => {
-      this.clients = this.clients.filter((c) => c !== client)
+      this.clients = this.clients.filter((c) => c !== res)
     })
   }
 
-  /**
-   * Push full registry update to all clients.
-   */
   pushFullUpdate(entries: ComponentEntry[]): void {
     const data = JSON.stringify({
       type: 'registry_updated',
@@ -43,13 +31,13 @@ export class SSEManager {
     })
 
     for (const client of this.clients) {
-      client.res.write(`data: ${data}\n\n`)
+      client.write(`data: ${data}\n\n`)
     }
   }
 
   disconnectAll(): void {
     for (const client of this.clients) {
-      client.res.end()
+      client.end()
     }
     this.clients = []
   }

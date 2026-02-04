@@ -128,4 +128,3 @@ export const DEFAULT_BREAKPOINTS: Record<string, number> = {
 export const DEFAULT_LAYOUT: Layout = { type: 'row', gap: 16 }
 export const DEFAULT_THEME: Theme = 'light'
 export const DEFAULT_PORT = 3000
-export const LSP_POLL_INTERVAL = 500

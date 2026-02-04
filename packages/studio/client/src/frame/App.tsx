@@ -1,15 +1,5 @@
-import React, { useState, useEffect, useRef, Component, type CSSProperties } from 'react'
-
-interface RenderMessage {
-  type: 'RENDER'
-  component: string
-  preview: string
-  filePath: string
-  importPath: string
-  variants: { label: string; props: Record<string, unknown> }[]
-  layout: { type: string; gap?: number; columns?: number }
-  theme: string
-}
+import React, { useState, useEffect, Component, type CSSProperties } from 'react'
+import type { RenderMessage } from '../types'
 
 export function App() {
   const [renderData, setRenderData] = useState<RenderMessage | null>(null)
@@ -77,37 +67,26 @@ function PreviewRenderer({ data }: { data: RenderMessage }) {
     )
   }
 
-  // PreviewExport with __type === 'preview'
-  if (previewExport.__type === 'preview') {
-    const PreviewComponent = previewExport.component
-    const variants = data.variants ?? previewExport.variants
-    const layout = data.layout ?? previewExport.layout ?? { type: 'row', gap: 16 }
-
-    return (
-      <div className="preview-container" style={getLayoutStyle(layout)}>
-        {variants.map((variant: any, i: number) => (
-          <div className="variant-wrapper" key={i}>
-            <ErrorBoundary>
-              <PreviewComponent {...variant.props} />
-            </ErrorBoundary>
-            <span className="variant-label">{variant.label}</span>
-          </div>
-        ))}
-      </div>
-    )
+  if (previewExport.__type !== 'preview') {
+    return <div className="error-display">Unknown export type for "{data.preview}"</div>
   }
 
-  // React component directly
-  if (typeof previewExport === 'function' || previewExport?.$$typeof) {
-    const DirectComponent = previewExport
-    return (
-      <ErrorBoundary>
-        <DirectComponent />
-      </ErrorBoundary>
-    )
-  }
+  const PreviewComponent = previewExport.component
+  const variants = data.variants ?? previewExport.variants
+  const layout = data.layout ?? previewExport.layout ?? { type: 'row', gap: 16 }
 
-  return <div className="error-display">Unknown export type for "{data.preview}"</div>
+  return (
+    <div className="preview-container" style={getLayoutStyle(layout)}>
+      {variants.map((variant: any, i: number) => (
+        <div className="variant-wrapper" key={i}>
+          <ErrorBoundary>
+            <PreviewComponent {...variant.props} />
+          </ErrorBoundary>
+          <span className="variant-label">{variant.label}</span>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 function getLayoutStyle(layout: {

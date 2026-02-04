@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { StudioConfig, PropInfo } from '../types.js'
-import { DEFAULT_PORT, LSP_POLL_INTERVAL } from '../types.js'
+import { DEFAULT_PORT } from '../types.js'
 import { resolveBreakpoints } from '../config.js'
 import { TsgoClient } from '../lsp/client.js'
 import { findPreviewFiles, loadPreviewModules } from './scanner.js'
@@ -74,44 +74,57 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
     console.warn('[studio]', (err as Error).message)
   }
 
-  // 5. Load preview modules via Vite SSR and build registry
-  let registry = await loadPreviewModules(vite, files, cwd, typeMap)
-
-  // Extract types for discovered components
+  // 5. Extract types in parallel, then build registry once
   if (lspReady) {
-    for (const file of files) {
-      const props = await lspClient.getComponentProps(file)
-      if (props) {
-        typeMap.set(file, props)
-      }
+    const results = await Promise.all(
+      files.map(async (file) => {
+        const props = await lspClient.getComponentProps(file)
+        return props ? ([file, props] as const) : null
+      }),
+    )
+    for (const result of results) {
+      if (result) typeMap.set(result[0], result[1])
     }
-    registry = await loadPreviewModules(vite, files, cwd, typeMap)
   }
 
+  let registry = await loadPreviewModules(vite, files, cwd, typeMap)
   console.log(`[studio] Registered ${registry.length} component(s)`)
 
-  // 6. LSP polling
-  let pollTimer: ReturnType<typeof setInterval> | null = null
+  // 6. Watch for file changes instead of polling
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
   if (lspReady) {
-    pollTimer = setInterval(async () => {
-      let changed = false
+    vite.watcher.on('change', (changedPath) => {
+      // Only react to files in the preview scope or their component sources
+      const isPreviewFile = files.some((f) => changedPath.endsWith(f) || changedPath === f)
+      const isSourceFile = changedPath.endsWith('.tsx') || changedPath.endsWith('.ts')
+      if (!isPreviewFile && !isSourceFile) return
 
-      for (const file of files) {
-        const props = await lspClient.getComponentProps(file)
-        if (!props) continue
-
-        const existing = typeMap.get(file)
-        if (JSON.stringify(existing) !== JSON.stringify(props)) {
-          typeMap.set(file, props)
-          changed = true
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(async () => {
+        // Notify LSP about changed files and re-extract types
+        for (const file of files) {
+          await lspClient.notifyChange(file)
         }
-      }
 
-      if (changed) {
-        registry = await loadPreviewModules(vite, files, cwd, typeMap)
-        sse.pushFullUpdate(registry)
-      }
-    }, LSP_POLL_INTERVAL)
+        let changed = false
+        for (const file of files) {
+          const props = await lspClient.getComponentProps(file)
+          if (!props) continue
+
+          const existing = typeMap.get(file)
+          if (JSON.stringify(existing) !== JSON.stringify(props)) {
+            typeMap.set(file, props)
+            changed = true
+          }
+        }
+
+        if (changed) {
+          registry = await loadPreviewModules(vite, files, cwd, typeMap)
+          sse.pushFullUpdate(registry)
+        }
+      }, 200)
+    })
   }
 
   // 7. Start listening
@@ -130,7 +143,7 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
   // 8. Graceful shutdown
   const shutdown = async () => {
     console.log('\n[studio] Shutting down...')
-    if (pollTimer) clearInterval(pollTimer)
+    if (debounceTimer) clearTimeout(debounceTimer)
     sse.disconnectAll()
     lspClient.stop()
     await vite.close()
