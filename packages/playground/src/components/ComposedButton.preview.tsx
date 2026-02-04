@@ -1,4 +1,4 @@
-import { setup } from '../../src/api/index'
+import { setup } from '@dennation/studio'
 import { ComposedButton } from './ComposedButton'
 
 export const composedButton = setup(ComposedButton, {
