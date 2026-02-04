@@ -1,6 +1,14 @@
 /**
- * Test: ExpandDeep with function/ReactNode exclusions,
- * and two-step approach (Simplify + individual hover).
+ * Test: single-step type extraction via tsgo LSP hover.
+ *
+ * Strategy: inject a utility type into the preview file via didChange,
+ * then hover to get the fully expanded flat props type.
+ *
+ * Utility type:
+ *   type __Expand<T> = { [K in keyof T]: T[K] extends string ? T[K] & string : T[K] } & {}
+ *
+ * This flattens composed interfaces and resolves string literal unions
+ * (e.g. Size → "lg" | "md" | "sm") in a single hover (~100ms).
  */
 import { spawn } from 'node:child_process'
 import { resolve } from 'node:path'
@@ -44,8 +52,8 @@ function send(msg: any) {
 async function request(method: string, params: any): Promise<any> {
   const id = ++reqId
   send({ jsonrpc: '2.0', id, method, params })
-  for (let i = 0; i < 100; i++) {
-    await new Promise(r => setTimeout(r, 200))
+  for (let i = 0; i < 150; i++) {
+    await new Promise(r => setTimeout(r, 100))
     if (responses.has(id)) { const r = responses.get(id)!; responses.delete(id); return r.result }
   }
   throw new Error(`Timeout: ${method} id=${id}`)
@@ -64,7 +72,7 @@ async function hover(uri: string, line: number, char: number): Promise<string | 
 async function run() {
   await request('initialize', { processId: process.pid, capabilities: {}, rootUri: `file://${cwd}` })
   notify('initialized', {})
-  await new Promise(r => setTimeout(r, 3000))
+  await new Promise(r => setTimeout(r, 2000))
 
   const previewFile = resolve(cwd, 'test/fixtures/ComposedButton.preview.tsx')
   const originalContent = readFileSync(previewFile, 'utf-8')
@@ -73,51 +81,54 @@ async function run() {
   notify('textDocument/didOpen', {
     textDocument: { uri, languageId: 'typescriptreact', version: 1, text: originalContent }
   })
-  await new Promise(r => setTimeout(r, 2000))
+  await new Promise(r => setTimeout(r, 1500))
 
-  // Strategy A: ExpandDeep with exclusions for functions and ReactNode
-  const strategyA = originalContent + `
-import type { ReactNode as __RN } from 'react'
-type __Expand<T> = T extends (...args: any[]) => any ? T : T extends __RN ? T : T extends object ? { [K in keyof T]: __Expand<T[K]> } : T
-type __PropsA = __Expand<React.ComponentProps<typeof ComposedButton>>
+  // Inject Expand utility + probe type
+  const injected = originalContent + `
+type __Expand<T> = { [K in keyof T]: T[K] extends string ? T[K] & string : T[K] } & {}
+type __Props = __Expand<React.ComponentProps<typeof ComposedButton>>
 `
+
+  const t0 = performance.now()
   notify('textDocument/didChange', {
     textDocument: { uri, version: 2 },
-    contentChanges: [{ text: strategyA }],
+    contentChanges: [{ text: injected }],
   })
-  await new Promise(r => setTimeout(r, 2000))
 
-  const linesA = strategyA.split('\n')
-  console.log('--- Strategy A: ExpandDeep with fn/ReactNode exclusion ---')
-  console.log(await hover(uri, linesA.length - 2, 6))
+  const lines = injected.split('\n')
+  const result = await hover(uri, lines.length - 2, 6)
+  const elapsed = performance.now() - t0
 
-  // Strategy B: Two-step — Simplify first, then hover on each unresolved type
-  const strategyB = originalContent + `
-type __Simplify<T> = { [K in keyof T]: T[K] } & {}
-type __PropsB = __Simplify<React.ComponentProps<typeof ComposedButton>>
-type __SizeResolved = React.ComponentProps<typeof ComposedButton>["size"]
-type __VariantResolved = React.ComponentProps<typeof ComposedButton>["variant"]
-`
+  console.log(`Result (${elapsed.toFixed(0)}ms):`)
+  console.log(result)
+
+  // Verify all fields are resolved
+  const expected = [
+    'disabled?: boolean',
+    'children: ReactNode',
+    'onClick?: (() => void)',
+    'onFocus?: (() => void)',
+    'size: "lg" | "md" | "sm"',
+    'variant: "ghost" | "primary" | "secondary"',
+  ]
+
+  let ok = true
+  for (const field of expected) {
+    if (!result?.includes(field)) {
+      console.error(`MISSING: ${field}`)
+      ok = false
+    }
+  }
+  console.log(ok ? '\nAll fields resolved.' : '\nSome fields missing!')
+
+  // Restore original content
   notify('textDocument/didChange', {
     textDocument: { uri, version: 3 },
-    contentChanges: [{ text: strategyB }],
-  })
-  await new Promise(r => setTimeout(r, 2000))
-
-  const linesB = strategyB.split('\n')
-  console.log('\n--- Strategy B: Simplify + indexed access for individual props ---')
-  console.log('__PropsB:', await hover(uri, linesB.length - 4, 6))
-  console.log('__SizeResolved:', await hover(uri, linesB.length - 3, 6))
-  console.log('__VariantResolved:', await hover(uri, linesB.length - 2, 6))
-
-  // Restore
-  notify('textDocument/didChange', {
-    textDocument: { uri, version: 4 },
     contentChanges: [{ text: originalContent }],
   })
 
   proc.kill()
-  console.log('\n[done]')
+  process.exit(ok ? 0 : 1)
 }
 
 run().catch(err => { console.error(err); proc.kill(); process.exit(1) })
