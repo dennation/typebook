@@ -75,21 +75,24 @@ function resolveType(node: any): PropType {
     // Union type: 'a' | 'b' | 'c'
     case 'TSUnionType': {
       const types = node.types ?? []
-      const allLiterals = types.every(
+
+      // oxc represents all literals as { type: 'Literal', value: ... }
+      const allStringLiterals = types.every(
         (t: any) =>
-          t.type === 'TSLiteralType' && t.literal?.type === 'StringLiteral',
+          t.type === 'TSLiteralType' &&
+          typeof t.literal?.value === 'string',
       )
-      if (allLiterals) {
+      if (allStringLiterals) {
         return {
           kind: 'literal',
           values: types.map((t: any) => t.literal.value),
         }
       }
 
-      // Check for boolean union: true | false
       const allBooleans = types.every(
         (t: any) =>
-          t.type === 'TSLiteralType' && t.literal?.type === 'BooleanLiteral',
+          t.type === 'TSLiteralType' &&
+          typeof t.literal?.value === 'boolean',
       )
       if (allBooleans) {
         return { kind: 'boolean' }
@@ -104,13 +107,13 @@ function resolveType(node: any): PropType {
     // Literal types
     case 'TSLiteralType': {
       const literal = node.literal
-      if (literal?.type === 'StringLiteral') {
+      if (typeof literal?.value === 'string') {
         return { kind: 'literal', values: [literal.value] }
       }
-      if (literal?.type === 'BooleanLiteral') {
+      if (typeof literal?.value === 'boolean') {
         return { kind: 'boolean' }
       }
-      if (literal?.type === 'NumericLiteral') {
+      if (typeof literal?.value === 'number') {
         return { kind: 'number' }
       }
       return { kind: 'unknown', raw: JSON.stringify(literal?.value) }
