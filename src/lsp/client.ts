@@ -1,45 +1,48 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import { resolve } from 'node:path'
+import { readFileSync } from 'node:fs'
 import type { PropInfo } from '../types.js'
 import { tryParseTypeString } from '../parser/type-parser.js'
 
 /**
- * Minimal LSP client for tsgo.
+ * LSP client for tsgo (@typescript/native-preview).
  *
- * Implements just enough of the Language Server Protocol
- * to extract prop types via hover requests.
+ * Spawns `tsgo --lsp -stdio` and communicates via JSON-RPC
+ * over stdin/stdout to extract prop types via hover.
  */
 export class TsgoClient {
   private process: ChildProcess | null = null
-  private buffer = ''
+  private buffer = Buffer.alloc(0)
   private requestId = 0
   private pending = new Map<
     number,
     { resolve: (value: any) => void; reject: (err: Error) => void }
   >()
-  private initialized = false
 
   constructor(private cwd: string) {}
 
   async start(): Promise<void> {
-    const tsgoPath = this.findTsgo()
+    const tsgoPath = await this.findTsgo()
 
-    this.process = spawn(tsgoPath, ['--stdio'], {
+    this.process = spawn(tsgoPath, ['--lsp', '-stdio'], {
       cwd: this.cwd,
       stdio: ['pipe', 'pipe', 'pipe'],
     })
 
     this.process.stdout!.on('data', (chunk: Buffer) => {
-      this.buffer += chunk.toString()
+      this.buffer = Buffer.concat([this.buffer, chunk])
       this.processBuffer()
     })
 
     this.process.stderr!.on('data', (chunk: Buffer) => {
-      console.error('[tsgo]', chunk.toString())
+      const msg = chunk.toString().trim()
+      if (msg) console.error('[tsgo]', msg)
     })
 
     this.process.on('exit', (code) => {
-      console.log('[tsgo] exited with code', code)
+      if (code !== 0 && code !== null) {
+        console.error('[tsgo] exited with code', code)
+      }
       this.process = null
     })
 
@@ -51,22 +54,22 @@ export class TsgoClient {
       this.process.kill()
       this.process = null
     }
-    this.initialized = false
   }
 
-  private findTsgo(): string {
-    // Look for tsgo in common locations
-    const candidates = [
-      resolve(this.cwd, 'node_modules', '.bin', 'tsgo'),
-      'tsgo',
-    ]
-
-    // Return first candidate — spawn will handle if not found
-    return candidates[0]
+  private async findTsgo(): Promise<string> {
+    // Use @typescript/native-preview's getExePath to resolve the platform-specific binary
+    try {
+      const mod = await import('@typescript/native-preview/lib/getExePath.js')
+      const getExePath = mod.default ?? mod
+      return getExePath()
+    } catch {
+      // Fallback: try node_modules/.bin
+      return resolve(this.cwd, 'node_modules', '.bin', 'tsgo')
+    }
   }
 
   private async initialize(): Promise<void> {
-    const result = await this.request('initialize', {
+    await this.request('initialize', {
       processId: process.pid,
       capabilities: {},
       rootUri: `file://${this.cwd}`,
@@ -75,17 +78,15 @@ export class TsgoClient {
       ],
     })
 
-    await this.notify('initialized', {})
-    this.initialized = true
-    return result
+    this.notify('initialized', {})
   }
 
   async openFile(filePath: string): Promise<void> {
-    const { readFileSync } = await import('node:fs')
-    const content = readFileSync(filePath, 'utf-8')
-    const uri = `file://${resolve(this.cwd, filePath)}`
+    const absPath = resolve(this.cwd, filePath)
+    const content = readFileSync(absPath, 'utf-8')
+    const uri = `file://${absPath}`
 
-    await this.notify('textDocument/didOpen', {
+    this.notify('textDocument/didOpen', {
       textDocument: {
         uri,
         languageId: filePath.endsWith('.tsx') ? 'typescriptreact' : 'typescript',
@@ -93,14 +94,14 @@ export class TsgoClient {
         text: content,
       },
     })
+
+    // Give tsgo time to process the file
+    await this.sleep(200)
   }
 
-  /**
-   * Hover over a position to get type information.
-   * Returns the hover content as a string.
-   */
   async hover(filePath: string, line: number, character: number): Promise<string | null> {
-    const uri = `file://${resolve(this.cwd, filePath)}`
+    const absPath = resolve(this.cwd, filePath)
+    const uri = `file://${absPath}`
 
     const result = await this.request('textDocument/hover', {
       textDocument: { uri },
@@ -109,7 +110,6 @@ export class TsgoClient {
 
     if (!result?.contents) return null
 
-    // Extract the type string from hover result
     const contents = result.contents
     if (typeof contents === 'string') return contents
     if (contents.value) return contents.value
@@ -121,59 +121,97 @@ export class TsgoClient {
   }
 
   /**
-   * Extract prop types for a component by hovering over its reference.
+   * Extract prop types for a component by hovering over its usage.
+   *
+   * Strategy: find the component reference in the source file,
+   * hover over it, parse the resulting type signature to extract
+   * the resolved props type (handles composed/imported types).
    */
   async getComponentProps(
     filePath: string,
     componentName: string,
   ): Promise<PropInfo[] | null> {
-    const { readFileSync } = await import('node:fs')
     const absPath = resolve(this.cwd, filePath)
     const content = readFileSync(absPath, 'utf-8')
     const lines = content.split('\n')
 
-    // Find the setup() call and hover over the component argument
+    // Find the component reference in a setup() call
     for (let lineNum = 0; lineNum < lines.length; lineNum++) {
       const line = lines[lineNum]
-      const setupMatch = line.match(new RegExp(`setup\\(\\s*(${componentName})`))
-      if (!setupMatch) continue
+      const pattern = new RegExp(`setup\\(\\s*(${componentName})`)
+      const match = line.match(pattern)
+      if (!match || match.index === undefined) continue
 
-      const charPos = setupMatch.index! + setupMatch[0].indexOf(componentName)
+      const charPos = match.index + match[0].indexOf(componentName)
       const hoverResult = await this.hover(filePath, lineNum, charPos)
       if (!hoverResult) continue
 
-      // Extract props type from hover result
-      // Typically looks like: "(alias) function Button(props: ButtonProps): JSX.Element"
-      // or the type itself
-      const propsTypeMatch = hoverResult.match(
-        /props:\s*({[^}]+})|type\s+\w+Props\s*=\s*({[^}]+})/,
-      )
-      if (propsTypeMatch) {
-        const typeStr = propsTypeMatch[1] ?? propsTypeMatch[2]
-        return await tryParseTypeString(typeStr)
-      }
+      return this.extractPropsFromHover(hoverResult)
+    }
 
-      // Try broader extraction — look for object type patterns
-      const objectMatch = hoverResult.match(/\{[^}]+\}/)
-      if (objectMatch) {
-        return await tryParseTypeString(objectMatch[0])
+    return null
+  }
+
+  /**
+   * Parse the hover result to extract a props type string,
+   * then feed it to the type-parser.
+   *
+   * Hover result formats from tsgo:
+   *   "function Button(props: { size: 'sm' | 'md' | 'lg'; ... }): JSX.Element"
+   *   "(alias) function Button(props: ButtonProps): Element"
+   *
+   * For inline props we can extract directly.
+   * For named types we need a second hover on the type name.
+   */
+  private async extractPropsFromHover(hover: string): Promise<PropInfo[] | null> {
+    // Case 1: inline object type in params — props: { ... }
+    // Use a brace-matching approach to handle nested braces
+    const inlineMatch = hover.match(/props:\s*\{/)
+    if (inlineMatch && inlineMatch.index !== undefined) {
+      const startIdx = hover.indexOf('{', inlineMatch.index)
+      const extracted = extractBalancedBraces(hover, startIdx)
+      if (extracted) {
+        return await tryParseTypeString(extracted)
+      }
+    }
+
+    // Case 2: named type reference — props: SomeType
+    const namedMatch = hover.match(/props:\s*([A-Z]\w+)/)
+    if (namedMatch) {
+      // The named type was resolved by tsgo, but shown as a name.
+      // We can't hover further without knowing the location.
+      // For now, return null — the caller can try alternative extraction.
+      return null
+    }
+
+    // Case 3: try to find any object type in the hover
+    const braceIdx = hover.indexOf('{')
+    if (braceIdx !== -1) {
+      const extracted = extractBalancedBraces(hover, braceIdx)
+      if (extracted) {
+        return await tryParseTypeString(extracted)
       }
     }
 
     return null
   }
 
+  // --- JSON-RPC transport ---
+
   private request(method: string, params: any): Promise<any> {
     return new Promise((resolve, reject) => {
+      if (!this.process) {
+        reject(new Error('tsgo process not running'))
+        return
+      }
       const id = ++this.requestId
       this.pending.set(id, { resolve, reject })
       this.send({ jsonrpc: '2.0', id, method, params })
     })
   }
 
-  private notify(method: string, params: any): Promise<void> {
+  private notify(method: string, params: any): void {
     this.send({ jsonrpc: '2.0', method, params })
-    return Promise.resolve()
   }
 
   private send(message: any): void {
@@ -187,14 +225,16 @@ export class TsgoClient {
   }
 
   private processBuffer(): void {
+    const SEPARATOR = Buffer.from('\r\n\r\n')
+
     while (true) {
-      const headerEnd = this.buffer.indexOf('\r\n\r\n')
+      const headerEnd = this.buffer.indexOf(SEPARATOR)
       if (headerEnd === -1) break
 
-      const header = this.buffer.slice(0, headerEnd)
+      const header = this.buffer.subarray(0, headerEnd).toString('utf-8')
       const match = header.match(/Content-Length:\s*(\d+)/)
       if (!match) {
-        this.buffer = this.buffer.slice(headerEnd + 4)
+        this.buffer = this.buffer.subarray(headerEnd + 4)
         continue
       }
 
@@ -202,8 +242,8 @@ export class TsgoClient {
       const bodyStart = headerEnd + 4
       if (this.buffer.length < bodyStart + contentLength) break
 
-      const body = this.buffer.slice(bodyStart, bodyStart + contentLength)
-      this.buffer = this.buffer.slice(bodyStart + contentLength)
+      const body = this.buffer.subarray(bodyStart, bodyStart + contentLength).toString('utf-8')
+      this.buffer = this.buffer.subarray(bodyStart + contentLength)
 
       try {
         const message = JSON.parse(body)
@@ -215,6 +255,7 @@ export class TsgoClient {
   }
 
   private handleMessage(message: any): void {
+    // Response to our request
     if (message.id !== undefined && this.pending.has(message.id)) {
       const handler = this.pending.get(message.id)!
       this.pending.delete(message.id)
@@ -224,6 +265,31 @@ export class TsgoClient {
       } else {
         handler.resolve(message.result)
       }
+      return
+    }
+
+    // Server-initiated request — respond with null to acknowledge
+    if (message.method && message.id !== undefined) {
+      this.send({ jsonrpc: '2.0', id: message.id, result: null })
     }
   }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((r) => setTimeout(r, ms))
+  }
+}
+
+/**
+ * Extract a balanced brace-delimited substring starting at `start`.
+ * Returns the full `{ ... }` string, or null if unbalanced.
+ */
+function extractBalancedBraces(str: string, start: number): string | null {
+  if (str[start] !== '{') return null
+  let depth = 0
+  for (let i = start; i < str.length; i++) {
+    if (str[i] === '{') depth++
+    else if (str[i] === '}') depth--
+    if (depth === 0) return str.slice(start, i + 1)
+  }
+  return null
 }
