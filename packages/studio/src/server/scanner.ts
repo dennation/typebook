@@ -1,100 +1,89 @@
 import { glob } from 'glob'
-import { resolve, relative, dirname, basename } from 'node:path'
-import { parsePreviewFile } from '../parser/preview-parser.js'
+import { resolve, relative } from 'node:path'
+import type { ViteDevServer } from 'vite'
 import type {
-  ParsedPreviewFile,
   ComponentEntry,
   PreviewEntry,
+  PreviewExport,
   PropInfo,
-  Layout,
-  Theme,
 } from '../types.js'
-import { DEFAULT_LAYOUT, DEFAULT_THEME } from '../types.js'
 
 /**
- * Scans the workspace for .preview.tsx files and builds
- * a component registry.
+ * Find all .preview.tsx files matching the include glob.
  */
-export async function scanPreviewFiles(
+export async function findPreviewFiles(
   cwd: string,
   includeGlob: string,
-): Promise<ParsedPreviewFile[]> {
+): Promise<string[]> {
   const pattern = resolve(cwd, includeGlob)
-  const files = await glob(pattern, { absolute: true })
-  const results: ParsedPreviewFile[] = []
-
-  for (const filePath of files) {
-    try {
-      const parsed = await parsePreviewFile(filePath)
-      results.push(parsed)
-    } catch (err) {
-      console.error(`[studio] Failed to parse ${filePath}:`, err)
-    }
-  }
-
-  return results
+  return glob(pattern, { absolute: true })
 }
 
 /**
- * Builds a component registry from parsed preview files and type info.
+ * Load preview modules via Vite SSR and build the component registry.
  */
-export function buildRegistry(
+export async function loadPreviewModules(
+  vite: ViteDevServer,
+  files: string[],
   cwd: string,
-  parsed: ParsedPreviewFile[],
   typeMap: Map<string, PropInfo[]>,
-): ComponentEntry[] {
+): Promise<ComponentEntry[]> {
   const entries: ComponentEntry[] = []
 
-  for (const file of parsed) {
-    for (const setup of file.setups) {
-      const props = typeMap.get(setup.componentName) ?? []
+  for (const filePath of files) {
+    try {
+      const mod = await vite.ssrLoadModule(filePath)
 
+      // Collect all named exports that are PreviewExport objects
       const previews: PreviewEntry[] = []
-      for (const exp of file.exports) {
-        if (exp.setupVariable !== setup.variableName) continue
+      let componentName: string | undefined
 
-        const layout: Layout =
-          exp.options?.layout ?? setup.layout ?? DEFAULT_LAYOUT
-        const theme: Theme =
-          (exp.options?.theme as Theme) ?? setup.theme ?? DEFAULT_THEME
+      for (const [exportName, value] of Object.entries(mod)) {
+        if (exportName === 'default') continue
+        const exp = value as PreviewExport
+        if (exp?.__type !== 'preview') continue
+
+        componentName ??=
+          exp.component.displayName || exp.component.name || 'Unknown'
+
+        const props = typeMap.get(componentName) ?? []
 
         if (exp.kind === 'showVariants' && exp.prop) {
           const propInfo = props.find((p) => p.name === exp.prop)
           const variants = propInfo
-            ? generateVariantsFromType(
-                propInfo,
-                setup.defaults,
-                exp.options?.props,
-              )
-            : [{ label: exp.prop, props: { ...setup.defaults } }]
+            ? generateVariantsFromType(propInfo, exp.defaults)
+            : exp.variants
 
           previews.push({
-            name: exp.name,
+            name: exportName,
             kind: 'showVariants',
             prop: exp.prop,
             variants,
-            layout,
-            theme,
+            layout: exp.layout,
+            theme: exp.theme,
           })
         } else {
           previews.push({
-            name: exp.name,
+            name: exportName,
             kind: 'show',
-            variants: [{ label: exp.name, props: { ...setup.defaults } }],
-            layout,
-            theme,
+            variants: exp.variants,
+            layout: exp.layout,
+            theme: exp.theme,
           })
         }
       }
 
-      const name = setup.componentName.toLowerCase()
-      entries.push({
-        name,
-        filePath: relative(cwd, file.filePath),
-        importPath: setup.importPath,
-        props,
-        previews,
-      })
+      if (componentName && previews.length > 0) {
+        entries.push({
+          name: componentName.toLowerCase(),
+          filePath: relative(cwd, filePath),
+          importPath: filePath,
+          props: typeMap.get(componentName) ?? [],
+          previews,
+        })
+      }
+    } catch (err) {
+      console.error(`[studio] Failed to load ${filePath}:`, err)
     }
   }
 
@@ -104,9 +93,8 @@ export function buildRegistry(
 function generateVariantsFromType(
   propInfo: PropInfo,
   defaults: Record<string, unknown>,
-  extraProps?: Record<string, unknown>,
 ): { label: string; props: Record<string, unknown> }[] {
-  const base = { ...defaults, ...extraProps }
+  const base = { ...defaults }
 
   switch (propInfo.type.kind) {
     case 'literal':

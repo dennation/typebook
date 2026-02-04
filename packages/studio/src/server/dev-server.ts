@@ -1,11 +1,11 @@
-import { createServer, type ViteDevServer } from 'vite'
+import { createServer } from 'vite'
 import { resolve } from 'node:path'
-import { readFileSync, existsSync } from 'node:fs'
-import type { StudioConfig, ComponentEntry, PropInfo } from '../types.js'
+import { existsSync } from 'node:fs'
+import type { StudioConfig, PropInfo } from '../types.js'
 import { DEFAULT_PORT, LSP_POLL_INTERVAL } from '../types.js'
 import { resolveBreakpoints } from '../config.js'
 import { TsgoClient } from '../lsp/client.js'
-import { scanPreviewFiles, buildRegistry } from './scanner.js'
+import { findPreviewFiles, loadPreviewModules } from './scanner.js'
 import { SSEManager } from './sse.js'
 import { getHostHtml } from '../ui/host-html.js'
 import { getFrameHtml } from '../ui/frame-html.js'
@@ -18,14 +18,25 @@ export interface DevServerOptions {
 
 export async function startDevServer(options: DevServerOptions): Promise<void> {
   const { cwd, config, port = DEFAULT_PORT } = options
+  const include = config.preview.include ?? './src/components/**/*.preview.tsx'
   const breakpoints = resolveBreakpoints(config.preview.breakpoints)
 
-  // 1. Scan preview files
-  console.log('[studio] Scanning preview files...')
-  const parsed = await scanPreviewFiles(cwd, config.preview.include)
-  console.log(`[studio] Found ${parsed.length} preview file(s)`)
+  // 1. Start Vite (needed for ssrLoadModule)
+  const vite = await createServer({
+    root: cwd,
+    server: { port, middlewareMode: true },
+    optimizeDeps: {
+      entries: [include],
+    },
+    appType: 'custom',
+  })
 
-  // 2. Start tsgo LSP
+  // 2. Find preview files
+  console.log('[studio] Scanning preview files...')
+  const files = await findPreviewFiles(cwd, include)
+  console.log(`[studio] Found ${files.length} preview file(s)`)
+
+  // 3. Start tsgo LSP
   const lspClient = new TsgoClient(cwd)
   let lspReady = false
   const typeMap = new Map<string, PropInfo[]>()
@@ -35,44 +46,37 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
     lspReady = true
     console.log('[studio] tsgo LSP started')
 
-    // Open all preview files
-    for (const file of parsed) {
-      await lspClient.openFile(file.filePath)
+    for (const file of files) {
+      await lspClient.openFile(file)
     }
 
-    // Initial type extraction
-    for (const file of parsed) {
-      for (const setup of file.setups) {
-        const props = await lspClient.getComponentProps(
-          file.filePath,
-          setup.componentName,
-        )
-        if (props) {
-          typeMap.set(setup.componentName, props)
-        }
-      }
-    }
+    // Initial type extraction — we need component names from modules first
   } catch (err) {
     console.warn('[studio] tsgo not available, running without type extraction')
     console.warn('[studio]', (err as Error).message)
   }
 
-  // 3. Build component registry
-  let registry = buildRegistry(cwd, parsed, typeMap)
+  // 4. Load preview modules via Vite SSR and build registry
+  let registry = await loadPreviewModules(vite, files, cwd, typeMap)
+
+  // Extract types for discovered components
+  if (lspReady) {
+    for (const entry of registry) {
+      for (const file of files) {
+        const props = await lspClient.getComponentProps(file, entry.name)
+        if (props) {
+          typeMap.set(entry.name, props)
+        }
+      }
+    }
+    // Rebuild with types
+    registry = await loadPreviewModules(vite, files, cwd, typeMap)
+  }
+
   console.log(`[studio] Registered ${registry.length} component(s)`)
 
-  // 4. SSE manager
+  // 5. SSE manager
   const sse = new SSEManager()
-
-  // 5. Start Vite
-  const vite = await createServer({
-    root: cwd,
-    server: { port, middlewareMode: true },
-    optimizeDeps: {
-      entries: [config.preview.include],
-    },
-    appType: 'custom',
-  })
 
   // 6. Build HTTP handler
   const { createServer: createHttpServer } = await import('node:http')
@@ -80,13 +84,11 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
     const url = new URL(req.url ?? '/', `http://${req.headers.host}`)
     const pathname = url.pathname
 
-    // SSE endpoint
     if (pathname === '/events') {
       sse.handleRequest(req, res)
       return
     }
 
-    // API: list components
     if (pathname === '/api/components') {
       res.writeHead(200, {
         'Content-Type': 'application/json',
@@ -96,7 +98,6 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
       return
     }
 
-    // API: single component
     if (pathname.startsWith('/api/component/')) {
       const name = pathname.slice('/api/component/'.length)
       const entry = registry.find((c) => c.name === name)
@@ -113,28 +114,22 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
       return
     }
 
-    // Frame HTML (rendered inside iframe)
     if (pathname === '/frame') {
-      const stylesPath = resolve(cwd, config.preview.styles)
-      const stylesExist = existsSync(stylesPath)
+      const stylesPath = config.preview.styles
+        ? resolve(cwd, config.preview.styles)
+        : null
+      const stylesExist = stylesPath && existsSync(stylesPath)
       res.writeHead(200, { 'Content-Type': 'text/html' })
-      res.end(getFrameHtml(stylesExist ? config.preview.styles : null))
+      res.end(getFrameHtml(stylesExist ? config.preview.styles! : null))
       return
     }
 
-    // Host HTML (main app shell)
     if (pathname === '/' || pathname.match(/^\/[a-z0-9-]+\/[A-Za-z0-9]+$/)) {
       res.writeHead(200, { 'Content-Type': 'text/html' })
-      res.end(
-        getHostHtml({
-          breakpoints,
-          port,
-        }),
-      )
+      res.end(getHostHtml({ breakpoints, port }))
       return
     }
 
-    // Fallthrough to Vite for module requests
     vite.middlewares(req, res)
   })
 
@@ -143,24 +138,21 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
     setInterval(async () => {
       let changed = false
 
-      for (const file of parsed) {
-        for (const setup of file.setups) {
-          const props = await lspClient.getComponentProps(
-            file.filePath,
-            setup.componentName,
-          )
+      for (const entry of registry) {
+        for (const file of files) {
+          const props = await lspClient.getComponentProps(file, entry.name)
           if (!props) continue
 
-          const existing = typeMap.get(setup.componentName)
+          const existing = typeMap.get(entry.name)
           if (JSON.stringify(existing) !== JSON.stringify(props)) {
-            typeMap.set(setup.componentName, props)
+            typeMap.set(entry.name, props)
             changed = true
           }
         }
       }
 
       if (changed) {
-        registry = buildRegistry(cwd, parsed, typeMap)
+        registry = await loadPreviewModules(vite, files, cwd, typeMap)
         sse.pushFullUpdate(registry)
       }
     }, LSP_POLL_INTERVAL)
@@ -179,7 +171,6 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
     console.log()
   })
 
-  // Handle shutdown
   process.on('SIGINT', () => {
     console.log('\n[studio] Shutting down...')
     sse.disconnectAll()

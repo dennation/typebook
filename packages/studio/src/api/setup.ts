@@ -23,7 +23,9 @@ export function setup<Props extends Record<string, any>>(
       const merged = { ...defaults, ...props }
       return {
         __type: 'preview',
+        kind: 'show',
         component,
+        defaults,
         variants: [{ label: 'default', props: merged }],
         layout: baseLayout,
         theme: baseTheme,
@@ -48,7 +50,10 @@ export function setup<Props extends Record<string, any>>(
 
       return {
         __type: 'preview',
+        kind: 'showVariants',
+        prop: propName,
         component,
+        defaults,
         variants,
         layout,
         theme,

@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react'
+import type { ComponentType } from 'react'
 
 // --- Config Types ---
 
@@ -37,7 +37,10 @@ export interface VariantsOptions<Props> {
 
 export interface PreviewExport {
   __type: 'preview'
+  kind: 'show' | 'showVariants'
+  prop?: string
   component: ComponentType<any>
+  defaults: Record<string, unknown>
   variants: PreviewVariant[]
   layout: Layout
   theme: Theme
@@ -71,35 +74,6 @@ export interface PropInfo {
   name: string
   optional: boolean
   type: PropType
-}
-
-// --- Parsed Preview Types ---
-
-export interface ParsedSetup {
-  componentName: string
-  importPath: string
-  variableName: string
-  defaults: Record<string, unknown>
-  layout?: Layout
-  theme?: Theme
-}
-
-export interface ParsedExport {
-  name: string
-  kind: 'show' | 'showVariants'
-  setupVariable: string
-  prop?: string
-  options?: {
-    props?: Record<string, unknown>
-    layout?: Layout
-    theme?: Theme
-  }
-}
-
-export interface ParsedPreviewFile {
-  filePath: string
-  setups: ParsedSetup[]
-  exports: ParsedExport[]
 }
 
 // --- Component Registry ---
