@@ -1,5 +1,5 @@
 export { setup } from './setup.js'
-export { defineConfig } from '../config.js'
+export { defineConfig } from '../define-config.js'
 export type {
   StudioConfig,
   PreviewConfig,

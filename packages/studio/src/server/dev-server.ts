@@ -1,14 +1,16 @@
 import { createServer } from 'vite'
-import { resolve } from 'node:path'
-import { existsSync } from 'node:fs'
+import react from '@vitejs/plugin-react'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import type { StudioConfig, PropInfo } from '../types.js'
 import { DEFAULT_PORT, LSP_POLL_INTERVAL } from '../types.js'
 import { resolveBreakpoints } from '../config.js'
 import { TsgoClient } from '../lsp/client.js'
 import { findPreviewFiles, loadPreviewModules } from './scanner.js'
 import { SSEManager } from './sse.js'
-import { getHostHtml } from '../ui/host-html.js'
-import { getFrameHtml } from '../ui/frame-html.js'
+import { studioPlugin } from './vite-plugin.js'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export interface DevServerOptions {
   cwd: string
@@ -20,23 +22,41 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
   const { cwd, config, port = DEFAULT_PORT } = options
   const include = config.preview.include ?? './src/components/**/*.preview.tsx'
   const breakpoints = resolveBreakpoints(config.preview.breakpoints)
+  const stylesPath = config.preview.styles
+    ? resolve(cwd, config.preview.styles)
+    : null
 
-  // 1. Start Vite (needed for ssrLoadModule)
+  const clientDir = resolve(__dirname, '../../client')
+
+  // 1. SSE manager (needed before Vite starts for plugin)
+  const sse = new SSEManager()
+
+  // 2. Create Vite dev server with studio plugin
   const vite = await createServer({
-    root: cwd,
-    server: { port, middlewareMode: true },
-    optimizeDeps: {
-      entries: [include],
+    root: clientDir,
+    server: {
+      port,
+      fs: { allow: [clientDir, cwd] },
     },
-    appType: 'custom',
+    plugins: [
+      react(),
+      studioPlugin({
+        getRegistry: () => registry,
+        sse,
+        breakpoints,
+        port,
+        stylesPath,
+        clientDir,
+      }),
+    ],
   })
 
-  // 2. Find preview files
+  // 3. Find preview files
   console.log('[studio] Scanning preview files...')
   const files = await findPreviewFiles(cwd, include)
   console.log(`[studio] Found ${files.length} preview file(s)`)
 
-  // 3. Start tsgo LSP
+  // 4. Start tsgo LSP
   const lspClient = new TsgoClient(cwd)
   let lspReady = false
   const typeMap = new Map<string, PropInfo[]>()
@@ -49,14 +69,12 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
     for (const file of files) {
       await lspClient.openFile(file)
     }
-
-    // Initial type extraction — we need component names from modules first
   } catch (err) {
     console.warn('[studio] tsgo not available, running without type extraction')
     console.warn('[studio]', (err as Error).message)
   }
 
-  // 4. Load preview modules via Vite SSR and build registry
+  // 5. Load preview modules via Vite SSR and build registry
   let registry = await loadPreviewModules(vite, files, cwd, typeMap)
 
   // Extract types for discovered components
@@ -69,71 +87,12 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
         }
       }
     }
-    // Rebuild with types
     registry = await loadPreviewModules(vite, files, cwd, typeMap)
   }
 
   console.log(`[studio] Registered ${registry.length} component(s)`)
 
-  // 5. SSE manager
-  const sse = new SSEManager()
-
-  // 6. Build HTTP handler
-  const { createServer: createHttpServer } = await import('node:http')
-  const server = createHttpServer(async (req, res) => {
-    const url = new URL(req.url ?? '/', `http://${req.headers.host}`)
-    const pathname = url.pathname
-
-    if (pathname === '/events') {
-      sse.handleRequest(req, res)
-      return
-    }
-
-    if (pathname === '/api/components') {
-      res.writeHead(200, {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      })
-      res.end(JSON.stringify(registry))
-      return
-    }
-
-    if (pathname.startsWith('/api/component/')) {
-      const name = pathname.slice('/api/component/'.length)
-      const entry = registry.find((c) => c.name === name)
-      if (entry) {
-        res.writeHead(200, {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        })
-        res.end(JSON.stringify(entry))
-      } else {
-        res.writeHead(404)
-        res.end('Not found')
-      }
-      return
-    }
-
-    if (pathname === '/frame') {
-      const stylesPath = config.preview.styles
-        ? resolve(cwd, config.preview.styles)
-        : null
-      const stylesExist = stylesPath && existsSync(stylesPath)
-      res.writeHead(200, { 'Content-Type': 'text/html' })
-      res.end(getFrameHtml(stylesExist ? config.preview.styles! : null))
-      return
-    }
-
-    if (pathname === '/' || pathname.match(/^\/[a-z0-9-]+\/[A-Za-z0-9]+$/)) {
-      res.writeHead(200, { 'Content-Type': 'text/html' })
-      res.end(getHostHtml({ breakpoints, port }))
-      return
-    }
-
-    vite.middlewares(req, res)
-  })
-
-  // 7. LSP polling
+  // 6. LSP polling
   if (lspReady) {
     setInterval(async () => {
       let changed = false
@@ -158,25 +117,24 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
     }, LSP_POLL_INTERVAL)
   }
 
-  // 8. Start listening
-  server.listen(port, () => {
-    console.log()
-    console.log(`  Studio running at http://localhost:${port}`)
-    console.log()
-    for (const entry of registry) {
-      for (const preview of entry.previews) {
-        console.log(`  → /${entry.name}/${preview.name}`)
-      }
+  // 7. Start listening
+  await vite.listen()
+
+  console.log()
+  console.log(`  Studio running at http://localhost:${port}`)
+  console.log()
+  for (const entry of registry) {
+    for (const preview of entry.previews) {
+      console.log(`  → /${entry.name}/${preview.name}`)
     }
-    console.log()
-  })
+  }
+  console.log()
 
   process.on('SIGINT', () => {
     console.log('\n[studio] Shutting down...')
     sse.disconnectAll()
     lspClient.stop()
     vite.close()
-    server.close()
     process.exit(0)
   })
 }
