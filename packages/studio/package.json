@@ -23,7 +23,6 @@
 	},
 	"dependencies": {
 		"@typescript/native-preview": "^7.0.0-dev.20260203.1",
-		"@vitejs/plugin-react": "^4.0.0",
 		"bundle-require": "^5.1.0",
 		"esbuild": "^0.25.0",
 		"glob": "^11.0.0",

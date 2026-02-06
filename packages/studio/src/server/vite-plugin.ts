@@ -69,6 +69,25 @@ export function studioPlugin(options: StudioPluginOptions): Plugin {
           return
         }
 
+        // Serve frame.html from clientDir (since root is now user's cwd)
+        if (pathname === '/frame.html') {
+          const framePath = resolve(clientDir, 'frame.html')
+          let html = readFileSync(framePath, 'utf-8')
+          // Replace script path with /@fs absolute path
+          html = html.replace(
+            'src="/src/frame/main.tsx"',
+            `src="/@fs${resolve(clientDir, 'src/frame/main.tsx')}"`,
+          )
+          server
+            .transformIndexHtml(pathname, html)
+            .then((transformed) => {
+              res.writeHead(200, { 'Content-Type': 'text/html' })
+              res.end(transformed)
+            })
+            .catch(next)
+          return
+        }
+
         // SPA fallback: serve index.html for host routes
         if (
           pathname === '/' ||
@@ -76,6 +95,11 @@ export function studioPlugin(options: StudioPluginOptions): Plugin {
         ) {
           const indexPath = resolve(clientDir, 'index.html')
           let html = readFileSync(indexPath, 'utf-8')
+          // Replace script path with /@fs absolute path
+          html = html.replace(
+            'src="/src/host/main.tsx"',
+            `src="/@fs${resolve(clientDir, 'src/host/main.tsx')}"`,
+          )
           server
             .transformIndexHtml(pathname, html)
             .then((transformed) => {

@@ -1,5 +1,4 @@
 import { createServer } from 'vite'
-import react from '@vitejs/plugin-react'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { StudioConfig, PropInfo } from '../types.js'
@@ -32,14 +31,14 @@ export async function startDevServer(options: DevServerOptions): Promise<void> {
   const sse = new SSEManager()
 
   // 2. Create Vite dev server with studio plugin
+  // root: cwd — so Vite loads user's vite.config.ts with their plugins (Tailwind, etc.)
   const vite = await createServer({
-    root: clientDir,
+    root: cwd,
     server: {
       port,
       fs: { allow: [clientDir, cwd] },
     },
     plugins: [
-      react(),
       studioPlugin({
         getRegistry: () => registry,
         sse,
