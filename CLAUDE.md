@@ -15,7 +15,7 @@ pnpm run typecheck   # Type-check all packages
 
 ```
 packages/
-  studio/      — @dennation/studio (library + CLI)
+  studio/      — @dennation/studio (library + Vite plugin)
   playground/  — @dennation/playground (Vite app using studio)
 ```
 
@@ -23,18 +23,18 @@ packages/
 
 - **`package.json`** — Workspace root. Private, delegates scripts to packages via `pnpm -r`.
 - **`pnpm-workspace.yaml`** — Declares `packages/*` as workspace members.
-- **`.gitignore`** — Ignores `node_modules/`, `dist/`, `.vite/`, `*.tsbuildinfo`.
+- **`.gitignore`** — Ignores `node_modules/`, `dist/`, `.vite/`, `*.tsbuildinfo`, `studio.gen.ts`.
 
 ---
 
 ## packages/studio
 
-React component preview tool with automatic variant generation from TypeScript types.
+React component story tool with automatic variant generation from TypeScript types.
 
 ### Commands
 
 ```bash
-pnpm --filter @dennation/studio build       # Build with tsup (api + cli entries)
+pnpm --filter @dennation/studio build       # Build with tsup (5 entry points)
 pnpm --filter @dennation/studio dev         # Build in watch mode
 pnpm --filter @dennation/studio typecheck   # Type-check without emit
 ```
@@ -47,67 +47,71 @@ packages/studio/
   tsconfig.json
   tsup.config.ts
   src/
-    types.ts                  — All shared types and default constants
-    config.ts                 — defineConfig(), loadConfig(), resolveBreakpoints()
+    types.ts                  — All shared types (DefineResult, StoryExport, PropInfo, etc.)
+    config.ts                 — StudioConfig type
+    define-config.ts          — defineConfig() helper
     api/
-      index.ts                — Public package exports (setup, defineConfig, types)
-      setup.ts                — setup() → { show(), showVariants() } runtime API
+      index.ts                — Public package exports (define, defineConfig, types)
+      define.ts               — define() → DefineResult with story() and valuesOf() methods
+    runtime/
+      index.ts                — resolveStories() — resolves valuesOf markers into variants
     parser/
-      preview-parser.ts       — oxc AST parser for .preview.tsx files
       type-parser.ts          — Converts LSP hover strings → PropInfo[] via oxc
     lsp/
       client.ts               — Minimal JSON-RPC LSP client for tsgo (stdio)
-    server/
-      dev-server.ts           — Vite middleware-mode HTTP server, SSE, LSP polling
-      scanner.ts              — Glob scanner for .preview.tsx + component registry builder
-      sse.ts                  — SSE connection manager, pushes type updates to browsers
-    ui/
-      host-html.ts            — Main app shell HTML (sidebar, breakpoints, theme, iframe)
-      frame-html.ts           — Iframe HTML (postMessage listener, error boundary, dynamic imports)
+    plugin/
+      vite.ts                 — Vite plugin: LSP, file watcher, .gen generation, /__studio route
+      scanner.ts              — Glob scanner for .stories.tsx files + analysis
+      generator.ts            — Generates studio.gen.ts content
+    react/
+      Studio.tsx              — <Studio /> component (sidebar, theme, story renderer)
+      ShadowRoot.tsx          — Shadow DOM wrapper for CSS isolation
+      ErrorBoundary.tsx       — Error boundary for component crash isolation
+      styles.ts               — CSS-in-JS styles for Studio UI
+      index.ts                — React exports
     cli/
-      index.ts                — CLI entry: `npx @dennation/studio preview [--port=N]`
+      index.ts                — CLI entry: `npx @dennation/studio generate`
 ```
 
-### Two build entry points
+### Five build entry points
 
-- **`api/index`** — Library exports (`setup`, `defineConfig`, types). Consumed by user code in `.preview.tsx` files. External: react, react-dom.
-- **`cli/index`** — Node CLI binary. Starts the dev server. External: vite, express.
+- **`api/index`** — Library exports (`define`, `defineConfig`, types). Consumed by user code in `.stories.tsx` files.
+- **`runtime/index`** — `resolveStories()` function. Used by generated `studio.gen.ts`.
+- **`react/index`** — `<Studio />` component, `ShadowRoot`, `ErrorBoundary`.
+- **`plugin/vite`** — Vite plugin (`studioPlugin()`). Handles type extraction and .gen file generation.
+- **`cli/index`** — Node CLI binary. One-shot `studio.gen.ts` generation.
+
+### Package exports
+
+- `@dennation/studio` — define, defineConfig, types
+- `@dennation/studio/runtime` — resolveStories
+- `@dennation/studio/react` — Studio component
+- `@dennation/studio/vite` — studioPlugin
 
 ### Data flow
 
 ```
-.preview.tsx  →  oxc parse  →  ParsedSetup / ParsedExport
-                                      ↓
-                              tsgo LSP hover  →  type string
-                                      ↓
-                              oxc parse "type T = {...}"  →  PropInfo[]
-                                      ↓
-                              buildRegistry()  →  ComponentEntry[]
-                                      ↓
-                    HTTP API /api/components  +  SSE /events
-                                      ↓
-                              Host UI (sidebar, iframe)
-                                      ↓
-                              postMessage → Frame (render component)
+.stories.tsx  →  plugin scans files  →  analyzeStoryFile()
+                                              ↓
+                                    tsgo LSP hover  →  type string
+                                              ↓
+                                    oxc parse  →  PropInfo[]
+                                              ↓
+                                    generateStudioGenFile()  →  studio.gen.ts
+                                              ↓
+                                    resolveStories()  →  ResolvedComponent[]
+                                              ↓
+                                    <Studio registry={registry} />
 ```
 
 ### Key design decisions
 
-- **Vite in middleware mode** — the HTTP server handles Studio routes (host HTML, frame HTML, SSE, API), and falls through to Vite for module requests (`.tsx` imports, HMR).
-- **Type extraction via LSP hover** — instead of building a custom TS compiler plugin, we spawn `tsgo` as a child process and use hover requests to get component prop types as strings. These strings are then parsed by oxc into structured `PropInfo[]`.
-- **LSP polling** — the server polls tsgo every 500ms for the currently open preview. Changes in type info are pushed to browsers via SSE.
-- **iframe isolation** — component previews render inside an iframe with the user's global CSS. The host communicates via `postMessage` (`RENDER`, `SET_THEME`).
-- **Breakpoint scaling** — when the selected breakpoint width exceeds available space, the iframe is CSS-scaled: `transform: scale(availableWidth / breakpointWidth)`.
-
-### Defaults
-
-| Setting     | Value                                      |
-|-------------|--------------------------------------------|
-| Layout      | `{ type: 'row', gap: 16 }`                |
-| Theme       | `'light'`                                  |
-| Port        | `3000`                                     |
-| LSP poll    | `500ms`                                    |
-| Breakpoints | mobile: 375, tablet: 768, desktop: 1280    |
+- **Vite plugin** — integrates into the user's existing Vite setup. No separate dev server. Scans `.stories.tsx` files, extracts types via tsgo LSP, generates `studio.gen.ts`, watches for changes, and serves `/__studio` route.
+- **Type extraction via LSP hover** — spawns `tsgo` as a child process and uses hover requests to get component prop types as strings. These strings are parsed by oxc into structured `PropInfo[]`.
+- **Generated .gen file** — single `studio.gen.ts` (TanStack Router pattern) aggregates all stories with resolved type data. `resolveStories()` replaces `valuesOf` markers with actual variant values from extracted types.
+- **Shadow DOM isolation** — Studio UI (sidebar, controls) renders inside Shadow DOM so user's global CSS doesn't affect it. Components render in normal DOM so user CSS applies correctly.
+- **Error Boundary** — React error boundaries replace iframes for component crash isolation.
+- **`valuesOf()` marker pattern** — `button.valuesOf('size')` returns a typed marker `{ __type: 'valuesOf', prop: 'size' }` that gets resolved at runtime by `resolveStories()` using LSP-extracted type data.
 
 ---
 
@@ -129,18 +133,17 @@ pnpm --filter @dennation/playground preview   # Preview production build
 packages/playground/
   package.json
   tsconfig.json
-  vite.config.ts
+  vite.config.ts                — Vite config with studioPlugin()
   index.html
-  studio.config.ts              — Studio configuration (preview includes, breakpoints)
   src/
     main.tsx                    — Vite entry point
     App.tsx                     — Demo app rendering test components
     components/
       types.ts                  — Shared types (Size, Variant, BaseProps, InteractiveProps)
       Button.tsx                — Button with inline props
-      Button.preview.tsx        — Studio preview for Button
+      Button.stories.tsx        — Studio stories for Button
       ComposedButton.tsx        — Button with composed interfaces
-      ComposedButton.preview.tsx — Studio preview for ComposedButton
+      ComposedButton.stories.tsx — Studio stories for ComposedButton
       InlineButton.tsx          — Button with intersection type props
 ```
 
@@ -148,35 +151,35 @@ packages/playground/
 
 ## User-facing API
 
-### studio.config.ts
+### vite.config.ts
 
 ```ts
-import { defineConfig } from '@dennation/studio'
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { studioPlugin } from '@dennation/studio/vite'
 
 export default defineConfig({
-  preview: {
-    styles: './src/styles/globals.css',
-    include: './src/components/**/*.preview.tsx',
-    breakpoints: true, // or { mobile: 375, tablet: 768, desktop: 1280 }
-  },
+  plugins: [
+    react(),
+    studioPlugin({ include: './src/components/**/*.stories.tsx' }),
+  ],
 })
 ```
 
-### Component.preview.tsx
+### Component.stories.tsx
 
 ```ts
-import { setup } from '@dennation/studio'
+import { define } from '@dennation/studio'
 import { Button } from './Button'
 
-const button = setup(Button, {
+const button = define(Button, {
+  group: 'Forms',
   defaults: { children: 'Click me', onClick: () => {} },
-  layout: { type: 'row', gap: 16 },
-  theme: 'light',
 })
 
-export const Sizes = button.showVariants('size')
-export const Variants = button.showVariants('variant', { props: { disabled: true } })
-export const WithIcon = button.show({ children: 'Add' })
+export const Sizes = button.story({ variants: button.valuesOf('size') })
+export const Variants = button.story({ variants: button.valuesOf('variant') })
+export const WithIcon = button.story({ props: { children: '+ Add', size: 'sm' as const } })
 
 export default button
 ```

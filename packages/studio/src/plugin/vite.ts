@@ -51,18 +51,16 @@ export function studioPlugin(config?: StudioPluginConfig): Plugin {
     }
   }
 
-  function debouncedRegenerate(): void {
+  function debouncedRegenerate(changedFile?: string): void {
     if (debounceTimer) clearTimeout(debounceTimer)
     debounceTimer = setTimeout(async () => {
       try {
         // Re-scan for new/deleted files
         storyFiles = await findStoryFiles(cwd, include)
 
-        // Notify LSP about changes
-        if (lsp && lspReady) {
-          for (const file of storyFiles) {
-            await lsp.notifyChange(file)
-          }
+        // Notify LSP about the changed file
+        if (lsp && lspReady && changedFile) {
+          await lsp.notifyChange(changedFile)
         }
 
         await regenerateGenFile()
@@ -110,19 +108,20 @@ export function studioPlugin(config?: StudioPluginConfig): Plugin {
 
       // Watch for file changes
       server.watcher.on('change', (changedPath) => {
+        if (changedPath.endsWith('.gen.ts')) return
         if (
           changedPath.endsWith('.stories.tsx') ||
-          (changedPath.endsWith('.tsx') && !changedPath.endsWith('.gen.ts')) ||
+          changedPath.endsWith('.tsx') ||
           changedPath.endsWith('.ts')
         ) {
-          debouncedRegenerate()
+          debouncedRegenerate(changedPath)
         }
       })
 
       // Watch for new/deleted story files
       server.watcher.on('add', (path) => {
         if (path.endsWith('.stories.tsx')) {
-          debouncedRegenerate()
+          debouncedRegenerate(path)
         }
       })
 
