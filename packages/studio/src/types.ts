@@ -1,10 +1,15 @@
 import type { ComponentType } from 'react'
 
-// --- Plugin Config ---
+// --- Config ---
 
-export interface StudioPluginConfig {
+export interface StudioConfig {
   /** Glob pattern for .stories.tsx files */
   include?: string
+}
+
+// --- Vite Plugin Config ---
+
+export interface VitePluginConfig extends StudioConfig {
   /** Route path for the studio UI (default: '/__studio') */
   route?: string
 }

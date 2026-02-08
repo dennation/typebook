@@ -1,7 +1,8 @@
 export { define } from './define.js'
 export type {
   Expand,
-  StudioPluginConfig,
+  StudioConfig,
+  VitePluginConfig,
   DefineConfig,
   DefineResult,
   StoryConfig,

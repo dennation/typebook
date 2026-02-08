@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Plugin, ViteDevServer } from 'vite'
-import type { StudioPluginConfig, PropInfo } from '../types.js'
+import type { VitePluginConfig, PropInfo } from '../types.js'
 import { TsgoClient } from '../lsp/client.js'
 import { findStoryFiles, analyzeStoryFile } from './scanner.js'
 import { generateStudioGenFile } from './generator.js'
@@ -12,7 +12,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const DEFAULT_INCLUDE = './src/**/*.stories.tsx'
 const DEFAULT_ROUTE = '/__studio'
 
-export function studioPlugin(config?: StudioPluginConfig): Plugin {
+export function studioPlugin(config?: VitePluginConfig): Plugin {
   const include = config?.include ?? DEFAULT_INCLUDE
   const route = config?.route ?? DEFAULT_ROUTE
 
