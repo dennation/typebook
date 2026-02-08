@@ -1,4 +1,4 @@
-import { relative, dirname, basename } from 'node:path'
+import { relative, dirname } from 'node:path'
 import type { PropInfo } from '../types.js'
 import type { analyzeStoryFile } from './scanner.js'
 

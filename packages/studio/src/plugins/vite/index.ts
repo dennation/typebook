@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url'
 import type { Plugin, ViteDevServer } from 'vite'
 import type { VitePluginConfig, PropInfo } from '../../types.js'
 import { TsgoClient } from '../../lsp/client.js'
-import { findStoryFiles, analyzeStoryFile } from '../scanner.js'
-import { generateStudioGenFile } from '../generator.js'
+import { findStoryFiles, analyzeStoryFile } from '../../core/scanner.js'
+import { generateStudioGenFile } from '../../core/generator.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 

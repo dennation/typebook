@@ -57,9 +57,10 @@ packages/studio/
       type-parser.ts          — Converts LSP hover strings → PropInfo[] via oxc
     lsp/
       client.ts               — Minimal JSON-RPC LSP client for tsgo (stdio)
-    plugin/
-      scanner.ts              — Glob scanner for .stories.tsx files + analysis (bundler-agnostic)
-      generator.ts            — Generates studio.gen.ts content (bundler-agnostic)
+    core/
+      scanner.ts              — Glob scanner for .stories.tsx files + analysis
+      generator.ts            — Generates studio.gen.ts content
+    plugins/
       vite/
         index.ts              — Vite plugin: LSP, file watcher, .gen generation, /__studio route
     react/

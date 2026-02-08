@@ -1,8 +1,8 @@
 import { resolve } from 'node:path'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { TsgoClient } from '../lsp/client.js'
-import { findStoryFiles, analyzeStoryFile } from '../plugin/scanner.js'
-import { generateStudioGenFile } from '../plugin/generator.js'
+import { findStoryFiles, analyzeStoryFile } from '../core/scanner.js'
+import { generateStudioGenFile } from '../core/generator.js'
 
 const args = process.argv.slice(2)
 const command = args[0]

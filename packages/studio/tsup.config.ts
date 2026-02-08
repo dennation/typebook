@@ -27,7 +27,7 @@ export default defineConfig([
   },
   // Vite plugin (consumed by vite.config.ts)
   {
-    entry: { 'plugin/vite': 'src/plugin/vite/index.ts' },
+    entry: { 'plugin/vite': 'src/plugins/vite/index.ts' },
     format: ['esm'],
     dts: true,
     outDir: 'dist',
