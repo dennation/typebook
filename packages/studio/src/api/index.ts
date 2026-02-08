@@ -1,5 +1,4 @@
 export { define } from './define.js'
-export { defineConfig } from '../define-config.js'
 export type {
   Expand,
   StudioPluginConfig,

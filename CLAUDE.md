@@ -48,10 +48,8 @@ packages/studio/
   tsup.config.ts
   src/
     types.ts                  — All shared types (DefineResult, StoryExport, PropInfo, etc.)
-    config.ts                 — StudioConfig type
-    define-config.ts          — defineConfig() helper
     api/
-      index.ts                — Public package exports (define, defineConfig, types)
+      index.ts                — Public package exports (define, types)
       define.ts               — define() → DefineResult with story() and valuesOf() methods
     runtime/
       index.ts                — resolveStories() — resolves valuesOf markers into variants
@@ -75,7 +73,7 @@ packages/studio/
 
 ### Five build entry points
 
-- **`api/index`** — Library exports (`define`, `defineConfig`, types). Consumed by user code in `.stories.tsx` files.
+- **`api/index`** — Library exports (`define`, types). Consumed by user code in `.stories.tsx` files.
 - **`runtime/index`** — `resolveStories()` function. Used by generated `studio.gen.ts`.
 - **`react/index`** — `<Studio />` component, `ShadowRoot`, `ErrorBoundary`.
 - **`plugin/vite`** — Vite plugin (`studioPlugin()`). Handles type extraction and .gen file generation.
@@ -83,7 +81,7 @@ packages/studio/
 
 ### Package exports
 
-- `@dennation/studio` — define, defineConfig, types
+- `@dennation/studio` — define, types
 - `@dennation/studio/runtime` — resolveStories
 - `@dennation/studio/react` — Studio component
 - `@dennation/studio/vite` — studioPlugin
