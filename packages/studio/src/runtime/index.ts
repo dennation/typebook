@@ -13,7 +13,8 @@ function isValuesOfMarker(v: unknown): v is ValuesOfMarker {
   return (
     typeof v === 'object' &&
     v !== null &&
-    (v as any).__type === 'valuesOf'
+    '__type' in v &&
+    v.__type === 'valuesOf'
   )
 }
 
@@ -22,7 +23,7 @@ function isValuesOfMarker(v: unknown): v is ValuesOfMarker {
  * from the extracted prop types.
  */
 export function resolveStories(
-  defineResult: DefineResult<any>,
+  defineResult: DefineResult<Record<string, unknown>>,
   input: ResolveStoriesInput,
 ): ResolvedComponent {
   const { props, stories } = input

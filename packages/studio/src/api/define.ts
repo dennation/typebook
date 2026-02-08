@@ -12,7 +12,7 @@ export function define<Props extends Record<string, any>>(
   component: ComponentType<Props>,
   config?: DefineConfig<Props>,
 ): DefineResult<Expand<Props>> {
-  const defaults = (config?.defaults ?? {}) as Record<string, unknown>
+  const defaults: Record<string, unknown> = config?.defaults ?? {}
   const title = config?.title
   const group = config?.group
 
@@ -33,13 +33,13 @@ export function define<Props extends Record<string, any>>(
           defaults,
           variants: storyConfig.variants,
           extraProps: storyConfig.props
-            ? ({ ...storyConfig.props } as Record<string, unknown>)
+            ? { ...storyConfig.props }
             : undefined,
         }
       }
 
       // Static story — merge defaults with provided props
-      const merged = { ...defaults, ...(storyConfig.props as Record<string, unknown>) }
+      const merged = { ...defaults, ...storyConfig.props }
       return {
         __type: 'story',
         kind: 'static',
@@ -55,7 +55,7 @@ export function define<Props extends Record<string, any>>(
     ): ValuesOfMarker {
       return {
         __type: 'valuesOf',
-        prop: prop as string,
+        prop: String(prop),
         columns: options?.columns,
       }
     },

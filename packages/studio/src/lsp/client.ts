@@ -5,6 +5,46 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import type { PropInfo } from '../types.js'
 import { tryParseTypeString } from '../parser/type-parser.js'
 
+// --- JSON-RPC types ---
+
+interface JsonRpcRequest {
+  jsonrpc: '2.0'
+  id: number
+  method: string
+  params: Record<string, unknown>
+}
+
+interface JsonRpcNotification {
+  jsonrpc: '2.0'
+  method: string
+  params: Record<string, unknown>
+}
+
+interface JsonRpcResponse {
+  jsonrpc: '2.0'
+  id: number
+  result?: unknown
+  error?: { code: number; message: string }
+}
+
+interface JsonRpcServerRequest {
+  jsonrpc: '2.0'
+  id: number
+  method: string
+}
+
+type JsonRpcMessage = JsonRpcResponse | JsonRpcServerRequest
+
+interface HoverContentsMarkup {
+  value: string
+}
+
+type HoverContents = string | HoverContentsMarkup | (string | HoverContentsMarkup)[]
+
+interface HoverResult {
+  contents: HoverContents
+}
+
 /**
  * LSP client for tsgo (@typescript/native-preview).
  *
@@ -18,7 +58,7 @@ export class TsgoClient {
   private fileVersions = new Map<string, number>()
   private pending = new Map<
     number,
-    { resolve: (value: any) => void; reject: (err: Error) => void }
+    { resolve: (value: unknown) => void; reject: (err: Error) => void }
   >()
 
   constructor(private cwd: string) {}
@@ -119,18 +159,16 @@ export class TsgoClient {
     const result = await this.request('textDocument/hover', {
       textDocument: { uri },
       position: { line, character },
-    })
+    }) as HoverResult | null
 
     if (!result?.contents) return null
 
     const contents = result.contents
     if (typeof contents === 'string') return contents
-    if (contents.value) return contents.value
     if (Array.isArray(contents)) {
-      return contents.map((c: any) => (typeof c === 'string' ? c : c.value)).join('\n')
+      return contents.map((c) => (typeof c === 'string' ? c : c.value)).join('\n')
     }
-
-    return null
+    return contents.value
   }
 
   /**
@@ -211,7 +249,7 @@ export class TsgoClient {
 
   // --- JSON-RPC transport ---
 
-  private request(method: string, params: any): Promise<any> {
+  private request(method: string, params: Record<string, unknown>): Promise<unknown> {
     return new Promise((resolve, reject) => {
       if (!this.process) {
         reject(new Error('tsgo process not running'))
@@ -223,11 +261,11 @@ export class TsgoClient {
     })
   }
 
-  private notify(method: string, params: any): void {
+  private notify(method: string, params: Record<string, unknown>): void {
     this.send({ jsonrpc: '2.0', method, params })
   }
 
-  private send(message: any): void {
+  private send(message: JsonRpcRequest | JsonRpcNotification | JsonRpcResponse): void {
     if (!this.process?.stdin) {
       throw new Error('tsgo process not running')
     }
@@ -259,7 +297,7 @@ export class TsgoClient {
       this.buffer = this.buffer.subarray(bodyStart + contentLength)
 
       try {
-        const message = JSON.parse(body)
+        const message: JsonRpcMessage = JSON.parse(body)
         this.handleMessage(message)
       } catch {
         // Ignore malformed messages
@@ -267,22 +305,23 @@ export class TsgoClient {
     }
   }
 
-  private handleMessage(message: any): void {
+  private handleMessage(message: JsonRpcMessage): void {
     // Response to our request
-    if (message.id !== undefined && this.pending.has(message.id)) {
-      const handler = this.pending.get(message.id)!
+    if ('result' in message || 'error' in message) {
+      const handler = this.pending.get(message.id)
+      if (!handler) return
       this.pending.delete(message.id)
 
-      if (message.error) {
+      if ('error' in message && message.error) {
         handler.reject(new Error(message.error.message))
       } else {
-        handler.resolve(message.result)
+        handler.resolve((message as JsonRpcResponse).result)
       }
       return
     }
 
     // Server-initiated request — respond with null to acknowledge
-    if (message.method && message.id !== undefined) {
+    if ('method' in message && message.id !== undefined) {
       this.send({ jsonrpc: '2.0', id: message.id, result: null })
     }
   }
