@@ -2,10 +2,10 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Plugin, ViteDevServer } from 'vite'
-import type { VitePluginConfig, PropInfo } from '../types.js'
-import { TsgoClient } from '../lsp/client.js'
-import { findStoryFiles, analyzeStoryFile } from './scanner.js'
-import { generateStudioGenFile } from './generator.js'
+import type { VitePluginConfig, PropInfo } from '../../types.js'
+import { TsgoClient } from '../../lsp/client.js'
+import { findStoryFiles, analyzeStoryFile } from '../scanner.js'
+import { generateStudioGenFile } from '../generator.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 

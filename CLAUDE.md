@@ -58,9 +58,10 @@ packages/studio/
     lsp/
       client.ts               — Minimal JSON-RPC LSP client for tsgo (stdio)
     plugin/
-      vite.ts                 — Vite plugin: LSP, file watcher, .gen generation, /__studio route
-      scanner.ts              — Glob scanner for .stories.tsx files + analysis
-      generator.ts            — Generates studio.gen.ts content
+      scanner.ts              — Glob scanner for .stories.tsx files + analysis (bundler-agnostic)
+      generator.ts            — Generates studio.gen.ts content (bundler-agnostic)
+      vite/
+        index.ts              — Vite plugin: LSP, file watcher, .gen generation, /__studio route
     react/
       Studio.tsx              — <Studio /> component (sidebar, theme, story renderer)
       ShadowRoot.tsx          — Shadow DOM wrapper for CSS isolation
