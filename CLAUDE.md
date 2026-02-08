@@ -52,14 +52,13 @@ packages/studio/
       index.ts                — Public package exports (define, types)
       define.ts               — define() → DefineResult with story() and valuesOf() methods
     runtime/
-      index.ts                — resolveStories() — resolves valuesOf markers into variants
-    parser/
-      type-parser.ts          — Converts LSP hover strings → PropInfo[] via oxc
-    lsp/
-      client.ts               — Minimal JSON-RPC LSP client for tsgo (stdio)
+      index.ts                — Re-exports resolveStories() from core (public entry point)
     core/
       scanner.ts              — Glob scanner for .stories.tsx files + analysis
       generator.ts            — Generates studio.gen.ts content
+      resolve.ts              — resolveStories() — resolves valuesOf markers into variants
+      lsp-client.ts           — Minimal JSON-RPC LSP client for tsgo (stdio)
+      type-parser.ts          — Converts LSP hover strings → PropInfo[] via oxc
     plugins/
       vite/
         index.ts              — Vite plugin: LSP, file watcher, .gen generation, /__studio route

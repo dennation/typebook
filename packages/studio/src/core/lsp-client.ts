@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import type { PropInfo } from '../types.js'
-import { tryParseTypeString } from '../parser/type-parser.js'
+import { tryParseTypeString } from './type-parser.js'
 
 // --- JSON-RPC types ---
 

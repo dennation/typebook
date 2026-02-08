@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import { readFileSync, writeFileSync } from 'node:fs'
-import { TsgoClient } from '../lsp/client.js'
+import { TsgoClient } from '../core/lsp-client.js'
 import { findStoryFiles, analyzeStoryFile } from '../core/scanner.js'
 import { generateStudioGenFile } from '../core/generator.js'
 
