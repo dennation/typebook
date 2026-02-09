@@ -1,6 +1,10 @@
+export const studioStyles = `
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-:root {
+:host {
+  display: block;
+  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --bg: #ffffff;
   --bg-sidebar: #f8f9fa;
   --bg-hover: #e9ecef;
@@ -13,7 +17,7 @@
   --label-bg: #f1f3f5;
 }
 
-[data-theme="dark"] {
+:host([data-theme="dark"]) {
   --bg: #1a1b1e;
   --bg-sidebar: #141517;
   --bg-hover: #25262b;
@@ -26,23 +30,16 @@
   --label-bg: #25262b;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  height: 100vh;
-  overflow: hidden;
-}
-
-.layout {
+.studio-layout {
   display: grid;
   grid-template-columns: 220px 1fr;
   grid-template-rows: 48px 1fr;
   height: 100vh;
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* Header */
-.header {
+.studio-header {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
@@ -52,49 +49,19 @@ body {
   background: var(--bg);
 }
 
-.header-title {
+.studio-header-title {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
-.header-controls {
+.studio-header-controls {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.breakpoint-group {
-  display: flex;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.breakpoint-btn {
-  padding: 4px 10px;
-  font-size: 12px;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.breakpoint-btn:hover {
-  background: var(--bg-hover);
-}
-
-.breakpoint-btn.active {
-  background: var(--accent);
-  color: #fff;
-}
-
-.breakpoint-btn + .breakpoint-btn {
-  border-left: 1px solid var(--border);
-}
-
-.theme-toggle {
+.studio-theme-toggle {
   width: 32px;
   height: 32px;
   border-radius: 6px;
@@ -109,38 +76,34 @@ body {
   transition: all 0.15s;
 }
 
-.theme-toggle:hover {
+.studio-theme-toggle:hover {
   background: var(--bg-hover);
 }
 
-.scale-indicator {
-  font-size: 11px;
-  color: var(--text-muted);
-  min-width: 40px;
-  text-align: right;
-}
-
-/* Sidebar */
-.sidebar {
+.studio-sidebar {
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border);
   overflow-y: auto;
   padding: 8px 0;
 }
 
-.sidebar-section {
-  margin-bottom: 4px;
+.studio-group-title {
+  padding: 12px 16px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
 }
 
-.sidebar-component {
+.studio-component-name {
   padding: 6px 16px;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
-  text-transform: capitalize;
 }
 
-.sidebar-item {
+.studio-story-item {
   display: block;
   width: 100%;
   padding: 5px 16px 5px 28px;
@@ -154,63 +117,27 @@ body {
   text-decoration: none;
 }
 
-.sidebar-item:hover {
+.studio-story-item:hover {
   background: var(--bg-hover);
 }
 
-.sidebar-item.active {
+.studio-story-item[data-active="true"] {
   background: var(--accent-light);
   color: var(--accent);
 }
 
-/* Main content */
-.main {
+.studio-main {
   overflow: auto;
   padding: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
-.preview-title {
+.studio-preview-title {
   font-size: 13px;
   color: var(--text-muted);
   margin-bottom: 16px;
-  align-self: flex-start;
 }
 
-.iframe-wrapper {
-  position: relative;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--bg);
-  transition: width 0.3s ease;
-}
-
-.iframe-wrapper iframe {
-  display: block;
-  width: 100%;
-  height: 400px;
-  border: none;
-}
-
-.variant-labels {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-
-.variant-label {
-  font-size: 11px;
-  padding: 2px 8px;
-  background: var(--label-bg);
-  border-radius: 4px;
-  color: var(--text-muted);
-}
-
-.empty-state {
+.studio-empty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -218,3 +145,11 @@ body {
   color: var(--text-muted);
   font-size: 14px;
 }
+
+.studio-variant-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  text-align: center;
+}
+`

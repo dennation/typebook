@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview",
-    "studio": "studio preview"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@dennation/studio": "workspace:*",

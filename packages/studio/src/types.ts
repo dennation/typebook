@@ -1,72 +1,20 @@
 import type { ComponentType } from 'react'
 
-// --- Config Types ---
-
-export interface PreviewConfig {
-  styles?: string
-  include?: string
-  breakpoints?: boolean | Record<string, number>
-}
+// --- Config ---
 
 export interface StudioConfig {
-  preview: PreviewConfig
+  /** Glob pattern for .stories.tsx files */
+  include?: string
 }
 
-// --- Layout & Theme ---
+// --- Vite Plugin Config ---
 
-export type Layout =
-  | { type: 'row'; gap?: number }
-  | { type: 'column'; gap?: number }
-  | { type: 'grid'; columns?: number; gap?: number }
-
-export type Theme = 'light' | 'dark'
-
-// --- Setup Types ---
-
-/**
- * Flattens composed interfaces and resolves string literal unions
- * so that tsgo hover shows inline `{ size: "sm" | "md" | "lg"; ... }`
- * instead of opaque type aliases like `ButtonProps`.
- */
-export type Expand<T> = { [K in keyof T]: T[K] extends string ? T[K] & string : T[K] } & {}
-
-export interface SetupConfig<Props> {
-  defaults: Partial<Props>
-  layout?: Layout
-  theme?: Theme
+export interface VitePluginConfig extends StudioConfig {
+  /** Route path for the studio UI (default: '/__studio') */
+  route?: string
 }
 
-export interface VariantsOptions<Props> {
-  props?: Partial<Props>
-  layout?: Layout
-  theme?: Theme
-}
-
-export interface PreviewExport {
-  __type: 'preview'
-  kind: 'show' | 'showVariants'
-  prop?: string
-  component: ComponentType<any>
-  defaults: Record<string, unknown>
-  variants: PreviewVariant[]
-  layout: Layout
-  theme: Theme
-}
-
-export interface PreviewVariant {
-  label: string
-  props: Record<string, unknown>
-}
-
-export interface SetupResult<Props> {
-  show: (props: Partial<Props>) => PreviewExport
-  showVariants: (
-    prop: keyof Props,
-    options?: VariantsOptions<Props>,
-  ) => PreviewExport
-}
-
-// --- Prop Info Types ---
+// --- Prop Info Types (from LSP extraction) ---
 
 export type PropType =
   | { kind: 'literal'; values: string[] }
@@ -83,48 +31,107 @@ export interface PropInfo {
   type: PropType
 }
 
-// --- Component Registry ---
+// --- Define API Types ---
 
-export interface ComponentEntry {
-  name: string
-  filePath: string
-  importPath: string
-  props: PropInfo[]
-  previews: PreviewEntry[]
+/**
+ * Flattens composed interfaces so tsgo hover shows inline types
+ * instead of opaque type aliases.
+ */
+export type Expand<T> = {
+  [K in keyof T]: T[K] extends string ? T[K] & string : T[K]
+} & {}
+
+export interface DefineConfig<Props> {
+  /** Display name override (defaults to displayName or function name) */
+  title?: string
+  /** Sidebar group (single level, e.g. 'Forms') */
+  group?: string
+  /** Default props applied to all stories */
+  defaults?: Partial<Props>
 }
 
-export interface PreviewEntry {
-  name: string
-  kind: 'show' | 'showVariants'
-  prop?: string
-  variants: PreviewVariant[]
-  layout: Layout
-  theme: Theme
+/** Marker returned by valuesOf() — signals auto-generation */
+export interface ValuesOfMarker {
+  __type: 'valuesOf'
+  prop: string
+  columns?: number
 }
 
-// --- SSE / Communication ---
+/** Manual variant configuration with explicit values */
+export interface ManualVariantsConfig {
+  prop: string
+  values: unknown[]
+  columns?: number
+}
 
-export interface RenderMessage {
-  type: 'RENDER'
-  component: string
+/** Variants config — either auto (valuesOf) or manual */
+export type VariantsConfig = ValuesOfMarker | ManualVariantsConfig
+
+export interface StoryConfig<Props> {
+  /** Fixed props (merged with defaults) */
+  props?: Partial<Props>
+  /** Variants configuration */
+  variants?: VariantsConfig
+}
+
+/** Exported from .stories.tsx — the result of story() */
+export interface StoryExport {
+  __type: 'story'
+  kind: 'static' | 'variants'
+  component: ComponentType<any>
+  defaults: Record<string, unknown>
+  /** Merged props for static stories */
+  props?: Record<string, unknown>
+  /** Variants config for variant stories */
+  variants?: VariantsConfig
+  /** Extra props applied to all variants */
+  extraProps?: Record<string, unknown>
+}
+
+/** Returned by define() */
+export interface DefineResult<Props> {
+  __type: 'define'
+  component: ComponentType<Props>
+  title?: string
+  group?: string
+  defaults: Record<string, unknown>
+  story(config: StoryConfig<Expand<Props>>): StoryExport
+  valuesOf(
+    prop: keyof Expand<Props>,
+    options?: { columns?: number },
+  ): ValuesOfMarker
+}
+
+// --- Resolved Types (output of resolveStories) ---
+
+export interface ResolvedVariant {
+  label: string
   props: Record<string, unknown>
 }
 
-export interface SetThemeMessage {
-  type: 'SET_THEME'
-  theme: Theme
+export interface ResolvedStory {
+  name: string
+  kind: 'static' | 'variants'
+  variants: ResolvedVariant[]
+  columns?: number
 }
 
-export type IframeMessage = RenderMessage | SetThemeMessage
-
-// --- Defaults ---
-
-export const DEFAULT_BREAKPOINTS: Record<string, number> = {
-  mobile: 375,
-  tablet: 768,
-  desktop: 1280,
+export interface ResolvedComponent {
+  component: ComponentType<any>
+  name: string
+  title?: string
+  group?: string
+  stories: ResolvedStory[]
 }
 
-export const DEFAULT_LAYOUT: Layout = { type: 'row', gap: 16 }
-export const DEFAULT_THEME: Theme = 'light'
-export const DEFAULT_PORT = 3000
+// --- resolveStories() input ---
+
+export interface StoryEntry {
+  name: string
+  story: StoryExport
+}
+
+export interface ResolveStoriesInput {
+  props: PropInfo[]
+  stories: StoryEntry[]
+}

@@ -1,7 +1,7 @@
 {
 	"name": "@dennation/studio",
-	"version": "0.1.0",
-	"description": "React component preview tool with automatic variant generation from TypeScript types",
+	"version": "0.2.0",
+	"description": "React component story tool with automatic variant generation from TypeScript types",
 	"type": "module",
 	"bin": {
 		"studio": "./dist/cli/index.js"
@@ -10,11 +10,22 @@
 		".": {
 			"types": "./dist/api/index.d.ts",
 			"import": "./dist/api/index.js"
+		},
+		"./runtime": {
+			"types": "./dist/runtime/index.d.ts",
+			"import": "./dist/runtime/index.js"
+		},
+		"./react": {
+			"types": "./dist/react/index.d.ts",
+			"import": "./dist/react/index.js"
+		},
+		"./vite": {
+			"types": "./dist/plugin/vite.d.ts",
+			"import": "./dist/plugin/vite.js"
 		}
 	},
 	"files": [
-		"dist",
-		"client"
+		"dist"
 	],
 	"scripts": {
 		"build": "tsup",
