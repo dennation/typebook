@@ -5,6 +5,8 @@ import type { ComponentType } from 'react'
 export interface StudioConfig {
   /** Glob pattern for .stories.tsx files */
   include?: string
+  /** Output path for the generated file (default: './studio.gen.ts') */
+  output?: string
 }
 
 // --- Vite Plugin Config ---

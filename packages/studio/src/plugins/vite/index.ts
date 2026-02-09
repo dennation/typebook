@@ -11,10 +11,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const DEFAULT_INCLUDE = './src/**/*.stories.tsx'
 const DEFAULT_ROUTE = '/__studio'
+const DEFAULT_OUTPUT = './studio.gen.ts'
 
 export function studioPlugin(config?: VitePluginConfig): Plugin {
   const include = config?.include ?? DEFAULT_INCLUDE
   const route = config?.route ?? DEFAULT_ROUTE
+  const output = config?.output ?? DEFAULT_OUTPUT
 
   let cwd: string
   let lsp: TsgoClient | null = null
@@ -39,7 +41,7 @@ export function studioPlugin(config?: VitePluginConfig): Plugin {
       }),
     )
 
-    const genFilePath = resolve(cwd, 'studio.gen.ts')
+    const genFilePath = resolve(cwd, output)
     const content = generateStudioGenFile(files, genFilePath)
 
     // Only write if content changed to avoid unnecessary HMR
@@ -100,7 +102,7 @@ export function studioPlugin(config?: VitePluginConfig): Plugin {
 
       // 3. Generate initial .gen file
       await regenerateGenFile()
-      console.log('[studio] Generated studio.gen.ts')
+      console.log(`[studio] Generated ${output}`)
     },
 
     configureServer(viteServer) {
@@ -108,7 +110,7 @@ export function studioPlugin(config?: VitePluginConfig): Plugin {
 
       // Watch for file changes
       server.watcher.on('change', (changedPath) => {
-        if (changedPath.endsWith('.gen.ts')) return
+        if (changedPath === resolve(cwd, output)) return
         if (
           changedPath.endsWith('.stories.tsx') ||
           changedPath.endsWith('.tsx') ||
@@ -136,7 +138,7 @@ export function studioPlugin(config?: VitePluginConfig): Plugin {
         const url = new URL(req.url ?? '/', `http://${req.headers.host}`)
 
         if (url.pathname === route) {
-          const studioHtml = getStudioHtml(cwd, route)
+          const studioHtml = getStudioHtml(cwd, route, output)
           server!
             .transformIndexHtml(url.pathname, studioHtml)
             .then((html) => {
@@ -162,7 +164,7 @@ export function studioPlugin(config?: VitePluginConfig): Plugin {
   }
 }
 
-function getStudioHtml(cwd: string, route: string): string {
+function getStudioHtml(cwd: string, route: string, output: string): string {
   // Virtual HTML that imports the Studio component and registry
   return `<!DOCTYPE html>
 <html lang="en">
@@ -177,7 +179,7 @@ function getStudioHtml(cwd: string, route: string): string {
     import { createRoot } from 'react-dom/client'
     import { createElement } from 'react'
     import { Studio } from '@dennation/studio/react'
-    import registry from '${resolve(cwd, 'studio.gen')}'
+    import registry from '${resolve(cwd, output).replace(/\.ts$/, '')}'
 
     const root = createRoot(document.getElementById('studio-root'))
     root.render(createElement(Studio, { registry }))
