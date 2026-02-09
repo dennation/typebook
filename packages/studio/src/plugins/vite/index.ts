@@ -18,6 +18,7 @@ export function studioPlugin(config?: VitePluginConfig): Plugin {
   const include = config?.include ?? DEFAULT_INCLUDE
   const route = config?.route ?? DEFAULT_ROUTE
   const output = config?.output ?? DEFAULT_OUTPUT
+  const styles = config?.styles ?? []
 
   let cwd: string
   let lsp: TsgoClient | null = null
@@ -152,11 +153,23 @@ export function studioPlugin(config?: VitePluginConfig): Plugin {
         const url = new URL(req.url ?? '/', `http://${req.headers.host}`)
 
         if (url.pathname === route) {
+          // Inject user CSS imports into studio HTML
+          let html = studioHtml
+          if (styles.length > 0) {
+            const imports = styles
+              .map((s) => `import '${resolve(cwd, s)}'`)
+              .join('\n    ')
+            html = html.replace(
+              '<script type="module">',
+              `<script type="module">\n    ${imports}`,
+            )
+          }
+
           server!
-            .transformIndexHtml(url.pathname, studioHtml)
-            .then((html) => {
+            .transformIndexHtml(url.pathname, html)
+            .then((transformed) => {
               res.writeHead(200, { 'Content-Type': 'text/html' })
-              res.end(html)
+              res.end(transformed)
             })
             .catch(next)
           return
