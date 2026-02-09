@@ -7,7 +7,7 @@ import type {
   ResolveStoriesInput,
   StoryExport,
   ValuesOfMarker,
-} from '../types.js'
+} from './types.js'
 
 function isValuesOfMarker(v: unknown): v is ValuesOfMarker {
   return (
