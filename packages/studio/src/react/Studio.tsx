@@ -1,6 +1,5 @@
-import { useState, useCallback, type CSSProperties } from 'react'
+import { useState, useCallback, useEffect, type CSSProperties } from 'react'
 import type { ResolvedComponent, ResolvedStory } from '../types.js'
-import { ShadowRoot } from './ShadowRoot.js'
 import { ErrorBoundary } from './ErrorBoundary.js'
 import { studioStyles } from './styles.js'
 
@@ -13,6 +12,17 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
   const [activeComponent, setActiveComponent] = useState<string | null>(null)
   const [activeStory, setActiveStory] = useState<string | null>(null)
   const [theme, setTheme] = useState(initialTheme)
+
+  // Inject studio styles into document head
+  useEffect(() => {
+    const id = 'studio-styles'
+    if (document.getElementById(id)) return
+    const style = document.createElement('style')
+    style.id = id
+    style.textContent = studioStyles
+    document.head.appendChild(style)
+    return () => { style.remove() }
+  }, [])
 
   const selectStory = useCallback((componentName: string, storyName: string) => {
     setActiveComponent(componentName)
@@ -31,61 +41,59 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
   const grouped = groupComponents(registry)
 
   return (
-    <ShadowRoot styles={studioStyles}>
-      <div className="studio-layout" data-theme={theme}>
-        {/* Header */}
-        <header className="studio-header">
-          <span className="studio-header-title">Studio</span>
-          <div className="studio-header-controls">
-            <button
-              className="studio-theme-toggle"
-              title="Toggle theme"
-              onClick={toggleTheme}
-            >
-              {theme === 'light' ? '\u263C' : '\u263E'}
-            </button>
-          </div>
-        </header>
+    <div className="studio-layout" data-theme={theme}>
+      {/* Header */}
+      <header className="studio-header">
+        <span className="studio-header-title">Studio</span>
+        <div className="studio-header-controls">
+          <button
+            className="studio-theme-toggle"
+            title="Toggle theme"
+            onClick={toggleTheme}
+          >
+            {theme === 'light' ? '\u263C' : '\u263E'}
+          </button>
+        </div>
+      </header>
 
-        {/* Sidebar */}
-        <nav className="studio-sidebar">
-          {grouped.map(({ group, components }) => (
-            <div key={group ?? '__ungrouped'}>
-              {group && <div className="studio-group-title">{group}</div>}
-              {components.map((c) => (
-                <div key={c.name}>
-                  <div className="studio-component-name">{c.title ?? c.name}</div>
-                  {c.stories.map((s) => (
-                    <button
-                      key={s.name}
-                      className="studio-story-item"
-                      data-active={activeComponent === c.name && activeStory === s.name}
-                      onClick={() => selectStory(c.name, s.name)}
-                    >
-                      {s.name}
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </div>
-          ))}
-        </nav>
-
-        {/* Main content */}
-        <main className="studio-main">
-          {comp && story ? (
-            <>
-              <div className="studio-preview-title">
-                {comp.title ?? comp.name} / {story.name}
+      {/* Sidebar */}
+      <nav className="studio-sidebar">
+        {grouped.map(({ group, components }) => (
+          <div key={group ?? '__ungrouped'}>
+            {group && <div className="studio-group-title">{group}</div>}
+            {components.map((c) => (
+              <div key={c.name}>
+                <div className="studio-component-name">{c.title ?? c.name}</div>
+                {c.stories.map((s) => (
+                  <button
+                    key={s.name}
+                    className="studio-story-item"
+                    data-active={activeComponent === c.name && activeStory === s.name}
+                    onClick={() => selectStory(c.name, s.name)}
+                  >
+                    {s.name}
+                  </button>
+                ))}
               </div>
-              <StoryRenderer story={story} component={comp.component} />
-            </>
-          ) : (
-            <div className="studio-empty">Select a story</div>
-          )}
-        </main>
-      </div>
-    </ShadowRoot>
+            ))}
+          </div>
+        ))}
+      </nav>
+
+      {/* Main content */}
+      <main className="studio-main">
+        {comp && story ? (
+          <>
+            <div className="studio-preview-title">
+              {comp.title ?? comp.name} / {story.name}
+            </div>
+            <StoryRenderer story={story} component={comp.component} />
+          </>
+        ) : (
+          <div className="studio-empty">Select a story</div>
+        )}
+      </main>
+    </div>
   )
 }
 

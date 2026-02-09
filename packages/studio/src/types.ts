@@ -11,10 +11,7 @@ export interface StudioConfig {
 
 // --- Vite Plugin Config ---
 
-export interface VitePluginConfig extends StudioConfig {
-  /** Route path for the studio UI (default: '/__studio') */
-  route?: string
-}
+export type VitePluginConfig = StudioConfig
 
 // --- Prop Info Types (from LSP extraction) ---
 

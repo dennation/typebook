@@ -5,10 +5,8 @@ import type { VitePluginConfig, PropInfo } from '../../types.js'
 import { TsgoClient } from '../../core/lsp-client.js'
 import { findStoryFiles, analyzeStoryFile } from '../../core/scanner.js'
 import { generateStudioGenFile } from '../../core/generator.js'
-import studioHtml from './studio.html'
 
 const DEFAULT_INCLUDE = './src/**/*.stories.tsx'
-const DEFAULT_ROUTE = '/__studio'
 const DEFAULT_OUTPUT = './studio.gen.ts'
 
 const VIRTUAL_MODULE_ID = 'virtual:studio-registry'
@@ -16,7 +14,6 @@ const RESOLVED_VIRTUAL_MODULE_ID = '\0' + VIRTUAL_MODULE_ID
 
 export function studioPlugin(config?: VitePluginConfig): Plugin {
   const include = config?.include ?? DEFAULT_INCLUDE
-  const route = config?.route ?? DEFAULT_ROUTE
   const output = config?.output ?? DEFAULT_OUTPUT
 
   let cwd: string
@@ -145,24 +142,6 @@ export function studioPlugin(config?: VitePluginConfig): Plugin {
         if (path.endsWith('.stories.tsx')) {
           debouncedRegenerate()
         }
-      })
-
-      // Serve /__studio route
-      server.middlewares.use((req, res, next) => {
-        const url = new URL(req.url ?? '/', `http://${req.headers.host}`)
-
-        if (url.pathname === route) {
-          server!
-            .transformIndexHtml(url.pathname, studioHtml)
-            .then((html) => {
-              res.writeHead(200, { 'Content-Type': 'text/html' })
-              res.end(html)
-            })
-            .catch(next)
-          return
-        }
-
-        next()
       })
     },
 

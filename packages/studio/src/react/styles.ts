@@ -1,9 +1,12 @@
 export const studioStyles = `
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-:host {
-  display: block;
+.studio-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 48px 1fr;
   height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --bg: #ffffff;
   --bg-sidebar: #f8f9fa;
@@ -15,9 +18,11 @@ export const studioStyles = `
   --accent: #4263eb;
   --accent-light: #edf2ff;
   --label-bg: #f1f3f5;
+  background: var(--bg);
+  color: var(--text);
 }
 
-:host([data-theme="dark"]) {
+.studio-layout[data-theme="dark"] {
   --bg: #1a1b1e;
   --bg-sidebar: #141517;
   --bg-hover: #25262b;
@@ -30,13 +35,10 @@ export const studioStyles = `
   --label-bg: #25262b;
 }
 
-.studio-layout {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  grid-template-rows: 48px 1fr;
-  height: 100vh;
-  background: var(--bg);
-  color: var(--text);
+.studio-layout *,
+.studio-layout *::before,
+.studio-layout *::after {
+  box-sizing: border-box;
 }
 
 .studio-header {
