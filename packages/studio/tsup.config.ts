@@ -23,6 +23,5 @@ export default defineConfig([
     dts: true,
     outDir: 'dist',
     external: ['vite', 'fsevents', 'bundle-require', 'esbuild', '@typescript/native-preview'],
-    loader: { '.html': 'text' },
   },
 ])

@@ -9,7 +9,6 @@ export default defineConfig({
     react(),
     studioPlugin({
       include: './src/components/**/*.stories.tsx',
-      styles: ['./src/styles.css'],
     }),
   ],
 })
