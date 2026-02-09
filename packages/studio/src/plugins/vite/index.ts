@@ -177,7 +177,7 @@ function getStudioHtml(cwd: string, route: string): string {
     import { createRoot } from 'react-dom/client'
     import { createElement } from 'react'
     import { Studio } from '@dennation/studio/react'
-    import registry from './studio.gen'
+    import registry from '${resolve(cwd, 'studio.gen')}'
 
     const root = createRoot(document.getElementById('studio-root'))
     root.render(createElement(Studio, { registry }))
