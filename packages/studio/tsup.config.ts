@@ -11,7 +11,7 @@ export default defineConfig([
   },
   // Runtime — resolveStories() (consumed by studio.gen.ts)
   {
-    entry: { 'runtime/index': 'src/runtime/index.ts' },
+    entry: { 'runtime/index': 'src/core/resolve.ts' },
     format: ['esm'],
     dts: true,
     outDir: 'dist',

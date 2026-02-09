@@ -51,8 +51,6 @@ packages/studio/
     api/
       index.ts                — Public package exports (define, types)
       define.ts               — define() → DefineResult with story() and valuesOf() methods
-    runtime/
-      index.ts                — Re-exports resolveStories() from core (public entry point)
     core/
       scanner.ts              — Glob scanner for .stories.tsx files + analysis
       generator.ts            — Generates studio.gen.ts content
