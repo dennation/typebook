@@ -1,4 +1,4 @@
-import { define } from '@dennation/studio'
+import { define } from '@dennation/ui-studio'
 import { Button } from './Button'
 
 const button = define(Button, {

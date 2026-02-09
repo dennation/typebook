@@ -1,3 +1,2 @@
-export { Studio } from './Studio.js'
-export type { StudioProps } from './Studio.js'
-export { ErrorBoundary } from './ErrorBoundary.js'
+export { ErrorBoundary } from './components/ErrorBoundary.js'
+export { Studio, type StudioProps } from './components/Studio.js'

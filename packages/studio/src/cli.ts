@@ -3,6 +3,12 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { TsgoClient } from './core/lsp-client.js'
 import { findStoryFiles, analyzeStoryFile } from './core/scanner.js'
 import { generateStudioGenFile } from './core/generator.js'
+import {
+  PACKAGE_NAME,
+  LOG_PREFIX,
+  DEFAULT_GEN_FILE,
+  DEFAULT_INCLUDE,
+} from './constants.js'
 
 const args = process.argv.slice(2)
 const command = args[0]
@@ -12,16 +18,16 @@ if (command === 'generate') {
   const includeArg = args.find((a) => a.startsWith('--include='))
   const include = includeArg
     ? includeArg.split('=')[1]
-    : './src/**/*.stories.tsx'
+    : DEFAULT_INCLUDE
 
   const outputArg = args.find((a) => a.startsWith('--output='))
   const output = outputArg
     ? outputArg.split('=')[1]
-    : './studio.gen.ts'
+    : DEFAULT_GEN_FILE
 
-  console.log('[studio] Scanning story files...')
+  console.log(LOG_PREFIX, 'Scanning story files...')
   const files = await findStoryFiles(cwd, include)
-  console.log(`[studio] Found ${files.length} story file(s)`)
+  console.log(LOG_PREFIX, `Found ${files.length} story file(s)`)
 
   // Start LSP
   const lsp = new TsgoClient(cwd)
@@ -30,14 +36,14 @@ if (command === 'generate') {
   try {
     await lsp.start()
     lspReady = true
-    console.log('[studio] tsgo LSP started')
+    console.log(LOG_PREFIX, 'tsgo LSP started')
 
     for (const file of files) {
       await lsp.openFile(file)
     }
   } catch (err) {
-    console.warn('[studio] tsgo not available, generating without types')
-    console.warn('[studio]', (err as Error).message)
+    console.warn(LOG_PREFIX, 'tsgo not available, generating without types')
+    console.warn(LOG_PREFIX, (err as Error).message)
   }
 
   // Analyze and extract types
@@ -58,21 +64,21 @@ if (command === 'generate') {
   const genFilePath = resolve(cwd, output)
   const content = generateStudioGenFile(fileInfos, genFilePath)
   writeFileSync(genFilePath, content, 'utf-8')
-  console.log(`[studio] Generated ${output}`)
+  console.log(LOG_PREFIX, `Generated ${output}`)
 
   lsp.stop()
 } else {
   console.log(`
-  @dennation/studio
+  @dennation/${PACKAGE_NAME}
 
   Commands:
-    generate    Generate studio.gen.ts from .stories.tsx files
+    generate    Generate ${DEFAULT_GEN_FILE} from .stories.tsx files
 
   Options:
-    --include=GLOB   Story files glob pattern (default: ./src/**/*.stories.tsx)
-    --output=PATH    Output path for generated file (default: ./studio.gen.ts)
+    --include=GLOB   Story files glob pattern (default: ${DEFAULT_INCLUDE})
+    --output=PATH    Output path for generated file (default: ${DEFAULT_GEN_FILE})
 
   Usage:
-    npx @dennation/studio generate
+    npx @dennation/${PACKAGE_NAME} generate
 `)
 }

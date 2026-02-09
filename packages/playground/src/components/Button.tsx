@@ -26,6 +26,7 @@ export function Button({ size, variant, disabled, children, onClick }: ButtonPro
       className={`inline-flex items-center justify-center font-medium transition-colors ${sizeClasses[size]} ${variantClasses[variant]} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       disabled={disabled}
       onClick={onClick}
+			type="button"
     >
       {children}
     </button>

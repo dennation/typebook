@@ -1,27 +1,31 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import type { Plugin, ViteDevServer } from 'vite'
+import picomatch from 'picomatch'
+import type { Plugin } from 'vite'
 import type { VitePluginConfig, PropInfo } from '../../types.js'
 import { TsgoClient } from '../../core/lsp-client.js'
 import { findStoryFiles, analyzeStoryFile } from '../../core/scanner.js'
 import { generateStudioGenFile } from '../../core/generator.js'
+import {
+  PACKAGE_NAME,
+  LOG_PREFIX,
+  DEFAULT_GEN_FILE,
+  DEFAULT_INCLUDE,
+  VIRTUAL_MODULE_ID,
+} from '../../constants.js'
 
-const DEFAULT_INCLUDE = './src/**/*.stories.tsx'
-const DEFAULT_OUTPUT = './studio.gen.ts'
-
-const VIRTUAL_MODULE_ID = 'virtual:studio-registry'
 const RESOLVED_VIRTUAL_MODULE_ID = '\0' + VIRTUAL_MODULE_ID
 
-export function studioPlugin(config?: VitePluginConfig): Plugin {
+export function uiStudio(config?: VitePluginConfig): Plugin {
   const include = config?.include ?? DEFAULT_INCLUDE
-  const output = config?.output ?? DEFAULT_OUTPUT
+  const output = config?.output ?? DEFAULT_GEN_FILE
+  const isStoryFile = picomatch(include)
 
   let cwd: string
   let lsp: TsgoClient | null = null
   let lspReady = false
   let storyFiles: string[] = []
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
-  let server: ViteDevServer | undefined
 
   async function extractTypes(filePath: string): Promise<PropInfo[]> {
     if (!lsp || !lspReady) return []
@@ -65,13 +69,13 @@ export function studioPlugin(config?: VitePluginConfig): Plugin {
 
         await regenerateGenFile()
       } catch (err) {
-        console.error('[studio] Failed to regenerate:', err)
+        console.error(LOG_PREFIX, 'Failed to regenerate:', err)
       }
     }, 200)
   }
 
   return {
-    name: 'studio',
+    name: PACKAGE_NAME,
 
     configResolved(resolvedConfig) {
       cwd = resolvedConfig.root
@@ -93,53 +97,48 @@ export function studioPlugin(config?: VitePluginConfig): Plugin {
     async buildStart() {
       // 1. Find story files
       storyFiles = await findStoryFiles(cwd, include)
-      console.log(`[studio] Found ${storyFiles.length} story file(s)`)
+      console.log(LOG_PREFIX, `Found ${storyFiles.length} story file(s)`)
 
       // 2. Start LSP
       lsp = new TsgoClient(cwd)
       try {
         await lsp.start()
         lspReady = true
-        console.log('[studio] tsgo LSP started')
+        console.log(LOG_PREFIX, 'tsgo LSP started')
 
         // Open all story files
         for (const file of storyFiles) {
           await lsp.openFile(file)
         }
       } catch (err) {
-        console.warn('[studio] tsgo not available, running without type extraction')
-        console.warn('[studio]', (err as Error).message)
+        console.warn(LOG_PREFIX, 'tsgo not available, running without type extraction')
+        console.warn(LOG_PREFIX, (err as Error).message)
       }
 
       // 3. Generate initial .gen file
       await regenerateGenFile()
-      console.log(`[studio] Generated ${output}`)
+      console.log(LOG_PREFIX, `Generated ${output}`)
     },
 
-    configureServer(viteServer) {
-      server = viteServer
+    configureServer(server) {
+      const genFilePath = resolve(cwd, output)
 
-      // Watch for file changes
-      server.watcher.on('change', (changedPath) => {
-        if (changedPath === resolve(cwd, output)) return
-        if (
-          changedPath.endsWith('.stories.tsx') ||
-          changedPath.endsWith('.tsx') ||
-          changedPath.endsWith('.ts')
-        ) {
-          debouncedRegenerate(changedPath)
+      server.watcher.on('change', (path) => {
+        if (path === genFilePath) return
+        // Regenerate on any TS/TSX change (types may affect story props)
+        if (path.endsWith('.tsx') || path.endsWith('.ts')) {
+          debouncedRegenerate(path)
         }
       })
 
-      // Watch for new/deleted story files
       server.watcher.on('add', (path) => {
-        if (path.endsWith('.stories.tsx')) {
+        if (isStoryFile(path)) {
           debouncedRegenerate(path)
         }
       })
 
       server.watcher.on('unlink', (path) => {
-        if (path.endsWith('.stories.tsx')) {
+        if (isStoryFile(path)) {
           debouncedRegenerate()
         }
       })

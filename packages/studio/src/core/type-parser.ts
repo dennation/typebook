@@ -1,4 +1,5 @@
 import type { PropInfo, PropType } from '../types.js'
+import { LOG_PREFIX } from '../constants.js'
 
 /**
  * Parses a type string returned by tsgo LSP hover
@@ -155,7 +156,7 @@ export async function tryParseTypeString(
   try {
     return await parseTypeString(raw)
   } catch (err) {
-    console.error('[studio] Failed to parse type string:', raw, err)
+    console.error(LOG_PREFIX, 'Failed to parse type string:', raw, err)
     return null
   }
 }

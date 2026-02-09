@@ -1,0 +1,29 @@
+@import "tailwindcss" prefix(st) source(none);
+
+@source "../**/*.tsx";
+
+@theme {
+  /* Light theme colors (default) */
+  --color-bg: #ffffff;
+  --color-bg-sidebar: #f8f9fa;
+  --color-bg-hover: #e9ecef;
+  --color-bg-active: #dee2e6;
+  --color-text: #212529;
+  --color-text-muted: #6c757d;
+  --color-border: #dee2e6;
+  --color-accent: #4263eb;
+  --color-accent-light: #edf2ff;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --color-bg: #1a1b1e;
+  --color-bg-sidebar: #141517;
+  --color-bg-hover: #25262b;
+  --color-bg-active: #2c2e33;
+  --color-text: #c1c2c5;
+  --color-text-muted: #909296;
+  --color-border: #373a40;
+  --color-accent: #748ffc;
+  --color-accent-light: #1e2a4a;
+}
