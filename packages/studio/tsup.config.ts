@@ -4,8 +4,8 @@ export default defineConfig([
   // Library — API, runtime, React component
   {
     entry: {
-      'api/index': 'src/api/index.ts',
-      'runtime/index': 'src/core/resolve.ts',
+      'api/index': 'src/index.ts',
+      'runtime/index': 'src/resolve.ts',
       'react/index': 'src/react/index.ts',
     },
     format: ['esm'],
@@ -17,7 +17,7 @@ export default defineConfig([
   {
     entry: {
       'plugin/vite': 'src/plugins/vite/index.ts',
-      'cli/index': 'src/cli/index.ts',
+      'cli/index': 'src/cli.ts',
     },
     format: ['esm'],
     dts: true,

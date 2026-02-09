@@ -17,4 +17,4 @@ export type {
   ResolvedVariant,
   StoryEntry,
   ResolveStoriesInput,
-} from '../types.js'
+} from './types.js'

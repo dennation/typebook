@@ -1,8 +1,8 @@
 import { resolve } from 'node:path'
 import { readFileSync, writeFileSync } from 'node:fs'
-import { TsgoClient } from '../core/lsp-client.js'
-import { findStoryFiles, analyzeStoryFile } from '../core/scanner.js'
-import { generateStudioGenFile } from '../core/generator.js'
+import { TsgoClient } from './core/lsp-client.js'
+import { findStoryFiles, analyzeStoryFile } from './core/scanner.js'
+import { generateStudioGenFile } from './core/generator.js'
 
 const args = process.argv.slice(2)
 const command = args[0]
@@ -40,7 +40,7 @@ if (command === 'generate') {
     files.map(async (filePath) => {
       const content = readFileSync(filePath, 'utf-8')
       const analysis = analyzeStoryFile(content)
-      let props: import('../types.js').PropInfo[] = []
+      let props: import('./types.js').PropInfo[] = []
       if (lspReady) {
         const extracted = await lsp.getComponentProps(filePath)
         if (extracted) props = extracted

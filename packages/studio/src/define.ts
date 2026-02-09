@@ -6,7 +6,7 @@ import type {
   StoryConfig,
   StoryExport,
   ValuesOfMarker,
-} from '../types.js'
+} from './types.js'
 
 export function define<Props extends Record<string, any>>(
   component: ComponentType<Props>,

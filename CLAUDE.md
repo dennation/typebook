@@ -47,27 +47,25 @@ packages/studio/
   tsconfig.json
   tsup.config.ts
   src/
+    index.ts                  — Public package exports (define, types)
     types.ts                  — All shared types (DefineResult, StoryExport, PropInfo, etc.)
-    api/
-      index.ts                — Public package exports (define, types)
-      define.ts               — define() → DefineResult with story() and valuesOf() methods
+    define.ts                 — define() → DefineResult with story() and valuesOf() methods
+    resolve.ts                — resolveStories() — resolves valuesOf markers into variants
+    cli.ts                    — CLI entry: `npx @dennation/studio generate`
     core/
       scanner.ts              — Glob scanner for .stories.tsx files + analysis
       generator.ts            — Generates studio.gen.ts content
-      resolve.ts              — resolveStories() — resolves valuesOf markers into variants
       lsp-client.ts           — Minimal JSON-RPC LSP client for tsgo (stdio)
       type-parser.ts          — Converts LSP hover strings → PropInfo[] via oxc
     plugins/
       vite/
         index.ts              — Vite plugin: LSP, file watcher, .gen generation, /__studio route
     react/
+      index.ts                — React exports
       Studio.tsx              — <Studio /> component (sidebar, theme, story renderer)
       ShadowRoot.tsx          — Shadow DOM wrapper for CSS isolation
       ErrorBoundary.tsx       — Error boundary for component crash isolation
       styles.ts               — CSS-in-JS styles for Studio UI
-      index.ts                — React exports
-    cli/
-      index.ts                — CLI entry: `npx @dennation/studio generate`
 ```
 
 ### Five build entry points
