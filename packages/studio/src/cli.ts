@@ -14,6 +14,11 @@ if (command === 'generate') {
     ? includeArg.split('=')[1]
     : './src/**/*.stories.tsx'
 
+  const outputArg = args.find((a) => a.startsWith('--output='))
+  const output = outputArg
+    ? outputArg.split('=')[1]
+    : './studio.gen.ts'
+
   console.log('[studio] Scanning story files...')
   const files = await findStoryFiles(cwd, include)
   console.log(`[studio] Found ${files.length} story file(s)`)
@@ -50,10 +55,10 @@ if (command === 'generate') {
   )
 
   // Generate .gen file
-  const genFilePath = resolve(cwd, 'studio.gen.ts')
+  const genFilePath = resolve(cwd, output)
   const content = generateStudioGenFile(fileInfos, genFilePath)
   writeFileSync(genFilePath, content, 'utf-8')
-  console.log('[studio] Generated studio.gen.ts')
+  console.log(`[studio] Generated ${output}`)
 
   lsp.stop()
 } else {
@@ -65,6 +70,7 @@ if (command === 'generate') {
 
   Options:
     --include=GLOB   Story files glob pattern (default: ./src/**/*.stories.tsx)
+    --output=PATH    Output path for generated file (default: ./studio.gen.ts)
 
   Usage:
     npx @dennation/studio generate
