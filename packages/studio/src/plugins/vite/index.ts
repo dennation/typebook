@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { resolve, relative } from 'node:path'
 import picomatch from 'picomatch'
 import type { Plugin } from 'vite'
 import type { VitePluginConfig, PropInfo } from '../../types.js'
@@ -132,13 +132,15 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
       })
 
       server.watcher.on('add', (path) => {
-        if (isStoryFile(path)) {
+        const relPath = relative(cwd, path)
+        if (isStoryFile(relPath)) {
           debouncedRegenerate(path)
         }
       })
 
       server.watcher.on('unlink', (path) => {
-        if (isStoryFile(path)) {
+        const relPath = relative(cwd, path)
+        if (isStoryFile(relPath)) {
           debouncedRegenerate()
         }
       })

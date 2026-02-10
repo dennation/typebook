@@ -2,59 +2,13 @@
 import { resolve } from '@dennation/ui-studio'
 import type { PropInfo } from '@dennation/ui-studio'
 
-import _Button, { Sizes as _Button_Sizes, Variants as _Button_Variants, WithIcon as _Button_WithIcon } from './src/components/Button.stories'
+import _Button, { Sizes as _Button_Sizes } from './src/stories/Butto.stories'
 
-const _ButtonProps: PropInfo[] = [
-  {
-    "name": "size",
-    "optional": false,
-    "type": {
-      "kind": "literal",
-      "values": [
-        "lg",
-        "md",
-        "sm"
-      ]
-    }
-  },
-  {
-    "name": "variant",
-    "optional": false,
-    "type": {
-      "kind": "literal",
-      "values": [
-        "ghost",
-        "primary",
-        "secondary"
-      ]
-    }
-  },
-  {
-    "name": "disabled",
-    "optional": true,
-    "type": {
-      "kind": "boolean"
-    }
-  },
-  {
-    "name": "children",
-    "optional": false,
-    "type": {
-      "kind": "node"
-    }
-  },
-  {
-    "name": "onClick",
-    "optional": true,
-    "type": {
-      "kind": "function"
-    }
-  }
-]
+const _ButtonProps: PropInfo[] = []
 
 const _ButtonResolved = resolve(_Button, {
   props: _ButtonProps,
-  stories: [{ name: 'Sizes', story: _Button_Sizes }, { name: 'Variants', story: _Button_Variants }, { name: 'WithIcon', story: _Button_WithIcon }],
+  stories: [{ name: 'Sizes', story: _Button_Sizes }],
 })
 
 export default [_ButtonResolved]

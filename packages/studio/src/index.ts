@@ -1,4 +1,5 @@
 export { define } from './define.js'
+export { resolve } from './resolve.js'
 export type {
   Expand,
   StudioConfig,

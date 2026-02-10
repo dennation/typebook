@@ -22,7 +22,7 @@ function isValuesOfMarker(v: unknown): v is ValuesOfMarker {
  * Resolves stories by replacing valuesOf() markers with actual variant values
  * from the extracted prop types.
  */
-export function resolveStories(
+export function resolve(
   defineResult: DefineResult<any>,
   input: ResolveStoriesInput,
 ): ResolvedComponent {

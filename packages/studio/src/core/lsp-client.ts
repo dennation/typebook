@@ -60,6 +60,7 @@ export class TsgoClient {
     number,
     { resolve: (value: unknown) => void; reject: (err: Error) => void }
   >()
+  private openedFiles = new Set<string>()
 
   constructor(private cwd: string) {}
 
@@ -124,6 +125,7 @@ export class TsgoClient {
     const uri = `file://${absPath}`
 
     this.fileVersions.set(absPath, 1)
+    this.openedFiles.add(absPath)
     this.notify('textDocument/didOpen', {
       textDocument: {
         uri,
@@ -139,6 +141,7 @@ export class TsgoClient {
 
   async notifyChange(filePath: string): Promise<void> {
     const absPath = resolve(this.cwd, filePath)
+    if (!this.openedFiles.has(absPath)) return
     const content = readFileSync(absPath, 'utf-8')
     const uri = `file://${absPath}`
     const version = (this.fileVersions.get(absPath) ?? 1) + 1
@@ -156,27 +159,61 @@ export class TsgoClient {
     const absPath = resolve(this.cwd, filePath)
     const uri = `file://${absPath}`
 
-    const result = await this.request('textDocument/hover', {
-      textDocument: { uri },
-      position: { line, character },
-    }) as HoverResult | null
+    // Попробуем несколько вариантов параметров для получения полного типа
+    const attempts = [
+      // Вариант 1: verbosityLevel (TypeScript 5.9+)
+      { verbosityLevel: 5 },
+      // Вариант 2: quickInfoOptions
+      { quickInfoOptions: { verbosityLevel: 5 } },
+      // Вариант 3: context с verbosity
+      { context: { verbosityDelta: 5 } },
+      // Вариант 4: обычный запрос (fallback)
+      {},
+    ]
 
-    if (!result?.contents) return null
+    for (const params of attempts) {
+      const result = await this.request('textDocument/hover', {
+        textDocument: { uri },
+        position: { line, character },
+        ...params,
+      }) as HoverResult | null
 
-    const contents = result.contents
-    if (typeof contents === 'string') return contents
-    if (Array.isArray(contents)) {
-      return contents.map((c) => (typeof c === 'string' ? c : c.value)).join('\n')
+      if (!result?.contents) continue
+
+      const contents = result.contents
+      let text: string
+      if (typeof contents === 'string') {
+        text = contents
+      } else if (Array.isArray(contents)) {
+        text = contents.map((c) => (typeof c === 'string' ? c : c.value)).join('\n')
+      } else {
+        text = contents.value
+      }
+
+      console.log('[studio] hover attempt with params:', JSON.stringify(params))
+      console.log('[studio] result length:', text.length, 'chars')
+
+      // Проверяем различные паттерны truncation
+      const hasTruncation = /\.\.\.\s*\d+\s*more/.test(text) || text.includes('... more ...')
+      console.log('[studio] has truncation:', hasTruncation)
+
+      // Если получили результат без truncation, используем его
+      if (!hasTruncation) {
+        console.log('[studio] ✓ Got full type without truncation!')
+        return text
+      }
     }
-    return contents.value
+
+    // Все попытки дали truncated результат, возвращаем последний
+    console.log('[studio] ✗ All attempts resulted in truncation')
+    return null
   }
 
   /**
    * Extract prop types for a component by hovering over its usage.
    *
-   * Strategy: find the component reference in the source file,
-   * hover over it, parse the resulting type signature to extract
-   * the resolved props type (handles composed/imported types).
+   * Strategy: find the define(Component, ...) call in the source file,
+   * hover over Component to get its function signature with props type.
    */
   async getComponentProps(
     filePath: string,
@@ -185,16 +222,17 @@ export class TsgoClient {
     const content = readFileSync(absPath, 'utf-8')
     const lines = content.split('\n')
 
-    // Find "export default X" and hover on X to get SetupResult<Props> type
+    // Find "const X = define(...)" and hover on X to get DefineResult<Props>
     for (let lineNum = 0; lineNum < lines.length; lineNum++) {
       const line = lines[lineNum]
-      const match = line.match(/export\s+default\s+(\w+)/)
+      const match = line.match(/const\s+(\w+)\s*=\s*define\s*\(/)
       if (!match || match.index === undefined) continue
 
-      const identifier = match[1]
-      const charPos = match.index + match[0].indexOf(identifier)
+      const varName = match[1]
+      const charPos = match.index + match[0].indexOf(varName)
 
       const hoverResult = await this.hover(filePath, lineNum, charPos)
+      console.log('[studio] hover result for', varName, ':\n', hoverResult)
       if (!hoverResult) continue
 
       return this.extractPropsFromHover(hoverResult)
@@ -209,33 +247,49 @@ export class TsgoClient {
    *
    * Hover result formats from tsgo:
    *   "function Button(props: { size: 'sm' | 'md' | 'lg'; ... }): JSX.Element"
-   *   "(alias) function Button(props: ButtonProps): Element"
+   *   "(alias) function Button({ size, variant }: ButtonProps): Element"
+   *   "(alias) function Button({ size, variant }: { size: 'sm' | 'md'; ... }): Element"
    *
    * For inline props we can extract directly.
-   * For named types we need a second hover on the type name.
+   * For destructured params with named type, we extract prop names from destructuring.
    */
   private async extractPropsFromHover(hover: string): Promise<PropInfo[] | null> {
-    // Case 1: inline object type in params — props: { ... }
-    // Use a brace-matching approach to handle nested braces
-    const inlineMatch = hover.match(/props:\s*\{/)
-    if (inlineMatch && inlineMatch.index !== undefined) {
-      const startIdx = hover.indexOf('{', inlineMatch.index)
+    // Case 1: inline object type in params — props: { ... } or }: { ... }
+    // Look for ": {" after the parameter pattern
+    const inlineTypeMatch = hover.match(/\):\s*\{/) ? null : hover.match(/}:\s*\{/)
+    if (inlineTypeMatch && inlineTypeMatch.index !== undefined) {
+      const startIdx = hover.indexOf('{', inlineTypeMatch.index)
       const extracted = extractBalancedBraces(hover, startIdx)
       if (extracted) {
         return await tryParseTypeString(extracted)
       }
     }
 
-    // Case 2: named type reference — props: SomeType
-    const namedMatch = hover.match(/props:\s*([A-Z]\w+)/)
-    if (namedMatch) {
-      // The named type was resolved by tsgo, but shown as a name.
-      // We can't hover further without knowing the location.
-      // For now, return null — the caller can try alternative extraction.
-      return null
+    // Case 2: props: { ... } pattern
+    const propsMatch = hover.match(/props:\s*\{/)
+    if (propsMatch && propsMatch.index !== undefined) {
+      const startIdx = hover.indexOf('{', propsMatch.index)
+      const extracted = extractBalancedBraces(hover, startIdx)
+      if (extracted) {
+        return await tryParseTypeString(extracted)
+      }
     }
 
-    // Case 3: try to find any object type in the hover
+    // Case 3: destructured params with named type — ({ a, b, c }: TypeName)
+    // We have prop names but need to get the type definition
+    // For now, return props with unknown types — valuesOf won't work but static stories will
+    const destructMatch = hover.match(/\(\{\s*([^}]+)\s*\}:\s*(\w+)\)/)
+    if (destructMatch) {
+      const propsStr = destructMatch[1]
+      const propNames = propsStr.split(',').map(p => p.trim()).filter(Boolean)
+      return propNames.map(name => ({
+        name,
+        optional: false,
+        type: { kind: 'unknown' as const, raw: '' },
+      }))
+    }
+
+    // Case 4: try to find any object type in the hover
     const braceIdx = hover.indexOf('{')
     if (braceIdx !== -1) {
       const extracted = extractBalancedBraces(hover, braceIdx)

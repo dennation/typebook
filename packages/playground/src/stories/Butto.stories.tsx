@@ -1,16 +1,13 @@
 import { define } from '@dennation/ui-studio'
-import { Button } from './Button'
+import { Button } from '@heroui/button'
 
 const button = define(Button, {
   group: 'Forms',
   defaults: {
     children: 'Click me',
-    onClick: () => {},
   },
 })
 
 export const Sizes = button.story({ variants: button.valuesOf('size') })
-export const Variants = button.story({ variants: button.valuesOf('variant') })
-export const WithIcon = button.story({ props: { children: '+ Add', size: 'sm' as const } })
 
 export default button

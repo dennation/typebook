@@ -3,7 +3,7 @@ import type { ResolvedComponent } from '../../types.js'
 import { PACKAGE_NAME } from '../../constants.js'
 import { groupComponents } from '../utils/groupComponents.js'
 import { StoryRenderer } from './StoryRenderer.js'
-import styles from '../styles/styles.generated.css?inline'
+import styles from '../styles/styles.css?inline'
 
 export interface StudioProps {
 	registry: ResolvedComponent[]
@@ -97,7 +97,7 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 			</nav>
 
 			{/* Main content */}
-			<main className="st:overflow-auto st:p-6">
+			<main className="st:overflow-auto st:p-6 st:bg-checkered">
 				{comp && story ? (
 					<>
 						<div className="st:text-sm st:text-text-muted st:mb-4">

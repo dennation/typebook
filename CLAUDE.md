@@ -137,9 +137,6 @@ packages/playground/
       types.ts                  — Shared types (Size, Variant, BaseProps, InteractiveProps)
       Button.tsx                — Button with inline props
       Button.stories.tsx        — Studio stories for Button
-      ComposedButton.tsx        — Button with composed interfaces
-      ComposedButton.stories.tsx — Studio stories for ComposedButton
-      InlineButton.tsx          — Button with intersection type props
 ```
 
 ---

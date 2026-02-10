@@ -75,7 +75,23 @@ function resolveType(node: any): PropType {
   switch (node.type) {
     // Union type: 'a' | 'b' | 'c'
     case 'TSUnionType': {
-      const types = node.types ?? []
+      const allTypes = node.types ?? []
+
+      // Filter out undefined/null from union (e.g., boolean | undefined → boolean)
+      const types = allTypes.filter(
+        (t: any) =>
+          t.type !== 'TSUndefinedKeyword' && t.type !== 'TSNullKeyword',
+      )
+
+      // If only one type remains after filtering, resolve it directly
+      if (types.length === 1) {
+        return resolveType(types[0])
+      }
+
+      // If all types were filtered out, return unknown
+      if (types.length === 0) {
+        return { kind: 'unknown', raw: '' }
+      }
 
       // oxc represents all literals as { type: 'Literal', value: ... }
       const allStringLiterals = types.every(
@@ -140,6 +156,10 @@ function resolveType(node: any): PropType {
     // Function types
     case 'TSFunctionType':
       return { kind: 'function' }
+
+    // Parenthesized type: (() => void)
+    case 'TSParenthesizedType':
+      return resolveType(node.typeAnnotation)
 
     default:
       return { kind: 'unknown', raw: node.type ?? '' }
