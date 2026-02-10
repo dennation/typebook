@@ -4,7 +4,7 @@ import type {
   DefineConfig,
   DefineResult,
   StoryConfig,
-  StoryExport,
+  Story,
   ValuesOfMarker,
 } from './types.js'
 
@@ -26,29 +26,28 @@ export function define<
     group,
     defaults,
 
-    story(storyConfig: StoryConfig<Expand<Props>>): StoryExport {
+    story(storyConfig: StoryConfig<Expand<Props>>): Story {
       if (storyConfig.variants) {
         // Variant story
         return {
           __type: 'story',
           kind: 'variants',
           component,
-          defaults,
           variants: storyConfig.variants,
-          extraProps: storyConfig.props
+          props: storyConfig.props
             ? { ...storyConfig.props }
             : undefined,
         }
       }
 
-      // Static story — merge defaults with provided props
-      const merged = { ...defaults, ...storyConfig.props }
+      // Static story
       return {
         __type: 'story',
         kind: 'static',
         component,
-        defaults,
-        props: merged,
+        props: storyConfig.props
+          ? { ...storyConfig.props }
+          : undefined,
       }
     },
 

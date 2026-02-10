@@ -78,19 +78,25 @@ export interface StoryConfig<Props> {
   variants?: VariantsConfig
 }
 
-/** Exported from .stories.tsx — the result of story() */
-export interface StoryExport {
+/** Static story — single variant with fixed props */
+export interface StaticStory {
   __type: 'story'
-  kind: 'static' | 'variants'
+  kind: 'static'
   component: ComponentType<any>
-  defaults: Record<string, unknown>
-  /** Merged props for static stories */
   props?: Record<string, unknown>
-  /** Variants config for variant stories */
-  variants?: VariantsConfig
-  /** Extra props applied to all variants */
-  extraProps?: Record<string, unknown>
 }
+
+/** Variant story — multiple variants generated from config */
+export interface VariantStory {
+  __type: 'story'
+  kind: 'variants'
+  component: ComponentType<any>
+  variants?: VariantsConfig
+  props?: Record<string, unknown>
+}
+
+/** Exported from .stories.tsx — the result of story() */
+export type Story = StaticStory | VariantStory
 
 /** Returned by define() */
 export interface DefineResult<Props> {
@@ -99,7 +105,7 @@ export interface DefineResult<Props> {
   title?: string
   group?: string
   defaults: Record<string, unknown>
-  story(config: StoryConfig<any>): StoryExport
+  story(config: StoryConfig<any>): Story
   valuesOf(
     prop: keyof Props,
     options?: { columns?: number },
@@ -125,6 +131,7 @@ export interface ResolvedComponent {
   name: string
   title?: string
   group?: string
+  props: PropInfo[]
   stories: ResolvedStory[]
 }
 
@@ -132,7 +139,7 @@ export interface ResolvedComponent {
 
 export interface StoryEntry {
   name: string
-  story: StoryExport
+  story: Story
 }
 
 export interface ResolveStoriesInput {

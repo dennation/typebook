@@ -5,7 +5,7 @@ import type {
   ResolvedStory,
   ResolvedVariant,
   ResolveStoriesInput,
-  StoryExport,
+  Story,
   ValuesOfMarker,
 } from './types.js'
 
@@ -43,22 +43,24 @@ export function resolve(
       'Unknown',
     title: defineResult.title,
     group: defineResult.group,
+    props,
     stories: resolvedStories,
   }
 }
 
 function resolveStory(
   name: string,
-  story: StoryExport,
+  story: Story,
   allProps: PropInfo[],
   defaults: Record<string, unknown>,
 ): ResolvedStory {
   // Static story — single variant with merged props
   if (story.kind === 'static') {
+    const mergedProps = { ...defaults, ...story.props }
     return {
       name,
       kind: 'static',
-      variants: [{ label: 'default', props: story.props ?? { ...defaults } }],
+      variants: [{ label: 'default', props: mergedProps }],
     }
   }
 
@@ -68,8 +70,7 @@ function resolveStory(
   }
 
   const variantsConfig = story.variants
-  const extraProps = story.extraProps ?? {}
-  const baseProps = { ...defaults, ...extraProps }
+  const baseProps = { ...defaults, ...story.props }
 
   if (isValuesOfMarker(variantsConfig)) {
     // Auto-generate from prop types
