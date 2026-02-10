@@ -2,13 +2,85 @@
 import { resolve } from '@dennation/ui-studio'
 import type { PropInfo } from '@dennation/ui-studio'
 
-import _Button, { Sizes as _Button_Sizes } from './src/stories/Butto.stories'
+import _Button, { Sizes as _Button_Sizes, Variants as _Button_Variants, Colors as _Button_Colors, Radiuses as _Button_Radiuses, Disabled as _Button_Disabled, Loading as _Button_Loading } from './src/stories/Butto.stories'
 
-const _ButtonProps: PropInfo[] = []
+const _ButtonProps: PropInfo[] = [
+  {
+    "name": "variant",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "flat",
+        "solid",
+        "bordered",
+        "light",
+        "faded",
+        "shadow",
+        "ghost"
+      ]
+    }
+  },
+  {
+    "name": "size",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "sm",
+        "md",
+        "lg"
+      ]
+    }
+  },
+  {
+    "name": "color",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "default",
+        "primary",
+        "secondary",
+        "success",
+        "warning",
+        "danger"
+      ]
+    }
+  },
+  {
+    "name": "radius",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "none",
+        "sm",
+        "md",
+        "lg",
+        "full"
+      ]
+    }
+  },
+  {
+    "name": "disabled",
+    "optional": true,
+    "type": {
+      "kind": "boolean"
+    }
+  },
+  {
+    "name": "isLoading",
+    "optional": true,
+    "type": {
+      "kind": "boolean"
+    }
+  }
+]
 
 const _ButtonResolved = resolve(_Button, {
   props: _ButtonProps,
-  stories: [{ name: 'Sizes', story: _Button_Sizes }],
+  stories: [{ name: 'Sizes', story: _Button_Sizes }, { name: 'Variants', story: _Button_Variants }, { name: 'Colors', story: _Button_Colors }, { name: 'Radiuses', story: _Button_Radiuses }, { name: 'Disabled', story: _Button_Disabled }, { name: 'Loading', story: _Button_Loading }],
 })
 
 export default [_ButtonResolved]

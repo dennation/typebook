@@ -3,7 +3,7 @@ import { resolve, relative } from 'node:path'
 import picomatch from 'picomatch'
 import type { Plugin } from 'vite'
 import type { VitePluginConfig, PropInfo } from '../../types.js'
-import { TsgoClient } from '../../core/lsp-client.js'
+import { TypeScriptClient } from '../../core/ts-client.js'
 import { findStoryFiles, analyzeStoryFile } from '../../core/scanner.js'
 import { generateStudioGenFile } from '../../core/generator.js'
 import {
@@ -22,7 +22,7 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
   const isStoryFile = picomatch(include)
 
   let cwd: string
-  let lsp: TsgoClient | null = null
+  let lsp: TypeScriptClient | null = null
   let lspReady = false
   let storyFiles: string[] = []
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -99,19 +99,20 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
       storyFiles = await findStoryFiles(cwd, include)
       console.log(LOG_PREFIX, `Found ${storyFiles.length} story file(s)`)
 
-      // 2. Start LSP
-      lsp = new TsgoClient(cwd)
+      // 2. Start TypeScript client
+      const client = new TypeScriptClient(cwd)
       try {
-        await lsp.start()
+        await client.start()
+        lsp = client
         lspReady = true
-        console.log(LOG_PREFIX, 'tsgo LSP started')
+        console.log(LOG_PREFIX, 'TypeScript client started')
 
         // Open all story files
         for (const file of storyFiles) {
           await lsp.openFile(file)
         }
       } catch (err) {
-        console.warn(LOG_PREFIX, 'tsgo not available, running without type extraction')
+        console.warn(LOG_PREFIX, 'TypeScript client not available, running without type extraction')
         console.warn(LOG_PREFIX, (err as Error).message)
       }
 

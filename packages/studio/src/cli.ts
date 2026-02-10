@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import { readFileSync, writeFileSync } from 'node:fs'
-import { TsgoClient } from './core/lsp-client.js'
+import { TypeScriptClient } from './core/ts-client.js'
 import { findStoryFiles, analyzeStoryFile } from './core/scanner.js'
 import { generateStudioGenFile } from './core/generator.js'
 import {
@@ -29,20 +29,20 @@ if (command === 'generate') {
   const files = await findStoryFiles(cwd, include)
   console.log(LOG_PREFIX, `Found ${files.length} story file(s)`)
 
-  // Start LSP
-  const lsp = new TsgoClient(cwd)
+  // Start TypeScript client
+  const lsp = new TypeScriptClient(cwd)
   let lspReady = false
 
   try {
     await lsp.start()
     lspReady = true
-    console.log(LOG_PREFIX, 'tsgo LSP started')
+    console.log(LOG_PREFIX, 'TypeScript client started')
 
     for (const file of files) {
       await lsp.openFile(file)
     }
   } catch (err) {
-    console.warn(LOG_PREFIX, 'tsgo not available, generating without types')
+    console.warn(LOG_PREFIX, 'TypeScript client not available, generating without types')
     console.warn(LOG_PREFIX, (err as Error).message)
   }
 

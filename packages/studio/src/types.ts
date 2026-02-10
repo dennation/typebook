@@ -40,13 +40,18 @@ export type Expand<T> = {
   [K in keyof T]: T[K] extends string ? T[K] & string : T[K]
 } & {}
 
-export interface DefineConfig<Props> {
+export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof Props> {
   /** Display name override (defaults to displayName or function name) */
   title?: string
   /** Sidebar group (single level, e.g. 'Forms') */
   group?: string
   /** Default props applied to all stories */
   defaults?: Partial<Props>
+  /**
+   * Props to include in documentation and type extraction.
+   * If not specified, all props are included.
+   */
+  props?: ReadonlyArray<IncludedProps>
 }
 
 /** Marker returned by valuesOf() — signals auto-generation */
@@ -90,13 +95,13 @@ export interface StoryExport {
 /** Returned by define() */
 export interface DefineResult<Props> {
   __type: 'define'
-  component: ComponentType<Props>
+  component: ComponentType<any>
   title?: string
   group?: string
   defaults: Record<string, unknown>
-  story(config: StoryConfig<Expand<Props>>): StoryExport
+  story(config: StoryConfig<any>): StoryExport
   valuesOf(
-    prop: keyof Expand<Props>,
+    prop: keyof Props,
     options?: { columns?: number },
   ): ValuesOfMarker
 }

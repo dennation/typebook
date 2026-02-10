@@ -8,15 +8,18 @@ import type {
   ValuesOfMarker,
 } from './types.js'
 
-export function define<Props extends Record<string, any>>(
+export function define<
+  Props extends Record<string, any>,
+  IncludedProps extends keyof Props = keyof Props
+>(
   component: ComponentType<Props>,
-  config?: DefineConfig<Props>,
-): DefineResult<Expand<Props>> {
+  config?: DefineConfig<Props, IncludedProps>,
+): DefineResult<Expand<Pick<Props, IncludedProps>>> {
   const defaults: Record<string, unknown> = config?.defaults ?? {}
   const title = config?.title
   const group = config?.group
 
-  const result: DefineResult<Expand<Props>> = {
+  const result: DefineResult<Expand<Pick<Props, IncludedProps>>> = {
     __type: 'define',
     component,
     title,

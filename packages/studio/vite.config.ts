@@ -22,7 +22,7 @@ export default defineConfig({
 				'react/jsx-runtime',
 				'vite',
 				'fsevents',
-				'@typescript/native-preview',
+				'typescript',
 				'glob',
 				'oxc-parser',
 				'picomatch',
