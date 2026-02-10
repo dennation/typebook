@@ -1,6 +1,7 @@
 import ts from 'typescript'
 import { resolve } from 'node:path'
 import type { PropInfo, PropType } from '../types.js'
+import { LOG_PREFIX } from '../constants.js'
 
 export class TypeScriptClient {
   private program: ts.Program | null = null
@@ -36,7 +37,7 @@ export class TypeScriptClient {
     // Find the source file
     const sourceFile = this.program!.getSourceFile(absPath)
     if (!sourceFile) {
-      console.log('[studio] Could not get source file')
+      console.log(LOG_PREFIX, 'Could not get source file')
       return null
     }
 
@@ -46,7 +47,7 @@ export class TypeScriptClient {
     const props = this.findComponentPropsInFile(sourceFile)
 
     if (props) {
-      console.log('[studio] Extracted', props.length, 'props from DefineResult type')
+      console.log(LOG_PREFIX, 'Extracted', props.length, 'props from DefineResult type')
     }
 
     return props
@@ -68,13 +69,13 @@ export class TypeScriptClient {
           if (!ts.isIdentifier(decl.name)) continue
 
           const varName = decl.name.text
-          console.log('[studio] Found define() variable:', varName)
+          console.log(LOG_PREFIX, 'Found define() variable:', varName)
 
           // Get type of the entire call expression: define(Button, {...})
           // This gives us the instantiated DefineResult<Props>
           const defineResultType = this.checker!.getTypeAtLocation(callExpr)
 
-          console.log('[studio] defineResultType:', this.checker!.typeToString(defineResultType))
+          console.log(LOG_PREFIX, 'defineResultType:', this.checker!.typeToString(defineResultType))
 
           // DefineResult<Props> is a type reference with type arguments
           const typeRef = defineResultType as ts.TypeReference
@@ -82,7 +83,7 @@ export class TypeScriptClient {
           // First try: typeArguments property on TypeReference
           if (typeRef.typeArguments && typeRef.typeArguments.length > 0) {
             const propsType = typeRef.typeArguments[0]
-            console.log('[studio] Got Props from typeRef.typeArguments:', this.checker!.typeToString(propsType))
+            console.log(LOG_PREFIX, 'Got Props from typeRef.typeArguments:', this.checker!.typeToString(propsType))
             result = this.extractPropsFromType(propsType)
             return
           }
@@ -91,12 +92,12 @@ export class TypeScriptClient {
           const typeArgs = this.checker!.getTypeArguments(typeRef)
           if (typeArgs && typeArgs.length > 0) {
             const propsType = typeArgs[0]
-            console.log('[studio] Got Props from getTypeArguments:', this.checker!.typeToString(propsType))
+            console.log(LOG_PREFIX, 'Got Props from getTypeArguments:', this.checker!.typeToString(propsType))
             result = this.extractPropsFromType(propsType)
             return
           }
 
-          console.log('[studio] Could not extract Props type argument')
+          console.log(LOG_PREFIX, 'Could not extract Props type argument')
           return
         }
       }
@@ -112,7 +113,7 @@ export class TypeScriptClient {
     const props: PropInfo[] = []
     const properties = type.getProperties()
 
-    console.log('[studio] Extracting', properties.length, 'properties')
+    console.log(LOG_PREFIX, 'Extracting', properties.length, 'properties')
 
     for (const prop of properties) {
       const propName = prop.getName()
@@ -122,7 +123,7 @@ export class TypeScriptClient {
       const propType = this.checker!.getTypeOfSymbol(prop)
       const isOptional = (prop.flags & ts.SymbolFlags.Optional) !== 0
 
-      console.log('[studio] Property:', propName, 'type:', this.checker!.typeToString(propType), 'optional:', isOptional)
+      console.log(LOG_PREFIX, 'Property:', propName, 'type:', this.checker!.typeToString(propType), 'optional:', isOptional)
 
       const typeInfo = this.convertTsType(propType)
 
@@ -140,11 +141,11 @@ export class TypeScriptClient {
     const typeString = this.checker!.typeToString(type)
     const flags = type.flags
 
-    console.log('[studio] Converting type:', typeString, 'flags:', flags)
+    console.log(LOG_PREFIX, 'Converting type:', typeString, 'flags:', flags)
 
     // Check for 'any' type - skip it
     if (flags & ts.TypeFlags.Any) {
-      console.log('[studio] Type is any, returning unknown')
+      console.log(LOG_PREFIX, 'Type is any, returning unknown')
       return { kind: 'unknown', raw: 'any' }
     }
 
