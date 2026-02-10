@@ -3,7 +3,22 @@
 @source "../**/*.tsx";
 
 @theme {
-  /* Light theme colors (default) */
+  /* CSS variables will be defined dynamically based on [data-theme] */
+  --color-bg: var(--color-bg);
+  --color-bg-sidebar: var(--color-bg-sidebar);
+  --color-bg-hover: var(--color-bg-hover);
+  --color-bg-active: var(--color-bg-active);
+  --color-bg-canvas: var(--color-bg-canvas);
+  --color-bg-grid: var(--color-bg-grid);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-border: var(--color-border);
+  --color-accent: var(--color-accent);
+  --color-accent-light: var(--color-accent-light);
+}
+
+/* Light theme CSS variables */
+:root, [data-theme="light"] {
   --color-bg: #ffffff;
   --color-bg-sidebar: #f8f9fa;
   --color-bg-hover: #e9ecef;
@@ -15,12 +30,6 @@
   --color-border: #dee2e6;
   --color-accent: #4263eb;
   --color-accent-light: #edf2ff;
-}
-
-/* Light theme CSS variables */
-:root, [data-theme="light"] {
-  --color-bg-canvas: #f8f9fa;
-  --color-bg-grid: #e9ecef;
 }
 
 /* Dark theme overrides */
