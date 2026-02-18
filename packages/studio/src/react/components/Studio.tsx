@@ -10,39 +10,53 @@ export interface StudioProps {
 	theme?: 'light' | 'dark'
 }
 
+export function toKebabCase(str: string): string {
+	return str
+		.replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')
+		.replace(/([a-z])([A-Z])/g, '$1-$2')
+		.toLowerCase()
+}
+
 export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps) {
 	const [activeComponent, setActiveComponent] = useState<string | null>(null)
 	const [activeStory, setActiveStory] = useState<string | null>(null)
 	const [theme, setTheme] = useState(initialTheme)
+
+	const findByKebab = useCallback(
+		(kebabComponent: string, kebabStory: string) => {
+			const comp = registry.find((c) => toKebabCase(c.name) === kebabComponent)
+			if (!comp) return null
+			const story = comp.stories.find((s) => toKebabCase(s.name) === kebabStory)
+			if (!story) return null
+			return { component: comp.name, story: story.name }
+		},
+		[registry],
+	)
 
 	const parseHash = useCallback((): { component: string; story: string } | null => {
 		const hash = window.location.hash.slice(1) // remove #
 		if (!hash) return null
 		const parts = hash.split('/')
 		if (parts.length >= 2) {
-			return {
-				component: decodeURIComponent(parts[0]),
-				story: decodeURIComponent(parts[1]),
-			}
+			const kebabComp = decodeURIComponent(parts[0])
+			const kebabStory = decodeURIComponent(parts[1])
+			return findByKebab(kebabComp, kebabStory)
 		}
 		return null
-	}, [])
+	}, [findByKebab])
 
 	const selectStory = useCallback((componentName: string, storyName: string) => {
 		setActiveComponent(componentName)
 		setActiveStory(storyName)
-		window.location.hash = `${encodeURIComponent(componentName)}/${encodeURIComponent(storyName)}`
+		window.location.hash = `${toKebabCase(componentName)}/${toKebabCase(storyName)}`
 	}, [])
 
 	// Restore selection from URL hash on mount
 	useEffect(() => {
 		const parsed = parseHash()
 		if (!parsed) return
-		const comp = registry.find((c) => c.name === parsed.component)
-		if (comp?.stories.some((s) => s.name === parsed.story)) {
-			setActiveComponent(parsed.component)
-			setActiveStory(parsed.story)
-		}
+		setActiveComponent(parsed.component)
+		setActiveStory(parsed.story)
 	}, [registry, parseHash])
 
 	// Sync with browser back/forward navigation
@@ -54,11 +68,8 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 				setActiveStory(null)
 				return
 			}
-			const comp = registry.find((c) => c.name === parsed.component)
-			if (comp?.stories.some((s) => s.name === parsed.story)) {
-				setActiveComponent(parsed.component)
-				setActiveStory(parsed.story)
-			}
+			setActiveComponent(parsed.component)
+			setActiveStory(parsed.story)
 		}
 		window.addEventListener('hashchange', onHashChange)
 		return () => window.removeEventListener('hashchange', onHashChange)
