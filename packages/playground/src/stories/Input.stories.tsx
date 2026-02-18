@@ -18,8 +18,7 @@ export const Variants = input.variants({ items: input.allOf('variant') })
 export const Colors = input.variants({ items: input.allOf('color'), columns: 3 })
 
 export const States = input.variants({
-	items: input.values('isDisabled', [false, true]),
-	props: { value: 'Sample text' },
+	items: input.values('disabled', [false, true]),
 })
 
 export const Matrix = input.matrix({

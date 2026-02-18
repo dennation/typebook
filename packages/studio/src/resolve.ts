@@ -104,6 +104,7 @@ export function resolve(
       'Unknown',
     title: defineResult.title,
     group: defineResult.group,
+    defaults: defineResult.defaults,
     props,
     stories: resolvedStories,
   }

@@ -14,16 +14,17 @@ import type {
 
 export function define<
   Props extends Record<string, any>,
-  IncludedProps extends keyof Props = keyof Props
+  IncludedProps extends keyof Props = keyof Props,
+  D extends Partial<Props> = Partial<Props>
 >(
   component: ComponentType<Props>,
-  config?: DefineConfig<Props, IncludedProps>,
-): DefineResult<Expand<Pick<Props, IncludedProps>>> {
+  config?: DefineConfig<Props, IncludedProps> & { defaults?: D },
+): DefineResult<Expand<Pick<Props, IncludedProps>>, keyof D & IncludedProps> {
   const defaults: Record<string, unknown> = config?.defaults ?? {}
   const title = config?.title
   const group = config?.group
 
-  const result: DefineResult<Expand<Pick<Props, IncludedProps>>> = {
+  const result: DefineResult<Expand<Pick<Props, IncludedProps>>, keyof D & IncludedProps> = {
     __type: 'define',
     component,
     title,

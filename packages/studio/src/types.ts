@@ -40,6 +40,15 @@ export type Expand<T> = {
   [K in keyof T]: T[K] extends string ? T[K] & string : T[K]
 } & {}
 
+/** Keys that are required (non-optional) in T */
+export type RequiredKeys<T> = {
+  [K in keyof T]-?: object extends Pick<T, K> ? never : K
+}[keyof T]
+
+/** Props that must be provided in story.props (required keys not covered by defaults) */
+export type MissingProps<Props, CoveredByDefaults extends keyof Props> =
+  Pick<Props, Exclude<RequiredKeys<Props>, CoveredByDefaults>>
+
 export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof Props> {
   /** Display name override (defaults to displayName or function name) */
   title?: string
@@ -107,7 +116,7 @@ export interface MatrixStory {
 export type Story = SingleStory | VariantsStory | MatrixStory
 
 /** Returned by define() */
-export interface DefineResult<Props> {
+export interface DefineResult<Props, CoveredByDefaults extends keyof Props = never> {
   __type: 'define'
   component: ComponentType<any>
   title?: string
@@ -115,16 +124,16 @@ export interface DefineResult<Props> {
   defaults: Record<string, unknown>
 
   // Story creation methods
-  single(config?: { props?: Partial<Props> }): SingleStory
+  single(config?: { props?: Partial<Props> & MissingProps<Props, CoveredByDefaults> }): SingleStory
   variants(config: {
     items: VariantConfig
-    props?: Partial<Props>
+    props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
     columns?: number
   }): VariantsStory
   matrix(config: {
     x: VariantConfig
     y: VariantConfig[]
-    props?: Partial<Props>
+    props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
   }): MatrixStory
 
   // Variant config helpers
@@ -170,6 +179,7 @@ export interface ResolvedComponent {
   name: string
   title?: string
   group?: string
+  defaults: Record<string, unknown>
   props: PropInfo[]
   stories: ResolvedStory[]
 }
