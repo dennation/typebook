@@ -2,11 +2,6 @@
 
 ## Tier 1 — Must have
 
-### Prop Table
-Таблица всех props компонента: имя, тип, обязательность, default.
-Данные уже извлекаются (`PropInfo[]`), но теряются после `resolve()`.
-Нужно: прокинуть `PropInfo[]` в `ResolvedComponent`, отрендерить таблицу в UI.
-
 ### Interactive Controls
 Панель рядом с превью — менять props в реальном времени.
 `literal` → dropdown, `boolean` → toggle, `string` → input, `number` → slider.
