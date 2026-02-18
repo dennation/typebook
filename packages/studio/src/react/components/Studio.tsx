@@ -15,10 +15,54 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 	const [activeStory, setActiveStory] = useState<string | null>(null)
 	const [theme, setTheme] = useState(initialTheme)
 
+	const parseHash = useCallback((): { component: string; story: string } | null => {
+		const hash = window.location.hash.slice(1) // remove #
+		if (!hash) return null
+		const parts = hash.split('/')
+		if (parts.length >= 2) {
+			return {
+				component: decodeURIComponent(parts[0]),
+				story: decodeURIComponent(parts[1]),
+			}
+		}
+		return null
+	}, [])
+
 	const selectStory = useCallback((componentName: string, storyName: string) => {
 		setActiveComponent(componentName)
 		setActiveStory(storyName)
+		window.location.hash = `${encodeURIComponent(componentName)}/${encodeURIComponent(storyName)}`
 	}, [])
+
+	// Restore selection from URL hash on mount
+	useEffect(() => {
+		const parsed = parseHash()
+		if (!parsed) return
+		const comp = registry.find((c) => c.name === parsed.component)
+		if (comp?.stories.some((s) => s.name === parsed.story)) {
+			setActiveComponent(parsed.component)
+			setActiveStory(parsed.story)
+		}
+	}, [registry, parseHash])
+
+	// Sync with browser back/forward navigation
+	useEffect(() => {
+		const onHashChange = () => {
+			const parsed = parseHash()
+			if (!parsed) {
+				setActiveComponent(null)
+				setActiveStory(null)
+				return
+			}
+			const comp = registry.find((c) => c.name === parsed.component)
+			if (comp?.stories.some((s) => s.name === parsed.story)) {
+				setActiveComponent(parsed.component)
+				setActiveStory(parsed.story)
+			}
+		}
+		window.addEventListener('hashchange', onHashChange)
+		return () => window.removeEventListener('hashchange', onHashChange)
+	}, [registry, parseHash])
 
 	const toggleTheme = useCallback(() => {
 		setTheme((t) => (t === 'light' ? 'dark' : 'light'))
