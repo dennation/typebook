@@ -2,37 +2,9 @@
 import { resolve } from '@dennation/ui-studio'
 import type { PropInfo } from '@dennation/ui-studio'
 
-import _Button, { Sizes as _Button_Sizes, Variants as _Button_Variants, Colors as _Button_Colors, Radiuses as _Button_Radiuses, Disabled as _Button_Disabled, Loading as _Button_Loading } from './src/stories/Butto.stories'
+import _Switch, { Default as _Switch_Default, Sizes as _Switch_Sizes, Colors as _Switch_Colors, States as _Switch_States, Matrix as _Switch_Matrix } from './src/stories/Switch.stories'
 
-const _ButtonProps: PropInfo[] = [
-  {
-    "name": "variant",
-    "optional": true,
-    "type": {
-      "kind": "literal",
-      "values": [
-        "flat",
-        "solid",
-        "bordered",
-        "light",
-        "faded",
-        "shadow",
-        "ghost"
-      ]
-    }
-  },
-  {
-    "name": "size",
-    "optional": true,
-    "type": {
-      "kind": "literal",
-      "values": [
-        "sm",
-        "md",
-        "lg"
-      ]
-    }
-  },
+const _SwitchProps: PropInfo[] = [
   {
     "name": "color",
     "optional": true,
@@ -49,16 +21,14 @@ const _ButtonProps: PropInfo[] = [
     }
   },
   {
-    "name": "radius",
+    "name": "size",
     "optional": true,
     "type": {
       "kind": "literal",
       "values": [
-        "none",
         "sm",
         "md",
-        "lg",
-        "full"
+        "lg"
       ]
     }
   },
@@ -67,6 +37,234 @@ const _ButtonProps: PropInfo[] = [
     "optional": true,
     "type": {
       "kind": "boolean"
+    }
+  },
+  {
+    "name": "isSelected",
+    "optional": true,
+    "type": {
+      "kind": "boolean"
+    }
+  }
+]
+
+const _SwitchResolved = resolve(_Switch, {
+  props: _SwitchProps,
+  stories: [{ name: 'Default', story: _Switch_Default }, { name: 'Sizes', story: _Switch_Sizes }, { name: 'Colors', story: _Switch_Colors }, { name: 'States', story: _Switch_States }, { name: 'Matrix', story: _Switch_Matrix }],
+})
+import _Input, { Default as _Input_Default, Sizes as _Input_Sizes, Variants as _Input_Variants, Colors as _Input_Colors, States as _Input_States, Matrix as _Input_Matrix } from './src/stories/Input.stories'
+
+const _InputProps: PropInfo[] = [
+  {
+    "name": "color",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "default",
+        "primary",
+        "secondary",
+        "success",
+        "warning",
+        "danger"
+      ]
+    }
+  },
+  {
+    "name": "size",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "sm",
+        "md",
+        "lg"
+      ]
+    }
+  },
+  {
+    "name": "disabled",
+    "optional": true,
+    "type": {
+      "kind": "boolean"
+    }
+  },
+  {
+    "name": "isReadOnly",
+    "optional": true,
+    "type": {
+      "kind": "boolean"
+    }
+  },
+  {
+    "name": "isRequired",
+    "optional": true,
+    "type": {
+      "kind": "boolean"
+    }
+  },
+  {
+    "name": "variant",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "flat",
+        "faded",
+        "bordered",
+        "underlined"
+      ]
+    }
+  },
+  {
+    "name": "radius",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "sm",
+        "md",
+        "lg",
+        "none",
+        "full"
+      ]
+    }
+  }
+]
+
+const _InputResolved = resolve(_Input, {
+  props: _InputProps,
+  stories: [{ name: 'Default', story: _Input_Default }, { name: 'Sizes', story: _Input_Sizes }, { name: 'Variants', story: _Input_Variants }, { name: 'Colors', story: _Input_Colors }, { name: 'States', story: _Input_States }, { name: 'Matrix', story: _Input_Matrix }],
+})
+import _Checkbox, { Default as _Checkbox_Default, Sizes as _Checkbox_Sizes, Colors as _Checkbox_Colors, States as _Checkbox_States, Matrix as _Checkbox_Matrix } from './src/stories/Checkbox.stories'
+
+const _CheckboxProps: PropInfo[] = [
+  {
+    "name": "color",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "default",
+        "primary",
+        "secondary",
+        "success",
+        "warning",
+        "danger"
+      ]
+    }
+  },
+  {
+    "name": "size",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "sm",
+        "md",
+        "lg"
+      ]
+    }
+  },
+  {
+    "name": "disabled",
+    "optional": true,
+    "type": {
+      "kind": "boolean"
+    }
+  },
+  {
+    "name": "isSelected",
+    "optional": true,
+    "type": {
+      "kind": "boolean"
+    }
+  },
+  {
+    "name": "radius",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "sm",
+        "md",
+        "lg",
+        "none",
+        "full"
+      ]
+    }
+  }
+]
+
+const _CheckboxResolved = resolve(_Checkbox, {
+  props: _CheckboxProps,
+  stories: [{ name: 'Default', story: _Checkbox_Default }, { name: 'Sizes', story: _Checkbox_Sizes }, { name: 'Colors', story: _Checkbox_Colors }, { name: 'States', story: _Checkbox_States }, { name: 'Matrix', story: _Checkbox_Matrix }],
+})
+import _Button, { Default as _Button_Default, Sizes as _Button_Sizes, Variants as _Button_Variants, Colors as _Button_Colors, Radiuses as _Button_Radiuses, Disabled as _Button_Disabled, Loading as _Button_Loading, Matrix as _Button_Matrix } from './src/stories/Button.stories'
+
+const _ButtonProps: PropInfo[] = [
+  {
+    "name": "color",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "default",
+        "primary",
+        "secondary",
+        "success",
+        "warning",
+        "danger"
+      ]
+    }
+  },
+  {
+    "name": "size",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "sm",
+        "md",
+        "lg"
+      ]
+    }
+  },
+  {
+    "name": "disabled",
+    "optional": true,
+    "type": {
+      "kind": "boolean"
+    }
+  },
+  {
+    "name": "variant",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "flat",
+        "faded",
+        "bordered",
+        "solid",
+        "light",
+        "shadow",
+        "ghost"
+      ]
+    }
+  },
+  {
+    "name": "radius",
+    "optional": true,
+    "type": {
+      "kind": "literal",
+      "values": [
+        "sm",
+        "md",
+        "lg",
+        "none",
+        "full"
+      ]
     }
   },
   {
@@ -80,7 +278,7 @@ const _ButtonProps: PropInfo[] = [
 
 const _ButtonResolved = resolve(_Button, {
   props: _ButtonProps,
-  stories: [{ name: 'Sizes', story: _Button_Sizes }, { name: 'Variants', story: _Button_Variants }, { name: 'Colors', story: _Button_Colors }, { name: 'Radiuses', story: _Button_Radiuses }, { name: 'Disabled', story: _Button_Disabled }, { name: 'Loading', story: _Button_Loading }],
+  stories: [{ name: 'Default', story: _Button_Default }, { name: 'Sizes', story: _Button_Sizes }, { name: 'Variants', story: _Button_Variants }, { name: 'Colors', story: _Button_Colors }, { name: 'Radiuses', story: _Button_Radiuses }, { name: 'Disabled', story: _Button_Disabled }, { name: 'Loading', story: _Button_Loading }, { name: 'Matrix', story: _Button_Matrix }],
 })
 
-export default [_ButtonResolved]
+export default [_SwitchResolved, _InputResolved, _CheckboxResolved, _ButtonResolved]

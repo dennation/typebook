@@ -54,49 +54,57 @@ export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof P
   props?: ReadonlyArray<IncludedProps>
 }
 
-/** Marker returned by valuesOf() — signals auto-generation */
-export interface ValuesOfMarker {
-  __type: 'valuesOf'
+/** Auto-generate variants from prop type (boolean/literal) */
+export interface AllOfConfig {
+  __type: 'allOf'
   prop: string
-  columns?: number
 }
 
 /** Manual variant configuration with explicit values */
-export interface ManualVariantsConfig {
+export interface ValuesConfig {
+  __type: 'values'
   prop: string
   values: unknown[]
+}
+
+/** Generate variants using a function */
+export interface GenerateConfig {
+  __type: 'generate'
+  prop: string
+  fn: () => unknown
+  count: number
+}
+
+/** Variant configuration — either auto (allOf), manual (values), or generated */
+export type VariantConfig = AllOfConfig | ValuesConfig | GenerateConfig
+
+/** Single story — one variant with fixed props */
+export interface SingleStory {
+  __type: 'story'
+  kind: 'single'
+  props?: Record<string, unknown>
+}
+
+/** Variants story — multiple variants generated from config */
+export interface VariantsStory {
+  __type: 'story'
+  kind: 'variants'
+  items: VariantConfig
+  props?: Record<string, unknown>
   columns?: number
 }
 
-/** Variants config — either auto (valuesOf) or manual */
-export type VariantsConfig = ValuesOfMarker | ManualVariantsConfig
-
-export interface StoryConfig<Props> {
-  /** Fixed props (merged with defaults) */
-  props?: Partial<Props>
-  /** Variants configuration */
-  variants?: VariantsConfig
-}
-
-/** Static story — single variant with fixed props */
-export interface StaticStory {
+/** Matrix story — cross-product of x (columns) with y (rows) */
+export interface MatrixStory {
   __type: 'story'
-  kind: 'static'
-  component: ComponentType<any>
+  kind: 'matrix'
+  x: VariantConfig
+  y: VariantConfig[]
   props?: Record<string, unknown>
 }
 
-/** Variant story — multiple variants generated from config */
-export interface VariantStory {
-  __type: 'story'
-  kind: 'variants'
-  component: ComponentType<any>
-  variants?: VariantsConfig
-  props?: Record<string, unknown>
-}
-
-/** Exported from .stories.tsx — the result of story() */
-export type Story = StaticStory | VariantStory
+/** Exported from .stories.tsx — the result of single(), variants(), or matrix() */
+export type Story = SingleStory | VariantsStory | MatrixStory
 
 /** Returned by define() */
 export interface DefineResult<Props> {
@@ -105,11 +113,28 @@ export interface DefineResult<Props> {
   title?: string
   group?: string
   defaults: Record<string, unknown>
-  story(config: StoryConfig<any>): Story
-  valuesOf(
-    prop: keyof Props,
-    options?: { columns?: number },
-  ): ValuesOfMarker
+
+  // Story creation methods
+  single(config?: { props?: Partial<Props> }): SingleStory
+  variants(config: {
+    items: VariantConfig
+    props?: Partial<Props>
+    columns?: number
+  }): VariantsStory
+  matrix(config: {
+    x: VariantConfig
+    y: VariantConfig[]
+    props?: Partial<Props>
+  }): MatrixStory
+
+  // Variant config helpers
+  allOf<K extends keyof Props>(prop: K): AllOfConfig
+  values<K extends keyof Props>(prop: K, values: Props[K][]): ValuesConfig
+  generate<K extends keyof Props>(
+    prop: K,
+    fn: () => Props[K],
+    count: number,
+  ): GenerateConfig
 }
 
 // --- Resolved Types (output of resolveStories) ---
@@ -119,11 +144,25 @@ export interface ResolvedVariant {
   props: Record<string, unknown>
 }
 
+/** Matrix row — one secondary prop value crossed with all primary values */
+export interface MatrixRow {
+  label: string // e.g., "solid" or "variant=solid"
+  variants: ResolvedVariant[] // One for each primary prop value
+}
+
+/** Matrix structure for resolved matrix stories */
+export interface ResolvedMatrix {
+  primaryProp: string
+  primaryValues: string[] // Column headers
+  rows: MatrixRow[] // One row per secondary prop value
+}
+
 export interface ResolvedStory {
   name: string
-  kind: 'static' | 'variants'
-  variants: ResolvedVariant[]
+  kind: 'single' | 'variants' | 'matrix'
+  variants?: ResolvedVariant[]
   columns?: number
+  matrix?: ResolvedMatrix
 }
 
 export interface ResolvedComponent {

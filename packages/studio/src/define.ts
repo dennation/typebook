@@ -3,9 +3,13 @@ import type {
   Expand,
   DefineConfig,
   DefineResult,
-  StoryConfig,
-  Story,
-  ValuesOfMarker,
+  SingleStory,
+  VariantsStory,
+  MatrixStory,
+  AllOfConfig,
+  ValuesConfig,
+  GenerateConfig,
+  VariantConfig,
 } from './types.js'
 
 export function define<
@@ -26,39 +30,65 @@ export function define<
     group,
     defaults,
 
-    story(storyConfig: StoryConfig<Expand<Props>>): Story {
-      if (storyConfig.variants) {
-        // Variant story
-        return {
-          __type: 'story',
-          kind: 'variants',
-          component,
-          variants: storyConfig.variants,
-          props: storyConfig.props
-            ? { ...storyConfig.props }
-            : undefined,
-        }
-      }
-
-      // Static story
+    // Story creation methods
+    single(config?: { props?: any }): SingleStory {
       return {
         __type: 'story',
-        kind: 'static',
-        component,
-        props: storyConfig.props
-          ? { ...storyConfig.props }
-          : undefined,
+        kind: 'single',
+        props: config?.props ? { ...config.props } : undefined,
       }
     },
 
-    valuesOf(
-      prop: keyof Expand<Props>,
-      options?: { columns?: number },
-    ): ValuesOfMarker {
+    variants(config: {
+      items: VariantConfig
+      props?: any
+      columns?: number
+    }): VariantsStory {
       return {
-        __type: 'valuesOf',
+        __type: 'story',
+        kind: 'variants',
+        items: config.items,
+        props: config.props ? { ...config.props } : undefined,
+        columns: config.columns,
+      }
+    },
+
+    matrix(config: {
+      x: VariantConfig
+      y: VariantConfig[]
+      props?: any
+    }): MatrixStory {
+      return {
+        __type: 'story',
+        kind: 'matrix',
+        x: config.x,
+        y: config.y,
+        props: config.props ? { ...config.props } : undefined,
+      }
+    },
+
+    // Variant config helpers
+    allOf(prop: any): AllOfConfig {
+      return {
+        __type: 'allOf',
         prop: String(prop),
-        columns: options?.columns,
+      }
+    },
+
+    values(prop: any, values: any[]): ValuesConfig {
+      return {
+        __type: 'values',
+        prop: String(prop),
+        values,
+      }
+    },
+
+    generate(prop: any, fn: () => any, count: number): GenerateConfig {
+      return {
+        __type: 'generate',
+        prop: String(prop),
+        fn,
+        count,
       }
     },
   }

@@ -19,7 +19,7 @@ export function toKebabCase(str: string): string {
 
 export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps) {
 	const [activeComponent, setActiveComponent] = useState<string | null>(null)
-	const [activeStory, setActiveStory] = useState<string | null>(null)
+	const [_activeStory, setActiveStory] = useState<string | null>(null)
 	const [theme, setTheme] = useState(initialTheme)
 
 	const findByKebab = useCallback(
@@ -57,7 +57,7 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 		if (!parsed) return
 		setActiveComponent(parsed.component)
 		setActiveStory(parsed.story)
-	}, [registry, parseHash])
+	}, [parseHash])
 
 	// Sync with browser back/forward navigation
 	useEffect(() => {
@@ -73,15 +73,14 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 		}
 		window.addEventListener('hashchange', onHashChange)
 		return () => window.removeEventListener('hashchange', onHashChange)
-	}, [registry, parseHash])
+	}, [parseHash])
 
 	const toggleTheme = useCallback(() => {
 		setTheme((t) => (t === 'light' ? 'dark' : 'light'))
 	}, [])
 
-	// Find active data
+	// Find active component
 	const comp = registry.find((c) => c.name === activeComponent)
-	const story = comp?.stories.find((s) => s.name === activeStory)
 
 	// Group components by group
 	const grouped = groupComponents(registry)
@@ -128,41 +127,91 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 							</div>
 						)}
 						{components.map((c) => (
-							<div key={c.name}>
-								<div className="st:px-4 st:py-1.5 st:text-sm st:font-semibold st:text-text-muted">
-									{c.title ?? c.name}
-								</div>
-								{c.stories.map((s) => (
-									<button
-										key={s.name}
-										className={`st:block st:w-full st:py-1.5 st:pl-7 st:pr-4 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all hover:st:bg-bg-hover ${activeComponent === c.name && activeStory === s.name
-											? 'st:bg-accent-light st:text-accent'
-											: ''
-											}`}
-										onClick={() => selectStory(c.name, s.name)}
-										type="button"
-									>
-										{s.name}
-									</button>
-								))}
-							</div>
+							<button
+								key={c.name}
+								className={`st:block st:w-full st:px-4 st:py-1.5 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all hover:st:bg-bg-hover ${activeComponent === c.name
+									? 'st:bg-accent-light st:text-accent st:font-semibold'
+									: ''
+									}`}
+								onClick={() => {
+									const firstStory = c.stories[0]
+									if (firstStory) selectStory(c.name, firstStory.name)
+								}}
+								type="button"
+							>
+								{c.title ?? c.name}
+							</button>
 						))}
 					</div>
 				))}
 			</nav>
 
 			{/* Main content */}
-			<main className="st:overflow-auto st:p-6 st:bg-checkered">
-				{comp && story ? (
-					<>
-						<div className="st:text-sm st:text-text-muted st:mb-4">
-							{comp.title ?? comp.name} / {story.name}
+			<main className="st:overflow-auto st:p-6 st:bg-bg">
+				{comp ? (
+					<div>
+						{/* Component documentation */}
+						<div className="st:bg-bg st:rounded-lg st:border st:border-border st:p-6 st:mb-6">
+							<h1 className="st:text-2xl st:font-bold st:mb-4">
+								{comp.title ?? comp.name}
+							</h1>
+
+							{/* Props table */}
+							{comp.props && comp.props.length > 0 && (
+								<div>
+									<h2 className="st:text-lg st:font-semibold st:mb-3">Props</h2>
+									<div className="st:overflow-x-auto">
+										<table className="st:w-full st:text-sm">
+											<thead>
+												<tr className="st:border-b st:border-border">
+													<th className="st:text-left st:py-2 st:pr-4 st:font-semibold">Name</th>
+													<th className="st:text-left st:py-2 st:pr-4 st:font-semibold">Type</th>
+													<th className="st:text-left st:py-2 st:font-semibold">Required</th>
+												</tr>
+											</thead>
+											<tbody>
+												{comp.props.map((prop) => (
+													<tr key={prop.name} className="st:border-b st:border-border">
+														<td className="st:py-2 st:pr-4 st:font-mono st:text-accent">{prop.name}</td>
+														<td className="st:py-2 st:pr-4 st:font-mono st:text-text-muted st:text-xs">
+															{prop.type.kind === 'literal' ? (
+																<span>{prop.type.values.map(v => `"${v}"`).join(' | ')}</span>
+															) : prop.type.kind === 'unknown' && prop.type.raw ? (
+																<span>{prop.type.raw}</span>
+															) : (
+																<span>{prop.type.kind}</span>
+															)}
+														</td>
+														<td className="st:py-2">{prop.optional ? 'No' : 'Yes'}</td>
+													</tr>
+												))}
+											</tbody>
+										</table>
+									</div>
+								</div>
+							)}
 						</div>
-						<StoryRenderer story={story} component={comp.component} />
-					</>
+
+						{/* Stories */}
+						{comp.stories.map((story) => (
+							<div key={story.name} className="st:mb-8">
+								<h2 className="st:text-xl st:font-semibold st:mb-4">
+							{story.name}
+							{story.variants?.length && (
+								<span className="st:text-text-muted st:font-normal st:ml-2">
+									({story.variants.length})
+								</span>
+							)}
+						</h2>
+								<div className="st:bg-checkered st:rounded-lg st:border st:border-border st:p-6">
+									<StoryRenderer story={story} component={comp.component} />
+								</div>
+							</div>
+						))}
+					</div>
 				) : (
 					<div className="st:flex st:items-center st:justify-center st:h-full st:text-text-muted st:text-sm">
-						Select a story
+						Select a component
 					</div>
 				)}
 			</main>
