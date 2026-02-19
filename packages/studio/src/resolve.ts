@@ -201,17 +201,6 @@ function resolveMatrixStoryFromConfigs(
   }
 }
 
-function extractPropValues(propInfo: PropInfo): unknown[] {
-  switch (propInfo.type.kind) {
-    case 'literal':
-      return propInfo.type.values
-    case 'boolean':
-      return [true, false]
-    default:
-      return []
-  }
-}
-
 function generateVariantsFromType(
   propInfo: PropInfo,
   propName: string,

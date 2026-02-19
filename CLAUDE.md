@@ -64,12 +64,16 @@ packages/studio/
     react/
       index.ts                — React exports
       components/
+        index.ts              — Barrel export
         Studio.tsx            — <Studio /> component (sidebar, theme, story renderer)
         StoryRenderer.tsx     — Renders single/variants/matrix stories
+        ComponentPreview.tsx   — Component preview with interactive props panel
+        PropControl.tsx       — Prop controls: dropdown (literal), toggle (boolean), input (string), number
         VariantCard.tsx       — Single variant preview card (with iframe isolation)
         IframePreview.tsx     — Iframe wrapper for CSS isolation of component previews
         ErrorBoundary.tsx     — Error boundary for component crash isolation
       utils/
+        index.ts              — Barrel export
         groupComponents.ts    — Groups components by group field
         getLayoutStyle.ts     — Computes CSS grid layout for variant grids
       styles/
@@ -139,6 +143,7 @@ packages/playground/
   src/
     main.tsx                    — Vite entry point
     App.tsx                     — Demo app
+    hero.ts                     — HeroUI provider/theme setup
     stories/
       Button.stories.tsx        — Stories for @heroui/button
       Checkbox.stories.tsx      — Stories for @heroui/checkbox

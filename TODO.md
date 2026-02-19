@@ -2,17 +2,8 @@
 
 ## Tier 1 — Must have
 
-### Interactive Controls
-Панель рядом с превью — менять props в реальном времени.
-`literal` → dropdown, `boolean` → toggle, `string` → input, `number` → slider.
-Данные для генерации контролов уже есть в `PropInfo[]`.
-
 ### Search
 Текстовый фильтр в sidebar. При 50+ компонентах без поиска невозможно.
-
-### Static Build
-`npx @dennation/studio build` → папка с HTML/JS для деплоя.
-Открывает аудиторию за пределами "разработчик с запущенным Vite" — дизайнеры, PM.
 
 ## Tier 2 — Дифференциаторы
 
@@ -37,6 +28,7 @@ Type extraction уже есть — AI может предложить edge case
 ### A11y Audit
 Встроенный axe-core — проверка каждого варианта на accessibility прямо в UI.
 
-### Theme Switcher
+### Custom Themes
 Переключение пользовательских тем (бренды, цветовые схемы).
 Обёртка ThemeProvider вокруг превью компонентов.
+Базовый light/dark toggle уже реализован — нужна поддержка произвольных тем.

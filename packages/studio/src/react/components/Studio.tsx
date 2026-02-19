@@ -20,7 +20,6 @@ export function toKebabCase(str: string): string {
 
 export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps) {
 	const [activeComponent, setActiveComponent] = useState<string | null>(null)
-	const [_activeStory, setActiveStory] = useState<string | null>(null)
 	const [theme, setTheme] = useState(initialTheme)
 
 	const findByKebab = useCallback(
@@ -48,7 +47,6 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 
 	const selectStory = useCallback((componentName: string, storyName: string) => {
 		setActiveComponent(componentName)
-		setActiveStory(storyName)
 		window.location.hash = `${toKebabCase(componentName)}/${toKebabCase(storyName)}`
 	}, [])
 
@@ -57,7 +55,6 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 		const parsed = parseHash()
 		if (!parsed) return
 		setActiveComponent(parsed.component)
-		setActiveStory(parsed.story)
 	}, [parseHash])
 
 	// Sync with browser back/forward navigation
@@ -66,11 +63,9 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 			const parsed = parseHash()
 			if (!parsed) {
 				setActiveComponent(null)
-				setActiveStory(null)
 				return
 			}
 			setActiveComponent(parsed.component)
-			setActiveStory(parsed.story)
 		}
 		window.addEventListener('hashchange', onHashChange)
 		return () => window.removeEventListener('hashchange', onHashChange)
