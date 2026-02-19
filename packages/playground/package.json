@@ -12,7 +12,10 @@
   "dependencies": {
     "@dennation/ui-studio": "workspace:*",
     "@heroui/button": "^2.2.30",
+    "@heroui/checkbox": "^2.3.31",
+    "@heroui/input": "^2.4.32",
     "@heroui/react": "^2.8.8",
+    "@heroui/switch": "^2.2.26",
     "@heroui/system": "^2.4.26",
     "@heroui/theme": "^2.4.26",
     "framer-motion": "^12.34.0",
