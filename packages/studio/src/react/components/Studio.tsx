@@ -83,7 +83,7 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 	const filtered = searchQuery
 		? registry.filter((c) => {
 				const q = searchQuery.toLowerCase()
-				return [c.title, c.component.displayName, c.component.name]
+				return [c.title, c.component.displayName, c.component.name, c.group]
 					.filter(Boolean)
 					.some((s) => s!.toLowerCase().includes(q))
 			})
