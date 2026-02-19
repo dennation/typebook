@@ -2,7 +2,7 @@
 
 @source "../**/*.tsx";
 
-@theme {
+@theme inline {
   /* CSS variables will be defined dynamically based on [data-theme] */
   --color-bg: var(--color-bg);
   --color-bg-sidebar: var(--color-bg-sidebar);
