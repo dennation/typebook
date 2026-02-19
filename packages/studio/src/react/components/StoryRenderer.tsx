@@ -6,10 +6,8 @@ import { getLayoutStyle } from '../utils/getLayoutStyle.js'
 
 export function StoryRenderer({
   story,
-  component: Component,
 }: {
   story: ResolvedStory
-  component: React.ComponentType<any>
 }) {
   // Matrix story — render as table
   if (story.kind === 'matrix' && story.matrix) {
@@ -43,7 +41,7 @@ export function StoryRenderer({
                     <IframePreview className="st:p-4">
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60px' }}>
                         <ErrorBoundary>
-                          <Component {...variant.props} />
+                          {story.render(variant.props)}
                         </ErrorBoundary>
                       </div>
                     </IframePreview>
@@ -63,7 +61,7 @@ export function StoryRenderer({
   return (
     <div style={layoutStyle}>
       {story.variants?.map((variant) => (
-        <VariantCard key={variant.label} variant={variant} component={Component} render={story.render} />
+        <VariantCard key={variant.label} variant={variant} render={story.render} />
       ))}
     </div>
   )

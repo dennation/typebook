@@ -87,12 +87,15 @@ export interface GenerateConfig {
 /** Variant configuration — either auto (allOf), manual (values), or generated */
 export type VariantConfig = AllOfConfig | ValuesConfig | GenerateConfig
 
+/** Render function that produces the final JSX for a story variant */
+export type StoryRenderFn = (props: Record<string, unknown>) => ReactNode
+
 /** Single story — one variant with fixed props */
 export interface SingleStory {
   __type: 'story'
   kind: 'single'
   props?: Record<string, unknown>
-  render?: (props: Record<string, unknown>) => ReactNode
+  render: StoryRenderFn
 }
 
 /** Variants story — multiple variants generated from config */
@@ -102,6 +105,7 @@ export interface VariantsStory {
   items: VariantConfig
   props?: Record<string, unknown>
   columns?: number
+  render: StoryRenderFn
 }
 
 /** Matrix story — cross-product of x (columns) with y (rows) */
@@ -111,6 +115,7 @@ export interface MatrixStory {
   x: VariantConfig
   y: VariantConfig[]
   props?: Record<string, unknown>
+  render: StoryRenderFn
 }
 
 /** Exported from .stories.tsx — the result of single(), variants(), or matrix() */
@@ -176,7 +181,7 @@ export interface ResolvedStory {
   variants?: ResolvedVariant[]
   columns?: number
   matrix?: ResolvedMatrix
-  render?: (props: Record<string, unknown>) => ReactNode
+  render: StoryRenderFn
 }
 
 export interface ResolvedComponent {

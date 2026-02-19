@@ -6,6 +6,7 @@ import type {
   ResolvedVariant,
   ResolveStoriesInput,
   Story,
+  StoryRenderFn,
   AllOfConfig,
   ValuesConfig,
   GenerateConfig,
@@ -129,7 +130,7 @@ function resolveStory(
 
   // Matrix story — cross-product of x and y props
   if (story.kind === 'matrix') {
-    return resolveMatrixStoryFromConfigs(name, story, allProps, defaults)
+    return resolveMatrixStoryFromConfigs(name, story, allProps, defaults, story.render)
   }
 
   // Variants story — resolve items config
@@ -141,6 +142,7 @@ function resolveStory(
     kind: 'variants',
     variants,
     columns: story.columns,
+    render: story.render,
   }
 }
 
@@ -149,13 +151,14 @@ function resolveMatrixStoryFromConfigs(
   story: { x: VariantConfig; y: VariantConfig[]; props?: Record<string, unknown> },
   allProps: PropInfo[],
   defaults: Record<string, unknown>,
+  render: StoryRenderFn,
 ): ResolvedStory {
   const baseProps = { ...defaults, ...story.props }
 
   // Resolve x (columns) config - extract just the values
   const xVariants = resolveVariantConfig(story.x, allProps, {})
   if (xVariants.length === 0) {
-    return { name, kind: 'matrix', variants: [] }
+    return { name, kind: 'matrix', variants: [], render }
   }
 
   // Get the prop name from x config
@@ -199,6 +202,7 @@ function resolveMatrixStoryFromConfigs(
       primaryValues: xValues.map(String),
       rows,
     },
+    render,
   }
 }
 

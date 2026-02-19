@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import { createElement, type ComponentType } from 'react'
 import type {
   Expand,
   DefineConfig,
@@ -6,6 +6,7 @@ import type {
   SingleStory,
   VariantsStory,
   MatrixStory,
+  StoryRenderFn,
   AllOfConfig,
   ValuesConfig,
   GenerateConfig,
@@ -24,6 +25,8 @@ export function define<
   const title = config?.title
   const group = config?.group
 
+  const defaultRender: StoryRenderFn = (props) => createElement(component as ComponentType<any>, props)
+
   const result: DefineResult<Expand<Pick<Props, IncludedProps>>, keyof D & IncludedProps> = {
     __type: 'define',
     component,
@@ -37,7 +40,7 @@ export function define<
         __type: 'story',
         kind: 'single',
         props: config?.props ? { ...config.props } : undefined,
-        render: config?.render,
+        render: config?.render ?? defaultRender,
       }
     },
 
@@ -52,6 +55,7 @@ export function define<
         items: config.items,
         props: config.props ? { ...config.props } : undefined,
         columns: config.columns,
+        render: defaultRender,
       }
     },
 
@@ -66,6 +70,7 @@ export function define<
         x: config.x,
         y: config.y,
         props: config.props ? { ...config.props } : undefined,
+        render: defaultRender,
       }
     },
 

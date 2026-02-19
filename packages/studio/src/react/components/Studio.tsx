@@ -186,7 +186,7 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 							)}
 						</h2>
 								<div className="st:bg-checkered st:rounded-lg st:border st:border-border st:p-6">
-									<StoryRenderer story={story} component={comp.component} />
+									<StoryRenderer story={story} />
 								</div>
 							</div>
 						))}
