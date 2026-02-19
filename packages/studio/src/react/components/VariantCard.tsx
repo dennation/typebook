@@ -1,20 +1,21 @@
-import type { ResolvedVariant } from '../../types.js'
+import type { ResolvedVariant, StoryRenderFn } from '../../types.js'
 import { ErrorBoundary } from './ErrorBoundary.js'
 import { IframePreview } from './IframePreview.js'
 
 export function VariantCard({
   variant,
-  component: Component,
+  render,
 }: {
   variant: ResolvedVariant
-  component: React.ComponentType<any>
+  render: StoryRenderFn
 }) {
+
   return (
     <div className="st:flex st:flex-col st:border st:border-dashed st:border-border st:rounded st:overflow-hidden">
       <IframePreview className="st:p-3">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60px' }}>
           <ErrorBoundary>
-            <Component {...variant.props} />
+            {render(variant.props)}
           </ErrorBoundary>
         </div>
       </IframePreview>

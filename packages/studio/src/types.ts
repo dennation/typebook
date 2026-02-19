@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 
 // --- Config ---
 
@@ -61,6 +61,8 @@ export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof P
    * If not specified, all props are included.
    */
   props?: ReadonlyArray<IncludedProps>
+  /** Wrapper applied to all stories (e.g. a theme provider) */
+  wrapper?: WrapperFn
 }
 
 /** Auto-generate variants from prop type (boolean/literal) */
@@ -87,11 +89,18 @@ export interface GenerateConfig {
 /** Variant configuration — either auto (allOf), manual (values), or generated */
 export type VariantConfig = AllOfConfig | ValuesConfig | GenerateConfig
 
+/** Render function that produces the final JSX for a story variant */
+export type StoryRenderFn = (props: any) => ReactNode
+
+/** Wrapper function that wraps all stories of a component (e.g. with a provider) */
+export type WrapperFn = (Story: ComponentType) => ReactNode
+
 /** Single story — one variant with fixed props */
 export interface SingleStory {
   __type: 'story'
   kind: 'single'
   props?: Record<string, unknown>
+  render: StoryRenderFn
 }
 
 /** Variants story — multiple variants generated from config */
@@ -101,6 +110,7 @@ export interface VariantsStory {
   items: VariantConfig
   props?: Record<string, unknown>
   columns?: number
+  render: StoryRenderFn
 }
 
 /** Matrix story — cross-product of x (columns) with y (rows) */
@@ -110,6 +120,7 @@ export interface MatrixStory {
   x: VariantConfig
   y: VariantConfig[]
   props?: Record<string, unknown>
+  render: StoryRenderFn
 }
 
 /** Exported from .stories.tsx — the result of single(), variants(), or matrix() */
@@ -124,7 +135,10 @@ export interface DefineResult<Props, CoveredByDefaults extends keyof Props = nev
   defaults: Record<string, unknown>
 
   // Story creation methods
-  single(config?: { props?: Partial<Props> & MissingProps<Props, CoveredByDefaults> }): SingleStory
+  single(config?: {
+    props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
+    render?: (props: Props) => ReactNode
+  }): SingleStory
   variants(config: {
     items: VariantConfig
     props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
@@ -172,6 +186,7 @@ export interface ResolvedStory {
   variants?: ResolvedVariant[]
   columns?: number
   matrix?: ResolvedMatrix
+  render: StoryRenderFn
 }
 
 export interface ResolvedComponent {
