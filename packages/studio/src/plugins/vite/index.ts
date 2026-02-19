@@ -29,6 +29,8 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
 
   // PropInfo cache — avoids redundant type extraction for unchanged files
   const typeCache = new Map<string, PropInfo[]>()
+  // Per-part PropInfo cache for compound components
+  const compoundTypeCache = new Map<string, Record<string, PropInfo[]>>()
 
   async function extractTypes(filePath: string): Promise<PropInfo[]> {
     if (!lsp || !lspReady) return []
@@ -42,14 +44,28 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
     return result
   }
 
+  async function extractCompoundTypes(filePath: string): Promise<Record<string, PropInfo[]>> {
+    if (!lsp || !lspReady) return {}
+
+    const cached = compoundTypeCache.get(filePath)
+    if (cached) return cached
+
+    const partProps = await lsp.getCompoundPartProps(filePath)
+    const result = partProps ?? {}
+    compoundTypeCache.set(filePath, result)
+    return result
+  }
+
   function invalidateTypeCache(changedFile: string): void {
     const relChanged = relative(cwd, changedFile)
     if (isStoryFile(relChanged)) {
       // Story file changed — invalidate only that file
       typeCache.delete(changedFile)
+      compoundTypeCache.delete(changedFile)
     } else {
       // Non-story file (component, util, etc.) — could affect any story's types
       typeCache.clear()
+      compoundTypeCache.clear()
     }
   }
 
@@ -58,8 +74,16 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
       storyFiles.map(async (filePath) => {
         const content = readFileSync(filePath, 'utf-8')
         const analysis = analyzeStoryFile(content)
-        const props = await extractTypes(filePath)
-        return { filePath, analysis, props }
+
+        if (analysis.compound) {
+          // Compound component: extract per-part props
+          const partProps = await extractCompoundTypes(filePath)
+          return { filePath, analysis, props: [] as PropInfo[], partProps }
+        } else {
+          // Regular component: extract flat props
+          const props = await extractTypes(filePath)
+          return { filePath, analysis, props }
+        }
       }),
     )
 
@@ -161,6 +185,7 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
         const relPath = relative(cwd, path)
         if (isStoryFile(relPath)) {
           typeCache.delete(path)
+          compoundTypeCache.delete(path)
           debouncedRegenerate()
         }
       })
@@ -169,6 +194,7 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
     async buildEnd() {
       if (debounceTimer) clearTimeout(debounceTimer)
       typeCache.clear()
+      compoundTypeCache.clear()
       if (lsp) {
         lsp.stop()
         lsp = null

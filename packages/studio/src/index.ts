@@ -1,11 +1,16 @@
 export { define } from './define.js'
-export { resolve } from './resolve.js'
+export { defineCompound } from './define-compound.js'
+export { resolve, resolveCompound } from './resolve.js'
 export type {
   Expand,
   StudioConfig,
   VitePluginConfig,
   DefineConfig,
   DefineResult,
+  CompoundDefineConfig,
+  CompoundDefineResult,
+  CompoundPartInfo,
+  ComponentProps,
   Story,
   SingleStory,
   VariantsStory,
@@ -23,5 +28,6 @@ export type {
   ResolvedMatrix,
   StoryEntry,
   ResolveStoriesInput,
+  ResolveCompoundInput,
   WrapperFn,
 } from './types.js'

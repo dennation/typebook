@@ -69,6 +69,8 @@ export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof P
 export interface AllOfConfig {
   __type: 'allOf'
   prop: string
+  /** For compound components: which part this prop belongs to */
+  part?: string
 }
 
 /** Manual variant configuration with explicit values */
@@ -76,6 +78,8 @@ export interface ValuesConfig {
   __type: 'values'
   prop: string
   values: unknown[]
+  /** For compound components: which part this prop belongs to */
+  part?: string
 }
 
 /** Generate variants using a function */
@@ -84,6 +88,8 @@ export interface GenerateConfig {
   prop: string
   fn: () => unknown
   count: number
+  /** For compound components: which part this prop belongs to */
+  part?: string
 }
 
 /** Variant configuration — either auto (allOf), manual (values), or generated */
@@ -189,16 +195,6 @@ export interface ResolvedStory {
   render: StoryRenderFn
 }
 
-export interface ResolvedComponent {
-  component: ComponentType<any>
-  name: string
-  title?: string
-  group?: string
-  defaults: Record<string, unknown>
-  props: PropInfo[]
-  stories: ResolvedStory[]
-}
-
 // --- resolveStories() input ---
 
 export interface StoryEntry {
@@ -208,5 +204,107 @@ export interface StoryEntry {
 
 export interface ResolveStoriesInput {
   props: PropInfo[]
+  stories: StoryEntry[]
+}
+
+// --- Compound Component Types ---
+
+/** Props-filter helper: extracts component props from ComponentType */
+export type ComponentProps<C> = C extends ComponentType<infer P> ? P : never
+
+/** Config for defineCompound() */
+export interface CompoundDefineConfig<
+  Parts extends Record<string, ComponentType<any>>,
+  PropsFilter extends { [K in keyof Parts]?: ReadonlyArray<string> },
+> {
+  /** Display name override */
+  title?: string
+  /** Sidebar group */
+  group?: string
+  /** Map of part names to their React components */
+  parts: Parts
+  /** Props to include per part (optional, defaults to all) */
+  props?: PropsFilter
+  /** Default props per part */
+  defaults?: { [K in keyof Parts]?: Partial<ComponentProps<Parts[K]>> }
+  /** Wrapper applied to all stories */
+  wrapper?: WrapperFn
+  /** Render function for the composed component */
+  render: (props: { [K in keyof Parts]: any }) => ReactNode
+}
+
+/** Result returned by defineCompound() */
+export interface CompoundDefineResult<
+  PartsProps extends Record<string, Record<string, any>>,
+> {
+  __type: 'defineCompound'
+  parts: Record<string, ComponentType<any>>
+  title?: string
+  group?: string
+  defaults: Record<string, Record<string, unknown>>
+  /** Composition render function */
+  compoundRender: (props: Record<string, Record<string, unknown>>) => ReactNode
+
+  // Story creation methods
+  single(config?: {
+    props?: { [K in keyof PartsProps]?: Partial<PartsProps[K]> }
+    render?: (props: { [K in keyof PartsProps]: PartsProps[K] }) => ReactNode
+  }): SingleStory
+  variants(config: {
+    items: VariantConfig
+    props?: { [K in keyof PartsProps]?: Partial<PartsProps[K]> }
+    columns?: number
+  }): VariantsStory
+  matrix(config: {
+    x: VariantConfig
+    y: VariantConfig[]
+    props?: { [K in keyof PartsProps]?: Partial<PartsProps[K]> }
+  }): MatrixStory
+
+  // Variant config helpers (take part name + prop name)
+  allOf<P extends keyof PartsProps & string>(
+    part: P,
+    prop: keyof PartsProps[P] & string,
+  ): AllOfConfig
+  values<P extends keyof PartsProps & string>(
+    part: P,
+    prop: keyof PartsProps[P] & string,
+    values: PartsProps[P][keyof PartsProps[P]][],
+  ): ValuesConfig
+  generate<P extends keyof PartsProps & string>(
+    part: P,
+    prop: keyof PartsProps[P] & string,
+    fn: () => PartsProps[P][keyof PartsProps[P]],
+    count: number,
+  ): GenerateConfig
+}
+
+/** Info about a single part in a resolved compound component */
+export interface CompoundPartInfo {
+  component: ComponentType<any>
+  props: PropInfo[]
+  defaults: Record<string, unknown>
+}
+
+// Extend ResolvedComponent with compound support
+export interface ResolvedComponent {
+  component: ComponentType<any>
+  name: string
+  title?: string
+  group?: string
+  defaults: Record<string, unknown>
+  props: PropInfo[]
+  stories: ResolvedStory[]
+  /** Whether this is a compound component */
+  compound?: boolean
+  /** Part info for compound components */
+  parts?: Record<string, CompoundPartInfo>
+  /** Composition render function for compound components */
+  compoundRender?: (props: Record<string, Record<string, unknown>>) => ReactNode
+}
+
+/** Input for resolveCompound() */
+export interface ResolveCompoundInput {
+  partProps: Record<string, PropInfo[]>
   stories: StoryEntry[]
 }

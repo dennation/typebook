@@ -216,6 +216,97 @@ export class TypeScriptClient {
     return { kind: 'unknown', raw: typeString }
   }
 
+  /**
+   * Extract per-part props from a compound component story file.
+   * Finds defineCompound() call and extracts the PartsProps type argument,
+   * then iterates over its properties to get PropInfo[] per part.
+   */
+  async getCompoundPartProps(filePath: string): Promise<Record<string, PropInfo[]> | null> {
+    if (!this.program || !this.checker) {
+      await this.start()
+    }
+
+    const absPath = resolve(this.cwd, filePath)
+    const sourceFile = this.program!.getSourceFile(absPath)
+    if (!sourceFile) {
+      console.log(LOG_PREFIX, 'Could not get source file for compound')
+      return null
+    }
+
+    const result = this.findCompoundPropsInFile(sourceFile)
+    if (result) {
+      const partNames = Object.keys(result)
+      const totalProps = partNames.reduce((sum, k) => sum + result[k].length, 0)
+      console.log(LOG_PREFIX, 'Extracted', totalProps, 'props across', partNames.length, 'parts from CompoundDefineResult')
+    }
+
+    return result
+  }
+
+  private findCompoundPropsInFile(sourceFile: ts.SourceFile): Record<string, PropInfo[]> | null {
+    let result: Record<string, PropInfo[]> | null = null
+
+    const visit = (node: ts.Node): void => {
+      if (ts.isVariableStatement(node)) {
+        for (const decl of node.declarationList.declarations) {
+          if (!decl.initializer || !ts.isCallExpression(decl.initializer)) continue
+
+          const callExpr = decl.initializer
+          if (!ts.isIdentifier(callExpr.expression) || callExpr.expression.text !== 'defineCompound') continue
+
+          if (!ts.isIdentifier(decl.name)) continue
+
+          const varName = decl.name.text
+          console.log(LOG_PREFIX, 'Found defineCompound() variable:', varName)
+
+          // Get type of defineCompound(...) → CompoundDefineResult<PartsProps>
+          const compoundResultType = this.checker!.getTypeAtLocation(callExpr)
+          console.log(LOG_PREFIX, 'compoundResultType:', this.checker!.typeToString(compoundResultType))
+
+          const typeRef = compoundResultType as ts.TypeReference
+
+          // Extract PartsProps type argument (first type param)
+          let partsPropsType: ts.Type | null = null
+
+          if (typeRef.typeArguments && typeRef.typeArguments.length > 0) {
+            partsPropsType = typeRef.typeArguments[0]
+          } else {
+            const typeArgs = this.checker!.getTypeArguments(typeRef)
+            if (typeArgs && typeArgs.length > 0) {
+              partsPropsType = typeArgs[0]
+            }
+          }
+
+          if (!partsPropsType) {
+            console.log(LOG_PREFIX, 'Could not extract PartsProps type argument')
+            return
+          }
+
+          console.log(LOG_PREFIX, 'PartsProps type:', this.checker!.typeToString(partsPropsType))
+
+          // PartsProps is { root: RootProps, trigger: TriggerProps, ... }
+          // Iterate over each property (part) and extract PropInfo[]
+          result = {}
+          const partProperties = partsPropsType.getProperties()
+
+          for (const partSymbol of partProperties) {
+            const partName = partSymbol.getName()
+            const partType = this.checker!.getTypeOfSymbol(partSymbol)
+            console.log(LOG_PREFIX, 'Extracting props for part:', partName, 'type:', this.checker!.typeToString(partType))
+            result[partName] = this.extractPropsFromType(partType)
+          }
+
+          return
+        }
+      }
+
+      ts.forEachChild(node, visit)
+    }
+
+    visit(sourceFile)
+    return result
+  }
+
   async notifyChange(_filePath: string): Promise<void> {
     // Incremental rebuild: reuses old program so TS only re-parses changed files
     await this.start()

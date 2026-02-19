@@ -13,13 +13,15 @@ export async function findStoryFiles(
 }
 
 /**
- * Parse a .stories.tsx file to extract export names and detect valuesOf() calls.
+ * Parse a .stories.tsx file to extract export names and detect define/defineCompound calls.
  * Uses simple regex-based analysis to avoid needing to execute the module.
  */
 export function analyzeStoryFile(content: string): {
   defaultExport: boolean
   namedExports: string[]
   componentImport: { name: string; path: string } | null
+  /** True if the file uses defineCompound() instead of define() */
+  compound: boolean
 } {
   const namedExports: string[] = []
 
@@ -33,23 +35,39 @@ export function analyzeStoryFile(content: string): {
   // Check for default export
   const defaultExport = /export\s+default\s+/.test(content)
 
-  // Find the component import used in define()
-  // Pattern: import { ComponentName } from './path'
-  // We look for the component passed to define() first
+  // Detect if this is a compound component story
+  const compound = /defineCompound\s*\(/.test(content)
+
+  // Find the component import used in define() or first part in defineCompound()
   let componentImport: { name: string; path: string } | null = null
 
-  const defineMatch = content.match(/define\(\s*(\w+)/)
-  if (defineMatch) {
-    const componentName = defineMatch[1]
-    // Find the import statement for this component
-    const importRegex = new RegExp(
-      `import\\s+\\{[^}]*\\b${componentName}\\b[^}]*\\}\\s+from\\s+['"]([^'"]+)['"]`,
-    )
-    const importMatch = content.match(importRegex)
-    if (importMatch) {
-      componentImport = { name: componentName, path: importMatch[1] }
+  if (compound) {
+    // For defineCompound, find the first component name in parts: { ... }
+    // Pattern: parts: { root: ComponentName, ... }
+    const partsMatch = content.match(/parts\s*:\s*\{[^}]*\b(\w+)\s*:\s*(\w+)/)
+    if (partsMatch) {
+      const componentName = partsMatch[2]
+      const importRegex = new RegExp(
+        `import\\s+\\{[^}]*\\b${componentName}\\b[^}]*\\}\\s+from\\s+['"]([^'"]+)['"]`,
+      )
+      const importMatch = content.match(importRegex)
+      if (importMatch) {
+        componentImport = { name: componentName, path: importMatch[1] }
+      }
+    }
+  } else {
+    const defineMatch = content.match(/define\(\s*(\w+)/)
+    if (defineMatch) {
+      const componentName = defineMatch[1]
+      const importRegex = new RegExp(
+        `import\\s+\\{[^}]*\\b${componentName}\\b[^}]*\\}\\s+from\\s+['"]([^'"]+)['"]`,
+      )
+      const importMatch = content.match(importRegex)
+      if (importMatch) {
+        componentImport = { name: componentName, path: importMatch[1] }
+      }
     }
   }
 
-  return { defaultExport, namedExports, componentImport }
+  return { defaultExport, namedExports, componentImport, compound }
 }
