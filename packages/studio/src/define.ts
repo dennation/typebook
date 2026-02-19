@@ -24,8 +24,14 @@ export function define<
   const defaults: Record<string, unknown> = config?.defaults ?? {}
   const title = config?.title
   const group = config?.group
+  const wrapper = config?.wrapper
 
   const defaultRender: StoryRenderFn = (props) => createElement(component, props)
+
+  const wrapRender = (renderFn: StoryRenderFn): StoryRenderFn => {
+    if (!wrapper) return renderFn
+    return (props) => wrapper(() => renderFn(props) as any)
+  }
 
   const result: DefineResult<Expand<Pick<Props, IncludedProps>>, keyof D & IncludedProps> = {
     __type: 'define',
@@ -40,7 +46,7 @@ export function define<
         __type: 'story',
         kind: 'single',
         props: config?.props ? { ...config.props } : undefined,
-        render: config?.render ?? defaultRender,
+        render: wrapRender(config?.render ?? defaultRender),
       }
     },
 
@@ -55,7 +61,7 @@ export function define<
         items: config.items,
         props: config.props ? { ...config.props } : undefined,
         columns: config.columns,
-        render: defaultRender,
+        render: wrapRender(defaultRender),
       }
     },
 
@@ -70,7 +76,7 @@ export function define<
         x: config.x,
         y: config.y,
         props: config.props ? { ...config.props } : undefined,
-        render: defaultRender,
+        render: wrapRender(defaultRender),
       }
     },
 

@@ -23,4 +23,5 @@ export type {
   ResolvedMatrix,
   StoryEntry,
   ResolveStoriesInput,
+  WrapperFn,
 } from './types.js'

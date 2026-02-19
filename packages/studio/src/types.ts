@@ -61,6 +61,8 @@ export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof P
    * If not specified, all props are included.
    */
   props?: ReadonlyArray<IncludedProps>
+  /** Wrapper applied to all stories (e.g. a theme provider) */
+  wrapper?: WrapperFn
 }
 
 /** Auto-generate variants from prop type (boolean/literal) */
@@ -89,6 +91,9 @@ export type VariantConfig = AllOfConfig | ValuesConfig | GenerateConfig
 
 /** Render function that produces the final JSX for a story variant */
 export type StoryRenderFn = (props: any) => ReactNode
+
+/** Wrapper function that wraps all stories of a component (e.g. with a provider) */
+export type WrapperFn = (Story: ComponentType) => ReactNode
 
 /** Single story — one variant with fixed props */
 export interface SingleStory {
