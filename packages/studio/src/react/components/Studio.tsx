@@ -21,6 +21,7 @@ export function toKebabCase(str: string): string {
 export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps) {
 	const [activeComponent, setActiveComponent] = useState<string | null>(null)
 	const [theme, setTheme] = useState(initialTheme)
+	const [searchQuery, setSearchQuery] = useState('')
 
 	const findByKebab = useCallback(
 		(kebabComponent: string, kebabStory: string) => {
@@ -78,8 +79,16 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 	// Find active component
 	const comp = registry.find((c) => c.name === activeComponent)
 
+	// Filter components by search query
+	const filtered = searchQuery
+		? registry.filter((c) => {
+				const label = (c.title ?? c.name).toLowerCase()
+				return label.includes(searchQuery.toLowerCase())
+			})
+		: registry
+
 	// Group components by group
-	const grouped = groupComponents(registry)
+	const grouped = groupComponents(filtered)
 
 	// Inject styles once on mount
 	useEffect(() => {
@@ -115,6 +124,15 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 
 			{/* Sidebar */}
 			<nav className="st:bg-bg-sidebar st:border-r st:border-border st:overflow-y-auto st:py-2">
+				<div className="st:px-3 st:pb-2">
+					<input
+						type="text"
+						placeholder="Search…"
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						className="st:w-full st:px-2.5 st:py-1.5 st:text-sm st:rounded-md st:border st:border-border st:bg-bg st:text-text st:outline-none st:placeholder-text-muted focus:st:border-accent"
+					/>
+				</div>
 				{grouped.map(({ group, components }) => (
 					<div key={group ?? '__ungrouped'}>
 						{group && (
