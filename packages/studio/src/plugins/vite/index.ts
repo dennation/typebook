@@ -27,10 +27,30 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
   let storyFiles: string[] = []
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
+  // PropInfo cache — avoids redundant type extraction for unchanged files
+  const typeCache = new Map<string, PropInfo[]>()
+
   async function extractTypes(filePath: string): Promise<PropInfo[]> {
     if (!lsp || !lspReady) return []
+
+    const cached = typeCache.get(filePath)
+    if (cached) return cached
+
     const props = await lsp.getComponentProps(filePath)
-    return props ?? []
+    const result = props ?? []
+    typeCache.set(filePath, result)
+    return result
+  }
+
+  function invalidateTypeCache(changedFile: string): void {
+    const relChanged = relative(cwd, changedFile)
+    if (isStoryFile(relChanged)) {
+      // Story file changed — invalidate only that file
+      typeCache.delete(changedFile)
+    } else {
+      // Non-story file (component, util, etc.) — could affect any story's types
+      typeCache.clear()
+    }
   }
 
   async function regenerateGenFile(): Promise<void> {
@@ -62,8 +82,10 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
         // Re-scan for new/deleted files
         storyFiles = await findStoryFiles(cwd, include)
 
-        // Notify LSP about the changed file
         if (lsp && lspReady && changedFile) {
+          // Invalidate cached types for affected files
+          invalidateTypeCache(changedFile)
+          // Incremental rebuild — TS reuses unchanged source files
           await lsp.notifyChange(changedFile)
         }
 
@@ -107,10 +129,6 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
         lspReady = true
         console.log(LOG_PREFIX, 'TypeScript client started')
 
-        // Open all story files
-        for (const file of storyFiles) {
-          await lsp.openFile(file)
-        }
       } catch (err) {
         console.warn(LOG_PREFIX, 'TypeScript client not available, running without type extraction')
         console.warn(LOG_PREFIX, (err as Error).message)
@@ -142,6 +160,7 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
       server.watcher.on('unlink', (path) => {
         const relPath = relative(cwd, path)
         if (isStoryFile(relPath)) {
+          typeCache.delete(path)
           debouncedRegenerate()
         }
       })
@@ -149,6 +168,7 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
 
     async buildEnd() {
       if (debounceTimer) clearTimeout(debounceTimer)
+      typeCache.clear()
       if (lsp) {
         lsp.stop()
         lsp = null

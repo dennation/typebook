@@ -7,24 +7,40 @@ export class TypeScriptClient {
   private program: ts.Program | null = null
   private checker: ts.TypeChecker | null = null
 
+  // Cached tsconfig — read once, reuse across rebuilds
+  private cachedFileNames: string[] | null = null
+  private cachedOptions: ts.CompilerOptions | null = null
+
   constructor(private cwd: string) {}
 
   async start(): Promise<void> {
-    const configPath = ts.findConfigFile(this.cwd, ts.sys.fileExists, 'tsconfig.json')
-    if (!configPath) {
-      throw new Error('tsconfig.json not found')
+    if (!this.cachedFileNames || !this.cachedOptions) {
+      const configPath = ts.findConfigFile(this.cwd, ts.sys.fileExists, 'tsconfig.json')
+      if (!configPath) {
+        throw new Error('tsconfig.json not found')
+      }
+
+      const { config } = ts.readConfigFile(configPath, ts.sys.readFile)
+      const { options, fileNames } = ts.parseJsonConfigFileContent(config, ts.sys, this.cwd)
+      this.cachedFileNames = fileNames
+      this.cachedOptions = options
     }
 
-    const { config } = ts.readConfigFile(configPath, ts.sys.readFile)
-    const { options, fileNames } = ts.parseJsonConfigFileContent(config, ts.sys, this.cwd)
-
-    this.program = ts.createProgram(fileNames, options)
+    // Pass oldProgram so TS reuses unchanged source files
+    this.program = ts.createProgram(
+      this.cachedFileNames,
+      this.cachedOptions,
+      undefined,
+      this.program ?? undefined,
+    )
     this.checker = this.program.getTypeChecker()
   }
 
   stop(): void {
     this.program = null
     this.checker = null
+    this.cachedFileNames = null
+    this.cachedOptions = null
   }
 
   async getComponentProps(filePath: string): Promise<PropInfo[] | null> {
@@ -200,12 +216,8 @@ export class TypeScriptClient {
     return { kind: 'unknown', raw: typeString }
   }
 
-  async openFile(filePath: string): Promise<void> {
-    // Not needed
-  }
-
-  async notifyChange(filePath: string): Promise<void> {
-    // Recreate program
+  async notifyChange(_filePath: string): Promise<void> {
+    // Incremental rebuild: reuses old program so TS only re-parses changed files
     await this.start()
   }
 }
