@@ -156,43 +156,8 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 							{comp.title ?? comp.name}
 						</h1>
 
-						{/* Interactive preview + controls */}
+						{/* Interactive preview + props */}
 						<ComponentPreview comp={comp} />
-
-						{/* Props table */}
-						{comp.props && comp.props.length > 0 && (
-							<div className="st:bg-bg st:rounded-lg st:border st:border-border st:p-6 st:mb-6">
-								<h2 className="st:text-lg st:font-semibold st:mb-3">Props</h2>
-								<div className="st:overflow-x-auto">
-									<table className="st:w-full st:text-sm">
-										<thead>
-											<tr className="st:border-b st:border-border">
-												<th className="st:text-left st:py-2 st:pr-4 st:font-semibold">Name</th>
-												<th className="st:text-left st:py-2 st:pr-4 st:font-semibold">Type</th>
-												<th className="st:text-left st:py-2 st:font-semibold">Required</th>
-											</tr>
-										</thead>
-										<tbody>
-											{comp.props.map((prop) => (
-												<tr key={prop.name} className="st:border-b st:border-border">
-													<td className="st:py-2 st:pr-4 st:font-mono st:text-accent">{prop.name}</td>
-													<td className="st:py-2 st:pr-4 st:font-mono st:text-text-muted st:text-xs">
-														{prop.type.kind === 'literal' ? (
-															<span>{prop.type.values.map(v => `"${v}"`).join(' | ')}</span>
-														) : prop.type.kind === 'unknown' && prop.type.raw ? (
-															<span>{prop.type.raw}</span>
-														) : (
-															<span>{prop.type.kind}</span>
-														)}
-													</td>
-													<td className="st:py-2">{prop.optional ? 'No' : 'Yes'}</td>
-												</tr>
-											))}
-										</tbody>
-									</table>
-								</div>
-							</div>
-						)}
 
 						{/* Stories */}
 						{comp.stories.map((story) => (

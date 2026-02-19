@@ -1,25 +1,33 @@
 import { useState } from 'react'
-import type { ResolvedComponent } from '../../types.js'
+import type { ResolvedComponent, PropInfo } from '../../types.js'
 import { IframePreview } from './IframePreview.js'
 import { ErrorBoundary } from './ErrorBoundary.js'
 import { PropControl } from './PropControl.js'
 
+function formatType(prop: PropInfo): string {
+  const { type } = prop
+  if (type.kind === 'literal') return type.values.map(v => `"${v}"`).join(' | ')
+  if (type.kind === 'unknown' && type.raw) return type.raw
+  return type.kind
+}
+
+function isControllable(prop: PropInfo): boolean {
+  const k = prop.type.kind
+  return k === 'literal' || k === 'boolean' || k === 'string' || k === 'number' || k === 'node'
+}
+
 export function ComponentPreview({ comp }: { comp: ResolvedComponent }) {
   const [controlProps, setControlProps] = useState<Record<string, unknown>>(comp.defaults)
-
-  const controllableProps = (comp.props ?? []).filter((p) => {
-    const k = p.type.kind
-    return k === 'literal' || k === 'boolean' || k === 'string' || k === 'number' || k === 'node'
-  })
 
   const handleChange = (propName: string, value: unknown) => {
     setControlProps((prev) => ({ ...prev, [propName]: value }))
   }
 
+  const props = comp.props ?? []
   const Component = comp.component
 
   return (
-    <div className="st:grid st:grid-cols-[1fr_240px] st:border st:border-border st:rounded-lg st:overflow-hidden st:mb-6">
+    <div className="st:grid st:grid-cols-[1fr_320px] st:border st:border-border st:rounded-lg st:overflow-hidden st:mb-6">
       {/* Preview */}
       <div className="st:border-r st:border-border">
         <IframePreview>
@@ -31,23 +39,44 @@ export function ComponentPreview({ comp }: { comp: ResolvedComponent }) {
         </IframePreview>
       </div>
 
-      {/* Controls */}
-      <div className="st:bg-bg-sidebar st:p-3 st:overflow-y-auto">
-        {controllableProps.length === 0 ? (
-          <p className="st:text-xs st:text-text-muted">No controllable props</p>
+      {/* Props panel */}
+      <div className="st:bg-bg-sidebar st:overflow-y-auto">
+        {props.length === 0 ? (
+          <p className="st:text-xs st:text-text-muted st:p-3">No props</p>
         ) : (
-          <div className="st:flex st:flex-col st:gap-2">
-            {controllableProps.map((prop) => (
-              <div key={prop.name}>
-                <div className="st:text-xs st:font-mono st:text-text-muted st:mb-1">{prop.name}</div>
-                <PropControl
-                  prop={prop}
-                  value={controlProps[prop.name]}
-                  onChange={(val) => handleChange(prop.name, val)}
-                />
-              </div>
-            ))}
-          </div>
+          <table className="st:w-full st:text-xs">
+            <thead>
+              <tr className="st:border-b st:border-border">
+                <th className="st:text-left st:py-1.5 st:px-2 st:font-semibold st:text-text-muted">Prop</th>
+                <th className="st:text-left st:py-1.5 st:px-2 st:font-semibold st:text-text-muted">Type</th>
+                <th className="st:text-left st:py-1.5 st:px-2 st:font-semibold st:text-text-muted">Control</th>
+              </tr>
+            </thead>
+            <tbody>
+              {props.map((prop) => (
+                <tr key={prop.name} className="st:border-b st:border-border">
+                  <td className="st:py-1.5 st:px-2 st:font-mono st:text-accent st:whitespace-nowrap">
+                    {prop.name}
+                    {!prop.optional && <span className="st:text-red-400 st:ml-0.5">*</span>}
+                  </td>
+                  <td className="st:py-1.5 st:px-2 st:font-mono st:text-text-muted st:max-w-[100px] st:truncate" title={formatType(prop)}>
+                    {formatType(prop)}
+                  </td>
+                  <td className="st:py-1.5 st:px-2">
+                    {isControllable(prop) ? (
+                      <PropControl
+                        prop={prop}
+                        value={controlProps[prop.name]}
+                        onChange={(val) => handleChange(prop.name, val)}
+                      />
+                    ) : (
+                      <span className="st:text-text-muted">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>
