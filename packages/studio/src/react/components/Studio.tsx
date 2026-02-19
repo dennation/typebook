@@ -79,11 +79,13 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 	// Find active component
 	const comp = registry.find((c) => c.name === activeComponent)
 
-	// Filter components by search query
+	// Filter components by search query (matches title, displayName, function name)
 	const filtered = searchQuery
 		? registry.filter((c) => {
-				const label = (c.title ?? c.name).toLowerCase()
-				return label.includes(searchQuery.toLowerCase())
+				const q = searchQuery.toLowerCase()
+				return [c.title, c.component.displayName, c.component.name]
+					.filter(Boolean)
+					.some((s) => s!.toLowerCase().includes(q))
 			})
 		: registry
 
