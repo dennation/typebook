@@ -123,6 +123,7 @@ function resolveStory(
       name,
       kind: 'single',
       variants: [{ label: 'default', props: mergedProps }],
+      render: story.render,
     }
   }
 

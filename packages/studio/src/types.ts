@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 
 // --- Config ---
 
@@ -92,6 +92,7 @@ export interface SingleStory {
   __type: 'story'
   kind: 'single'
   props?: Record<string, unknown>
+  render?: (props: Record<string, unknown>) => ReactNode
 }
 
 /** Variants story — multiple variants generated from config */
@@ -124,7 +125,10 @@ export interface DefineResult<Props, CoveredByDefaults extends keyof Props = nev
   defaults: Record<string, unknown>
 
   // Story creation methods
-  single(config?: { props?: Partial<Props> & MissingProps<Props, CoveredByDefaults> }): SingleStory
+  single(config?: {
+    props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
+    render?: (props: Props) => ReactNode
+  }): SingleStory
   variants(config: {
     items: VariantConfig
     props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
@@ -172,6 +176,7 @@ export interface ResolvedStory {
   variants?: ResolvedVariant[]
   columns?: number
   matrix?: ResolvedMatrix
+  render?: (props: Record<string, unknown>) => ReactNode
 }
 
 export interface ResolvedComponent {

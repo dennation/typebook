@@ -63,7 +63,7 @@ export function StoryRenderer({
   return (
     <div style={layoutStyle}>
       {story.variants?.map((variant) => (
-        <VariantCard key={variant.label} variant={variant} component={Component} />
+        <VariantCard key={variant.label} variant={variant} component={Component} render={story.render} />
       ))}
     </div>
   )

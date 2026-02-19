@@ -32,11 +32,12 @@ export function define<
     defaults,
 
     // Story creation methods
-    single(config?: { props?: any }): SingleStory {
+    single(config?: { props?: any; render?: any }): SingleStory {
       return {
         __type: 'story',
         kind: 'single',
         props: config?.props ? { ...config.props } : undefined,
+        render: config?.render,
       }
     },
 
