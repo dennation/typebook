@@ -88,7 +88,7 @@ export interface GenerateConfig {
 export type VariantConfig = AllOfConfig | ValuesConfig | GenerateConfig
 
 /** Render function that produces the final JSX for a story variant */
-export type StoryRenderFn = (props: Record<string, unknown>) => ReactNode
+export type StoryRenderFn = (props: any) => ReactNode
 
 /** Single story — one variant with fixed props */
 export interface SingleStory {

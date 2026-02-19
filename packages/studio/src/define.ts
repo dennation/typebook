@@ -25,7 +25,7 @@ export function define<
   const title = config?.title
   const group = config?.group
 
-  const defaultRender: StoryRenderFn = (props) => createElement(component as ComponentType<any>, props)
+  const defaultRender: StoryRenderFn = (props) => createElement(component, props)
 
   const result: DefineResult<Expand<Pick<Props, IncludedProps>>, keyof D & IncludedProps> = {
     __type: 'define',
