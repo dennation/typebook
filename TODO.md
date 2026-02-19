@@ -1,10 +1,5 @@
 # Studio — Roadmap
 
-## Tier 1 — Must have
-
-### Search
-Текстовый фильтр в sidebar. При 50+ компонентах без поиска невозможно.
-
 ## Tier 2 — Дифференциаторы
 
 ### Responsive Preview
