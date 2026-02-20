@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
-import type { RegistryEntry, ResolvedComponent } from '../../types.js'
-import { resolveRegistry } from '../../resolve.js'
+import type { ComponentType } from 'react'
+import type { RegistryEntry, PropInfo } from '../../types.js'
 import { PACKAGE_NAME } from '../../constants.js'
 import { groupComponents } from '../utils/groupComponents.js'
 import { StoryRenderer } from './StoryRenderer.js'
@@ -19,23 +19,41 @@ export function toKebabCase(str: string): string {
 		.toLowerCase()
 }
 
+/** Get display name for a registry entry */
+function entryName(entry: RegistryEntry): string {
+	return (
+		entry.config.title ??
+		entry.config.component.displayName ??
+		entry.config.component.name ??
+		'Unknown'
+	)
+}
+
 export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps) {
 	const [activeComponent, setActiveComponent] = useState<string | null>(null)
 	const [theme, setTheme] = useState(initialTheme)
 	const [searchQuery, setSearchQuery] = useState('')
 
-	// Resolve registry entries into renderable components
-	const resolved = useMemo(() => resolveRegistry(registry), [registry])
+	// Component → PropInfo[] map for cross-file story resolution
+	const propsMap = useMemo(() => {
+		const map = new Map<ComponentType<any>, PropInfo[]>()
+		for (const entry of registry) {
+			if (entry.meta) {
+				map.set(entry.config.component, entry.meta.props)
+			}
+		}
+		return map
+	}, [registry])
 
 	const findByKebab = useCallback(
 		(kebabComponent: string, kebabStory: string) => {
-			const comp = resolved.find((c) => toKebabCase(c.name) === kebabComponent)
-			if (!comp) return null
-			const story = comp.stories.find((s) => toKebabCase(s.name) === kebabStory)
-			if (!story) return null
-			return { component: comp.name, story: story.name }
+			const entry = registry.find((e) => toKebabCase(entryName(e)) === kebabComponent)
+			if (!entry) return null
+			const storyName = Object.keys(entry.stories).find((s) => toKebabCase(s) === kebabStory)
+			if (!storyName) return null
+			return { component: entryName(entry), story: storyName }
 		},
-		[resolved],
+		[registry],
 	)
 
 	const parseHash = useCallback((): { component: string; story: string } | null => {
@@ -80,18 +98,18 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 		setTheme((t) => (t === 'light' ? 'dark' : 'light'))
 	}, [])
 
-	// Find active component
-	const comp = resolved.find((c) => c.name === activeComponent)
+	// Find active entry
+	const activeEntry = registry.find((e) => entryName(e) === activeComponent)
 
-	// Filter components by search query (matches title, displayName, function name)
+	// Filter components by search query
 	const filtered = searchQuery
-		? resolved.filter((c) => {
+		? registry.filter((e) => {
 				const q = searchQuery.toLowerCase()
-				return [c.title, c.component.displayName, c.component.name, c.group]
+				return [e.config.title, e.config.component.displayName, e.config.component.name, e.config.group]
 					.filter(Boolean)
 					.some((s) => s!.toLowerCase().includes(q))
 			})
-		: resolved
+		: registry
 
 	// Group components by group
 	const grouped = groupComponents(filtered)
@@ -146,54 +164,56 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 								{group}
 							</div>
 						)}
-						{components.map((c) => (
-							<button
-								key={c.name}
-								className={`st:block st:w-full st:px-4 st:py-1.5 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all hover:st:bg-bg-hover ${activeComponent === c.name
-									? 'st:bg-accent-light st:text-accent st:font-semibold'
-									: ''
-									}`}
-								onClick={() => {
-									const firstStory = c.stories[0]
-									if (firstStory) selectStory(c.name, firstStory.name)
-								}}
-								type="button"
-							>
-								{c.title ?? c.name}
-							</button>
-						))}
+						{components.map((entry) => {
+							const name = entryName(entry)
+							return (
+								<button
+									key={name}
+									className={`st:block st:w-full st:px-4 st:py-1.5 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all hover:st:bg-bg-hover ${activeComponent === name
+										? 'st:bg-accent-light st:text-accent st:font-semibold'
+										: ''
+										}`}
+									onClick={() => {
+										const firstStory = Object.keys(entry.stories)[0]
+										if (firstStory) selectStory(name, firstStory)
+									}}
+									type="button"
+								>
+									{entry.config.title ?? name}
+								</button>
+							)
+						})}
 					</div>
 				))}
 			</nav>
 
 			{/* Main content */}
 			<main className="st:overflow-auto st:p-6 st:bg-bg">
-				{comp ? (
+				{activeEntry ? (
 					<div>
 						{/* Component header */}
 						<h1 className="st:text-2xl st:font-bold st:mb-4">
-							{comp.title ?? comp.name}
+							{activeEntry.config.title ?? entryName(activeEntry)}
 						</h1>
 
 						{/* Interactive preview + props */}
-						<ComponentPreview comp={comp} />
+						<ComponentPreview
+							component={activeEntry.config.component}
+							defaults={activeEntry.config.defaults}
+							props={activeEntry.meta?.props ?? []}
+						/>
 
-						{/* Stories */}
-						{comp.stories.map((story) => (
-							<div key={story.name} className="st:mb-8">
-								<h2 className="st:text-xl st:font-semibold st:mb-4">
-							{story.name}
-							{story.variants?.length && (
-								<span className="st:text-text-muted st:font-normal st:ml-2">
-									({story.variants.length})
-								</span>
-							)}
-						</h2>
-								<div className="st:bg-checkered st:rounded-lg st:border st:border-border st:p-6">
-									<StoryRenderer story={story} />
-								</div>
-							</div>
-						))}
+						{/* Stories — resolved lazily */}
+						{Object.entries(activeEntry.stories).map(([name, story]) => {
+							// For cross-file stories, look up props by story's component
+							const storyProps = story.component === activeEntry.config.component
+								? (activeEntry.meta?.props ?? [])
+								: (propsMap.get(story.component) ?? [])
+
+							return (
+								<StoryRenderer key={name} name={name} story={story} props={storyProps} />
+							)
+						})}
 					</div>
 				) : (
 					<div className="st:flex st:items-center st:justify-center st:h-full st:text-text-muted st:text-sm">

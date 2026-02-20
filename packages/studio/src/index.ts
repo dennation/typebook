@@ -17,7 +17,6 @@ export type {
   PropType,
   ComponentMeta,
   RegistryEntry,
-  ResolvedComponent,
   ResolvedStory,
   ResolvedVariant,
   MatrixRow,

@@ -205,12 +205,3 @@ export interface ResolvedStory {
   render: StoryRenderFn
 }
 
-export interface ResolvedComponent {
-  component: ComponentType<any>
-  name: string
-  title?: string
-  group?: string
-  defaults: Record<string, unknown>
-  props: PropInfo[]
-  stories: ResolvedStory[]
-}

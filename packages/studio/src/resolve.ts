@@ -1,7 +1,5 @@
-import type { ComponentType } from 'react'
 import type {
   PropInfo,
-  ResolvedComponent,
   ResolvedStory,
   ResolvedVariant,
   Story,
@@ -11,8 +9,6 @@ import type {
   GenerateConfig,
   VariantConfig,
   MatrixRow,
-  RegistryEntry,
-  ComponentMeta,
 } from './types.js'
 
 function isAllOfConfig(v: unknown): v is AllOfConfig {
@@ -78,49 +74,10 @@ function resolveVariantConfig(
 }
 
 /**
- * Resolves a full registry into ResolvedComponent[] for rendering.
- * Builds a Map<Component, ComponentMeta> and resolves allOf markers.
+ * Resolves a single Story into a ResolvedStory for rendering.
+ * Called lazily — only when the story is actually being displayed.
  */
-export function resolveRegistry(registry: RegistryEntry[]): ResolvedComponent[] {
-  // Build component → meta map for cross-file story resolution
-  const metaMap = new Map<ComponentType<any>, ComponentMeta>()
-  for (const entry of registry) {
-    if (entry.meta) {
-      metaMap.set(entry.config.component, entry.meta)
-    }
-  }
-
-  return registry.map((entry) => {
-    const { config, stories, meta } = entry
-    const props = meta?.props ?? []
-
-    const resolvedStories: ResolvedStory[] = []
-    for (const [name, story] of Object.entries(stories)) {
-      // For cross-file reused stories, look up meta by story's component reference
-      const storyProps = story.component === config.component
-        ? props
-        : (metaMap.get(story.component)?.props ?? [])
-
-      resolvedStories.push(resolveStory(name, story, storyProps))
-    }
-
-    return {
-      component: config.component,
-      name:
-        config.title ??
-        config.component.displayName ??
-        config.component.name ??
-        'Unknown',
-      title: config.title,
-      group: config.group,
-      defaults: config.defaults,
-      props,
-      stories: resolvedStories,
-    }
-  })
-}
-
-function resolveStory(
+export function resolveStory(
   name: string,
   story: Story,
   allProps: PropInfo[],

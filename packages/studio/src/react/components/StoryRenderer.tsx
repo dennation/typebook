@@ -1,23 +1,32 @@
-import type { ResolvedStory } from '../../types.js'
+import { useMemo } from 'react'
+import type { Story, PropInfo } from '../../types.js'
+import { resolveStory } from '../../resolve.js'
 import { ErrorBoundary } from './ErrorBoundary.js'
 import { VariantCard } from './VariantCard.js'
 import { IframePreview } from './IframePreview.js'
 import { getLayoutStyle } from '../utils/getLayoutStyle.js'
 
 export function StoryRenderer({
+  name,
   story,
+  props,
 }: {
-  story: ResolvedStory
+  name: string
+  story: Story
+  props: PropInfo[]
 }) {
+  // Resolve variants lazily — only for this story
+  const resolved = useMemo(() => resolveStory(name, story, props), [name, story, props])
+
   // Matrix story — render as table
-  if (story.kind === 'matrix' && story.matrix) {
+  if (resolved.kind === 'matrix' && resolved.matrix) {
     return (
       <div className="st:overflow-x-auto">
         <table className="st:w-full st:border-collapse">
           <thead>
             <tr>
               <th className="st:border st:border-border st:bg-bg-sidebar st:p-2 st:text-sm st:font-semibold st:text-left" />
-              {story.matrix.primaryValues.map((value) => (
+              {resolved.matrix.primaryValues.map((value) => (
                 <th
                   key={value}
                   className="st:border st:border-border st:bg-bg-sidebar st:p-2 st:text-sm st:font-semibold st:text-center"
@@ -28,7 +37,7 @@ export function StoryRenderer({
             </tr>
           </thead>
           <tbody>
-            {story.matrix.rows.map((row) => (
+            {resolved.matrix.rows.map((row) => (
               <tr key={row.label}>
                 <td className="st:border st:border-border st:bg-bg-sidebar st:p-2 st:text-sm st:font-semibold st:text-left">
                   {row.label}
@@ -41,7 +50,7 @@ export function StoryRenderer({
                     <IframePreview className="st:p-4">
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60px' }}>
                         <ErrorBoundary>
-                          {story.render(variant.props)}
+                          {resolved.render(variant.props)}
                         </ErrorBoundary>
                       </div>
                     </IframePreview>
@@ -55,13 +64,13 @@ export function StoryRenderer({
     )
   }
 
-  // Static or variants story — render as grid
-  const layoutStyle = getLayoutStyle(story)
+  // Single or variants story — render as grid
+  const layoutStyle = getLayoutStyle(resolved)
 
   return (
     <div style={layoutStyle}>
-      {story.variants?.map((variant) => (
-        <VariantCard key={variant.label} variant={variant} render={story.render} />
+      {resolved.variants?.map((variant) => (
+        <VariantCard key={variant.label} variant={variant} render={resolved.render} />
       ))}
     </div>
   )
