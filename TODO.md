@@ -10,13 +10,6 @@
 `oxc-parser` уже в зависимостях — нужно переписать анализ на AST.
 **Effort: низкий.** oxc API минималистичный, замена — один файл. **Impact: высокий.** Убирает целый класс багов.
 
-### Gen-файл: запись на диск → полный virtual module
-Сейчас gen-файлы пишутся физически на диск (`writeIfChanged()` в `plugins/vite/index.ts`).
-Проблемы: нужно `.gitignore`, может устареть, перезапись триггерит watcher → лишние циклы, нет настоящего HMR.
-Virtual module уже частично реализован (`VIRTUAL_MODULE_ID`), но `load()` всё равно читает с диска.
-Нужно: хранить сгенерированный контент в памяти, отдавать через `load()`, инвалидировать через Vite server API (`server.moduleGraph.invalidateModule` + `server.ws.send`).
-**Effort: низкий–средний.** Паттерн стандартный для Vite-плагинов. **Impact: средний–высокий.** Чистый DX, настоящий HMR, нет мусора в файловой системе.
-
 ### Улучшение PropControl
 `isControllable()` в `ComponentPreview.tsx` — контролы только для `literal`, `boolean`, `string`, `number`, `node`.
 Минимально необходимые доработки:

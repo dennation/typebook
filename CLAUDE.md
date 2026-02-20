@@ -69,7 +69,7 @@ packages/studio/
         StoryRenderer.tsx     — Dispatches to RenderSingle / RenderVariants / RenderMatrix
         ComponentPreview.tsx   — Component preview with interactive props panel
         PropControl.tsx       — Prop controls: dropdown (literal), toggle (boolean), input (string), number
-        VariantCard.tsx       — Single variant preview card (with iframe isolation)
+        VariantCard.tsx       — Single variant preview card (inline by default, iframe when isolate: true)
         IframePreview.tsx     — Iframe wrapper for CSS isolation of component previews
         ErrorBoundary.tsx     — Error boundary for component crash isolation
       utils/
@@ -114,10 +114,10 @@ packages/studio/
 
 - **Vite plugin** — integrates into the user's existing Vite setup. No separate dev server. Scans `.stories.tsx` files, extracts types via TypeScript Compiler API, generates two gen files, watches for changes.
 - **Type extraction via TS Compiler API** — uses TypeScript Compiler API directly (`ts-client.ts`) to get component prop types as strings. These strings are parsed by oxc into structured `PropInfo[]`.
-- **Two generated files** — `ui-studio-registry.gen.ts` (imports stories/configs, assembles registry array) and `ui-studio-meta.gen.ts` (extracted component metadata keyed by file path). Registry imports meta internally — user only imports registry. Both paths are independently configurable via `output` and `metaOutput`.
+- **Two generated files on disk (not virtual modules)** — `ui-studio-registry.gen.ts` (imports stories/configs, assembles registry array) and `ui-studio-meta.gen.ts` (extracted component metadata keyed by file path). Registry imports meta internally — user only imports registry. Both paths are independently configurable via `output` and `metaOutput`. Files are **physical and committed to git** — not Vite virtual modules. Reasons: (1) `tsc --noEmit` runs before Vite in build scripts, so it needs real files to typecheck against — virtual modules are invisible to `tsc`; (2) gen files are the primary debugging tool for type extraction — when props don't appear, you open `ui-studio-meta.gen.ts` and immediately see what was extracted; (3) PR diffs show exactly what changed in extracted types; (4) clone-and-build works without running Vite first. This matches TanStack Router's approach with `routeTree.gen.ts`. HMR works naturally — Vite's file watcher picks up gen file changes after `writeIfChanged()`, and the guard in the plugin prevents infinite regen cycles.
 - **Self-contained stories** — each story (single/variants/matrix) carries its own `component` reference and `defaults`, making stories reusable without the DefineResult.
 - **Lazy variant resolution** — each story kind renderer (RenderSingle, RenderVariants, RenderMatrix) resolves its own VariantConfig markers inline using `resolveVariantConfig()`. No upfront resolution step — variants are only computed for the story being displayed.
-- **Iframe isolation** — each variant card renders inside an iframe (`IframePreview`) so component styles don't bleed into Studio UI and vice versa.
+- **Iframe isolation opt-in** — variant cards render inline by default. Add `isolate: true` to a story to render inside an iframe (`IframePreview`) for full CSS/JS isolation. Only needed for components that interact with document/body (modals, dropdowns with portals). Studio's `st:` Tailwind prefix already prevents style bleeding for normal components.
 - **Error Boundary** — React error boundaries isolate component crashes per variant.
 - **VariantConfig marker pattern** — `button.allOf('size')` returns a typed marker `{ __type: 'allOf', prop: 'size' }` that gets resolved at render time by the story renderer using TS-extracted type data.
 - **Three story kinds** — `single` (one card), `variants` (grid of values for one prop), `matrix` (table: x prop × y props).
