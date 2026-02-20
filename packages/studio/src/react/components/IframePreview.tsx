@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type PropsWithChildren } from 'react'
 import { createPortal } from 'react-dom'
+import { LOG_PREFIX } from '../../constants.js'
 
 export type IframePreviewProps = PropsWithChildren<{
 	className?: string
@@ -41,7 +42,7 @@ export function IframePreview({ children, className }: IframePreviewProps) {
 					}
 				} catch (e) {
 					// Skip stylesheets that throw CORS errors
-					console.warn('Could not copy stylesheet:', e)
+					console.warn(LOG_PREFIX, 'Could not copy stylesheet:', e)
 				}
 			})
 

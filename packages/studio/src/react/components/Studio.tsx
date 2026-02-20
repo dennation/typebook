@@ -1,36 +1,23 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import type { ComponentType } from 'react'
 import type { RegistryEntry, PropInfo } from '../../types.js'
-import { PACKAGE_NAME } from '../../constants.js'
+import { PACKAGE_NAME, STYLE_ELEMENT_ID } from '../../constants.js'
 import { groupComponents } from '../utils/groupComponents.js'
+import { entryName } from '../utils/naming.js'
+import { useHashRoute } from '../utils/useHashRoute.js'
 import { StoryRenderer } from './StoryRenderer.js'
 import { ComponentPreview } from './ComponentPreview.js'
 import styles from '../styles/styles.css?inline'
+
+export { toKebabCase } from '../utils/naming.js'
 
 export interface StudioProps {
 	registry: RegistryEntry[]
 	theme?: 'light' | 'dark'
 }
 
-export function toKebabCase(str: string): string {
-	return str
-		.replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')
-		.replace(/([a-z])([A-Z])/g, '$1-$2')
-		.toLowerCase()
-}
-
-/** Get display name for a registry entry */
-function entryName(entry: RegistryEntry): string {
-	return (
-		entry.config.title ??
-		entry.config.component.displayName ??
-		entry.config.component.name ??
-		'Unknown'
-	)
-}
-
 export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps) {
-	const [activeComponent, setActiveComponent] = useState<string | null>(null)
+	const { activeComponent, selectStory } = useHashRoute(registry)
 	const [theme, setTheme] = useState(initialTheme)
 	const [searchQuery, setSearchQuery] = useState('')
 
@@ -44,55 +31,6 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 		}
 		return map
 	}, [registry])
-
-	const findByKebab = useCallback(
-		(kebabComponent: string, kebabStory: string) => {
-			const entry = registry.find((e) => toKebabCase(entryName(e)) === kebabComponent)
-			if (!entry) return null
-			const storyName = Object.keys(entry.stories).find((s) => toKebabCase(s) === kebabStory)
-			if (!storyName) return null
-			return { component: entryName(entry), story: storyName }
-		},
-		[registry],
-	)
-
-	const parseHash = useCallback((): { component: string; story: string } | null => {
-		const hash = window.location.hash.slice(1) // remove #
-		if (!hash) return null
-		const parts = hash.split('/')
-		if (parts.length >= 2) {
-			const kebabComp = decodeURIComponent(parts[0])
-			const kebabStory = decodeURIComponent(parts[1])
-			return findByKebab(kebabComp, kebabStory)
-		}
-		return null
-	}, [findByKebab])
-
-	const selectStory = useCallback((componentName: string, storyName: string) => {
-		setActiveComponent(componentName)
-		window.location.hash = `${toKebabCase(componentName)}/${toKebabCase(storyName)}`
-	}, [])
-
-	// Restore selection from URL hash on mount
-	useEffect(() => {
-		const parsed = parseHash()
-		if (!parsed) return
-		setActiveComponent(parsed.component)
-	}, [parseHash])
-
-	// Sync with browser back/forward navigation
-	useEffect(() => {
-		const onHashChange = () => {
-			const parsed = parseHash()
-			if (!parsed) {
-				setActiveComponent(null)
-				return
-			}
-			setActiveComponent(parsed.component)
-		}
-		window.addEventListener('hashchange', onHashChange)
-		return () => window.removeEventListener('hashchange', onHashChange)
-	}, [parseHash])
 
 	const toggleTheme = useCallback(() => {
 		setTheme((t) => (t === 'light' ? 'dark' : 'light'))
@@ -116,10 +54,9 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 
 	// Inject styles once on mount
 	useEffect(() => {
-		const id = 'ui-studio-styles'
-		if (document.getElementById(id)) return
+		if (document.getElementById(STYLE_ELEMENT_ID)) return
 		const style = document.createElement('style')
-		style.id = id
+		style.id = STYLE_ELEMENT_ID
 		style.textContent = styles
 		document.head.appendChild(style)
 	}, [])

@@ -36,12 +36,12 @@ if (command === 'generate') {
   console.log(LOG_PREFIX, `Found ${files.length} story file(s)`)
 
   // Start TypeScript client
-  const lsp = new TypeScriptClient(cwd)
-  let lspReady = false
+  const tsClient = new TypeScriptClient(cwd)
+  let tsClientReady = false
 
   try {
-    await lsp.start()
-    lspReady = true
+    await tsClient.start()
+    tsClientReady = true
     console.log(LOG_PREFIX, 'TypeScript client started')
 
   } catch (err) {
@@ -55,8 +55,8 @@ if (command === 'generate') {
       const content = readFileSync(filePath, 'utf-8')
       const analysis = analyzeStoryFile(content)
       let props: import('./types.js').PropInfo[] = []
-      if (lspReady) {
-        const extracted = await lsp.getComponentProps(filePath)
+      if (tsClientReady) {
+        const extracted = await tsClient.getComponentProps(filePath)
         if (extracted) props = extracted
       }
       return { filePath, analysis, props }
@@ -75,7 +75,7 @@ if (command === 'generate') {
   writeFileSync(registryFilePath, registryContent, 'utf-8')
   console.log(LOG_PREFIX, `Generated ${registryOutput}`)
 
-  lsp.stop()
+  tsClient.stop()
 } else {
   console.log(`
   @dennation/${PACKAGE_NAME}

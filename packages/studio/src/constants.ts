@@ -24,3 +24,9 @@ export const CSS_PREFIX = PACKAGE_NAME
 
 /** Tailwind prefix for isolated styling (variant syntax: st:flex) */
 export const TW_PREFIX = 'st'
+
+/** Debounce delay (ms) for file watcher regeneration */
+export const DEBOUNCE_MS = 200
+
+/** ID for the injected Studio style element */
+export const STYLE_ELEMENT_ID = 'ui-studio-styles'

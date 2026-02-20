@@ -2,10 +2,9 @@ import type { PropInfo, PropType } from '../types.js'
 import { LOG_PREFIX } from '../constants.js'
 
 /**
- * Parses a type string returned by tsgo LSP hover
- * into structured PropInfo[].
+ * Parses a raw type string into structured PropInfo[].
  *
- * Example input (from LSP hover):
+ * Example input (from TypeScript Compiler API):
  *   "{ size?: 'sm' | 'md' | 'lg'; variant: 'primary' | 'secondary'; disabled?: boolean; children: ReactNode; onClick?: () => void }"
  *
  * Strategy: wrap in "type T = {...}" and parse via oxc.
@@ -117,7 +116,11 @@ function resolveType(node: any): PropType {
 
       return {
         kind: 'unknown',
-        raw: types.map(() => '...').join(' | '),
+        raw: types.map((t: any) => {
+          if (t.type === 'TSLiteralType') return JSON.stringify(t.literal?.value)
+          if (t.type === 'TSTypeReference') return t.typeName?.name ?? t.type
+          return t.type ?? '...'
+        }).join(' | '),
       }
     }
 

@@ -64,6 +64,6 @@ export function PropControl({
     )
   }
 
-  // function / unknown — не рендерим контрол
+  // function / unknown — no control rendered
   return null
 }

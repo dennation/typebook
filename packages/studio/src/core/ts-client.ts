@@ -48,28 +48,29 @@ export class TypeScriptClient {
       await this.start()
     }
 
+    if (!this.program || !this.checker) {
+      console.warn(LOG_PREFIX, 'TypeScript program not initialized')
+      return null
+    }
+
     const absPath = resolve(this.cwd, filePath)
 
     // Find the source file
-    const sourceFile = this.program!.getSourceFile(absPath)
+    const sourceFile = this.program.getSourceFile(absPath)
     if (!sourceFile) {
-      console.log(LOG_PREFIX, 'Could not get source file')
+      console.warn(LOG_PREFIX, 'Could not get source file:', absPath)
       return null
     }
 
     // Find the variable declaration: const button = define(Button, ...)
     // The type of 'button' is DefineResult<Pick<Props, IncludedProps>>
     // So TypeScript already filtered props for us!
-    const props = this.findComponentPropsInFile(sourceFile)
-
-    if (props) {
-      console.log(LOG_PREFIX, 'Extracted', props.length, 'props from DefineResult type')
-    }
-
-    return props
+    return this.findComponentPropsInFile(sourceFile)
   }
 
   private findComponentPropsInFile(sourceFile: ts.SourceFile): PropInfo[] | null {
+    // Guaranteed non-null by getComponentProps guard
+    const checker = this.checker!
     let result: PropInfo[] | null = null
 
     const visit = (node: ts.Node): void => {
@@ -84,36 +85,30 @@ export class TypeScriptClient {
           // Found define(...) call
           if (!ts.isIdentifier(decl.name)) continue
 
-          const varName = decl.name.text
-          console.log(LOG_PREFIX, 'Found define() variable:', varName)
-
           // Get type of the entire call expression: define(Button, {...})
           // This gives us the instantiated DefineResult<Props>
-          const defineResultType = this.checker!.getTypeAtLocation(callExpr)
+          const defineResultType = checker.getTypeAtLocation(callExpr)
 
-          console.log(LOG_PREFIX, 'defineResultType:', this.checker!.typeToString(defineResultType))
-
-          // DefineResult<Props> is a type reference with type arguments
+          // DefineResult<Props> is a type reference — cast needed because
+          // TS checker returns ts.Type but DefineResult<T> is always a reference
           const typeRef = defineResultType as ts.TypeReference
 
           // First try: typeArguments property on TypeReference
           if (typeRef.typeArguments && typeRef.typeArguments.length > 0) {
             const propsType = typeRef.typeArguments[0]
-            console.log(LOG_PREFIX, 'Got Props from typeRef.typeArguments:', this.checker!.typeToString(propsType))
-            result = this.extractPropsFromType(propsType)
+            result = this.extractPropsFromType(checker, propsType)
             return
           }
 
           // Second try: getTypeArguments method
-          const typeArgs = this.checker!.getTypeArguments(typeRef)
+          const typeArgs = checker.getTypeArguments(typeRef)
           if (typeArgs && typeArgs.length > 0) {
             const propsType = typeArgs[0]
-            console.log(LOG_PREFIX, 'Got Props from getTypeArguments:', this.checker!.typeToString(propsType))
-            result = this.extractPropsFromType(propsType)
+            result = this.extractPropsFromType(checker, propsType)
             return
           }
 
-          console.log(LOG_PREFIX, 'Could not extract Props type argument')
+          console.warn(LOG_PREFIX, 'Could not extract Props type argument')
           return
         }
       }
@@ -125,23 +120,18 @@ export class TypeScriptClient {
     return result
   }
 
-  private extractPropsFromType(type: ts.Type): PropInfo[] {
+  private extractPropsFromType(checker: ts.TypeChecker, type: ts.Type): PropInfo[] {
     const props: PropInfo[] = []
     const properties = type.getProperties()
-
-    console.log(LOG_PREFIX, 'Extracting', properties.length, 'properties')
 
     for (const prop of properties) {
       const propName = prop.getName()
 
       // For Pick<T, K> types, we need to get the type directly from the symbol
       // instead of from declarations (which don't exist for mapped types)
-      const propType = this.checker!.getTypeOfSymbol(prop)
+      const propType = checker.getTypeOfSymbol(prop)
       const isOptional = (prop.flags & ts.SymbolFlags.Optional) !== 0
-
-      console.log(LOG_PREFIX, 'Property:', propName, 'type:', this.checker!.typeToString(propType), 'optional:', isOptional)
-
-      const typeInfo = this.convertTsType(propType)
+      const typeInfo = this.convertTsType(checker, propType)
 
       props.push({
         name: propName,
@@ -153,15 +143,12 @@ export class TypeScriptClient {
     return props
   }
 
-  private convertTsType(type: ts.Type): PropType {
-    const typeString = this.checker!.typeToString(type)
+  private convertTsType(checker: ts.TypeChecker, type: ts.Type): PropType {
+    const typeString = checker.typeToString(type)
     const flags = type.flags
-
-    console.log(LOG_PREFIX, 'Converting type:', typeString, 'flags:', flags)
 
     // Check for 'any' type - skip it
     if (flags & ts.TypeFlags.Any) {
-      console.log(LOG_PREFIX, 'Type is any, returning unknown')
       return { kind: 'unknown', raw: 'any' }
     }
 
@@ -171,7 +158,7 @@ export class TypeScriptClient {
 
       // If only one type left after filtering undefined/null, unwrap it
       if (types.length === 1) {
-        return this.convertTsType(types[0])
+        return this.convertTsType(checker, types[0])
       }
 
       // String literal union: "sm" | "md" | "lg"

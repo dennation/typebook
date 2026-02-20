@@ -13,6 +13,7 @@ import {
   DEFAULT_META_FILE,
   DEFAULT_INCLUDE,
   VIRTUAL_MODULE_ID,
+  DEBOUNCE_MS,
 } from '../../constants.js'
 
 const RESOLVED_VIRTUAL_MODULE_ID = '\0' + VIRTUAL_MODULE_ID
@@ -24,8 +25,8 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
   const isStoryFile = picomatch(include)
 
   let cwd: string
-  let lsp: TypeScriptClient | null = null
-  let lspReady = false
+  let tsClient: TypeScriptClient | null = null
+  let tsClientReady = false
   let storyFiles: string[] = []
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -33,12 +34,12 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
   const typeCache = new Map<string, PropInfo[]>()
 
   async function extractTypes(filePath: string): Promise<PropInfo[]> {
-    if (!lsp || !lspReady) return []
+    if (!tsClient || !tsClientReady) return []
 
     const cached = typeCache.get(filePath)
     if (cached) return cached
 
-    const props = await lsp.getComponentProps(filePath)
+    const props = await tsClient.getComponentProps(filePath)
     const result = props ?? []
     typeCache.set(filePath, result)
     return result
@@ -90,16 +91,16 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
       try {
         storyFiles = await findStoryFiles(cwd, include)
 
-        if (lsp && lspReady && changedFile) {
+        if (tsClient && tsClientReady && changedFile) {
           invalidateTypeCache(changedFile)
-          await lsp.notifyChange(changedFile)
+          await tsClient.notifyChange(changedFile)
         }
 
         await regenerateGenFiles()
       } catch (err) {
         console.error(LOG_PREFIX, 'Failed to regenerate:', err)
       }
-    }, 200)
+    }, DEBOUNCE_MS)
   }
 
   return {
@@ -129,8 +130,8 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
       const client = new TypeScriptClient(cwd)
       try {
         await client.start()
-        lsp = client
-        lspReady = true
+        tsClient = client
+        tsClientReady = true
         console.log(LOG_PREFIX, 'TypeScript client started')
 
       } catch (err) {
@@ -172,10 +173,10 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
     async buildEnd() {
       if (debounceTimer) clearTimeout(debounceTimer)
       typeCache.clear()
-      if (lsp) {
-        lsp.stop()
-        lsp = null
-        lspReady = false
+      if (tsClient) {
+        tsClient.stop()
+        tsClient = null
+        tsClientReady = false
       }
     },
   }
