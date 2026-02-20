@@ -58,7 +58,7 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
     const files = await Promise.all(
       storyFiles.map(async (filePath) => {
         const content = readFileSync(filePath, 'utf-8')
-        const analysis = analyzeStoryFile(content)
+        const analysis = await analyzeStoryFile(content)
         const props = await extractTypes(filePath)
         return { filePath, analysis, props }
       }),

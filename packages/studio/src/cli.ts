@@ -53,7 +53,7 @@ if (command === 'generate') {
   const fileInfos = await Promise.all(
     files.map(async (filePath) => {
       const content = readFileSync(filePath, 'utf-8')
-      const analysis = analyzeStoryFile(content)
+      const analysis = await analyzeStoryFile(content)
       let props: import('./types.js').PropInfo[] = []
       if (tsClientReady) {
         const extracted = await tsClient.getComponentProps(filePath)

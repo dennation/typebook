@@ -54,7 +54,7 @@ packages/studio/
     constants.ts              — Shared constants (PACKAGE_NAME, etc.)
     cli.ts                    — CLI entry: `npx @dennation/ui-studio generate`
     core/
-      scanner.ts              — Glob scanner for .stories.tsx files + analysis
+      scanner.ts              — Glob scanner for .stories.tsx files + oxc AST analysis
       generator.ts            — Generates ui-studio-registry.gen.ts and ui-studio-meta.gen.ts content
       ts-client.ts            — TypeScript Compiler API client for type extraction
       type-parser.ts          — Converts TS type strings → PropInfo[] via oxc

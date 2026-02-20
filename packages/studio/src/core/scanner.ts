@@ -12,44 +12,104 @@ export async function findStoryFiles(
   return glob(pattern, { absolute: true })
 }
 
-/**
- * Parse a .stories.tsx file to extract export names and detect valuesOf() calls.
- * Uses simple regex-based analysis to avoid needing to execute the module.
- */
-export function analyzeStoryFile(content: string): {
+export interface StoryAnalysis {
   defaultExport: boolean
   namedExports: string[]
   componentImport: { name: string; path: string } | null
-} {
+}
+
+/**
+ * Parse a .stories.tsx file via oxc AST to extract exports and the component import.
+ *
+ * Extracts:
+ * - Named exports: `export const Sizes = ...` and `export { Sizes } from ...`
+ * - Default export: `export default ...`
+ * - Component import: finds `define(Component, ...)` call, then resolves
+ *   the matching ImportDeclaration (named or default import).
+ */
+export async function analyzeStoryFile(content: string): Promise<StoryAnalysis> {
+  const oxc = await import('oxc-parser')
+  const { program } = oxc.parseSync('story.tsx', content)
+  const body: any[] = program.body
+
   const namedExports: string[] = []
+  let defaultExport = false
 
-  // Find named exports: export const Sizes = ...
-  const exportRegex = /export\s+const\s+(\w+)\s*=/g
-  let match
-  while ((match = exportRegex.exec(content)) !== null) {
-    namedExports.push(match[1])
-  }
+  // Collect all imports: local name → { name, path }
+  const imports = new Map<string, { name: string; path: string }>()
 
-  // Check for default export
-  const defaultExport = /export\s+default\s+/.test(content)
+  // First argument of define() call
+  let defineArg: string | null = null
 
-  // Find the component import used in define()
-  // Pattern: import { ComponentName } from './path'
-  // We look for the component passed to define() first
-  let componentImport: { name: string; path: string } | null = null
+  for (const node of body) {
+    // --- Imports ---
+    if (node.type === 'ImportDeclaration') {
+      const source: string = node.source?.value ?? ''
+      for (const spec of node.specifiers ?? []) {
+        const localName: string = spec.local?.name
+        if (!localName) continue
 
-  const defineMatch = content.match(/define\(\s*(\w+)/)
-  if (defineMatch) {
-    const componentName = defineMatch[1]
-    // Find the import statement for this component
-    const importRegex = new RegExp(
-      `import\\s+\\{[^}]*\\b${componentName}\\b[^}]*\\}\\s+from\\s+['"]([^'"]+)['"]`,
-    )
-    const importMatch = content.match(importRegex)
-    if (importMatch) {
-      componentImport = { name: componentName, path: importMatch[1] }
+        if (spec.type === 'ImportDefaultSpecifier') {
+          imports.set(localName, { name: localName, path: source })
+        } else if (spec.type === 'ImportSpecifier') {
+          imports.set(localName, { name: spec.imported?.name ?? localName, path: source })
+        }
+      }
+    }
+
+    // --- Named exports ---
+    if (node.type === 'ExportNamedDeclaration') {
+      // export const Foo = ...
+      if (node.declaration?.type === 'VariableDeclaration') {
+        for (const decl of node.declaration.declarations ?? []) {
+          if (decl.id?.name) {
+            namedExports.push(decl.id.name)
+          }
+        }
+      }
+
+      // export { Foo, Bar } or export { Foo } from './other'
+      for (const spec of node.specifiers ?? []) {
+        const exported = spec.exported?.name
+        if (exported && exported !== 'default') {
+          namedExports.push(exported)
+        }
+      }
+    }
+
+    // --- Default export ---
+    if (node.type === 'ExportDefaultDeclaration') {
+      defaultExport = true
+    }
+
+    // --- Find define() call in top-level variable declarations ---
+    if (node.type === 'VariableDeclaration' && !defineArg) {
+      defineArg = findDefineArg(node.declarations)
+    }
+    if (node.type === 'ExportNamedDeclaration' && node.declaration?.type === 'VariableDeclaration' && !defineArg) {
+      defineArg = findDefineArg(node.declaration.declarations)
     }
   }
 
+  const componentImport = defineArg ? (imports.get(defineArg) ?? null) : null
+
   return { defaultExport, namedExports, componentImport }
+}
+
+/**
+ * Search variable declarators for a `define(Component, ...)` call
+ * and return the first argument name.
+ */
+function findDefineArg(declarations: any[]): string | null {
+  for (const decl of declarations ?? []) {
+    const init = decl.init
+    if (!init || init.type !== 'CallExpression') continue
+    if (init.callee?.type !== 'Identifier' || init.callee.name !== 'define') continue
+
+    const firstArg = init.arguments?.[0]
+    if (firstArg?.type === 'Identifier') {
+      return firstArg.name
+    }
+  }
+  return null
 }
