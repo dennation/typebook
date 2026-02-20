@@ -5,8 +5,10 @@ import type { ComponentType, ReactNode } from 'react'
 export interface StudioConfig {
   /** Glob pattern for .stories.tsx files */
   include?: string
-  /** Output path for the generated registry file (default: './studio.registry.gen.ts') */
+  /** Output path for the generated registry file (default: './ui-studio-registry.gen.ts') */
   output?: string
+  /** Output path for the generated meta file (default: './ui-studio-meta.gen.ts') */
+  metaOutput?: string
 }
 
 // --- Vite Plugin Config ---
@@ -30,7 +32,7 @@ export interface PropInfo {
   type: PropType
 }
 
-// --- Component Meta (extracted by plugin, stored in studio.meta.gen.ts) ---
+// --- Component Meta (extracted by plugin, stored in ui-studio-meta.gen.ts) ---
 
 export interface ComponentMeta {
   props: PropInfo[]

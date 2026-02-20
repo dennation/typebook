@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { resolve, relative, dirname, join } from 'node:path'
+import { resolve, relative } from 'node:path'
 import picomatch from 'picomatch'
 import type { Plugin } from 'vite'
 import type { VitePluginConfig, PropInfo } from '../../types.js'
@@ -10,7 +10,7 @@ import {
   PACKAGE_NAME,
   LOG_PREFIX,
   DEFAULT_REGISTRY_FILE,
-  META_FILENAME,
+  DEFAULT_META_FILE,
   DEFAULT_INCLUDE,
   VIRTUAL_MODULE_ID,
 } from '../../constants.js'
@@ -20,6 +20,7 @@ const RESOLVED_VIRTUAL_MODULE_ID = '\0' + VIRTUAL_MODULE_ID
 export function uiStudio(config?: VitePluginConfig): Plugin {
   const include = config?.include ?? DEFAULT_INCLUDE
   const registryOutput = config?.output ?? DEFAULT_REGISTRY_FILE
+  const metaOutput = config?.metaOutput ?? DEFAULT_META_FILE
   const isStoryFile = picomatch(include)
 
   let cwd: string
@@ -63,7 +64,7 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
     )
 
     const registryFilePath = resolve(cwd, registryOutput)
-    const metaFilePath = join(dirname(registryFilePath), META_FILENAME)
+    const metaFilePath = resolve(cwd, metaOutput)
 
     // Generate meta file first (registry imports it)
     const metaContent = generateMetaFile(files, cwd)
@@ -138,13 +139,12 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
       }
 
       await regenerateGenFiles()
-      const metaOutput = join(dirname(registryOutput), META_FILENAME)
       console.log(LOG_PREFIX, `Generated ${registryOutput} and ${metaOutput}`)
     },
 
     configureServer(server) {
       const registryFilePath = resolve(cwd, registryOutput)
-      const metaFilePath = join(dirname(registryFilePath), META_FILENAME)
+      const metaFilePath = resolve(cwd, metaOutput)
 
       server.watcher.on('change', (path) => {
         if (path === registryFilePath || path === metaFilePath) return
