@@ -82,14 +82,14 @@ export default button
 ```tsx
 // src/main.tsx
 import { Studio } from '@dennation/ui-studio/react'
-import registry from './ui-studio.gen' // auto-generated
+import registry from './studio.registry.gen' // auto-generated
 
 function App() {
   return <Studio registry={registry} />
 }
 ```
 
-Start Vite — the plugin scans your `*.stories.tsx` files, extracts types, and generates `ui-studio.gen.ts` automatically.
+Start Vite — the plugin scans your `*.stories.tsx` files, extracts types, and generates `studio.registry.gen.ts` + `studio.meta.gen.ts` automatically.
 
 ## API Reference
 
@@ -161,7 +161,7 @@ export const Matrix = button.matrix({
 import { Studio } from '@dennation/ui-studio/react'
 
 <Studio
-  registry={registry}  // from ui-studio.gen.ts
+  registry={registry}  // from studio.registry.gen.ts
   theme="light"        // "light" | "dark"
 />
 ```
@@ -170,8 +170,8 @@ import { Studio } from '@dennation/ui-studio/react'
 
 ```ts
 uiStudio({
-  include: './src/**/*.stories.tsx',  // glob pattern (default)
-  output: './ui-studio.gen.ts',       // generated file path (default)
+  include: './src/**/*.stories.tsx',      // glob pattern (default)
+  output: './studio.registry.gen.ts',     // registry file path (default)
 })
 ```
 
@@ -228,21 +228,19 @@ Vite plugin scans files ──► TypeScript Compiler API extracts prop types
                               oxc parses type strings into PropInfo[]
                                         │
                                         ▼
-                              Generates ui-studio.gen.ts
+                              Generates studio.meta.gen.ts (extracted types)
+                              Generates studio.registry.gen.ts (imports + assembly)
                                         │
                                         ▼
-                              resolve() replaces allOf/values/generate
-                              markers with real variant data
-                                        │
-                                        ▼
-                              <Studio /> renders sidebar + stories
+                              <Studio /> resolves allOf markers internally
+                              and renders sidebar + stories
 ```
 
 1. **Scan** — The Vite plugin finds all `*.stories.tsx` files matching the `include` glob.
 2. **Extract** — TypeScript Compiler API resolves component prop types as strings.
 3. **Parse** — [oxc](https://oxc.rs) parses type strings into structured `PropInfo[]` (literal unions, booleans, strings, numbers, nodes, functions).
-4. **Generate** — A `ui-studio.gen.ts` file is written, aggregating all stories with their type data.
-5. **Resolve** — At runtime, `allOf('size')` markers are replaced with actual values from the extracted types.
+4. **Generate** — Two files are written: `studio.meta.gen.ts` (extracted component metadata) and `studio.registry.gen.ts` (imports stories, configs, and meta into a registry array).
+5. **Resolve** — At runtime, `<Studio />` resolves `allOf('size')` markers using a `Map<Component, ComponentMeta>` built from the registry.
 6. **Render** — `<Studio />` renders a sidebar, interactive props panel, and story cards with iframe isolation.
 
 The plugin watches for file changes and regenerates incrementally — only re-extracting types for changed files.
@@ -250,7 +248,7 @@ The plugin watches for file changes and regenerates incrementally — only re-ex
 ## Package Exports
 
 ```ts
-import { define, resolve } from '@dennation/ui-studio'          // Core API
+import { define } from '@dennation/ui-studio'                    // Core API + types
 import { Studio } from '@dennation/ui-studio/react'              // React components
 import { uiStudio } from '@dennation/ui-studio/vite'             // Vite plugin
 ```

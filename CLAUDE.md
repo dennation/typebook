@@ -23,7 +23,7 @@ packages/
 
 - **`package.json`** — Workspace root. Private, delegates scripts to packages via `pnpm -r`.
 - **`pnpm-workspace.yaml`** — Declares `packages/*` as workspace members.
-- **`.gitignore`** — Ignores `node_modules/`, `dist/`, `.vite/`, `*.tsbuildinfo`, `studio.gen.ts`.
+- **`.gitignore`** — Ignores `node_modules/`, `dist/`, `.vite/`, `*.tsbuildinfo`.
 
 ---
 
@@ -47,20 +47,20 @@ packages/studio/
   tsconfig.json
   vite.config.ts
   src/
-    index.ts                  — Public package exports (define, resolveStories, types)
-    types.ts                  — All shared types (DefineResult, Story, PropInfo, ResolvedComponent, etc.)
+    index.ts                  — Public package exports (define, types)
+    types.ts                  — All shared types (DefineResult, Story, PropInfo, ComponentMeta, RegistryEntry, etc.)
     define.ts                 — define() → DefineResult with single(), variants(), matrix(), allOf(), values(), generate()
-    resolve.ts                — resolveStories() — resolves VariantConfig markers into variants
+    resolve.ts                — resolveRegistry() — internal, resolves VariantConfig markers into variants (used by Studio)
     constants.ts              — Shared constants (PACKAGE_NAME, etc.)
     cli.ts                    — CLI entry: `npx @dennation/ui-studio generate`
     core/
       scanner.ts              — Glob scanner for .stories.tsx files + analysis
-      generator.ts            — Generates ui-studio.gen.ts content
+      generator.ts            — Generates studio.registry.gen.ts and studio.meta.gen.ts content
       ts-client.ts            — TypeScript Compiler API client for type extraction
       type-parser.ts          — Converts TS type strings → PropInfo[] via oxc
     plugins/
       vite/
-        index.ts              — Vite plugin: type extraction, file watcher, .gen generation, /__studio route
+        index.ts              — Vite plugin: type extraction, file watcher, two-file gen generation
     react/
       index.ts                — React exports
       components/
@@ -82,13 +82,13 @@ packages/studio/
 
 ### Build entry points
 
-- **`index`** — Library exports (`define`, `resolveStories`, types). Consumed by user code and generated `.gen.ts`.
+- **`index`** — Library exports (`define`, types). Consumed by user code and generated `.gen.ts`.
 - **`react/index`** — `<Studio />` component, `ErrorBoundary`.
-- **`plugins/vite`** — Vite plugin (`uiStudio()`). Handles type extraction and .gen file generation.
+- **`plugins/vite`** — Vite plugin (`uiStudio()`). Handles type extraction and two-file gen generation.
 
 ### Package exports
 
-- `@dennation/ui-studio` — define, resolveStories, types
+- `@dennation/ui-studio` — define, types (ComponentMeta, RegistryEntry, etc.)
 - `@dennation/ui-studio/react` — Studio component
 - `@dennation/ui-studio/vite` — uiStudio vite plugin
 
@@ -101,21 +101,24 @@ packages/studio/
                                               ↓
                                     oxc parse  →  PropInfo[]
                                               ↓
-                                    generateStudioGenFile()  →  ui-studio.gen.ts
+                                    generateMetaFile()       →  studio.meta.gen.ts (extracted types)
+                                    generateRegistryFile()   →  studio.registry.gen.ts (imports + assembly)
                                               ↓
-                                    resolveStories()  →  ResolvedComponent[]
+                                    <Studio />  resolves allOf markers internally
                                               ↓
-                                    <Studio registry={registry} />
+                                    ResolvedComponent[]  →  render
 ```
 
 ### Key design decisions
 
-- **Vite plugin** — integrates into the user's existing Vite setup. No separate dev server. Scans `.stories.tsx` files, extracts types via TypeScript Compiler API, generates `ui-studio.gen.ts`, watches for changes, and serves `/__studio` route.
+- **Vite plugin** — integrates into the user's existing Vite setup. No separate dev server. Scans `.stories.tsx` files, extracts types via TypeScript Compiler API, generates two gen files, watches for changes.
 - **Type extraction via TS Compiler API** — uses TypeScript Compiler API directly (`ts-client.ts`) to get component prop types as strings. These strings are parsed by oxc into structured `PropInfo[]`.
-- **Generated .gen file** — single `ui-studio.gen.ts` (TanStack Router pattern) aggregates all stories with resolved type data. `resolveStories()` replaces `VariantConfig` markers with actual variant values from extracted types.
+- **Two generated files** — `studio.registry.gen.ts` (imports stories/configs, assembles registry array) and `studio.meta.gen.ts` (extracted component metadata keyed by file path). Registry imports meta internally — user only imports registry.
+- **Self-contained stories** — each story (single/variants/matrix) carries its own `component` reference and `defaults`, making stories reusable without the DefineResult.
+- **Internal resolution** — `allOf('size')` markers are resolved inside `<Studio />` at render time using `Map<Component, ComponentMeta>`, not in the gen file.
 - **Iframe isolation** — each variant card renders inside an iframe (`IframePreview`) so component styles don't bleed into Studio UI and vice versa.
 - **Error Boundary** — React error boundaries isolate component crashes per variant.
-- **VariantConfig marker pattern** — `button.allOf('size')` returns a typed marker `{ __type: 'allOf', prop: 'size' }` that gets resolved at runtime by `resolveStories()` using TS-extracted type data.
+- **VariantConfig marker pattern** — `button.allOf('size')` returns a typed marker `{ __type: 'allOf', prop: 'size' }` that gets resolved at runtime by Studio using TS-extracted type data.
 - **Three story kinds** — `single` (one card), `variants` (grid of values for one prop), `matrix` (table: x prop × y props).
 
 ---
