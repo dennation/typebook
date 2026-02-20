@@ -5,11 +5,12 @@ import type { Plugin } from 'vite'
 import type { VitePluginConfig, PropInfo } from '../../types.js'
 import { TypeScriptClient } from '../../core/ts-client.js'
 import { findStoryFiles, analyzeStoryFile } from '../../core/scanner.js'
-import { generateStudioGenFile } from '../../core/generator.js'
+import { generateRegistryFile, generateMetaFile } from '../../core/generator.js'
 import {
   PACKAGE_NAME,
   LOG_PREFIX,
-  DEFAULT_GEN_FILE,
+  DEFAULT_REGISTRY_FILE,
+  DEFAULT_META_FILE,
   DEFAULT_INCLUDE,
   VIRTUAL_MODULE_ID,
 } from '../../constants.js'
@@ -18,7 +19,7 @@ const RESOLVED_VIRTUAL_MODULE_ID = '\0' + VIRTUAL_MODULE_ID
 
 export function uiStudio(config?: VitePluginConfig): Plugin {
   const include = config?.include ?? DEFAULT_INCLUDE
-  const output = config?.output ?? DEFAULT_GEN_FILE
+  const registryOutput = config?.output ?? DEFAULT_REGISTRY_FILE
   const isStoryFile = picomatch(include)
 
   let cwd: string
@@ -45,15 +46,13 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
   function invalidateTypeCache(changedFile: string): void {
     const relChanged = relative(cwd, changedFile)
     if (isStoryFile(relChanged)) {
-      // Story file changed — invalidate only that file
       typeCache.delete(changedFile)
     } else {
-      // Non-story file (component, util, etc.) — could affect any story's types
       typeCache.clear()
     }
   }
 
-  async function regenerateGenFile(): Promise<void> {
+  async function regenerateGenFiles(): Promise<void> {
     const files = await Promise.all(
       storyFiles.map(async (filePath) => {
         const content = readFileSync(filePath, 'utf-8')
@@ -63,15 +62,24 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
       }),
     )
 
-    const genFilePath = resolve(cwd, output)
-    const content = generateStudioGenFile(files, genFilePath)
+    const registryFilePath = resolve(cwd, registryOutput)
+    const metaFilePath = resolve(cwd, DEFAULT_META_FILE)
 
-    // Only write if content changed to avoid unnecessary HMR
-    const existing = existsSync(genFilePath)
-      ? readFileSync(genFilePath, 'utf-8')
+    // Generate meta file first (registry imports it)
+    const metaContent = generateMetaFile(files, cwd)
+    writeIfChanged(metaFilePath, metaContent)
+
+    // Generate registry file
+    const registryContent = generateRegistryFile(files, registryFilePath, metaFilePath, cwd)
+    writeIfChanged(registryFilePath, registryContent)
+  }
+
+  function writeIfChanged(filePath: string, content: string): void {
+    const existing = existsSync(filePath)
+      ? readFileSync(filePath, 'utf-8')
       : ''
     if (content !== existing) {
-      writeFileSync(genFilePath, content, 'utf-8')
+      writeFileSync(filePath, content, 'utf-8')
     }
   }
 
@@ -79,17 +87,14 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
     if (debounceTimer) clearTimeout(debounceTimer)
     debounceTimer = setTimeout(async () => {
       try {
-        // Re-scan for new/deleted files
         storyFiles = await findStoryFiles(cwd, include)
 
         if (lsp && lspReady && changedFile) {
-          // Invalidate cached types for affected files
           invalidateTypeCache(changedFile)
-          // Incremental rebuild — TS reuses unchanged source files
           await lsp.notifyChange(changedFile)
         }
 
-        await regenerateGenFile()
+        await regenerateGenFiles()
       } catch (err) {
         console.error(LOG_PREFIX, 'Failed to regenerate:', err)
       }
@@ -111,17 +116,15 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
 
     load(id) {
       if (id === RESOLVED_VIRTUAL_MODULE_ID) {
-        const genPath = resolve(cwd, output).replace(/\.ts$/, '')
-        return `export { default } from '${genPath}'`
+        const registryPath = resolve(cwd, registryOutput).replace(/\.ts$/, '')
+        return `export { default } from '${registryPath}'`
       }
     },
 
     async buildStart() {
-      // 1. Find story files
       storyFiles = await findStoryFiles(cwd, include)
       console.log(LOG_PREFIX, `Found ${storyFiles.length} story file(s)`)
 
-      // 2. Start TypeScript client
       const client = new TypeScriptClient(cwd)
       try {
         await client.start()
@@ -134,17 +137,16 @@ export function uiStudio(config?: VitePluginConfig): Plugin {
         console.warn(LOG_PREFIX, (err as Error).message)
       }
 
-      // 3. Generate initial .gen file
-      await regenerateGenFile()
-      console.log(LOG_PREFIX, `Generated ${output}`)
+      await regenerateGenFiles()
+      console.log(LOG_PREFIX, `Generated ${registryOutput} and ${DEFAULT_META_FILE}`)
     },
 
     configureServer(server) {
-      const genFilePath = resolve(cwd, output)
+      const registryFilePath = resolve(cwd, registryOutput)
+      const metaFilePath = resolve(cwd, DEFAULT_META_FILE)
 
       server.watcher.on('change', (path) => {
-        if (path === genFilePath) return
-        // Regenerate on any TS/TSX change (types may affect story props)
+        if (path === registryFilePath || path === metaFilePath) return
         if (path.endsWith('.tsx') || path.endsWith('.ts')) {
           debouncedRegenerate(path)
         }

@@ -1,10 +1,9 @@
+import type { ComponentType } from 'react'
 import type {
-  DefineResult,
   PropInfo,
   ResolvedComponent,
   ResolvedStory,
   ResolvedVariant,
-  ResolveStoriesInput,
   Story,
   StoryRenderFn,
   AllOfConfig,
@@ -12,6 +11,8 @@ import type {
   GenerateConfig,
   VariantConfig,
   MatrixRow,
+  RegistryEntry,
+  ComponentMeta,
 } from './types.js'
 
 function isAllOfConfig(v: unknown): v is AllOfConfig {
@@ -50,15 +51,12 @@ function resolveVariantConfig(
   baseProps: Record<string, unknown>,
 ): ResolvedVariant[] {
   if (isAllOfConfig(config)) {
-    // Auto-generate from prop type
     const propInfo = allProps.find((p) => p.name === config.prop)
     if (!propInfo) return []
-
     return generateVariantsFromType(propInfo, config.prop, baseProps)
   }
 
   if (isValuesConfig(config)) {
-    // Manual values
     return config.values.map((value) => ({
       label: String(value),
       props: { ...baseProps, [config.prop]: value },
@@ -66,7 +64,6 @@ function resolveVariantConfig(
   }
 
   if (isGenerateConfig(config)) {
-    // Generated values
     const values: unknown[] = []
     for (let i = 0; i < config.count; i++) {
       values.push(config.fn())
@@ -81,43 +78,55 @@ function resolveVariantConfig(
 }
 
 /**
- * Resolves stories by replacing VariantConfig markers with actual variant values
- * from the extracted prop types.
+ * Resolves a full registry into ResolvedComponent[] for rendering.
+ * Builds a Map<Component, ComponentMeta> and resolves allOf markers.
  */
-export function resolve(
-  defineResult: DefineResult<any>,
-  input: ResolveStoriesInput,
-): ResolvedComponent {
-  const { props, stories } = input
-  const resolvedStories: ResolvedStory[] = []
-
-  for (const entry of stories) {
-    const { name, story } = entry
-    resolvedStories.push(resolveStory(name, story, props, defineResult.defaults))
+export function resolveRegistry(registry: RegistryEntry[]): ResolvedComponent[] {
+  // Build component → meta map for cross-file story resolution
+  const metaMap = new Map<ComponentType<any>, ComponentMeta>()
+  for (const entry of registry) {
+    if (entry.meta) {
+      metaMap.set(entry.config.component, entry.meta)
+    }
   }
 
-  return {
-    component: defineResult.component,
-    name:
-      defineResult.title ??
-      defineResult.component.displayName ??
-      defineResult.component.name ??
-      'Unknown',
-    title: defineResult.title,
-    group: defineResult.group,
-    defaults: defineResult.defaults,
-    props,
-    stories: resolvedStories,
-  }
+  return registry.map((entry) => {
+    const { config, stories, meta } = entry
+    const props = meta?.props ?? []
+
+    const resolvedStories: ResolvedStory[] = []
+    for (const [name, story] of Object.entries(stories)) {
+      // For cross-file reused stories, look up meta by story's component reference
+      const storyProps = story.component === config.component
+        ? props
+        : (metaMap.get(story.component)?.props ?? [])
+
+      resolvedStories.push(resolveStory(name, story, storyProps))
+    }
+
+    return {
+      component: config.component,
+      name:
+        config.title ??
+        config.component.displayName ??
+        config.component.name ??
+        'Unknown',
+      title: config.title,
+      group: config.group,
+      defaults: config.defaults,
+      props,
+      stories: resolvedStories,
+    }
+  })
 }
 
 function resolveStory(
   name: string,
   story: Story,
   allProps: PropInfo[],
-  defaults: Record<string, unknown>,
 ): ResolvedStory {
-  // Single story — single variant with merged props
+  const defaults = story.defaults
+
   if (story.kind === 'single') {
     const mergedProps = { ...defaults, ...story.props }
     return {
@@ -128,12 +137,11 @@ function resolveStory(
     }
   }
 
-  // Matrix story — cross-product of x and y props
   if (story.kind === 'matrix') {
-    return resolveMatrixStoryFromConfigs(name, story, allProps, defaults, story.render)
+    return resolveMatrixStory(name, story, allProps, defaults, story.render)
   }
 
-  // Variants story — resolve items config
+  // Variants story
   const baseProps = { ...defaults, ...story.props }
   const variants = resolveVariantConfig(story.items, allProps, baseProps)
 
@@ -146,7 +154,7 @@ function resolveStory(
   }
 }
 
-function resolveMatrixStoryFromConfigs(
+function resolveMatrixStory(
   name: string,
   story: { x: VariantConfig; y: VariantConfig[]; props?: Record<string, unknown> },
   allProps: PropInfo[],
@@ -155,26 +163,21 @@ function resolveMatrixStoryFromConfigs(
 ): ResolvedStory {
   const baseProps = { ...defaults, ...story.props }
 
-  // Resolve x (columns) config - extract just the values
   const xVariants = resolveVariantConfig(story.x, allProps, {})
   if (xVariants.length === 0) {
     return { name, kind: 'matrix', variants: [], render }
   }
 
-  // Get the prop name from x config
   const xProp = (story.x as AllOfConfig | ValuesConfig | GenerateConfig).prop
   const xValues = xVariants.map((v) => v.props[xProp])
 
-  // Generate rows for each y config
   const rows: MatrixRow[] = []
   for (const yConfig of story.y) {
     const yVariants = resolveVariantConfig(yConfig, allProps, {})
     if (yVariants.length === 0) continue
 
-    // Get the prop name from y config
     const yProp = (yConfig as AllOfConfig | ValuesConfig | GenerateConfig).prop
 
-    // Create one row per y value
     for (const yVariant of yVariants) {
       const yValue = yVariant.props[yProp]
 

@@ -5,7 +5,7 @@ import type { ComponentType, ReactNode } from 'react'
 export interface StudioConfig {
   /** Glob pattern for .stories.tsx files */
   include?: string
-  /** Output path for the generated file (default: './studio.gen.ts') */
+  /** Output path for the generated registry file (default: './studio.registry.gen.ts') */
   output?: string
 }
 
@@ -13,7 +13,7 @@ export interface StudioConfig {
 
 export type VitePluginConfig = StudioConfig
 
-// --- Prop Info Types (from LSP extraction) ---
+// --- Prop Info Types (from type extraction) ---
 
 export type PropType =
   | { kind: 'literal'; values: string[] }
@@ -28,6 +28,12 @@ export interface PropInfo {
   name: string
   optional: boolean
   type: PropType
+}
+
+// --- Component Meta (extracted by plugin, stored in studio.meta.gen.ts) ---
+
+export interface ComponentMeta {
+  props: PropInfo[]
 }
 
 // --- Define API Types ---
@@ -95,38 +101,40 @@ export type StoryRenderFn = (props: any) => ReactNode
 /** Wrapper function that wraps all stories of a component (e.g. with a provider) */
 export type WrapperFn = (Story: ComponentType) => ReactNode
 
-/** Single story — one variant with fixed props */
-export interface SingleStory {
+/** Common fields for all story types — makes stories self-contained */
+interface StoryBase {
   __type: 'story'
-  kind: 'single'
-  props?: Record<string, unknown>
+  component: ComponentType<any>
+  defaults: Record<string, unknown>
   render: StoryRenderFn
 }
 
+/** Single story — one variant with fixed props */
+export interface SingleStory extends StoryBase {
+  kind: 'single'
+  props?: Record<string, unknown>
+}
+
 /** Variants story — multiple variants generated from config */
-export interface VariantsStory {
-  __type: 'story'
+export interface VariantsStory extends StoryBase {
   kind: 'variants'
   items: VariantConfig
   props?: Record<string, unknown>
   columns?: number
-  render: StoryRenderFn
 }
 
 /** Matrix story — cross-product of x (columns) with y (rows) */
-export interface MatrixStory {
-  __type: 'story'
+export interface MatrixStory extends StoryBase {
   kind: 'matrix'
   x: VariantConfig
   y: VariantConfig[]
   props?: Record<string, unknown>
-  render: StoryRenderFn
 }
 
 /** Exported from .stories.tsx — the result of single(), variants(), or matrix() */
 export type Story = SingleStory | VariantsStory | MatrixStory
 
-/** Returned by define() */
+/** Returned by define() — component page configuration + story builder */
 export interface DefineResult<Props, CoveredByDefaults extends keyof Props = never> {
   __type: 'define'
   component: ComponentType<any>
@@ -160,7 +168,15 @@ export interface DefineResult<Props, CoveredByDefaults extends keyof Props = nev
   ): GenerateConfig
 }
 
-// --- Resolved Types (output of resolveStories) ---
+// --- Registry (output of gen file, input to <Studio />) ---
+
+export interface RegistryEntry {
+  config: DefineResult<any>
+  stories: Record<string, Story>
+  meta: ComponentMeta
+}
+
+// --- Resolved Types (internal, used by Studio for rendering) ---
 
 export interface ResolvedVariant {
   label: string
@@ -169,15 +185,15 @@ export interface ResolvedVariant {
 
 /** Matrix row — one secondary prop value crossed with all primary values */
 export interface MatrixRow {
-  label: string // e.g., "solid" or "variant=solid"
-  variants: ResolvedVariant[] // One for each primary prop value
+  label: string
+  variants: ResolvedVariant[]
 }
 
 /** Matrix structure for resolved matrix stories */
 export interface ResolvedMatrix {
   primaryProp: string
-  primaryValues: string[] // Column headers
-  rows: MatrixRow[] // One row per secondary prop value
+  primaryValues: string[]
+  rows: MatrixRow[]
 }
 
 export interface ResolvedStory {
@@ -197,16 +213,4 @@ export interface ResolvedComponent {
   defaults: Record<string, unknown>
   props: PropInfo[]
   stories: ResolvedStory[]
-}
-
-// --- resolveStories() input ---
-
-export interface StoryEntry {
-  name: string
-  story: Story
-}
-
-export interface ResolveStoriesInput {
-  props: PropInfo[]
-  stories: StoryEntry[]
 }

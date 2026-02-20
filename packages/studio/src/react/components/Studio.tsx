@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect } from 'react'
-import type { ResolvedComponent } from '../../types.js'
+import { useState, useCallback, useEffect, useMemo } from 'react'
+import type { RegistryEntry, ResolvedComponent } from '../../types.js'
+import { resolveRegistry } from '../../resolve.js'
 import { PACKAGE_NAME } from '../../constants.js'
 import { groupComponents } from '../utils/groupComponents.js'
 import { StoryRenderer } from './StoryRenderer.js'
@@ -7,7 +8,7 @@ import { ComponentPreview } from './ComponentPreview.js'
 import styles from '../styles/styles.css?inline'
 
 export interface StudioProps {
-	registry: ResolvedComponent[]
+	registry: RegistryEntry[]
 	theme?: 'light' | 'dark'
 }
 
@@ -23,15 +24,18 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 	const [theme, setTheme] = useState(initialTheme)
 	const [searchQuery, setSearchQuery] = useState('')
 
+	// Resolve registry entries into renderable components
+	const resolved = useMemo(() => resolveRegistry(registry), [registry])
+
 	const findByKebab = useCallback(
 		(kebabComponent: string, kebabStory: string) => {
-			const comp = registry.find((c) => toKebabCase(c.name) === kebabComponent)
+			const comp = resolved.find((c) => toKebabCase(c.name) === kebabComponent)
 			if (!comp) return null
 			const story = comp.stories.find((s) => toKebabCase(s.name) === kebabStory)
 			if (!story) return null
 			return { component: comp.name, story: story.name }
 		},
-		[registry],
+		[resolved],
 	)
 
 	const parseHash = useCallback((): { component: string; story: string } | null => {
@@ -77,17 +81,17 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 	}, [])
 
 	// Find active component
-	const comp = registry.find((c) => c.name === activeComponent)
+	const comp = resolved.find((c) => c.name === activeComponent)
 
 	// Filter components by search query (matches title, displayName, function name)
 	const filtered = searchQuery
-		? registry.filter((c) => {
+		? resolved.filter((c) => {
 				const q = searchQuery.toLowerCase()
 				return [c.title, c.component.displayName, c.component.name, c.group]
 					.filter(Boolean)
 					.some((s) => s!.toLowerCase().includes(q))
 			})
-		: registry
+		: resolved
 
 	// Group components by group
 	const grouped = groupComponents(filtered)

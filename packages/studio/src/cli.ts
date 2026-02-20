@@ -2,11 +2,12 @@ import { resolve } from 'node:path'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { TypeScriptClient } from './core/ts-client.js'
 import { findStoryFiles, analyzeStoryFile } from './core/scanner.js'
-import { generateStudioGenFile } from './core/generator.js'
+import { generateRegistryFile, generateMetaFile } from './core/generator.js'
 import {
   PACKAGE_NAME,
   LOG_PREFIX,
-  DEFAULT_GEN_FILE,
+  DEFAULT_REGISTRY_FILE,
+  DEFAULT_META_FILE,
   DEFAULT_INCLUDE,
 } from './constants.js'
 
@@ -21,9 +22,9 @@ if (command === 'generate') {
     : DEFAULT_INCLUDE
 
   const outputArg = args.find((a) => a.startsWith('--output='))
-  const output = outputArg
+  const registryOutput = outputArg
     ? outputArg.split('=')[1]
-    : DEFAULT_GEN_FILE
+    : DEFAULT_REGISTRY_FILE
 
   console.log(LOG_PREFIX, 'Scanning story files...')
   const files = await findStoryFiles(cwd, include)
@@ -57,11 +58,17 @@ if (command === 'generate') {
     }),
   )
 
-  // Generate .gen file
-  const genFilePath = resolve(cwd, output)
-  const content = generateStudioGenFile(fileInfos, genFilePath)
-  writeFileSync(genFilePath, content, 'utf-8')
-  console.log(LOG_PREFIX, `Generated ${output}`)
+  // Generate meta file
+  const metaFilePath = resolve(cwd, DEFAULT_META_FILE)
+  const metaContent = generateMetaFile(fileInfos, cwd)
+  writeFileSync(metaFilePath, metaContent, 'utf-8')
+  console.log(LOG_PREFIX, `Generated ${DEFAULT_META_FILE}`)
+
+  // Generate registry file
+  const registryFilePath = resolve(cwd, registryOutput)
+  const registryContent = generateRegistryFile(fileInfos, registryFilePath, metaFilePath, cwd)
+  writeFileSync(registryFilePath, registryContent, 'utf-8')
+  console.log(LOG_PREFIX, `Generated ${registryOutput}`)
 
   lsp.stop()
 } else {
@@ -69,11 +76,11 @@ if (command === 'generate') {
   @dennation/${PACKAGE_NAME}
 
   Commands:
-    generate    Generate ${DEFAULT_GEN_FILE} from .stories.tsx files
+    generate    Generate ${DEFAULT_REGISTRY_FILE} and ${DEFAULT_META_FILE} from .stories.tsx files
 
   Options:
     --include=GLOB   Story files glob pattern (default: ${DEFAULT_INCLUDE})
-    --output=PATH    Output path for generated file (default: ${DEFAULT_GEN_FILE})
+    --output=PATH    Output path for registry file (default: ${DEFAULT_REGISTRY_FILE})
 
   Usage:
     npx @dennation/${PACKAGE_NAME} generate
