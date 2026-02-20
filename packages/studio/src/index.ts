@@ -1,5 +1,4 @@
 export { define } from './define.js'
-export { resolve } from './resolve.js'
 export type {
   Expand,
   StudioConfig,
@@ -16,12 +15,7 @@ export type {
   GenerateConfig,
   PropInfo,
   PropType,
-  ResolvedComponent,
-  ResolvedStory,
-  ResolvedVariant,
-  MatrixRow,
-  ResolvedMatrix,
-  StoryEntry,
-  ResolveStoriesInput,
+  ComponentMeta,
+  RegistryEntry,
   WrapperFn,
 } from './types.js'

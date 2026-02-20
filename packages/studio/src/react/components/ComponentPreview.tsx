@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import type { ResolvedComponent, PropInfo } from '../../types.js'
+import type { ComponentType } from 'react'
+import type { PropInfo } from '../../types.js'
 import { IframePreview } from './IframePreview.js'
 import { ErrorBoundary } from './ErrorBoundary.js'
 import { PropControl } from './PropControl.js'
@@ -16,15 +17,20 @@ function isControllable(prop: PropInfo): boolean {
   return k === 'literal' || k === 'boolean' || k === 'string' || k === 'number' || k === 'node'
 }
 
-export function ComponentPreview({ comp }: { comp: ResolvedComponent }) {
-  const [controlProps, setControlProps] = useState<Record<string, unknown>>(comp.defaults)
+export function ComponentPreview({
+  component: Component,
+  defaults,
+  props,
+}: {
+  component: ComponentType<any>
+  defaults: Record<string, unknown>
+  props: PropInfo[]
+}) {
+  const [controlProps, setControlProps] = useState<Record<string, unknown>>(defaults)
 
   const handleChange = (propName: string, value: unknown) => {
     setControlProps((prev) => ({ ...prev, [propName]: value }))
   }
-
-  const props = comp.props ?? []
-  const Component = comp.component
 
   return (
     <div className="st:grid st:grid-cols-[1fr_320px] st:border st:border-border st:rounded-lg st:overflow-hidden st:mb-6">

@@ -1,19 +1,19 @@
-import type { ResolvedComponent } from '../../types.js'
+import type { RegistryEntry } from '../../types.js'
 
 export interface GroupedComponents {
   group: string | null
-  components: ResolvedComponent[]
+  components: RegistryEntry[]
 }
 
-export function groupComponents(registry: ResolvedComponent[]): GroupedComponents[] {
-  const groups = new Map<string | null, ResolvedComponent[]>()
+export function groupComponents(registry: RegistryEntry[]): GroupedComponents[] {
+  const groups = new Map<string | null, RegistryEntry[]>()
 
-  for (const comp of registry) {
-    const group = comp.group ?? null
+  for (const entry of registry) {
+    const group = entry.config.group ?? null
     if (!groups.has(group)) {
       groups.set(group, [])
     }
-    groups.get(group)!.push(comp)
+    groups.get(group)!.push(entry)
   }
 
   const result: GroupedComponents[] = []

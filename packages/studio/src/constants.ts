@@ -8,7 +8,10 @@ export const PACKAGE_NAME = 'ui-studio'
 export const LOG_PREFIX = `[${PACKAGE_NAME}]`
 
 /** Default output file for generated registry */
-export const DEFAULT_GEN_FILE = `./${PACKAGE_NAME}.gen.ts`
+export const DEFAULT_REGISTRY_FILE = './ui-studio-registry.gen.ts'
+
+/** Default output file for generated component meta */
+export const DEFAULT_META_FILE = './ui-studio-meta.gen.ts'
 
 /** Virtual module ID for Vite */
 export const VIRTUAL_MODULE_ID = `virtual:${PACKAGE_NAME}-registry`

@@ -45,6 +45,8 @@ export function define<
       return {
         __type: 'story',
         kind: 'single',
+        component,
+        defaults,
         props: config?.props ? { ...config.props } : undefined,
         render: wrapRender(config?.render ?? defaultRender),
       }
@@ -58,6 +60,8 @@ export function define<
       return {
         __type: 'story',
         kind: 'variants',
+        component,
+        defaults,
         items: config.items,
         props: config.props ? { ...config.props } : undefined,
         columns: config.columns,
@@ -73,6 +77,8 @@ export function define<
       return {
         __type: 'story',
         kind: 'matrix',
+        component,
+        defaults,
         x: config.x,
         y: config.y,
         props: config.props ? { ...config.props } : undefined,
