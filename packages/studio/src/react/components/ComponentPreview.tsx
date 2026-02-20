@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { ComponentType } from 'react'
 import type { PropInfo } from '../../types.js'
-import { IframePreview } from './IframePreview.js'
 import { ErrorBoundary } from './ErrorBoundary.js'
 import { PropControl } from './PropControl.js'
 
@@ -36,13 +35,11 @@ export function ComponentPreview({
     <div className="st:grid st:grid-cols-[1fr_320px] st:border st:border-border st:rounded-lg st:overflow-hidden st:mb-6">
       {/* Preview */}
       <div className="st:border-r st:border-border">
-        <IframePreview>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '120px', padding: '24px' }}>
-            <ErrorBoundary>
-              <Component {...controlProps} />
-            </ErrorBoundary>
-          </div>
-        </IframePreview>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '120px', padding: '24px' }}>
+          <ErrorBoundary>
+            <Component {...controlProps} />
+          </ErrorBoundary>
+        </div>
       </div>
 
       {/* Props panel */}

@@ -31,15 +31,6 @@ Virtual module уже частично реализован (`VIRTUAL_MODULE_ID`
 
 ## Tier 2 — Производительность, надёжность и Quick Wins
 
-### Iframe: виртуализация / lazy rendering
-Каждый вариант рендерится в отдельном `<IframePreview>` (используется в `VariantCard.tsx` и `StoryRenderer.tsx`).
-Страница Button из playground = ~71 iframe одновременно. На сложных компонентах — тормоза.
-Варианты решения (от дешёвого к дорогому):
-1. **IntersectionObserver** — рендерить iframe только когда карточка в viewport. ~30 строк кода.
-2. **Один shared iframe** для variants/matrix внутри одной story.
-3. **Shadow DOM** вместо iframe — легче, но слабее изоляция (не блокирует JS, только CSS).
-**Effort: низкий (вариант 1) — средний (варианты 2–3).** **Impact: высокий.** Без этого матрицы 10×10 неюзабельны.
-
 ### Устойчивость type extraction
 `convertTsType()` в `ts-client.ts` покрывает базовые случаи (literals, boolean, string, number, function, ReactNode).
 Ломается на: discriminated unions, template literal types, conditional types, `Record<K, V>`, deep generics.

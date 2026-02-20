@@ -41,7 +41,7 @@ export function define<
     defaults,
 
     // Story creation methods
-    single(config?: { props?: any; render?: any }): SingleStory {
+    single(config?: { props?: any; render?: any; isolate?: boolean }): SingleStory {
       return {
         __type: 'story',
         kind: 'single',
@@ -49,6 +49,7 @@ export function define<
         defaults,
         props: config?.props ? { ...config.props } : undefined,
         render: wrapRender(config?.render ?? defaultRender),
+        isolate: config?.isolate,
       }
     },
 
@@ -56,6 +57,7 @@ export function define<
       items: VariantConfig
       props?: any
       columns?: number
+      isolate?: boolean
     }): VariantsStory {
       return {
         __type: 'story',
@@ -66,6 +68,7 @@ export function define<
         props: config.props ? { ...config.props } : undefined,
         columns: config.columns,
         render: wrapRender(defaultRender),
+        isolate: config.isolate,
       }
     },
 
@@ -73,6 +76,7 @@ export function define<
       x: VariantConfig
       y: VariantConfig[]
       props?: any
+      isolate?: boolean
     }): MatrixStory {
       return {
         __type: 'story',
@@ -83,6 +87,7 @@ export function define<
         y: config.y,
         props: config.props ? { ...config.props } : undefined,
         render: wrapRender(defaultRender),
+        isolate: config.isolate,
       }
     },
 

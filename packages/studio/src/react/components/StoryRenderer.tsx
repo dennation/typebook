@@ -20,7 +20,7 @@ function RenderSingle({ story }: { story: SingleStory }) {
   const merged = { ...story.defaults, ...story.props }
 
   return (
-    <VariantCard label="default" props={merged} render={story.render} />
+    <VariantCard label="default" props={merged} render={story.render} isolate={story.isolate} />
   )
 }
 
@@ -31,7 +31,7 @@ function RenderVariants({ story, props }: { story: VariantsStory; props: PropInf
   return (
     <div style={getGridStyle(variants.length, story.columns)}>
       {variants.map((v) => (
-        <VariantCard key={v.label} label={v.label} props={v.props} render={story.render} />
+        <VariantCard key={v.label} label={v.label} props={v.props} render={story.render} isolate={story.isolate} />
       ))}
     </div>
   )
@@ -88,20 +88,26 @@ function RenderMatrix({ story, props }: { story: MatrixStory; props: PropInfo[] 
               <td className="st:border st:border-border st:bg-bg-sidebar st:p-2 st:text-sm st:font-semibold st:text-left">
                 {row.label}
               </td>
-              {row.cells.map((cell) => (
-                <td
-                  key={`${row.label}-${cell.label}`}
-                  className="st:border st:border-border st:p-0"
-                >
-                  <IframePreview className="st:p-4">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60px' }}>
-                      <ErrorBoundary>
-                        {story.render(cell.props)}
-                      </ErrorBoundary>
-                    </div>
-                  </IframePreview>
-                </td>
-              ))}
+              {row.cells.map((cell) => {
+                const cellContent = (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60px' }}>
+                    <ErrorBoundary>
+                      {story.render(cell.props)}
+                    </ErrorBoundary>
+                  </div>
+                )
+
+                return (
+                  <td
+                    key={`${row.label}-${cell.label}`}
+                    className="st:border st:border-border st:p-0"
+                  >
+                    {story.isolate
+                      ? <IframePreview className="st:p-4">{cellContent}</IframePreview>
+                      : <div className="st:p-4">{cellContent}</div>}
+                  </td>
+                )
+              })}
             </tr>
           ))}
         </tbody>

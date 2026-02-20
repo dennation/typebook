@@ -109,6 +109,8 @@ interface StoryBase {
   component: ComponentType<any>
   defaults: Record<string, unknown>
   render: StoryRenderFn
+  /** When true, render each variant inside an iframe for full CSS/JS isolation */
+  isolate?: boolean
 }
 
 /** Single story — one variant with fixed props */
@@ -148,16 +150,19 @@ export interface DefineResult<Props, CoveredByDefaults extends keyof Props = nev
   single(config?: {
     props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
     render?: (props: Props) => ReactNode
+    isolate?: boolean
   }): SingleStory
   variants(config: {
     items: VariantConfig
     props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
     columns?: number
+    isolate?: boolean
   }): VariantsStory
   matrix(config: {
     x: VariantConfig
     y: VariantConfig[]
     props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
+    isolate?: boolean
   }): MatrixStory
 
   // Variant config helpers
