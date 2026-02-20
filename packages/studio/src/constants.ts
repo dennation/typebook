@@ -10,8 +10,8 @@ export const LOG_PREFIX = `[${PACKAGE_NAME}]`
 /** Default output file for generated registry */
 export const DEFAULT_REGISTRY_FILE = './studio.registry.gen.ts'
 
-/** Default output file for generated component meta */
-export const DEFAULT_META_FILE = './studio.meta.gen.ts'
+/** Filename for generated component meta (placed in same directory as registry) */
+export const META_FILENAME = 'studio.meta.gen.ts'
 
 /** Virtual module ID for Vite */
 export const VIRTUAL_MODULE_ID = `virtual:${PACKAGE_NAME}-registry`

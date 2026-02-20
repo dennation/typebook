@@ -1,4 +1,4 @@
-import { resolve } from 'node:path'
+import { resolve, dirname, join } from 'node:path'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { TypeScriptClient } from './core/ts-client.js'
 import { findStoryFiles, analyzeStoryFile } from './core/scanner.js'
@@ -7,7 +7,7 @@ import {
   PACKAGE_NAME,
   LOG_PREFIX,
   DEFAULT_REGISTRY_FILE,
-  DEFAULT_META_FILE,
+  META_FILENAME,
   DEFAULT_INCLUDE,
 } from './constants.js'
 
@@ -58,14 +58,15 @@ if (command === 'generate') {
     }),
   )
 
-  // Generate meta file
-  const metaFilePath = resolve(cwd, DEFAULT_META_FILE)
+  // Generate meta file (same directory as registry)
+  const registryFilePath = resolve(cwd, registryOutput)
+  const metaFilePath = join(dirname(registryFilePath), META_FILENAME)
   const metaContent = generateMetaFile(fileInfos, cwd)
   writeFileSync(metaFilePath, metaContent, 'utf-8')
-  console.log(LOG_PREFIX, `Generated ${DEFAULT_META_FILE}`)
+  const metaOutput = join(dirname(registryOutput), META_FILENAME)
+  console.log(LOG_PREFIX, `Generated ${metaOutput}`)
 
   // Generate registry file
-  const registryFilePath = resolve(cwd, registryOutput)
   const registryContent = generateRegistryFile(fileInfos, registryFilePath, metaFilePath, cwd)
   writeFileSync(registryFilePath, registryContent, 'utf-8')
   console.log(LOG_PREFIX, `Generated ${registryOutput}`)
@@ -76,7 +77,7 @@ if (command === 'generate') {
   @dennation/${PACKAGE_NAME}
 
   Commands:
-    generate    Generate ${DEFAULT_REGISTRY_FILE} and ${DEFAULT_META_FILE} from .stories.tsx files
+    generate    Generate registry and meta gen files from .stories.tsx files
 
   Options:
     --include=GLOB   Story files glob pattern (default: ${DEFAULT_INCLUDE})
