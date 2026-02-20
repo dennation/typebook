@@ -50,12 +50,12 @@ packages/studio/
     index.ts                  — Public package exports (define, types)
     types.ts                  — All shared types (DefineResult, Story, PropInfo, ComponentMeta, RegistryEntry, etc.)
     define.ts                 — define() → DefineResult with single(), variants(), matrix(), allOf(), values(), generate()
-    resolve.ts                — resolveRegistry() — internal, resolves VariantConfig markers into variants (used by Studio)
+    resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into variant arrays (used by renderers)
     constants.ts              — Shared constants (PACKAGE_NAME, etc.)
     cli.ts                    — CLI entry: `npx @dennation/ui-studio generate`
     core/
       scanner.ts              — Glob scanner for .stories.tsx files + analysis
-      generator.ts            — Generates studio.registry.gen.ts and studio.meta.gen.ts content
+      generator.ts            — Generates ui-studio-registry.gen.ts and ui-studio-meta.gen.ts content
       ts-client.ts            — TypeScript Compiler API client for type extraction
       type-parser.ts          — Converts TS type strings → PropInfo[] via oxc
     plugins/
@@ -65,8 +65,8 @@ packages/studio/
       index.ts                — React exports
       components/
         index.ts              — Barrel export
-        Studio.tsx            — <Studio /> component (sidebar, theme, story renderer)
-        StoryRenderer.tsx     — Renders single/variants/matrix stories
+        Studio.tsx            — <Studio /> component (sidebar, theme, story dispatch)
+        StoryRenderer.tsx     — Dispatches to RenderSingle / RenderVariants / RenderMatrix
         ComponentPreview.tsx   — Component preview with interactive props panel
         PropControl.tsx       — Prop controls: dropdown (literal), toggle (boolean), input (string), number
         VariantCard.tsx       — Single variant preview card (with iframe isolation)
@@ -74,8 +74,8 @@ packages/studio/
         ErrorBoundary.tsx     — Error boundary for component crash isolation
       utils/
         index.ts              — Barrel export
-        groupComponents.ts    — Groups components by group field
-        getLayoutStyle.ts     — Computes CSS grid layout for variant grids
+        groupComponents.ts    — Groups RegistryEntry[] by config.group field
+        getLayoutStyle.ts     — getGridStyle() — computes CSS grid layout for variant grids
       styles/
         styles.css            — Studio UI styles (Tailwind)
 ```
@@ -101,24 +101,25 @@ packages/studio/
                                               ↓
                                     oxc parse  →  PropInfo[]
                                               ↓
-                                    generateMetaFile()       →  studio.meta.gen.ts (extracted types)
-                                    generateRegistryFile()   →  studio.registry.gen.ts (imports + assembly)
+                                    generateMetaFile()       →  ui-studio-meta.gen.ts (extracted types)
+                                    generateRegistryFile()   →  ui-studio-registry.gen.ts (imports + assembly)
                                               ↓
-                                    <Studio />  resolves allOf markers internally
+                                    <Studio />  passes RegistryEntry[] to renderers
                                               ↓
-                                    ResolvedComponent[]  →  render
+                                    RenderSingle / RenderVariants / RenderMatrix
+                                    resolve variants lazily via resolveVariantConfig()
 ```
 
 ### Key design decisions
 
 - **Vite plugin** — integrates into the user's existing Vite setup. No separate dev server. Scans `.stories.tsx` files, extracts types via TypeScript Compiler API, generates two gen files, watches for changes.
 - **Type extraction via TS Compiler API** — uses TypeScript Compiler API directly (`ts-client.ts`) to get component prop types as strings. These strings are parsed by oxc into structured `PropInfo[]`.
-- **Two generated files** — `studio.registry.gen.ts` (imports stories/configs, assembles registry array) and `studio.meta.gen.ts` (extracted component metadata keyed by file path). Registry imports meta internally — user only imports registry.
+- **Two generated files** — `ui-studio-registry.gen.ts` (imports stories/configs, assembles registry array) and `ui-studio-meta.gen.ts` (extracted component metadata keyed by file path). Registry imports meta internally — user only imports registry. Both paths are independently configurable via `output` and `metaOutput`.
 - **Self-contained stories** — each story (single/variants/matrix) carries its own `component` reference and `defaults`, making stories reusable without the DefineResult.
-- **Internal resolution** — `allOf('size')` markers are resolved inside `<Studio />` at render time using `Map<Component, ComponentMeta>`, not in the gen file.
+- **Lazy variant resolution** — each story kind renderer (RenderSingle, RenderVariants, RenderMatrix) resolves its own VariantConfig markers inline using `resolveVariantConfig()`. No upfront resolution step — variants are only computed for the story being displayed.
 - **Iframe isolation** — each variant card renders inside an iframe (`IframePreview`) so component styles don't bleed into Studio UI and vice versa.
 - **Error Boundary** — React error boundaries isolate component crashes per variant.
-- **VariantConfig marker pattern** — `button.allOf('size')` returns a typed marker `{ __type: 'allOf', prop: 'size' }` that gets resolved at runtime by Studio using TS-extracted type data.
+- **VariantConfig marker pattern** — `button.allOf('size')` returns a typed marker `{ __type: 'allOf', prop: 'size' }` that gets resolved at render time by the story renderer using TS-extracted type data.
 - **Three story kinds** — `single` (one card), `variants` (grid of values for one prop), `matrix` (table: x prop × y props).
 
 ---
@@ -168,7 +169,11 @@ import { uiStudio } from '@dennation/ui-studio/vite'
 export default defineConfig({
   plugins: [
     react(),
-    uiStudio({ include: './src/**/*.stories.tsx' }),
+    uiStudio({
+      include: './src/**/*.stories.tsx',
+      output: './ui-studio-registry.gen.ts',   // default
+      metaOutput: './ui-studio-meta.gen.ts',   // default
+    }),
   ],
 })
 ```
