@@ -1,15 +1,15 @@
 import type {
   PropInfo,
-  ResolvedStory,
-  ResolvedVariant,
-  Story,
-  StoryRenderFn,
   AllOfConfig,
   ValuesConfig,
   GenerateConfig,
   VariantConfig,
-  MatrixRow,
 } from './types.js'
+
+interface Variant {
+  label: string
+  props: Record<string, unknown>
+}
 
 function isAllOfConfig(v: unknown): v is AllOfConfig {
   return (
@@ -39,13 +39,14 @@ function isGenerateConfig(v: unknown): v is GenerateConfig {
 }
 
 /**
- * Resolves a VariantConfig into an array of ResolvedVariants
+ * Resolves a VariantConfig marker into concrete variant entries.
+ * Used by variant and matrix story renderers.
  */
-function resolveVariantConfig(
+export function resolveVariantConfig(
   config: VariantConfig,
   allProps: PropInfo[],
   baseProps: Record<string, unknown>,
-): ResolvedVariant[] {
+): Variant[] {
   if (isAllOfConfig(config)) {
     const propInfo = allProps.find((p) => p.name === config.prop)
     if (!propInfo) return []
@@ -74,103 +75,17 @@ function resolveVariantConfig(
 }
 
 /**
- * Resolves a single Story into a ResolvedStory for rendering.
- * Called lazily — only when the story is actually being displayed.
+ * Extracts the prop name from any VariantConfig.
  */
-export function resolveStory(
-  name: string,
-  story: Story,
-  allProps: PropInfo[],
-): ResolvedStory {
-  const defaults = story.defaults
-
-  if (story.kind === 'single') {
-    const mergedProps = { ...defaults, ...story.props }
-    return {
-      name,
-      kind: 'single',
-      variants: [{ label: 'default', props: mergedProps }],
-      render: story.render,
-    }
-  }
-
-  if (story.kind === 'matrix') {
-    return resolveMatrixStory(name, story, allProps, defaults, story.render)
-  }
-
-  // Variants story
-  const baseProps = { ...defaults, ...story.props }
-  const variants = resolveVariantConfig(story.items, allProps, baseProps)
-
-  return {
-    name,
-    kind: 'variants',
-    variants,
-    columns: story.columns,
-    render: story.render,
-  }
-}
-
-function resolveMatrixStory(
-  name: string,
-  story: { x: VariantConfig; y: VariantConfig[]; props?: Record<string, unknown> },
-  allProps: PropInfo[],
-  defaults: Record<string, unknown>,
-  render: StoryRenderFn,
-): ResolvedStory {
-  const baseProps = { ...defaults, ...story.props }
-
-  const xVariants = resolveVariantConfig(story.x, allProps, {})
-  if (xVariants.length === 0) {
-    return { name, kind: 'matrix', variants: [], render }
-  }
-
-  const xProp = (story.x as AllOfConfig | ValuesConfig | GenerateConfig).prop
-  const xValues = xVariants.map((v) => v.props[xProp])
-
-  const rows: MatrixRow[] = []
-  for (const yConfig of story.y) {
-    const yVariants = resolveVariantConfig(yConfig, allProps, {})
-    if (yVariants.length === 0) continue
-
-    const yProp = (yConfig as AllOfConfig | ValuesConfig | GenerateConfig).prop
-
-    for (const yVariant of yVariants) {
-      const yValue = yVariant.props[yProp]
-
-      const rowVariants: ResolvedVariant[] = xValues.map((xValue) => ({
-        label: String(xValue),
-        props: {
-          ...baseProps,
-          [xProp]: xValue,
-          [yProp]: yValue,
-        },
-      }))
-
-      rows.push({
-        label: String(yValue),
-        variants: rowVariants,
-      })
-    }
-  }
-
-  return {
-    name,
-    kind: 'matrix',
-    matrix: {
-      primaryProp: xProp,
-      primaryValues: xValues.map(String),
-      rows,
-    },
-    render,
-  }
+export function variantConfigProp(config: VariantConfig): string {
+  return (config as AllOfConfig | ValuesConfig | GenerateConfig).prop
 }
 
 function generateVariantsFromType(
   propInfo: PropInfo,
   propName: string,
   baseProps: Record<string, unknown>,
-): ResolvedVariant[] {
+): Variant[] {
   switch (propInfo.type.kind) {
     case 'literal':
       return propInfo.type.values.map((v) => ({

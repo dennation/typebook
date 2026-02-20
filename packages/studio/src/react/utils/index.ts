@@ -1,2 +1,2 @@
 export { groupComponents, type GroupedComponents } from './groupComponents.js'
-export { getLayoutStyle } from './getLayoutStyle.js'
+export { getGridStyle } from './getLayoutStyle.js'

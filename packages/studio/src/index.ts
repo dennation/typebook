@@ -17,9 +17,5 @@ export type {
   PropType,
   ComponentMeta,
   RegistryEntry,
-  ResolvedStory,
-  ResolvedVariant,
-  MatrixRow,
-  ResolvedMatrix,
   WrapperFn,
 } from './types.js'

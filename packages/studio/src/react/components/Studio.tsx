@@ -203,7 +203,7 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 							props={activeEntry.meta?.props ?? []}
 						/>
 
-						{/* Stories — resolved lazily */}
+						{/* Stories — resolved lazily per renderer */}
 						{Object.entries(activeEntry.stories).map(([name, story]) => {
 							// For cross-file stories, look up props by story's component
 							const storyProps = story.component === activeEntry.config.component
@@ -211,7 +211,12 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 								: (propsMap.get(story.component) ?? [])
 
 							return (
-								<StoryRenderer key={name} name={name} story={story} props={storyProps} />
+								<div key={name} className="st:mb-8">
+									<h2 className="st:text-xl st:font-semibold st:mb-4">{name}</h2>
+									<div className="st:bg-checkered st:rounded-lg st:border st:border-border st:p-6">
+										<StoryRenderer story={story} props={storyProps} />
+									</div>
+								</div>
 							)
 						})}
 					</div>

@@ -176,32 +176,4 @@ export interface RegistryEntry {
   meta: ComponentMeta
 }
 
-// --- Resolved Types (internal, used by Studio for rendering) ---
-
-export interface ResolvedVariant {
-  label: string
-  props: Record<string, unknown>
-}
-
-/** Matrix row — one secondary prop value crossed with all primary values */
-export interface MatrixRow {
-  label: string
-  variants: ResolvedVariant[]
-}
-
-/** Matrix structure for resolved matrix stories */
-export interface ResolvedMatrix {
-  primaryProp: string
-  primaryValues: string[]
-  rows: MatrixRow[]
-}
-
-export interface ResolvedStory {
-  name: string
-  kind: 'single' | 'variants' | 'matrix'
-  variants?: ResolvedVariant[]
-  columns?: number
-  matrix?: ResolvedMatrix
-  render: StoryRenderFn
-}
 
