@@ -1,12 +1,12 @@
 # @dennation/ui-studio — monorepo
 
-pnpm workspace monorepo with two packages.
+pnpm workspace monorepo.
 
 ## Commands (root)
 
 ```bash
 pnpm install         # Install all workspace dependencies
-pnpm run build       # Build all packages (studio first, then playground)
+pnpm run build       # Build all packages (studio first, then examples)
 pnpm run dev         # Dev mode for all packages in parallel
 pnpm run typecheck   # Type-check all packages
 ```
@@ -16,13 +16,14 @@ pnpm run typecheck   # Type-check all packages
 ```
 packages/
   studio/      — @dennation/ui-studio (library + Vite plugin)
-  playground/  — @dennation/playground (Vite app using studio)
+examples/
+  vite/        — @dennation/example-vite (Vite app using studio)
 ```
 
 ## Root files
 
 - **`package.json`** — Workspace root. Private, delegates scripts to packages via `pnpm -r`.
-- **`pnpm-workspace.yaml`** — Declares `packages/*` as workspace members.
+- **`pnpm-workspace.yaml`** — Declares `packages/*` and `examples/*` as workspace members.
 - **`.gitignore`** — Ignores `node_modules/`, `dist/`, `.vite/`, `*.tsbuildinfo`.
 
 ---
@@ -131,22 +132,22 @@ packages/studio/
 
 ---
 
-## packages/playground
+## examples/vite
 
 Vite + React app for testing studio locally. Uses `@dennation/ui-studio` as a workspace dependency. Components come from `@heroui/*` external library.
 
 ### Commands
 
 ```bash
-pnpm --filter @dennation/playground dev       # Start Vite dev server
-pnpm --filter @dennation/playground build     # Type-check + production build
-pnpm --filter @dennation/playground preview   # Preview production build
+pnpm --filter @dennation/example-vite dev       # Start Vite dev server
+pnpm --filter @dennation/example-vite build     # Type-check + production build
+pnpm --filter @dennation/example-vite preview   # Preview production build
 ```
 
 ### Structure
 
 ```
-packages/playground/
+examples/vite/
   package.json
   tsconfig.json
   vite.config.ts                — Vite config with uiStudio()
