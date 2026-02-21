@@ -30,26 +30,28 @@ export function Sidebar({
 	const isNodeCollapsed = (key: string) => !searchQuery && collapsed.has(key)
 
 	return (
-		<nav className="st:bg-bg-sidebar st:border-r st:border-border st:overflow-y-auto st:py-2">
+		<nav className="st:w-[260px] st:shrink-0 st:glass st:rounded-2xl st:flex st:flex-col st:overflow-hidden">
 			{!disableSearch && (
-				<div className="st:px-3 st:pb-2">
+				<div className="st:px-3 st:pt-3 st:pb-3 st:shrink-0">
 					<input
 						type="text"
 						placeholder="Search…"
 						value={searchQuery}
 						onChange={(e) => onSearchChange(e.target.value)}
-						className="st:w-full st:px-2.5 st:py-1.5 st:text-sm st:rounded-md st:border st:border-border st:bg-bg st:text-text st:outline-none st:placeholder-text-muted focus:st:border-accent"
+						className="st:w-full st:px-3.5 st:py-2 st:text-sm st:rounded-full st:glass-input st:text-text st:outline-none st:placeholder-text-muted focus:st:border-accent st:transition-all"
 					/>
 				</div>
 			)}
-			{renderTree(tree, 0, '', {
-				activeComponent,
-				activeStory,
-				selectStory,
-				toggleCollapse,
-				isNodeCollapsed,
-				stories,
-			})}
+			<div className="st:flex-1 st:overflow-y-auto st:pb-3">
+				{renderTree(tree, 0, '', {
+					activeComponent,
+					activeStory,
+					selectStory,
+					toggleCollapse,
+					isNodeCollapsed,
+					stories,
+				})}
+			</div>
 		</nav>
 	)
 }
@@ -186,7 +188,7 @@ function SidebarItem({
 }) {
 	return (
 		<button
-			className={`st:block st:w-full st:py-1.5 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all hover:st:bg-bg-hover ${
+			className={`st:block st:w-[calc(100%-16px)] st:mx-2 st:py-1.5 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all st:rounded-lg hover:st:bg-bg-hover ${
 				isActive ? 'st:bg-accent-light st:text-accent st:font-semibold' : ''
 			}`}
 			style={{ paddingLeft: `${depth * 12 + 8}px` }}
@@ -213,7 +215,7 @@ function SidebarComponentHeader({
 }) {
 	return (
 		<button
-			className={`st:flex st:items-center st:justify-between st:w-full st:py-1.5 st:pr-3 st:text-sm st:border-none st:bg-transparent st:cursor-pointer st:text-left st:transition-all hover:st:bg-bg-hover ${
+			className={`st:flex st:items-center st:justify-between st:w-[calc(100%-16px)] st:mx-2 st:py-1.5 st:pr-3 st:text-sm st:border-none st:bg-transparent st:cursor-pointer st:text-left st:transition-all st:rounded-lg hover:st:bg-bg-hover ${
 				isActive ? 'st:text-accent st:font-semibold' : 'st:text-text'
 			}`}
 			style={{ paddingLeft: `${depth * 12 + 8}px` }}
@@ -221,7 +223,7 @@ function SidebarComponentHeader({
 			type="button"
 		>
 			<span>{name}</span>
-			<span className="st:text-[10px] st:leading-none st:text-text-muted">
+			<span className="st:text-[10px] st:leading-none st:text-text-muted st:opacity-60">
 				{collapsed ? '\u25B8' : '\u25BE'}
 			</span>
 		</button>
@@ -244,13 +246,13 @@ function SidebarGroup({
 	return (
 		<div>
 			<button
-				className="st:flex st:items-center st:justify-between st:w-full st:py-1.5 st:pr-3 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all hover:st:bg-bg-hover"
+				className="st:flex st:items-center st:justify-between st:w-[calc(100%-16px)] st:mx-2 st:py-1.5 st:pr-3 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all st:rounded-lg hover:st:bg-bg-hover"
 				style={{ paddingLeft: `${depth * 12 + 8}px` }}
 				onClick={onToggle}
 				type="button"
 			>
 				<span>{label}</span>
-				<span className="st:text-[10px] st:leading-none st:text-text-muted">
+				<span className="st:text-[10px] st:leading-none st:text-text-muted st:opacity-60">
 					{collapsed ? '\u25B8' : '\u25BE'}
 				</span>
 			</button>
@@ -274,14 +276,14 @@ function SidebarPathNode({
 }) {
 	return (
 		<button
-			className="st:flex st:items-center st:justify-between st:w-full st:pt-3 st:pb-1 st:pr-3 st:text-xs st:font-semibold st:uppercase st:tracking-wide st:text-text-muted st:bg-transparent st:border-none st:cursor-pointer st:text-left hover:st:text-text"
+			className="st:flex st:items-center st:justify-between st:w-[calc(100%-16px)] st:mx-2 st:pt-3 st:pb-1 st:pr-3 st:text-xs st:font-semibold st:uppercase st:tracking-wide st:text-text-muted st:bg-transparent st:border-none st:cursor-pointer st:text-left st:rounded-lg hover:st:text-text"
 			style={{ paddingLeft: `${(depth + 1) * 12}px` }}
 			onClick={onToggle}
 			type="button"
 		>
 			<span>{label}</span>
 			{hasChildren && (
-				<span className="st:text-[10px] st:leading-none">
+				<span className="st:text-[10px] st:leading-none st:opacity-60">
 					{collapsed ? '\u25B8' : '\u25BE'}
 				</span>
 			)}

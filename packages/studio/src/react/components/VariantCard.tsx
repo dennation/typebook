@@ -22,15 +22,15 @@ export const VariantCard = memo(function VariantCard({
 	)
 
 	return (
-		<div className="st:flex st:flex-col st:border st:border-dashed st:border-border st:rounded st:overflow-hidden">
-			{isolate ? (
-				<IframePreview className="st:p-3">{content}</IframePreview>
-			) : (
-				<div className="st:p-3">{content}</div>
-			)}
-			<span className="st:text-xs st:text-text-muted st:py-1.5 st:text-center st:bg-bg-sidebar st:border-t st:border-border">
+		<div className="st:relative st:glass-subtle st:rounded-xl st:overflow-hidden st:transition-all hover:st:shadow-lg">
+			<span className="st:absolute st:top-1 st:left-1 st:text-[10px] st:text-text-muted st:bg-bg-sidebar st:px-1.5 st:py-px st:rounded-full st:border st:border-border st:z-10">
 				{label}
 			</span>
+			{isolate ? (
+				<IframePreview className="st:p-4">{content}</IframePreview>
+			) : (
+				<div className="st:p-4">{content}</div>
+			)}
 		</div>
 	)
 })

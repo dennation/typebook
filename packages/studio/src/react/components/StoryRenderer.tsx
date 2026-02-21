@@ -72,15 +72,15 @@ function RenderMatrix({ story, props }: { story: MatrixStory; props: PropInfo[] 
 	}
 
 	return (
-		<div className="st:overflow-x-auto">
+		<div className="st:overflow-x-auto st:rounded-xl st:glass-subtle">
 			<table className="st:w-full st:border-collapse">
 				<thead>
 					<tr>
-						<th className="st:border st:border-border st:bg-bg-sidebar st:p-2 st:text-sm st:font-semibold st:text-left" />
-						{xValues.map((value) => (
+						<th className="st:border st:border-border st:bg-bg-sidebar st:p-2.5 st:text-sm st:font-semibold st:text-left st:rounded-tl-xl" />
+						{xValues.map((value, i) => (
 							<th
 								key={String(value)}
-								className="st:border st:border-border st:bg-bg-sidebar st:p-2 st:text-sm st:font-semibold st:text-center"
+								className={`st:border st:border-border st:bg-bg-sidebar st:p-2.5 st:text-sm st:font-semibold st:text-center ${i === xValues.length - 1 ? 'st:rounded-tr-xl' : ''}`}
 							>
 								{String(value)}
 							</th>
@@ -88,22 +88,24 @@ function RenderMatrix({ story, props }: { story: MatrixStory; props: PropInfo[] 
 					</tr>
 				</thead>
 				<tbody>
-					{rows.map((row) => (
+					{rows.map((row, rowIdx) => (
 						<tr key={row.label}>
-							<td className="st:border st:border-border st:bg-bg-sidebar st:p-2 st:text-sm st:font-semibold st:text-left">
+							<td className={`st:border st:border-border st:bg-bg-sidebar st:p-2.5 st:text-sm st:font-semibold st:text-left ${rowIdx === rows.length - 1 ? 'st:rounded-bl-xl' : ''}`}>
 								{row.label}
 							</td>
-							{row.cells.map((cell) => {
+							{row.cells.map((cell, cellIdx) => {
 								const cellContent = (
 									<div style={CENTERED_CONTENT_STYLE}>
 										<ErrorBoundary>{story.render(cell.props)}</ErrorBoundary>
 									</div>
 								)
 
+								const isLastCell = rowIdx === rows.length - 1 && cellIdx === row.cells.length - 1
+
 								return (
 									<td
 										key={`${row.label}-${cell.label}`}
-										className="st:border st:border-border st:p-0"
+										className={`st:border st:border-border st:p-0 ${isLastCell ? 'st:rounded-br-xl' : ''}`}
 									>
 										{story.isolate ? (
 											<IframePreview className="st:p-4">{cellContent}</IframePreview>

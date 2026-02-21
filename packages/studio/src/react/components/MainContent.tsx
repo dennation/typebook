@@ -1,4 +1,3 @@
-import type { ComponentType } from 'react'
 import type { ComponentEntry, Story, PropInfo } from '../../types.js'
 import { entryName } from '../utils/naming.js'
 import { StoryRenderer } from './StoryRenderer.js'
@@ -20,10 +19,10 @@ export function MainContent({
 	storyProps,
 }: MainContentProps) {
 	return (
-		<main className="st:overflow-auto st:p-6 st:bg-bg">
+		<main className="st:flex-1 st:overflow-auto st:p-6">
 			{activeEntry && activeStory ? (
 				<div>
-					<h1 className="st:text-2xl st:font-bold st:mb-4">
+					<h1 className="st:text-2xl st:font-bold st:mb-5">
 						{entryName(activeEntry)}
 					</h1>
 
@@ -35,12 +34,10 @@ export function MainContent({
 						/>
 					) : activeStoryObj ? (
 						<div className="st:mb-8">
-							<h2 className="st:text-xl st:font-semibold st:mb-4">
+							<h2 className="st:text-lg st:font-semibold st:mb-4 st:text-text-muted">
 								{activeStoryObj.name ?? activeStory}
 							</h2>
-							<div className="st:bg-checkered st:rounded-lg st:border st:border-border st:p-6">
-								<StoryRenderer story={activeStoryObj} props={storyProps} />
-							</div>
+							<StoryRenderer story={activeStoryObj} props={storyProps} />
 						</div>
 					) : null}
 				</div>
