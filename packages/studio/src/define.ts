@@ -23,7 +23,7 @@ export function define<
 ): DefineResult<Expand<Pick<Props, IncludedProps>>, keyof D & IncludedProps> {
   const defaults: Record<string, unknown> = config?.defaults ?? {}
   const title = config?.title
-  const group = config?.group
+  const path = config?.path
   const wrapper = config?.wrapper
 
   const defaultRender: StoryRenderFn = (props) => createElement(component, props)
@@ -37,7 +37,7 @@ export function define<
     __type: 'define',
     component,
     title,
-    group,
+    path,
     defaults,
 
     // Story creation methods

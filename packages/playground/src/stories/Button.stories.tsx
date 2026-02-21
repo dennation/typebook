@@ -2,7 +2,7 @@ import { define } from '@dennation/ui-studio'
 import { Button } from '@heroui/button'
 
 const button = define(Button, {
-	group: 'Hero UI',
+	path: 'Hero UI',
 	defaults: {
 		children: 'Click me',
 	},

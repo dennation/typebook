@@ -2,7 +2,7 @@ import { define } from '@dennation/ui-studio'
 import { Switch } from '@heroui/switch'
 
 const switchComponent = define(Switch, {
-	group: 'Hero UI',
+	path: 'Hero UI',
 	defaults: {
 		children: 'Enable notifications',
 	},

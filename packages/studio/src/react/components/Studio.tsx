@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react'
 import type { ComponentType } from 'react'
 import type { RegistryEntry, PropInfo } from '../../types.js'
 import { PACKAGE_NAME, STYLE_ELEMENT_ID } from '../../constants.js'
-import { groupComponents } from '../utils/groupComponents.js'
+import { buildSidebarTree, type SidebarNode } from '../utils/groupByPath.js'
 import { entryName } from '../utils/naming.js'
 import { useHashRoute } from '../utils/useHashRoute.js'
 import { StoryRenderer } from './StoryRenderer.js'
@@ -20,6 +20,7 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 	const { activeComponent, selectStory } = useHashRoute(registry)
 	const [theme, setTheme] = useState(initialTheme)
 	const [searchQuery, setSearchQuery] = useState('')
+	const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
 	// Component → PropInfo[] map for cross-file story resolution
 	const propsMap = useMemo(() => {
@@ -43,14 +44,94 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 	const filtered = searchQuery
 		? registry.filter((e) => {
 				const q = searchQuery.toLowerCase()
-				return [e.config.title, e.config.component.displayName, e.config.component.name, e.config.group]
+				return [e.config.title, e.config.component.displayName, e.config.component.name, e.config.path]
 					.filter(Boolean)
 					.some((s) => s!.toLowerCase().includes(q))
 			})
 		: registry
 
-	// Group components by group
-	const grouped = groupComponents(filtered)
+	// Build sidebar tree from paths
+	const tree = buildSidebarTree(filtered)
+
+	const toggleCollapse = (key: string) => {
+		setCollapsed((prev) => {
+			const next = new Set(prev)
+			if (next.has(key)) {
+				next.delete(key)
+			} else {
+				next.add(key)
+			}
+			return next
+		})
+	}
+
+	const renderTree = (nodes: SidebarNode[], depth: number = 0, parentPath: string = '') =>
+		nodes.map((node) => {
+			if (!node.label) {
+				const name = entryName(node.components[0])
+				return (
+					<button
+						key={name}
+						className={`st:block st:w-full st:px-4 st:py-1.5 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all hover:st:bg-bg-hover ${activeComponent === name
+							? 'st:bg-accent-light st:text-accent st:font-semibold'
+							: ''
+							}`}
+						onClick={() => {
+							const firstStory = Object.keys(node.components[0].stories)[0]
+							if (firstStory) selectStory(name, firstStory)
+						}}
+						type="button"
+					>
+						{node.components[0].config.title ?? name}
+					</button>
+				)
+			}
+
+			const nodeKey = parentPath ? `${parentPath}/${node.label}` : node.label
+			const hasChildren = node.children.length > 0 || node.components.length > 0
+			const isCollapsed = !searchQuery && collapsed.has(nodeKey)
+
+			return (
+				<div key={node.label}>
+					<button
+						className="st:flex st:items-center st:gap-1 st:w-full st:pt-3 st:pb-1 st:text-xs st:font-semibold st:uppercase st:tracking-wide st:text-text-muted st:bg-transparent st:border-none st:cursor-pointer st:text-left hover:st:text-text"
+						style={{ paddingLeft: `${(depth + 1) * 12}px` }}
+						onClick={() => hasChildren && toggleCollapse(nodeKey)}
+						type="button"
+					>
+						{hasChildren && (
+							<span className="st:text-[10px] st:leading-none">{isCollapsed ? '\u25B8' : '\u25BE'}</span>
+						)}
+						{node.label}
+					</button>
+					{!isCollapsed && (
+						<>
+							{node.components.map((entry) => {
+								const name = entryName(entry)
+								return (
+									<button
+										key={name}
+										className={`st:block st:w-full st:py-1.5 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all hover:st:bg-bg-hover ${activeComponent === name
+											? 'st:bg-accent-light st:text-accent st:font-semibold'
+											: ''
+											}`}
+										style={{ paddingLeft: `${(depth + 1) * 12 + 8}px` }}
+										onClick={() => {
+											const firstStory = Object.keys(entry.stories)[0]
+											if (firstStory) selectStory(name, firstStory)
+										}}
+										type="button"
+									>
+										{entry.config.title ?? name}
+									</button>
+								)
+							})}
+							{renderTree(node.children, depth + 1, nodeKey)}
+						</>
+					)}
+				</div>
+			)
+		})
 
 	// Inject styles once on mount
 	useEffect(() => {
@@ -94,34 +175,7 @@ export function Studio({ registry, theme: initialTheme = 'light' }: StudioProps)
 						className="st:w-full st:px-2.5 st:py-1.5 st:text-sm st:rounded-md st:border st:border-border st:bg-bg st:text-text st:outline-none st:placeholder-text-muted focus:st:border-accent"
 					/>
 				</div>
-				{grouped.map(({ group, components }) => (
-					<div key={group ?? '__ungrouped'}>
-						{group && (
-							<div className="st:px-4 st:pt-3 st:pb-1 st:text-xs st:font-semibold st:uppercase st:tracking-wide st:text-text-muted">
-								{group}
-							</div>
-						)}
-						{components.map((entry) => {
-							const name = entryName(entry)
-							return (
-								<button
-									key={name}
-									className={`st:block st:w-full st:px-4 st:py-1.5 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all hover:st:bg-bg-hover ${activeComponent === name
-										? 'st:bg-accent-light st:text-accent st:font-semibold'
-										: ''
-										}`}
-									onClick={() => {
-										const firstStory = Object.keys(entry.stories)[0]
-										if (firstStory) selectStory(name, firstStory)
-									}}
-									type="button"
-								>
-									{entry.config.title ?? name}
-								</button>
-							)
-						})}
-					</div>
-				))}
+				{renderTree(tree)}
 			</nav>
 
 			{/* Main content */}

@@ -74,7 +74,7 @@ packages/studio/
         ErrorBoundary.tsx     — Error boundary for component crash isolation
       utils/
         index.ts              — Barrel export
-        groupComponents.ts    — Groups RegistryEntry[] by config.group field
+        groupByPath.ts        — Groups RegistryEntry[] by config.path field
         getLayoutStyle.ts     — getGridStyle() — computes CSS grid layout for variant grids
       styles/
         styles.css            — Studio UI styles (Tailwind)
@@ -185,7 +185,7 @@ import { define } from '@dennation/ui-studio'
 import { Button } from '@heroui/button'
 
 const button = define(Button, {
-  group: 'Forms',
+  path: 'Forms',
   defaults: { children: 'Click me' },
   props: ['size', 'variant', 'color'],
 })

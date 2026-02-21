@@ -60,8 +60,8 @@ export type MissingProps<Props, CoveredByDefaults extends keyof Props> =
 export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof Props> {
   /** Display name override (defaults to displayName or function name) */
   title?: string
-  /** Sidebar group (single level, e.g. 'Forms') */
-  group?: string
+  /** Sidebar path with nesting via '/' (e.g. 'Components/Forms') */
+  path?: string
   /** Default props applied to all stories */
   defaults?: Partial<Props>
   /**
@@ -143,7 +143,7 @@ export interface DefineResult<Props, CoveredByDefaults extends keyof Props = nev
   __type: 'define'
   component: ComponentType<any>
   title?: string
-  group?: string
+  path?: string
   defaults: Record<string, unknown>
 
   // Story creation methods

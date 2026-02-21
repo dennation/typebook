@@ -50,40 +50,6 @@ const meta: Record<string, ComponentMeta> = {
   "src/stories/Input.stories.tsx": {
     "props": [
       {
-        "name": "color",
-        "optional": true,
-        "type": {
-          "kind": "literal",
-          "values": [
-            "default",
-            "primary",
-            "secondary",
-            "success",
-            "warning",
-            "danger"
-          ]
-        }
-      },
-      {
-        "name": "size",
-        "optional": true,
-        "type": {
-          "kind": "literal",
-          "values": [
-            "sm",
-            "md",
-            "lg"
-          ]
-        }
-      },
-      {
-        "name": "disabled",
-        "optional": true,
-        "type": {
-          "kind": "boolean"
-        }
-      },
-      {
         "name": "isReadOnly",
         "optional": true,
         "type": {
@@ -111,17 +77,51 @@ const meta: Record<string, ComponentMeta> = {
         }
       },
       {
-        "name": "radius",
+        "name": "color",
+        "optional": true,
+        "type": {
+          "kind": "literal",
+          "values": [
+            "default",
+            "primary",
+            "secondary",
+            "success",
+            "warning",
+            "danger"
+          ]
+        }
+      },
+      {
+        "name": "size",
         "optional": true,
         "type": {
           "kind": "literal",
           "values": [
             "sm",
             "md",
-            "lg",
+            "lg"
+          ]
+        }
+      },
+      {
+        "name": "radius",
+        "optional": true,
+        "type": {
+          "kind": "literal",
+          "values": [
             "none",
+            "sm",
+            "md",
+            "lg",
             "full"
           ]
+        }
+      },
+      {
+        "name": "disabled",
+        "optional": true,
+        "type": {
+          "kind": "boolean"
         }
       }
     ]
@@ -163,13 +163,6 @@ const meta: Record<string, ComponentMeta> = {
         }
       },
       {
-        "name": "isSelected",
-        "optional": true,
-        "type": {
-          "kind": "boolean"
-        }
-      },
-      {
         "name": "radius",
         "optional": true,
         "type": {
@@ -182,23 +175,31 @@ const meta: Record<string, ComponentMeta> = {
             "full"
           ]
         }
+      },
+      {
+        "name": "isSelected",
+        "optional": true,
+        "type": {
+          "kind": "boolean"
+        }
       }
     ]
   },
   "src/stories/Button.stories.tsx": {
     "props": [
       {
-        "name": "color",
+        "name": "variant",
         "optional": true,
         "type": {
           "kind": "literal",
           "values": [
-            "default",
-            "primary",
-            "secondary",
-            "success",
-            "warning",
-            "danger"
+            "flat",
+            "solid",
+            "bordered",
+            "light",
+            "faded",
+            "shadow",
+            "ghost"
           ]
         }
       },
@@ -215,25 +216,17 @@ const meta: Record<string, ComponentMeta> = {
         }
       },
       {
-        "name": "disabled",
-        "optional": true,
-        "type": {
-          "kind": "boolean"
-        }
-      },
-      {
-        "name": "variant",
+        "name": "color",
         "optional": true,
         "type": {
           "kind": "literal",
           "values": [
-            "flat",
-            "faded",
-            "bordered",
-            "solid",
-            "light",
-            "shadow",
-            "ghost"
+            "default",
+            "primary",
+            "secondary",
+            "success",
+            "warning",
+            "danger"
           ]
         }
       },
@@ -243,12 +236,19 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "literal",
           "values": [
+            "none",
             "sm",
             "md",
             "lg",
-            "none",
             "full"
           ]
+        }
+      },
+      {
+        "name": "disabled",
+        "optional": true,
+        "type": {
+          "kind": "boolean"
         }
       },
       {

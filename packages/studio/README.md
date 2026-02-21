@@ -56,7 +56,7 @@ import { define } from '@dennation/ui-studio'
 import { Button } from './Button'
 
 const button = define(Button, {
-  group: 'Forms',
+  path: 'Forms',
   defaults: { children: 'Click me' },
   props: ['size', 'variant', 'color', 'disabled'],
 })
@@ -100,7 +100,7 @@ Creates a story definition bound to a React component.
 ```ts
 const button = define(Button, {
   title: 'Primary Button',  // display name override
-  group: 'Forms',           // sidebar group
+  path: 'Forms',            // sidebar path with nesting via '/'
   defaults: { children: 'Click me' },
   props: ['size', 'variant', 'color'],  // limit which props to extract
 })
@@ -109,7 +109,7 @@ const button = define(Button, {
 | Option | Type | Description |
 |---|---|---|
 | `title` | `string` | Display name in the sidebar. Defaults to `displayName` or function name. |
-| `group` | `string` | Sidebar group heading. |
+| `path` | `string` | Sidebar path with nesting via `/` (e.g. `'Components/Forms'`). |
 | `defaults` | `Partial<Props>` | Default prop values applied to all stories. |
 | `props` | `string[]` | Whitelist of props to include. Omit to include all. |
 
