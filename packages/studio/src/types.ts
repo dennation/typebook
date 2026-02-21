@@ -11,9 +11,6 @@ export interface StudioConfig {
   metaOutput?: string
 }
 
-// --- Vite Plugin Config ---
-
-export type VitePluginConfig = StudioConfig
 
 // --- Prop Info Types (from type extraction) ---
 

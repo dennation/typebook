@@ -15,9 +15,10 @@ pnpm run typecheck   # Type-check all packages
 
 ```
 packages/
-  studio/      — @dennation/ui-studio (library + Vite plugin)
+  studio/      — @dennation/ui-studio (library + Vite/Webpack plugins)
 examples/
   vite/        — @dennation/example-vite (Vite app using studio)
+  webpack/     — @dennation/example-webpack (Webpack app using studio)
 ```
 
 ## Root files
@@ -35,7 +36,7 @@ React component story tool with automatic variant generation from TypeScript typ
 ### Commands
 
 ```bash
-pnpm --filter @dennation/ui-studio build       # Build with Vite (3 entry points)
+pnpm --filter @dennation/ui-studio build       # Build with Vite (5 entry points)
 pnpm --filter @dennation/ui-studio dev         # Build in watch mode
 pnpm --filter @dennation/ui-studio typecheck   # Type-check without emit
 ```
@@ -55,13 +56,16 @@ packages/studio/
     constants.ts              — Shared constants (PACKAGE_NAME, etc.)
     cli.ts                    — CLI entry: `npx @dennation/ui-studio generate`
     core/
+      compiler.ts             — StudioCompiler class: shared lifecycle, type caching, gen file writing
       scanner.ts              — Glob scanner for .stories.tsx files + oxc AST analysis
       generator.ts            — Generates ui-studio-registry.gen.ts and ui-studio-meta.gen.ts content
       ts-client.ts            — TypeScript Compiler API client for type extraction
       type-parser.ts          — Converts TS type strings → PropInfo[] via oxc
     plugins/
       vite/
-        index.ts              — Vite plugin: type extraction, file watcher, two-file gen generation
+        index.ts              — Vite plugin: thin wrapper around StudioCompiler + virtual module + dev watcher
+      webpack/
+        index.ts              — Webpack plugin: UiStudioWebpackPlugin class wrapping StudioCompiler
     react/
       index.ts                — React exports
       components/
@@ -88,13 +92,16 @@ packages/studio/
 
 - **`index`** — Library exports (`define`, types). Consumed by user code and generated `.gen.ts`.
 - **`react/index`** — `<Studio />` component, `ErrorBoundary`.
-- **`plugins/vite`** — Vite plugin (`uiStudio()`). Handles type extraction and two-file gen generation.
+- **`plugins/vite`** — Vite plugin (`uiStudio()`). Thin wrapper around `StudioCompiler`.
+- **`plugins/webpack`** — Webpack plugin (`UiStudioWebpackPlugin`). Thin wrapper around `StudioCompiler`.
+- **`cli/index`** — CLI entry: `npx @dennation/ui-studio generate`.
 
 ### Package exports
 
 - `@dennation/ui-studio` — define, types (ComponentMeta, Registry, ComponentEntry, etc.)
 - `@dennation/ui-studio/react` — Studio component
-- `@dennation/ui-studio/vite` — uiStudio vite plugin
+- `@dennation/ui-studio/vite` — uiStudio Vite plugin
+- `@dennation/ui-studio/webpack` — UiStudioWebpackPlugin
 
 ### Data flow
 
@@ -117,7 +124,8 @@ packages/studio/
 
 ### Key design decisions
 
-- **Vite plugin** — integrates into the user's existing Vite setup. No separate dev server. Scans `.stories.tsx` files, extracts types via TypeScript Compiler API, generates two gen files, watches for changes.
+- **Bundler plugins (Vite + Webpack)** — thin wrappers around `StudioCompiler` (`core/compiler.ts`). The compiler handles TS client lifecycle, type caching, file scanning, and gen file writing. Each plugin just wires compiler methods into bundler-specific hooks. Vite plugin additionally provides a virtual module (`virtual:ui-studio-registry`).
+- **StudioCompiler** — shared core class extracted from the original Vite plugin. Encapsulates: `start()` (init TS client + first generation), `stop()` (cleanup), `regenerate(changedFile?)` (full regen cycle), `debouncedRegenerate()` (watch mode), type cache management.
 - **Type extraction via TS Compiler API** — uses TypeScript Compiler API directly (`ts-client.ts`) to get component prop types as strings. These strings are parsed by oxc into structured `PropInfo[]`.
 - **Two generated files on disk (not virtual modules)** — `ui-studio-registry.gen.ts` (imports stories/configs, exports `Registry` object with `components` array) and `ui-studio-meta.gen.ts` (extracted component metadata keyed by file path). Registry imports meta internally — user only imports registry. Both paths are independently configurable via `output` and `metaOutput`. Files are **physical and committed to git** — not Vite virtual modules. Reasons: (1) `tsc --noEmit` runs before Vite in build scripts, so it needs real files to typecheck against — virtual modules are invisible to `tsc`; (2) gen files are the primary debugging tool for type extraction — when props don't appear, you open `ui-studio-meta.gen.ts` and immediately see what was extracted; (3) PR diffs show exactly what changed in extracted types; (4) clone-and-build works without running Vite first. This matches TanStack Router's approach with `routeTree.gen.ts`. HMR works naturally — Vite's file watcher picks up gen file changes after `writeIfChanged()`, and the guard in the plugin prevents infinite regen cycles.
 - **Self-contained stories** — each story (single/variants/matrix) carries its own `component` reference and `defaults`, making stories reusable without the DefineResult.
@@ -165,6 +173,37 @@ examples/vite/
 
 ---
 
+## examples/webpack
+
+Webpack + React app for testing the webpack plugin. Uses a simple local Button component (no external UI library dependency).
+
+### Commands
+
+```bash
+pnpm --filter @dennation/example-webpack dev       # Start webpack-dev-server on port 3001
+pnpm --filter @dennation/example-webpack build     # Production build
+pnpm --filter @dennation/example-webpack typecheck  # Type-check without emit
+```
+
+### Structure
+
+```
+examples/webpack/
+  package.json
+  tsconfig.json
+  webpack.config.mjs              — Webpack config with UiStudioWebpackPlugin
+  src/
+    index.html                    — HTML template
+    main.tsx                      — Entry point
+    App.tsx                       — Renders <Studio />
+    components/
+      Button.tsx                  — Simple local Button component
+    stories/
+      Button.stories.tsx          — Stories for Button
+```
+
+---
+
 ## User-facing API
 
 ### vite.config.ts
@@ -184,6 +223,25 @@ export default defineConfig({
     }),
   ],
 })
+```
+
+### webpack.config.mjs
+
+```js
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import { UiStudioWebpackPlugin } from '@dennation/ui-studio/webpack'
+
+export default {
+  // ... your webpack config ...
+  plugins: [
+    new HtmlWebpackPlugin({ template: './src/index.html' }),
+    new UiStudioWebpackPlugin({
+      include: './src/**/*.stories.tsx',   // default
+      output: './ui-studio-registry.gen.ts',   // default
+      metaOutput: './ui-studio-meta.gen.ts',   // default
+    }),
+  ],
+}
 ```
 
 ### Component.stories.tsx
