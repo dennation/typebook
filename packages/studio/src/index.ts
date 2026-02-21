@@ -16,6 +16,7 @@ export type {
   PropInfo,
   PropType,
   ComponentMeta,
-  RegistryEntry,
+  Registry,
+  ComponentEntry,
   WrapperFn,
 } from './types.js'

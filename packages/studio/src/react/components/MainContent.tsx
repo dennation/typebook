@@ -1,11 +1,11 @@
 import type { ComponentType } from 'react'
-import type { RegistryEntry, Story, PropInfo } from '../../types.js'
+import type { ComponentEntry, Story, PropInfo } from '../../types.js'
 import { entryName } from '../utils/naming.js'
 import { StoryRenderer } from './StoryRenderer.js'
 import { ComponentPreview } from './ComponentPreview.js'
 
 export interface MainContentProps {
-	activeEntry: RegistryEntry | undefined
+	activeEntry: ComponentEntry | undefined
 	activeStory: string | null
 	isDocsPage: boolean
 	activeStoryObj: Story | null

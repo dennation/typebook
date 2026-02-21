@@ -187,10 +187,14 @@ export interface DefineResult<Props, CoveredByDefaults extends keyof Props = nev
 
 // --- Registry (output of gen file, input to <Studio />) ---
 
-export interface RegistryEntry {
+export interface ComponentEntry {
   config: DefineResult<any>
   stories: Record<string, Story>
   meta: ComponentMeta
+}
+
+export interface Registry {
+  components: ComponentEntry[]
 }
 
 

@@ -1,6 +1,6 @@
 import { useState, useCallback, useInsertionEffect, useMemo } from 'react'
 import type { ComponentType } from 'react'
-import type { RegistryEntry, PropInfo } from '../../types.js'
+import type { Registry, ComponentEntry, PropInfo } from '../../types.js'
 import { STYLE_ELEMENT_ID, DOCS_PAGE } from '../../constants.js'
 import { buildSidebarTree } from '../utils/buildSidebarTree.js'
 import { entryName } from '../utils/naming.js'
@@ -10,13 +10,14 @@ import { MainContent } from './MainContent.js'
 import styles from '../styles/styles.css?inline'
 
 export interface StudioProps {
-	registry: RegistryEntry[]
+	registry: Registry
 	theme?: 'light' | 'dark'
 	disableSearch?: boolean
 }
 
 export function Studio({ registry, theme: initialTheme = 'light', disableSearch = false }: StudioProps) {
-	const { activeComponent, activeStory, selectStory } = useHashRoute(registry)
+	const { components } = registry
+	const { activeComponent, activeStory, selectStory } = useHashRoute(components)
 	const [theme, setTheme] = useState(initialTheme)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
@@ -24,13 +25,13 @@ export function Studio({ registry, theme: initialTheme = 'light', disableSearch 
 	// Component → PropInfo[] map for cross-file story resolution
 	const propsMap = useMemo(() => {
 		const map = new Map<ComponentType<any>, PropInfo[]>()
-		for (const entry of registry) {
+		for (const entry of components) {
 			if (entry.meta) {
 				map.set(entry.config.component, entry.meta.props)
 			}
 		}
 		return map
-	}, [registry])
+	}, [components])
 
 	const toggleTheme = useCallback(() => {
 		setTheme((t) => (t === 'light' ? 'dark' : 'light'))
@@ -50,9 +51,9 @@ export function Studio({ registry, theme: initialTheme = 'light', disableSearch 
 
 	// Filter components by search query
 	const filtered = useMemo(() => {
-		if (!searchQuery) return registry
+		if (!searchQuery) return components
 		const q = searchQuery.toLowerCase()
-		return registry.filter((e) => {
+		return components.filter((e) => {
 			const matchesComponent = [
 				e.config.name,
 				e.config.component.displayName,
@@ -64,24 +65,24 @@ export function Studio({ registry, theme: initialTheme = 'light', disableSearch 
 			const matchesStory = Object.keys(e.stories).some((s) => s.toLowerCase().includes(q))
 			return matchesComponent || matchesStory
 		})
-	}, [registry, searchQuery])
+	}, [components, searchQuery])
 
 	// Build sidebar tree from paths
 	const tree = useMemo(() => buildSidebarTree(filtered), [filtered])
 
 	// Stories lookup for sidebar
 	const storiesMap = useMemo(() => {
-		const map: Record<string, RegistryEntry['stories']> = {}
-		for (const entry of registry) {
+		const map: Record<string, ComponentEntry['stories']> = {}
+		for (const entry of components) {
 			map[entryName(entry)] = entry.stories
 		}
 		return map
-	}, [registry])
+	}, [components])
 
 	// Find active entry
 	const activeEntry = useMemo(
-		() => registry.find((e) => entryName(e) === activeComponent),
-		[registry, activeComponent],
+		() => components.find((e) => entryName(e) === activeComponent),
+		[components, activeComponent],
 	)
 
 	const isDocsPage = activeStory === DOCS_PAGE

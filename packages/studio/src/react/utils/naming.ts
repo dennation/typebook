@@ -1,4 +1,4 @@
-import type { RegistryEntry } from '../../types.js'
+import type { ComponentEntry } from '../../types.js'
 
 export function toKebabCase(str: string): string {
 	return str
@@ -7,8 +7,8 @@ export function toKebabCase(str: string): string {
 		.toLowerCase()
 }
 
-/** Get display name for a registry entry */
-export function entryName(entry: RegistryEntry): string {
+/** Get display name for a component entry */
+export function entryName(entry: ComponentEntry): string {
 	return (
 		entry.config.name ??
 		entry.config.component.displayName ??

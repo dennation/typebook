@@ -1,4 +1,4 @@
-import type { RegistryEntry } from '../../types.js'
+import type { ComponentEntry } from '../../types.js'
 import { entryName } from './naming.js'
 
 export interface StoryItem {
@@ -13,7 +13,7 @@ export interface StoryGroup {
 
 export interface ComponentNode {
 	name: string
-	entry: RegistryEntry
+	entry: ComponentEntry
 	groups: StoryGroup[]
 }
 
@@ -23,7 +23,7 @@ export interface SidebarNode {
 	children: SidebarNode[]
 }
 
-function buildComponentNode(entry: RegistryEntry): ComponentNode {
+function buildComponentNode(entry: ComponentEntry): ComponentNode {
 	const componentName = entryName(entry)
 	const groupMap = new Map<string, StoryItem[]>()
 
@@ -46,10 +46,10 @@ function buildComponentNode(entry: RegistryEntry): ComponentNode {
 	}
 }
 
-export function buildSidebarTree(registry: RegistryEntry[]): SidebarNode[] {
+export function buildSidebarTree(components: ComponentEntry[]): SidebarNode[] {
 	const root: SidebarNode[] = []
 
-	for (const entry of registry) {
+	for (const entry of components) {
 		const path = entry.config.path
 		const componentNode = buildComponentNode(entry)
 

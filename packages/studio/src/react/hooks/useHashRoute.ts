@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import type { RegistryEntry } from '../../types.js'
+import type { ComponentEntry } from '../../types.js'
 import { DOCS_PAGE } from '../../constants.js'
 import { toKebabCase, entryName } from '../utils/naming.js'
 
@@ -11,13 +11,13 @@ export interface HashRouteState {
 
 const DOCS_KEBAB = toKebabCase(DOCS_PAGE)
 
-export function useHashRoute(registry: RegistryEntry[]): HashRouteState {
+export function useHashRoute(components: ComponentEntry[]): HashRouteState {
 	const [activeComponent, setActiveComponent] = useState<string | null>(null)
 	const [activeStory, setActiveStory] = useState<string | null>(null)
 
 	const findByKebab = useCallback(
 		(kebabComponent: string, kebabStory: string) => {
-			const entry = registry.find((e) => toKebabCase(entryName(e)) === kebabComponent)
+			const entry = components.find((e) => toKebabCase(entryName(e)) === kebabComponent)
 			if (!entry) return null
 
 			// Docs is a virtual page, not a real story
@@ -29,7 +29,7 @@ export function useHashRoute(registry: RegistryEntry[]): HashRouteState {
 			if (!storyName) return null
 			return { component: entryName(entry), story: storyName }
 		},
-		[registry],
+		[components],
 	)
 
 	const parseHash = useCallback((): { component: string; story: string } | null => {

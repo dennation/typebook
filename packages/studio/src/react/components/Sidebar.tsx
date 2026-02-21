@@ -1,4 +1,4 @@
-import type { RegistryEntry } from '../../types.js'
+import type { ComponentEntry } from '../../types.js'
 import { DOCS_PAGE } from '../../constants.js'
 import type { SidebarNode, ComponentNode } from '../utils/buildSidebarTree.js'
 
@@ -12,7 +12,7 @@ export interface SidebarProps {
 	disableSearch: boolean
 	searchQuery: string
 	onSearchChange: (query: string) => void
-	stories: Record<string, RegistryEntry['stories']>
+	stories: Record<string, ComponentEntry['stories']>
 }
 
 export function Sidebar({
@@ -60,7 +60,7 @@ interface RenderContext {
 	selectStory: (component: string, story: string) => void
 	toggleCollapse: (key: string) => void
 	isNodeCollapsed: (key: string) => boolean
-	stories: Record<string, RegistryEntry['stories']>
+	stories: Record<string, ComponentEntry['stories']>
 }
 
 function renderTree(
