@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PropsWithChildren } from 'react'
 import { createPortal } from 'react-dom'
 import { LOG_PREFIX } from '../../constants.js'
+import { IFRAME_STYLE } from '../styles/constants.js'
 
 export type IframePreviewProps = PropsWithChildren<{
 	className?: string
@@ -74,12 +75,7 @@ export function IframePreview({ children, className }: IframePreviewProps) {
 						</body>
 					</html>
 				`}
-				style={{
-					width: '100%',
-					minHeight: '200px',
-					border: 'none',
-					display: 'block',
-				}}
+				style={IFRAME_STYLE}
 				title="Component Preview"
 			/>
 			{iframeBody && createPortal(children, iframeBody)}
