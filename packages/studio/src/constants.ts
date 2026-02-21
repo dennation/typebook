@@ -33,3 +33,6 @@ export const STYLE_ELEMENT_ID = 'ui-studio-styles'
 
 /** Virtual page name for auto-generated component docs */
 export const DOCS_PAGE = 'Docs'
+
+/** localStorage key for persisted theme preference */
+export const THEME_STORAGE_KEY = 'ui-studio-theme'

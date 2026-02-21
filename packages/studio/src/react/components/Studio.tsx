@@ -5,20 +5,21 @@ import { STYLE_ELEMENT_ID, DOCS_PAGE } from '../../constants.js'
 import { buildSidebarTree } from '../utils/buildSidebarTree.js'
 import { entryName } from '../utils/naming.js'
 import { useHashRoute } from '../hooks/useHashRoute.js'
+import { useTheme, type Theme } from '../hooks/useTheme.js'
 import { Sidebar } from './Sidebar.js'
 import { MainContent } from './MainContent.js'
 import styles from '../styles/styles.css?inline'
 
 export interface StudioProps {
 	registry: Registry
-	theme?: 'light' | 'dark'
+	theme?: Theme
 	disableSearch?: boolean
 }
 
-export function Studio({ registry, theme: initialTheme = 'light', disableSearch = false }: StudioProps) {
+export function Studio({ registry, theme: themeOverride, disableSearch = false }: StudioProps) {
 	const { components } = registry
 	const { activeComponent, activeStory, selectStory } = useHashRoute(components)
-	const [theme, setTheme] = useState(initialTheme)
+	const { theme, toggleTheme } = useTheme(themeOverride)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
@@ -32,10 +33,6 @@ export function Studio({ registry, theme: initialTheme = 'light', disableSearch 
 		}
 		return map
 	}, [components])
-
-	const toggleTheme = useCallback(() => {
-		setTheme((t) => (t === 'light' ? 'dark' : 'light'))
-	}, [])
 
 	const toggleCollapse = useCallback((key: string) => {
 		setCollapsed((prev) => {

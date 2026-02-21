@@ -48,7 +48,7 @@ packages/studio/
   vite.config.ts
   src/
     index.ts                  — Public package exports (define, types)
-    types.ts                  — All shared types (DefineResult, Story, PropInfo, ComponentMeta, RegistryEntry, etc.)
+    types.ts                  — All shared types (DefineResult, Story, PropInfo, ComponentMeta, Registry, ComponentEntry, etc.)
     define.ts                 — define() → DefineResult with single(), variants(), matrix(), allOf(), values(), generate()
     resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into variant arrays (used by renderers)
     constants.ts              — Shared constants (PACKAGE_NAME, etc.)
@@ -91,7 +91,7 @@ packages/studio/
 
 ### Package exports
 
-- `@dennation/ui-studio` — define, types (ComponentMeta, RegistryEntry, etc.)
+- `@dennation/ui-studio` — define, types (ComponentMeta, Registry, ComponentEntry, etc.)
 - `@dennation/ui-studio/react` — Studio component
 - `@dennation/ui-studio/vite` — uiStudio vite plugin
 
@@ -118,7 +118,7 @@ packages/studio/
 
 - **Vite plugin** — integrates into the user's existing Vite setup. No separate dev server. Scans `.stories.tsx` files, extracts types via TypeScript Compiler API, generates two gen files, watches for changes.
 - **Type extraction via TS Compiler API** — uses TypeScript Compiler API directly (`ts-client.ts`) to get component prop types as strings. These strings are parsed by oxc into structured `PropInfo[]`.
-- **Two generated files on disk (not virtual modules)** — `ui-studio-registry.gen.ts` (imports stories/configs, assembles registry array) and `ui-studio-meta.gen.ts` (extracted component metadata keyed by file path). Registry imports meta internally — user only imports registry. Both paths are independently configurable via `output` and `metaOutput`. Files are **physical and committed to git** — not Vite virtual modules. Reasons: (1) `tsc --noEmit` runs before Vite in build scripts, so it needs real files to typecheck against — virtual modules are invisible to `tsc`; (2) gen files are the primary debugging tool for type extraction — when props don't appear, you open `ui-studio-meta.gen.ts` and immediately see what was extracted; (3) PR diffs show exactly what changed in extracted types; (4) clone-and-build works without running Vite first. This matches TanStack Router's approach with `routeTree.gen.ts`. HMR works naturally — Vite's file watcher picks up gen file changes after `writeIfChanged()`, and the guard in the plugin prevents infinite regen cycles.
+- **Two generated files on disk (not virtual modules)** — `ui-studio-registry.gen.ts` (imports stories/configs, exports `Registry` object with `components` array) and `ui-studio-meta.gen.ts` (extracted component metadata keyed by file path). Registry imports meta internally — user only imports registry. Both paths are independently configurable via `output` and `metaOutput`. Files are **physical and committed to git** — not Vite virtual modules. Reasons: (1) `tsc --noEmit` runs before Vite in build scripts, so it needs real files to typecheck against — virtual modules are invisible to `tsc`; (2) gen files are the primary debugging tool for type extraction — when props don't appear, you open `ui-studio-meta.gen.ts` and immediately see what was extracted; (3) PR diffs show exactly what changed in extracted types; (4) clone-and-build works without running Vite first. This matches TanStack Router's approach with `routeTree.gen.ts`. HMR works naturally — Vite's file watcher picks up gen file changes after `writeIfChanged()`, and the guard in the plugin prevents infinite regen cycles.
 - **Self-contained stories** — each story (single/variants/matrix) carries its own `component` reference and `defaults`, making stories reusable without the DefineResult.
 - **Lazy variant resolution** — each story kind renderer (RenderSingle, RenderVariants, RenderMatrix) resolves its own VariantConfig markers inline using `resolveVariantConfig()`. No upfront resolution step — variants are only computed for the story being displayed.
 - **Iframe isolation opt-in** — variant cards render inline by default. Add `isolate: true` to a story to render inside an iframe (`IframePreview`) for full CSS/JS isolation. Only needed for components that interact with document/body (modals, dropdowns with portals). Studio's `st:` Tailwind prefix already prevents style bleeding for normal components.
