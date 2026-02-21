@@ -1,4 +1,4 @@
-import { Component, type CSSProperties, type ReactNode } from 'react'
+import { Component, type ReactNode } from 'react'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -7,17 +7,6 @@ interface ErrorBoundaryProps {
 
 interface ErrorBoundaryState {
   error: Error | null
-}
-
-const ERROR_STYLE: CSSProperties = {
-  padding: 16,
-  background: '#fff5f5',
-  border: '1px solid #ffc9c9',
-  borderRadius: 6,
-  color: '#c92a2a',
-  fontSize: 13,
-  fontFamily: 'monospace',
-  whiteSpace: 'pre-wrap',
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -31,7 +20,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (this.state.error) {
       if (this.props.fallback) return this.props.fallback
       return (
-        <div style={ERROR_STYLE}>
+        <div className="st:p-4 st:bg-red-50 st:border st:border-red-200 st:rounded-md st:text-red-700 st:text-[13px] st:font-mono st:whitespace-pre-wrap">
           {this.state.error.message}
         </div>
       )

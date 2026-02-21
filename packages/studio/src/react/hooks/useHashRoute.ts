@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import type { RegistryEntry } from '../../types.js'
 import { DOCS_PAGE } from '../../constants.js'
-import { toKebabCase, entryName } from './naming.js'
+import { toKebabCase, entryName } from '../utils/naming.js'
 
 export interface HashRouteState {
 	activeComponent: string | null

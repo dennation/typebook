@@ -3,7 +3,7 @@ import { resolveVariantConfig, variantConfigProp } from '../../resolve.js'
 import { ErrorBoundary } from './ErrorBoundary.js'
 import { VariantCard } from './VariantCard.js'
 import { IframePreview } from './IframePreview.js'
-import { getGridStyle } from '../utils/getLayoutStyle.js'
+import { getGridStyle } from '../utils/getGridStyle.js'
 import { CENTERED_CONTENT_STYLE } from '../styles/constants.js'
 
 export function StoryRenderer({ story, props }: { story: Story; props: PropInfo[] }) {

@@ -72,12 +72,13 @@ packages/studio/
         VariantCard.tsx       — Single variant preview card (inline by default, iframe when isolate: true)
         IframePreview.tsx     — Iframe wrapper for CSS isolation of component previews
         ErrorBoundary.tsx     — Error boundary for component crash isolation
+      hooks/
+        useHashRoute.ts       — Hash-based routing: #component/story → activeComponent + activeStory
       utils/
         index.ts              — Barrel export
-        groupByPath.ts        — Builds sidebar tree: path groups → ComponentNode → StoryGroup → StoryItem
+        buildSidebarTree.ts   — Builds sidebar tree: path groups → ComponentNode → StoryGroup → StoryItem
         naming.ts             — toKebabCase(), entryName() helpers
-        useHashRoute.ts       — Hash-based routing: #component/story → activeComponent + activeStory
-        getLayoutStyle.ts     — getGridStyle() — computes CSS grid layout for variant grids
+        getGridStyle.ts       — getGridStyle() — computes CSS grid layout for variant grids
       styles/
         styles.css            — Studio UI styles (Tailwind)
 ```

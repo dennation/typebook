@@ -1,6 +1,6 @@
 import type { RegistryEntry } from '../../types.js'
 import { DOCS_PAGE } from '../../constants.js'
-import type { SidebarNode, ComponentNode } from '../utils/groupByPath.js'
+import type { SidebarNode, ComponentNode } from '../utils/buildSidebarTree.js'
 
 export interface SidebarProps {
 	tree: SidebarNode[]

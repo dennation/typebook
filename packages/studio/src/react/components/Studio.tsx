@@ -1,10 +1,10 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useInsertionEffect, useMemo } from 'react'
 import type { ComponentType } from 'react'
 import type { RegistryEntry, PropInfo } from '../../types.js'
 import { STYLE_ELEMENT_ID, DOCS_PAGE } from '../../constants.js'
-import { buildSidebarTree } from '../utils/groupByPath.js'
+import { buildSidebarTree } from '../utils/buildSidebarTree.js'
 import { entryName } from '../utils/naming.js'
-import { useHashRoute } from '../utils/useHashRoute.js'
+import { useHashRoute } from '../hooks/useHashRoute.js'
 import { Sidebar } from './Sidebar.js'
 import { MainContent } from './MainContent.js'
 import styles from '../styles/styles.css?inline'
@@ -99,8 +99,8 @@ export function Studio({ registry, theme: initialTheme = 'light', disableSearch 
 			: (propsMap.get(activeStoryObj.component) ?? [])
 	}, [activeStoryObj, activeEntry, propsMap])
 
-	// Inject styles once on mount
-	useEffect(() => {
+	// Inject styles before first paint to prevent FOUC
+	useInsertionEffect(() => {
 		if (document.getElementById(STYLE_ELEMENT_ID)) return
 		const style = document.createElement('style')
 		style.id = STYLE_ELEMENT_ID
