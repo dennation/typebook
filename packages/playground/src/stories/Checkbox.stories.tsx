@@ -2,7 +2,6 @@ import { define } from '@dennation/ui-studio'
 import { Checkbox } from '@heroui/checkbox'
 
 const checkbox = define(Checkbox, {
-	path: 'Hero UI',
 	defaults: {
 		children: 'Agree to terms',
 	},

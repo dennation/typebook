@@ -22,7 +22,7 @@ export function define<
   config?: DefineConfig<Props, IncludedProps> & { defaults?: D },
 ): DefineResult<Expand<Pick<Props, IncludedProps>>, keyof D & IncludedProps> {
   const defaults: Record<string, unknown> = config?.defaults ?? {}
-  const title = config?.title
+  const name = config?.name
   const path = config?.path
   const wrapper = config?.wrapper
 
@@ -36,12 +36,12 @@ export function define<
   const result: DefineResult<Expand<Pick<Props, IncludedProps>>, keyof D & IncludedProps> = {
     __type: 'define',
     component,
-    title,
+    name,
     path,
     defaults,
 
     // Story creation methods
-    single(config?: { props?: any; render?: any; isolate?: boolean }): SingleStory {
+    single(config?: { props?: any; render?: any; isolate?: boolean; name?: string; path?: string }): SingleStory {
       return {
         __type: 'story',
         kind: 'single',
@@ -50,6 +50,8 @@ export function define<
         props: config?.props ? { ...config.props } : undefined,
         render: wrapRender(config?.render ?? defaultRender),
         isolate: config?.isolate,
+        name: config?.name,
+        path: config?.path,
       }
     },
 
@@ -58,6 +60,8 @@ export function define<
       props?: any
       columns?: number
       isolate?: boolean
+      name?: string
+      path?: string
     }): VariantsStory {
       return {
         __type: 'story',
@@ -69,6 +73,8 @@ export function define<
         columns: config.columns,
         render: wrapRender(defaultRender),
         isolate: config.isolate,
+        name: config.name,
+        path: config.path,
       }
     },
 
@@ -77,6 +83,8 @@ export function define<
       y: VariantConfig[]
       props?: any
       isolate?: boolean
+      name?: string
+      path?: string
     }): MatrixStory {
       return {
         __type: 'story',
@@ -88,6 +96,8 @@ export function define<
         props: config.props ? { ...config.props } : undefined,
         render: wrapRender(defaultRender),
         isolate: config.isolate,
+        name: config.name,
+        path: config.path,
       }
     },
 

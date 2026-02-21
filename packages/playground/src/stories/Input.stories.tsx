@@ -2,7 +2,6 @@ import { define } from '@dennation/ui-studio'
 import { Input } from '@heroui/input'
 
 const input = define(Input, {
-	path: 'Hero UI',
 	defaults: {
 		placeholder: 'Enter text',
 	},

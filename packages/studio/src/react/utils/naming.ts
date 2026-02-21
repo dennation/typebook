@@ -10,7 +10,7 @@ export function toKebabCase(str: string): string {
 /** Get display name for a registry entry */
 export function entryName(entry: RegistryEntry): string {
 	return (
-		entry.config.title ??
+		entry.config.name ??
 		entry.config.component.displayName ??
 		entry.config.component.name ??
 		'Unknown'

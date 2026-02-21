@@ -50,33 +50,6 @@ const meta: Record<string, ComponentMeta> = {
   "src/stories/Input.stories.tsx": {
     "props": [
       {
-        "name": "isReadOnly",
-        "optional": true,
-        "type": {
-          "kind": "boolean"
-        }
-      },
-      {
-        "name": "isRequired",
-        "optional": true,
-        "type": {
-          "kind": "boolean"
-        }
-      },
-      {
-        "name": "variant",
-        "optional": true,
-        "type": {
-          "kind": "literal",
-          "values": [
-            "flat",
-            "faded",
-            "bordered",
-            "underlined"
-          ]
-        }
-      },
-      {
         "name": "color",
         "optional": true,
         "type": {
@@ -104,24 +77,51 @@ const meta: Record<string, ComponentMeta> = {
         }
       },
       {
+        "name": "disabled",
+        "optional": true,
+        "type": {
+          "kind": "boolean"
+        }
+      },
+      {
+        "name": "isReadOnly",
+        "optional": true,
+        "type": {
+          "kind": "boolean"
+        }
+      },
+      {
+        "name": "isRequired",
+        "optional": true,
+        "type": {
+          "kind": "boolean"
+        }
+      },
+      {
+        "name": "variant",
+        "optional": true,
+        "type": {
+          "kind": "literal",
+          "values": [
+            "flat",
+            "faded",
+            "bordered",
+            "underlined"
+          ]
+        }
+      },
+      {
         "name": "radius",
         "optional": true,
         "type": {
           "kind": "literal",
           "values": [
-            "none",
             "sm",
             "md",
             "lg",
+            "none",
             "full"
           ]
-        }
-      },
-      {
-        "name": "disabled",
-        "optional": true,
-        "type": {
-          "kind": "boolean"
         }
       }
     ]
@@ -163,6 +163,13 @@ const meta: Record<string, ComponentMeta> = {
         }
       },
       {
+        "name": "isSelected",
+        "optional": true,
+        "type": {
+          "kind": "boolean"
+        }
+      },
+      {
         "name": "radius",
         "optional": true,
         "type": {
@@ -175,46 +182,11 @@ const meta: Record<string, ComponentMeta> = {
             "full"
           ]
         }
-      },
-      {
-        "name": "isSelected",
-        "optional": true,
-        "type": {
-          "kind": "boolean"
-        }
       }
     ]
   },
   "src/stories/Button.stories.tsx": {
     "props": [
-      {
-        "name": "variant",
-        "optional": true,
-        "type": {
-          "kind": "literal",
-          "values": [
-            "flat",
-            "solid",
-            "bordered",
-            "light",
-            "faded",
-            "shadow",
-            "ghost"
-          ]
-        }
-      },
-      {
-        "name": "size",
-        "optional": true,
-        "type": {
-          "kind": "literal",
-          "values": [
-            "sm",
-            "md",
-            "lg"
-          ]
-        }
-      },
       {
         "name": "color",
         "optional": true,
@@ -231,16 +203,14 @@ const meta: Record<string, ComponentMeta> = {
         }
       },
       {
-        "name": "radius",
+        "name": "size",
         "optional": true,
         "type": {
           "kind": "literal",
           "values": [
-            "none",
             "sm",
             "md",
-            "lg",
-            "full"
+            "lg"
           ]
         }
       },
@@ -249,6 +219,36 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "boolean"
+        }
+      },
+      {
+        "name": "variant",
+        "optional": true,
+        "type": {
+          "kind": "literal",
+          "values": [
+            "flat",
+            "faded",
+            "bordered",
+            "solid",
+            "light",
+            "shadow",
+            "ghost"
+          ]
+        }
+      },
+      {
+        "name": "radius",
+        "optional": true,
+        "type": {
+          "kind": "literal",
+          "values": [
+            "sm",
+            "md",
+            "lg",
+            "none",
+            "full"
+          ]
         }
       },
       {

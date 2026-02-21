@@ -65,7 +65,7 @@ packages/studio/
       index.ts                — React exports
       components/
         index.ts              — Barrel export
-        Studio.tsx            — <Studio /> component (sidebar, theme, story dispatch)
+        Studio.tsx            — <Studio /> component (per-story sidebar tree, theme, single-story rendering)
         StoryRenderer.tsx     — Dispatches to RenderSingle / RenderVariants / RenderMatrix
         ComponentPreview.tsx   — Component preview with interactive props panel
         PropControl.tsx       — Prop controls: dropdown (literal), toggle (boolean), input (string), number
@@ -74,7 +74,9 @@ packages/studio/
         ErrorBoundary.tsx     — Error boundary for component crash isolation
       utils/
         index.ts              — Barrel export
-        groupByPath.ts        — Groups RegistryEntry[] by config.path field
+        groupByPath.ts        — Builds sidebar tree: path groups → ComponentNode → StoryGroup → StoryItem
+        naming.ts             — toKebabCase(), entryName() helpers
+        useHashRoute.ts       — Hash-based routing: #component/story → activeComponent + activeStory
         getLayoutStyle.ts     — getGridStyle() — computes CSS grid layout for variant grids
       styles/
         styles.css            — Studio UI styles (Tailwind)
@@ -104,8 +106,9 @@ packages/studio/
                                     generateMetaFile()       →  ui-studio-meta.gen.ts (extracted types)
                                     generateRegistryFile()   →  ui-studio-registry.gen.ts (imports + assembly)
                                               ↓
-                                    <Studio />  passes RegistryEntry[] to renderers
+                                    <Studio />  sidebar tree → click story → #component/story hash
                                               ↓
+                                    Single story rendered per page
                                     RenderSingle / RenderVariants / RenderMatrix
                                     resolve variants lazily via resolveVariantConfig()
 ```
@@ -121,6 +124,9 @@ packages/studio/
 - **Error Boundary** — React error boundaries isolate component crashes per variant.
 - **VariantConfig marker pattern** — `button.allOf('size')` returns a typed marker `{ __type: 'allOf', prop: 'size' }` that gets resolved at render time by the story renderer using TS-extracted type data.
 - **Three story kinds** — `single` (one card), `variants` (grid of values for one prop), `matrix` (table: x prop × y props).
+- **Per-story pages** — each story is a separate page. Sidebar shows a tree: path groups → components → stories. Clicking a story navigates to `#component/story` hash route and renders only that story.
+- **Auto-generated Docs page** — each component gets a virtual "Docs" page (`DOCS_PAGE` constant) as the first sidebar item. Shows `ComponentPreview` with interactive props panel. Clicking a component name auto-selects its Docs page. The Docs page is not a real story — it's handled specially by the router and Studio. (Future: make it disableable or replaceable with custom content.)
+- **Story path grouping** — stories can set `path` to group them under sub-sections in the sidebar (e.g. `path: 'Matrix'`). Default path is `'Stories'`. When all stories share the same path (single group), the group level is flattened — stories appear directly under the component.
 
 ---
 
@@ -185,6 +191,7 @@ import { define } from '@dennation/ui-studio'
 import { Button } from '@heroui/button'
 
 const button = define(Button, {
+  name: 'Button',
   path: 'Forms',
   defaults: { children: 'Click me' },
   props: ['size', 'variant', 'color'],
@@ -202,10 +209,12 @@ export const Colors = button.variants({ items: button.allOf('color'), columns: 3
 // Variants story — manual list of values
 export const States = button.variants({ items: button.values('disabled', [false, true]) })
 
-// Matrix story — cross-product table (x columns × y rows)
+// Matrix story — custom name and path group
 export const Matrix = button.matrix({
   x: button.allOf('color'),
   y: [button.allOf('variant')],
+  name: 'Color × Variant',
+  path: 'Matrix',
 })
 
 export default button

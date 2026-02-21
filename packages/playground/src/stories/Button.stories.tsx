@@ -2,7 +2,6 @@ import { define } from '@dennation/ui-studio'
 import { Button } from '@heroui/button'
 
 const button = define(Button, {
-	path: 'Hero UI',
 	defaults: {
 		children: 'Click me',
 	},
@@ -26,6 +25,7 @@ export const Loading = button.variants({ items: button.allOf('isLoading') })
 export const Matrix = button.matrix({
 	x: button.allOf('color'),
 	y: [button.allOf('variant')],
+	path: 'Matrix',
 })
 
 

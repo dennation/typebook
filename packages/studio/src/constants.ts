@@ -30,3 +30,6 @@ export const DEBOUNCE_MS = 200
 
 /** ID for the injected Studio style element */
 export const STYLE_ELEMENT_ID = 'ui-studio-styles'
+
+/** Virtual page name for auto-generated component docs */
+export const DOCS_PAGE = 'Docs'
