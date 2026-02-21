@@ -108,46 +108,31 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 
 	return (
 		<div
-			className="st:h-screen st:m-0 st:p-3 st:box-border st:font-sans st:text-text st:bg-gradient-studio st:flex st:flex-col st:gap-3"
+			className="st:grid st:grid-cols-[260px_1fr] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text"
 			data-theme={theme}
 		>
-			{/* Header */}
-			<header className="st:flex st:items-center st:justify-between st:px-5 st:h-14 st:shrink-0 st:glass st:rounded-2xl">
-				<span className="st:text-sm st:font-semibold st:tracking-tight">
-					UI Studio
-				</span>
-				<button
-					className="st:w-8 st:h-8 st:rounded-full st:glass-subtle st:text-text st:cursor-pointer st:text-sm st:flex st:items-center st:justify-center st:transition-all hover:st:bg-bg-hover"
-					title="Toggle theme"
-					onClick={toggleTheme}
-					type="button"
-				>
-					{theme === 'light' ? '\u263C' : '\u263E'}
-				</button>
-			</header>
+			<Sidebar
+				tree={tree}
+				activeComponent={activeComponent}
+				activeStory={activeStory}
+				selectStory={selectStory}
+				collapsed={collapsed}
+				toggleCollapse={toggleCollapse}
+				disableSearch={disableSearch}
+				searchQuery={searchQuery}
+				onSearchChange={setSearchQuery}
+				stories={storiesMap}
+				theme={theme}
+				onToggleTheme={toggleTheme}
+			/>
 
-			<div className="st:flex st:gap-3 st:flex-1 st:min-h-0">
-				<Sidebar
-					tree={tree}
-					activeComponent={activeComponent}
-					activeStory={activeStory}
-					selectStory={selectStory}
-					collapsed={collapsed}
-					toggleCollapse={toggleCollapse}
-					disableSearch={disableSearch}
-					searchQuery={searchQuery}
-					onSearchChange={setSearchQuery}
-					stories={storiesMap}
-				/>
-
-				<MainContent
-					activeEntry={activeEntry}
-					activeStory={activeStory}
-					isDocsPage={isDocsPage}
-					activeStoryObj={activeStoryObj}
-					storyProps={storyProps}
-				/>
-			</div>
+			<MainContent
+				activeEntry={activeEntry}
+				activeStory={activeStory}
+				isDocsPage={isDocsPage}
+				activeStoryObj={activeStoryObj}
+				storyProps={storyProps}
+			/>
 		</div>
 	)
 }

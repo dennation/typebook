@@ -19,10 +19,10 @@ export function MainContent({
 	storyProps,
 }: MainContentProps) {
 	return (
-		<main className="st:flex-1 st:overflow-auto st:p-6">
+		<main className="st:overflow-auto st:p-8 st:bg-bg">
 			{activeEntry && activeStory ? (
 				<div>
-					<h1 className="st:text-2xl st:font-bold st:mb-5">
+					<h1 className="st:text-2xl st:font-semibold st:mb-6">
 						{entryName(activeEntry)}
 					</h1>
 
@@ -34,7 +34,7 @@ export function MainContent({
 						/>
 					) : activeStoryObj ? (
 						<div className="st:mb-8">
-							<h2 className="st:text-lg st:font-semibold st:mb-4 st:text-text-muted">
+							<h2 className="st:text-lg st:font-medium st:mb-5 st:text-text-muted">
 								{activeStoryObj.name ?? activeStory}
 							</h2>
 							<StoryRenderer story={activeStoryObj} props={storyProps} />

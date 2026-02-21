@@ -1,4 +1,5 @@
 import type { ComponentEntry } from '../../types.js'
+import type { Theme } from '../hooks/useTheme.js'
 import { DOCS_PAGE } from '../../constants.js'
 import type { SidebarNode, ComponentNode } from '../utils/buildSidebarTree.js'
 
@@ -13,6 +14,8 @@ export interface SidebarProps {
 	searchQuery: string
 	onSearchChange: (query: string) => void
 	stories: Record<string, ComponentEntry['stories']>
+	theme: Theme
+	onToggleTheme: () => void
 }
 
 export function Sidebar({
@@ -26,23 +29,38 @@ export function Sidebar({
 	searchQuery,
 	onSearchChange,
 	stories,
+	theme,
+	onToggleTheme,
 }: SidebarProps) {
 	const isNodeCollapsed = (key: string) => !searchQuery && collapsed.has(key)
 
 	return (
-		<nav className="st:w-[260px] st:shrink-0 st:glass st:rounded-2xl st:flex st:flex-col st:overflow-hidden">
+		<nav className="st:bg-bg-sidebar st:border-r st:border-border st:flex st:flex-col st:overflow-hidden">
+			<div className="st:flex st:items-center st:justify-between st:px-4 st:pt-4 st:pb-2 st:shrink-0">
+				<span className="st:text-sm st:font-semibold st:tracking-tight">
+					UI Studio
+				</span>
+				<button
+					className="st:w-7 st:h-7 st:rounded-md st:bg-transparent st:border-none st:text-text-muted st:cursor-pointer st:text-sm st:flex st:items-center st:justify-center st:transition-colors hover:st:text-text"
+					title="Toggle theme"
+					onClick={onToggleTheme}
+					type="button"
+				>
+					{theme === 'light' ? '\u263C' : '\u263E'}
+				</button>
+			</div>
 			{!disableSearch && (
-				<div className="st:px-3 st:pt-3 st:pb-3 st:shrink-0">
+				<div className="st:px-4 st:pb-3 st:shrink-0">
 					<input
 						type="text"
 						placeholder="Search…"
 						value={searchQuery}
 						onChange={(e) => onSearchChange(e.target.value)}
-						className="st:w-full st:px-3.5 st:py-2 st:text-sm st:rounded-full st:glass-input st:text-text st:outline-none st:placeholder-text-muted focus:st:border-accent st:transition-all"
+						className="st:w-full st:px-1 st:py-1.5 st:text-sm st:bg-transparent st:border-b st:border-border st:text-text st:outline-none st:placeholder-text-muted focus:st:border-accent st:transition-colors st:rounded-none"
 					/>
 				</div>
 			)}
-			<div className="st:flex-1 st:overflow-y-auto st:pb-3">
+			<div className="st:flex-1 st:overflow-y-auto st:pb-4">
 				{renderTree(tree, 0, '', {
 					activeComponent,
 					activeStory,
@@ -84,12 +102,11 @@ function renderTree(
 
 		return (
 			<div key={node.label}>
-				<SidebarPathNode
+				<SidebarButton
 					label={node.label}
 					depth={depth}
-					hasChildren={hasChildren}
-					collapsed={nodeCollapsed}
-					onToggle={() => hasChildren && ctx.toggleCollapse(nodeKey)}
+					collapsed={hasChildren ? nodeCollapsed : undefined}
+					onClick={() => hasChildren && ctx.toggleCollapse(nodeKey)}
 				/>
 				{!nodeCollapsed && (
 					<>
@@ -116,12 +133,12 @@ function renderComponentNode(
 
 	return (
 		<div key={comp.name}>
-			<SidebarComponentHeader
-				name={comp.entry.config.name ?? comp.name}
+			<SidebarButton
+				label={comp.entry.config.name ?? comp.name}
 				depth={depth}
 				isActive={isActiveComp}
 				collapsed={compCollapsed}
-				onToggle={() => {
+				onClick={() => {
 					ctx.toggleCollapse(compKey)
 					if (compCollapsed && ctx.activeComponent !== comp.name) {
 						ctx.selectStory(comp.name, DOCS_PAGE)
@@ -130,8 +147,7 @@ function renderComponentNode(
 			/>
 			{!compCollapsed && (
 				<>
-					<SidebarItem
-						storyKey={DOCS_PAGE}
+					<SidebarButton
 						label={DOCS_PAGE}
 						isActive={ctx.activeComponent === comp.name && ctx.activeStory === DOCS_PAGE}
 						depth={depth + 1}
@@ -141,20 +157,19 @@ function renderComponentNode(
 						const groupKey = `${compKey}/${group.label}`
 						const groupCollapsed = ctx.isNodeCollapsed(groupKey)
 						return (
-							<SidebarGroup
-								key={group.label}
-								label={group.label}
-								depth={depth + 1}
-								collapsed={groupCollapsed}
-								onToggle={() => ctx.toggleCollapse(groupKey)}
-							>
+							<div key={group.label}>
+								<SidebarButton
+									label={group.label}
+									depth={depth + 1}
+									collapsed={groupCollapsed}
+									onClick={() => ctx.toggleCollapse(groupKey)}
+								/>
 								{!groupCollapsed &&
 									group.stories.map((s) => {
 										const story = ctx.stories[comp.name]?.[s.name]
 										return (
-											<SidebarItem
+											<SidebarButton
 												key={s.name}
-												storyKey={s.name}
 												label={story?.name ?? s.name}
 												isActive={
 													ctx.activeComponent === s.componentName &&
@@ -165,7 +180,7 @@ function renderComponentNode(
 											/>
 										)
 									})}
-							</SidebarGroup>
+							</div>
 						)
 					})}
 				</>
@@ -174,116 +189,31 @@ function renderComponentNode(
 	)
 }
 
-function SidebarItem({
+function SidebarButton({
 	label,
-	isActive,
 	depth,
+	isActive,
+	collapsed,
 	onClick,
 }: {
-	storyKey: string
 	label: string
-	isActive: boolean
 	depth: number
+	isActive?: boolean
+	collapsed?: boolean
 	onClick: () => void
 }) {
 	return (
 		<button
-			className={`st:block st:w-[calc(100%-16px)] st:mx-2 st:py-1.5 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all st:rounded-lg hover:st:bg-bg-hover ${
-				isActive ? 'st:bg-accent-light st:text-accent st:font-semibold' : ''
+			className={`st:flex st:items-center st:justify-between st:w-full st:py-1.5 st:pr-3 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-colors hover:st:bg-bg-hover ${
+				isActive ? 'st:bg-accent-light st:font-medium' : ''
 			}`}
-			style={{ paddingLeft: `${depth * 12 + 8}px` }}
+			style={{ paddingLeft: `${depth * 12 + 16}px` }}
 			onClick={onClick}
 			type="button"
 		>
-			{label}
-		</button>
-	)
-}
-
-function SidebarComponentHeader({
-	name,
-	depth,
-	isActive,
-	collapsed,
-	onToggle,
-}: {
-	name: string
-	depth: number
-	isActive: boolean
-	collapsed: boolean
-	onToggle: () => void
-}) {
-	return (
-		<button
-			className={`st:flex st:items-center st:justify-between st:w-[calc(100%-16px)] st:mx-2 st:py-1.5 st:pr-3 st:text-sm st:border-none st:bg-transparent st:cursor-pointer st:text-left st:transition-all st:rounded-lg hover:st:bg-bg-hover ${
-				isActive ? 'st:text-accent st:font-semibold' : 'st:text-text'
-			}`}
-			style={{ paddingLeft: `${depth * 12 + 8}px` }}
-			onClick={onToggle}
-			type="button"
-		>
-			<span>{name}</span>
-			<span className="st:text-[10px] st:leading-none st:text-text-muted st:opacity-60">
-				{collapsed ? '\u25B8' : '\u25BE'}
-			</span>
-		</button>
-	)
-}
-
-function SidebarGroup({
-	label,
-	depth,
-	collapsed,
-	onToggle,
-	children,
-}: {
-	label: string
-	depth: number
-	collapsed: boolean
-	onToggle: () => void
-	children: React.ReactNode
-}) {
-	return (
-		<div>
-			<button
-				className="st:flex st:items-center st:justify-between st:w-[calc(100%-16px)] st:mx-2 st:py-1.5 st:pr-3 st:text-sm st:border-none st:bg-transparent st:text-text st:cursor-pointer st:text-left st:transition-all st:rounded-lg hover:st:bg-bg-hover"
-				style={{ paddingLeft: `${depth * 12 + 8}px` }}
-				onClick={onToggle}
-				type="button"
-			>
-				<span>{label}</span>
-				<span className="st:text-[10px] st:leading-none st:text-text-muted st:opacity-60">
-					{collapsed ? '\u25B8' : '\u25BE'}
-				</span>
-			</button>
-			{children}
-		</div>
-	)
-}
-
-function SidebarPathNode({
-	label,
-	depth,
-	hasChildren,
-	collapsed,
-	onToggle,
-}: {
-	label: string
-	depth: number
-	hasChildren: boolean
-	collapsed: boolean
-	onToggle: () => void
-}) {
-	return (
-		<button
-			className="st:flex st:items-center st:justify-between st:w-[calc(100%-16px)] st:mx-2 st:pt-3 st:pb-1 st:pr-3 st:text-xs st:font-semibold st:uppercase st:tracking-wide st:text-text-muted st:bg-transparent st:border-none st:cursor-pointer st:text-left st:rounded-lg hover:st:text-text"
-			style={{ paddingLeft: `${(depth + 1) * 12}px` }}
-			onClick={onToggle}
-			type="button"
-		>
 			<span>{label}</span>
-			{hasChildren && (
-				<span className="st:text-[10px] st:leading-none st:opacity-60">
+			{collapsed !== undefined && (
+				<span className="st:text-[10px] st:leading-none st:text-text-muted">
 					{collapsed ? '\u25B8' : '\u25BE'}
 				</span>
 			)}

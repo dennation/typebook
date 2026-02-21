@@ -22,8 +22,8 @@ export const VariantCard = memo(function VariantCard({
 	)
 
 	return (
-		<div className="st:relative st:glass-subtle st:rounded-xl st:overflow-hidden st:transition-all hover:st:shadow-lg">
-			<span className="st:absolute st:top-1 st:left-1 st:text-[10px] st:text-text-muted st:bg-bg-sidebar st:px-1.5 st:py-px st:rounded-full st:border st:border-border st:z-10">
+		<div className="st:relative st:bg-bg-sidebar st:rounded-lg st:overflow-hidden">
+			<span className="st:absolute st:top-1 st:left-1 st:text-[10px] st:text-text-muted st:bg-bg st:px-1.5 st:py-px st:rounded-full st:z-10">
 				{label}
 			</span>
 			{isolate ? (

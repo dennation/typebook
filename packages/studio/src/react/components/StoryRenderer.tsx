@@ -72,15 +72,15 @@ function RenderMatrix({ story, props }: { story: MatrixStory; props: PropInfo[] 
 	}
 
 	return (
-		<div className="st:overflow-x-auto st:rounded-xl st:glass-subtle">
+		<div className="st:overflow-x-auto st:rounded-lg st:border st:border-border">
 			<table className="st:w-full st:border-collapse">
 				<thead>
 					<tr>
-						<th className="st:border st:border-border st:bg-bg-sidebar st:p-2.5 st:text-sm st:font-semibold st:text-left st:rounded-tl-xl" />
-						{xValues.map((value, i) => (
+						<th className="st:border-b st:border-r st:border-border st:bg-bg-sidebar st:p-2.5 st:text-sm st:font-medium st:text-text-muted st:text-left" />
+						{xValues.map((value) => (
 							<th
 								key={String(value)}
-								className={`st:border st:border-border st:bg-bg-sidebar st:p-2.5 st:text-sm st:font-semibold st:text-center ${i === xValues.length - 1 ? 'st:rounded-tr-xl' : ''}`}
+								className="st:border-b st:border-border st:bg-bg-sidebar st:p-2.5 st:text-sm st:font-medium st:text-text-muted st:text-center"
 							>
 								{String(value)}
 							</th>
@@ -90,22 +90,20 @@ function RenderMatrix({ story, props }: { story: MatrixStory; props: PropInfo[] 
 				<tbody>
 					{rows.map((row, rowIdx) => (
 						<tr key={row.label}>
-							<td className={`st:border st:border-border st:bg-bg-sidebar st:p-2.5 st:text-sm st:font-semibold st:text-left ${rowIdx === rows.length - 1 ? 'st:rounded-bl-xl' : ''}`}>
+							<td className={`st:border-r st:border-border st:bg-bg-sidebar st:p-2.5 st:text-sm st:font-medium st:text-text-muted st:text-left ${rowIdx < rows.length - 1 ? 'st:border-b' : ''}`}>
 								{row.label}
 							</td>
-							{row.cells.map((cell, cellIdx) => {
+							{row.cells.map((cell) => {
 								const cellContent = (
 									<div style={CENTERED_CONTENT_STYLE}>
 										<ErrorBoundary>{story.render(cell.props)}</ErrorBoundary>
 									</div>
 								)
 
-								const isLastCell = rowIdx === rows.length - 1 && cellIdx === row.cells.length - 1
-
 								return (
 									<td
 										key={`${row.label}-${cell.label}`}
-										className={`st:border st:border-border st:p-0 ${isLastCell ? 'st:rounded-br-xl' : ''}`}
+										className={`st:p-0 ${rowIdx < rows.length - 1 ? 'st:border-b st:border-border' : ''}`}
 									>
 										{story.isolate ? (
 											<IframePreview className="st:p-4">{cellContent}</IframePreview>
