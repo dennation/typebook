@@ -136,10 +136,10 @@ describe('generics', () => {
 		expect(value.type).toEqual({ kind: 'literal', values: ['alpha', 'beta', 'gamma'] })
 	})
 
-	test('generic array prop → unknown (T[])', () => {
+	test('generic array prop → unknown with raw type (T[] not yet handled)', () => {
 		const options = findProp(props, 'options')!
-		// T[] with instantiated T should produce an array type — not a primitive
 		expect(options.type.kind).toBe('unknown')
+		expect((options.type as any).raw).toBeDefined()
 	})
 
 	test('generic function prop → function', () => {
@@ -305,34 +305,26 @@ describe('conditional and advanced types', () => {
 
 	test('template literal type: `size-${Size}` → literal values', () => {
 		const sizeLabel = findProp(props, 'sizeLabel')!
-		expect(sizeLabel.type.kind).toBe('literal')
-		if (sizeLabel.type.kind === 'literal') {
-			expect(sizeLabel.type.values.sort()).toEqual(['size-lg', 'size-md', 'size-sm'])
-		}
+		expect(sizeLabel.type).toEqual({ kind: 'literal', values: expect.arrayContaining(['size-sm', 'size-md', 'size-lg']) })
+		expect((sizeLabel.type as any).values).toHaveLength(3)
 	})
 
 	test('enum type → literal values', () => {
 		const color = findProp(props, 'color')!
-		expect(color.type.kind).toBe('literal')
-		if (color.type.kind === 'literal') {
-			expect(color.type.values.sort()).toEqual(['blue', 'green', 'red'])
-		}
+		expect(color.type).toEqual({ kind: 'literal', values: expect.arrayContaining(['red', 'blue', 'green']) })
+		expect((color.type as any).values).toHaveLength(3)
 	})
 
 	test('Extract<> utility → filtered literals', () => {
 		const extracted = findProp(props, 'extracted')!
-		expect(extracted.type.kind).toBe('literal')
-		if (extracted.type.kind === 'literal') {
-			expect(extracted.type.values.sort()).toEqual(['a', 'b'])
-		}
+		expect(extracted.type).toEqual({ kind: 'literal', values: expect.arrayContaining(['a', 'b']) })
+		expect((extracted.type as any).values).toHaveLength(2)
 	})
 
 	test('Exclude<> utility → remaining literals', () => {
 		const excluded = findProp(props, 'excluded')!
-		expect(excluded.type.kind).toBe('literal')
-		if (excluded.type.kind === 'literal') {
-			expect(excluded.type.values.sort()).toEqual(['a', 'b'])
-		}
+		expect(excluded.type).toEqual({ kind: 'literal', values: expect.arrayContaining(['a', 'b']) })
+		expect((excluded.type as any).values).toHaveLength(2)
 	})
 })
 
@@ -347,17 +339,14 @@ describe('complex unions', () => {
 		props = result!
 	})
 
-	test('string | number → unknown (mixed primitive union)', () => {
+	test('string | number → unknown with raw type string', () => {
 		const mixed = findProp(props, 'mixed')!
-		expect(mixed.type.kind).toBe('unknown')
+		expect(mixed.type).toEqual({ kind: 'unknown', raw: 'string | number' })
 	})
 
-	test('number literal union 1 | 2 | 3 → unknown (not yet handled)', () => {
+	test('number literal union 1 | 2 | 3 → number', () => {
 		const numLiteral = findProp(props, 'numLiteral')!
-		// Number literal unions are not specifically handled by convertTsType —
-		// they are a union where members are NumberLiteral, but no branch matches.
-		// This documents the current behavior; could be improved to return 'number'.
-		expect(numLiteral.type.kind).toBe('unknown')
+		expect(numLiteral.type).toEqual({ kind: 'number' })
 	})
 
 	test('single string literal → literal with one value', () => {
@@ -365,9 +354,9 @@ describe('complex unions', () => {
 		expect(single.type).toEqual({ kind: 'literal', values: ['only'] })
 	})
 
-	test('boolean | string → unknown (mixed union)', () => {
+	test('boolean | string → unknown with raw type string', () => {
 		const boolOrString = findProp(props, 'boolOrString')!
-		expect(boolOrString.type.kind).toBe('unknown')
+		expect(boolOrString.type).toEqual({ kind: 'unknown', raw: expect.stringContaining('string') })
 	})
 
 	test('"a" | "b" | string → string (wide union absorbs literals)', () => {

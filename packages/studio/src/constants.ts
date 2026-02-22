@@ -19,6 +19,9 @@ export const VIRTUAL_MODULE_ID = `virtual:${PACKAGE_NAME}-registry`
 /** Default glob pattern for story files */
 export const DEFAULT_INCLUDE = './src/**/*.stories.tsx'
 
+/** Default glob pattern for page files */
+export const DEFAULT_PAGES_INCLUDE = './src/**/*.docs.tsx'
+
 /** CSS class prefix for Studio UI components */
 export const CSS_PREFIX = PACKAGE_NAME
 

@@ -11,6 +11,8 @@ const registry: Registry = {
       meta: meta['src/stories/Button.stories.tsx'],
     },
   ],
+  pages: [
+  ],
 }
 
 export default registry

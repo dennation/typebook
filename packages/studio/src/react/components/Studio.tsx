@@ -17,8 +17,8 @@ export interface StudioProps {
 }
 
 export function Studio({ registry, theme: themeOverride, disableSearch = false }: StudioProps) {
-	const { components } = registry
-	const { activeComponent, activeStory, selectStory } = useHashRoute(components)
+	const { components, pages = [] } = registry
+	const { activeComponent, activeStory, activePage, selectStory, selectPage } = useHashRoute(components, pages)
 	const { theme, toggleTheme } = useTheme(themeOverride)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
@@ -64,8 +64,17 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 		})
 	}, [components, searchQuery])
 
+	// Filter pages by search query
+	const filteredPages = useMemo(() => {
+		if (!searchQuery) return pages
+		const q = searchQuery.toLowerCase()
+		return pages.filter((p) => {
+			return p.page.name.toLowerCase().includes(q) || (p.page.path?.toLowerCase().includes(q) ?? false)
+		})
+	}, [pages, searchQuery])
+
 	// Build sidebar tree from paths
-	const tree = useMemo(() => buildSidebarTree(filtered), [filtered])
+	const tree = useMemo(() => buildSidebarTree(filtered, filteredPages), [filtered, filteredPages])
 
 	// Stories lookup for sidebar
 	const storiesMap = useMemo(() => {
@@ -97,6 +106,12 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 			: (propsMap.get(activeStoryObj.component) ?? [])
 	}, [activeStoryObj, activeEntry, propsMap])
 
+	// Find active page entry
+	const activePageEntry = useMemo(
+		() => (activePage ? pages.find((p) => p.page.name === activePage) : undefined),
+		[pages, activePage],
+	)
+
 	// Inject styles before first paint to prevent FOUC
 	useInsertionEffect(() => {
 		if (document.getElementById(STYLE_ELEMENT_ID)) return
@@ -115,7 +130,9 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 				tree={tree}
 				activeComponent={activeComponent}
 				activeStory={activeStory}
+				activePage={activePage}
 				selectStory={selectStory}
+				selectPage={selectPage}
 				collapsed={collapsed}
 				toggleCollapse={toggleCollapse}
 				disableSearch={disableSearch}
@@ -132,6 +149,8 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 				isDocsPage={isDocsPage}
 				activeStoryObj={activeStoryObj}
 				storyProps={storyProps}
+				activePageContent={activePageEntry?.page.content ?? null}
+				activePageName={activePage}
 			/>
 		</div>
 	)

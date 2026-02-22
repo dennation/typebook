@@ -5,6 +5,8 @@ import type { ComponentType, ReactNode } from 'react'
 export interface StudioConfig {
   /** Glob pattern for .stories.tsx files */
   include?: string
+  /** Glob pattern for docs page files */
+  includePages?: string
   /** Output path for the generated registry file (default: './ui-studio-registry.gen.ts') */
   output?: string
   /** Output path for the generated meta file (default: './ui-studio-meta.gen.ts') */
@@ -35,6 +37,31 @@ export interface ComponentMeta {
   props: PropInfo[]
 }
 
+// --- Page Types ---
+
+export interface PageConfig {
+  /** Display name for the page in the sidebar */
+  name: string
+  /** Sidebar path with nesting via '/' (e.g. 'Guides') */
+  path?: string
+  /** Sort order within the same path group (ascending, default 0) */
+  order?: number
+  /** React component to render as the page content */
+  content: ComponentType
+}
+
+export interface PageResult {
+  __type: 'page'
+  name: string
+  path?: string
+  order?: number
+  content: ComponentType
+}
+
+export interface PageEntry {
+  page: PageResult
+}
+
 // --- Define API Types ---
 
 /**
@@ -54,7 +81,7 @@ export type RequiredKeys<T> = {
 export type MissingProps<Props, CoveredByDefaults extends keyof Props> =
   Pick<Props, Exclude<RequiredKeys<Props>, CoveredByDefaults>>
 
-export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof Props> {
+export interface DescribeConfig<Props, IncludedProps extends keyof Props = keyof Props> {
   /** Display name override (defaults to displayName or function name) */
   name?: string
   /** Sidebar path with nesting via '/' (e.g. 'Components/Forms') */
@@ -69,6 +96,9 @@ export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof P
   /** Wrapper applied to all stories (e.g. a theme provider) */
   wrapper?: WrapperFn
 }
+
+/** @deprecated Use DescribeConfig instead */
+export type DefineConfig<Props, IncludedProps extends keyof Props = keyof Props> = DescribeConfig<Props, IncludedProps>
 
 /** Auto-generate variants from prop type (boolean/literal) */
 export interface AllOfConfig {
@@ -139,8 +169,8 @@ export interface MatrixStory extends StoryBase {
 /** Exported from .stories.tsx — the result of single(), variants(), or matrix() */
 export type Story = SingleStory | VariantsStory | MatrixStory
 
-/** Returned by define() — component page configuration + story builder */
-export interface DefineResult<Props, CoveredByDefaults extends keyof Props = never> {
+/** Returned by describe() — component page configuration + story builder */
+export interface DescribeResult<Props, CoveredByDefaults extends keyof Props = never> {
   __type: 'define'
   component: ComponentType<any>
   name?: string
@@ -182,16 +212,20 @@ export interface DefineResult<Props, CoveredByDefaults extends keyof Props = nev
   ): GenerateConfig
 }
 
+/** @deprecated Use DescribeResult instead */
+export type DefineResult<Props, CoveredByDefaults extends keyof Props = never> = DescribeResult<Props, CoveredByDefaults>
+
 // --- Registry (output of gen file, input to <Studio />) ---
 
 export interface ComponentEntry {
-  config: DefineResult<any>
+  config: DescribeResult<any>
   stories: Record<string, Story>
   meta: ComponentMeta
 }
 
 export interface Registry {
   components: ComponentEntry[]
+  pages: PageEntry[]
 }
 
 

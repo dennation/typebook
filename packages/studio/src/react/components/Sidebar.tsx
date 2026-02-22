@@ -1,13 +1,15 @@
 import type { ComponentEntry } from '../../types.js'
 import type { Theme } from '../hooks/useTheme.js'
 import { DOCS_PAGE } from '../../constants.js'
-import type { SidebarNode, ComponentNode } from '../utils/buildSidebarTree.js'
+import type { SidebarNode, ComponentNode, PageNode } from '../utils/buildSidebarTree.js'
 
 export interface SidebarProps {
 	tree: SidebarNode[]
 	activeComponent: string | null
 	activeStory: string | null
+	activePage: string | null
 	selectStory: (component: string, story: string) => void
+	selectPage: (pageName: string) => void
 	collapsed: Set<string>
 	toggleCollapse: (key: string) => void
 	disableSearch: boolean
@@ -22,7 +24,9 @@ export function Sidebar({
 	tree,
 	activeComponent,
 	activeStory,
+	activePage,
 	selectStory,
+	selectPage,
 	collapsed,
 	toggleCollapse,
 	disableSearch,
@@ -64,7 +68,9 @@ export function Sidebar({
 				{renderTree(tree, 0, '', {
 					activeComponent,
 					activeStory,
+					activePage,
 					selectStory,
+					selectPage,
 					toggleCollapse,
 					isNodeCollapsed,
 					stories,
@@ -77,7 +83,9 @@ export function Sidebar({
 interface RenderContext {
 	activeComponent: string | null
 	activeStory: string | null
+	activePage: string | null
 	selectStory: (component: string, story: string) => void
+	selectPage: (pageName: string) => void
 	toggleCollapse: (key: string) => void
 	isNodeCollapsed: (key: string) => boolean
 	stories: Record<string, ComponentEntry['stories']>
@@ -91,13 +99,20 @@ function renderTree(
 ) {
 	return nodes.map((node) => {
 		if (!node.label) {
-			return node.components.map((comp) =>
-				renderComponentNode(comp, depth, parentPath, ctx),
+			return (
+				<>
+					{node.pages.map((page) =>
+						renderPageNode(page, depth, ctx),
+					)}
+					{node.components.map((comp) =>
+						renderComponentNode(comp, depth, parentPath, ctx),
+					)}
+				</>
 			)
 		}
 
 		const nodeKey = parentPath ? `${parentPath}/${node.label}` : node.label
-		const hasChildren = node.children.length > 0 || node.components.length > 0
+		const hasChildren = node.children.length > 0 || node.components.length > 0 || node.pages.length > 0
 		const nodeCollapsed = ctx.isNodeCollapsed(nodeKey)
 
 		return (
@@ -110,6 +125,9 @@ function renderTree(
 				/>
 				{!nodeCollapsed && (
 					<>
+						{node.pages.map((page) =>
+							renderPageNode(page, depth + 1, ctx),
+						)}
 						{node.components.map((comp) =>
 							renderComponentNode(comp, depth + 1, nodeKey, ctx),
 						)}
@@ -119,6 +137,25 @@ function renderTree(
 			</div>
 		)
 	})
+}
+
+function renderPageNode(
+	page: PageNode,
+	depth: number,
+	ctx: RenderContext,
+) {
+	const isActive = ctx.activePage === page.name
+
+	return (
+		<SidebarButton
+			key={`page:${page.name}`}
+			label={page.name}
+			depth={depth}
+			isActive={isActive}
+			icon="\u25A2"
+			onClick={() => ctx.selectPage(page.name)}
+		/>
+	)
 }
 
 function renderComponentNode(
@@ -194,12 +231,14 @@ function SidebarButton({
 	depth,
 	isActive,
 	collapsed,
+	icon,
 	onClick,
 }: {
 	label: string
 	depth: number
 	isActive?: boolean
 	collapsed?: boolean
+	icon?: string
 	onClick: () => void
 }) {
 	return (
@@ -211,7 +250,10 @@ function SidebarButton({
 			onClick={onClick}
 			type="button"
 		>
-			<span>{label}</span>
+			<span>
+				{icon && <span className="st:mr-1.5 st:text-text-muted st:text-xs">{icon}</span>}
+				{label}
+			</span>
 			{collapsed !== undefined && (
 				<span className="st:text-[10px] st:leading-none st:text-text-muted">
 					{collapsed ? '\u25B8' : '\u25BE'}

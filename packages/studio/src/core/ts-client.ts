@@ -62,8 +62,8 @@ export class TypeScriptClient {
       return null
     }
 
-    // Find the variable declaration: const button = define(Button, ...)
-    // The type of 'button' is DefineResult<Pick<Props, IncludedProps>>
+    // Find the variable declaration: const button = describe(Button, ...) or define(Button, ...)
+    // The type of 'button' is DescribeResult<Pick<Props, IncludedProps>>
     // So TypeScript already filtered props for us!
     return this.findComponentPropsInFile(sourceFile)
   }
@@ -72,17 +72,18 @@ export class TypeScriptClient {
     // Guaranteed non-null by getComponentProps guard
     const checker = this.checker!
     let result: PropInfo[] | null = null
+    const describeFnNames = new Set(['define', 'describe'])
 
     const visit = (node: ts.Node): void => {
-      // Look for: const button = define(...)
+      // Look for: const button = define(...) or describe(...)
       if (ts.isVariableStatement(node)) {
         for (const decl of node.declarationList.declarations) {
           if (!decl.initializer || !ts.isCallExpression(decl.initializer)) continue
 
           const callExpr = decl.initializer
-          if (!ts.isIdentifier(callExpr.expression) || callExpr.expression.text !== 'define') continue
+          if (!ts.isIdentifier(callExpr.expression) || !describeFnNames.has(callExpr.expression.text)) continue
 
-          // Found define(...) call
+          // Found define()/describe() call
           if (!ts.isIdentifier(decl.name)) continue
 
           // Get type of the entire call expression: define(Button, {...})
@@ -170,6 +171,11 @@ export class TypeScriptClient {
       // Boolean (true | false)
       if (types.every(t => t.flags & ts.TypeFlags.BooleanLiteral)) {
         return { kind: 'boolean' }
+      }
+
+      // Number literal union: 1 | 2 | 3
+      if (types.every(t => t.flags & ts.TypeFlags.NumberLiteral)) {
+        return { kind: 'number' }
       }
     }
 

@@ -1,4 +1,4 @@
-import { resolve, relative } from 'node:path'
+import { relative } from 'node:path'
 import type { Plugin } from 'vite'
 import type { StudioConfig } from '../../types.js'
 import { StudioCompiler } from '../../core/compiler.js'
@@ -43,7 +43,7 @@ export function uiStudio(config?: StudioConfig): Plugin {
 
 			server.watcher.on('add', (path) => {
 				const relPath = relative(compiler.cwd, path)
-				if (compiler.matchesStoryGlob(relPath)) {
+				if (compiler.matchesStoryGlob(relPath) || compiler.matchesPageGlob(relPath)) {
 					compiler.debouncedRegenerate(path)
 				}
 			})
@@ -52,6 +52,9 @@ export function uiStudio(config?: StudioConfig): Plugin {
 				const relPath = relative(compiler.cwd, path)
 				if (compiler.matchesStoryGlob(relPath)) {
 					compiler.evictTypeCache(path)
+					compiler.debouncedRegenerate()
+				}
+				if (compiler.matchesPageGlob(relPath)) {
 					compiler.debouncedRegenerate()
 				}
 			})

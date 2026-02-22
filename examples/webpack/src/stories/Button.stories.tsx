@@ -1,7 +1,7 @@
-import { define } from '@dennation/ui-studio'
+import { describe } from '@dennation/ui-studio'
 import { Button } from '../components/Button'
 
-const button = define(Button, {
+const button = describe(Button, {
 	defaults: {
 		children: 'Click me',
 	},

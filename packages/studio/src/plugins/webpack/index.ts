@@ -36,10 +36,10 @@ export class UiStudioWebpackPlugin {
 				}
 			}
 
-			const changedStoryFile = findFirstStoryFile(studio, compiler.context, modified)
+			const changedFile = findFirstMatchingFile(studio, compiler.context, modified)
 
-			if (changedStoryFile || removed.size > 0) {
-				await studio.regenerate(changedStoryFile)
+			if (changedFile || removed.size > 0) {
+				await studio.regenerate(changedFile)
 			}
 		})
 
@@ -53,7 +53,7 @@ export class UiStudioWebpackPlugin {
 	}
 }
 
-function findFirstStoryFile(
+function findFirstMatchingFile(
 	studio: StudioCompiler,
 	context: string,
 	files: ReadonlySet<string>,
@@ -61,7 +61,7 @@ function findFirstStoryFile(
 	for (const absPath of files) {
 		if (absPath.endsWith('.ts') || absPath.endsWith('.tsx')) {
 			const relPath = relative(context, absPath)
-			if (studio.matchesStoryGlob(relPath)) {
+			if (studio.matchesStoryGlob(relPath) || studio.matchesPageGlob(relPath)) {
 				return absPath
 			}
 		}

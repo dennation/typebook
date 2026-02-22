@@ -3,13 +3,14 @@ import { resolve, relative } from 'node:path'
 import picomatch from 'picomatch'
 import type { StudioConfig, PropInfo } from '../types.js'
 import { TypeScriptClient } from './ts-client.js'
-import { findStoryFiles, analyzeStoryFile } from './scanner.js'
+import { findStoryFiles, findPageFiles, analyzeStoryFile, analyzePageFile } from './scanner.js'
 import { generateRegistryFile, generateMetaFile } from './generator.js'
 import {
 	LOG_PREFIX,
 	DEFAULT_REGISTRY_FILE,
 	DEFAULT_META_FILE,
 	DEFAULT_INCLUDE,
+	DEFAULT_PAGES_INCLUDE,
 	DEBOUNCE_MS,
 } from '../constants.js'
 
@@ -20,22 +21,27 @@ export interface CompilerConfig extends StudioConfig {
 export class StudioCompiler {
 	readonly cwd: string
 	private readonly include: string
+	private readonly includePages: string
 	private readonly registryOutput: string
 	private readonly metaOutput: string
 	private readonly isStoryFile: (path: string) => boolean
+	private readonly isPageFile: (path: string) => boolean
 
 	private tsClient: TypeScriptClient | null = null
 	private tsClientReady = false
 	private storyFiles: string[] = []
+	private pageFiles: string[] = []
 	private debounceTimer: ReturnType<typeof setTimeout> | null = null
 	private readonly typeCache = new Map<string, PropInfo[]>()
 
 	constructor(config: CompilerConfig) {
 		this.cwd = config.cwd
 		this.include = config.include ?? DEFAULT_INCLUDE
+		this.includePages = config.includePages ?? DEFAULT_PAGES_INCLUDE
 		this.registryOutput = config.output ?? DEFAULT_REGISTRY_FILE
 		this.metaOutput = config.metaOutput ?? DEFAULT_META_FILE
 		this.isStoryFile = picomatch(this.include)
+		this.isPageFile = picomatch(this.includePages)
 	}
 
 	/** Resolved absolute path to the registry gen file */
@@ -51,7 +57,8 @@ export class StudioCompiler {
 	/** Initialize TS client, scan story files, and generate */
 	async start(): Promise<void> {
 		this.storyFiles = await findStoryFiles(this.cwd, this.include)
-		console.log(LOG_PREFIX, `Found ${this.storyFiles.length} story file(s)`)
+		this.pageFiles = await findPageFiles(this.cwd, this.includePages)
+		console.log(LOG_PREFIX, `Found ${this.storyFiles.length} story file(s), ${this.pageFiles.length} page file(s)`)
 
 		const client = new TypeScriptClient(this.cwd)
 		try {
@@ -84,6 +91,11 @@ export class StudioCompiler {
 		return this.isStoryFile(relPath)
 	}
 
+	/** Check if a relative path matches the page file glob */
+	matchesPageGlob(relPath: string): boolean {
+		return this.isPageFile(relPath)
+	}
+
 	/** Get the relative path of a file from cwd */
 	relativePath(absPath: string): string {
 		return relative(this.cwd, absPath)
@@ -92,6 +104,7 @@ export class StudioCompiler {
 	/** Full regeneration: rescan files, extract types, write gen files */
 	async regenerate(changedFile?: string): Promise<void> {
 		this.storyFiles = await findStoryFiles(this.cwd, this.include)
+		this.pageFiles = await findPageFiles(this.cwd, this.includePages)
 
 		if (this.tsClient && this.tsClientReady && changedFile) {
 			this.invalidateTypeCache(changedFile)
@@ -107,10 +120,18 @@ export class StudioCompiler {
 			}),
 		)
 
+		const pageFileInfos = await Promise.all(
+			this.pageFiles.map(async (filePath) => {
+				const content = readFileSync(filePath, 'utf-8')
+				const analysis = await analyzePageFile(content)
+				return { filePath, analysis }
+			}),
+		)
+
 		const metaContent = generateMetaFile(files, this.cwd)
 		writeIfChanged(this.metaFilePath, metaContent)
 
-		const registryContent = generateRegistryFile(files, this.registryFilePath, this.metaFilePath, this.cwd)
+		const registryContent = generateRegistryFile(files, pageFileInfos, this.registryFilePath, this.metaFilePath, this.cwd)
 		writeIfChanged(this.registryFilePath, registryContent)
 	}
 

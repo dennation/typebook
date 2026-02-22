@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react'
 import type { ComponentEntry, Story, PropInfo } from '../../types.js'
 import { entryName } from '../utils/naming.js'
 import { StoryRenderer } from './StoryRenderer.js'
@@ -9,6 +10,8 @@ export interface MainContentProps {
 	isDocsPage: boolean
 	activeStoryObj: Story | null
 	storyProps: PropInfo[]
+	activePageContent: ComponentType | null
+	activePageName: string | null
 }
 
 export function MainContent({
@@ -17,7 +20,19 @@ export function MainContent({
 	isDocsPage,
 	activeStoryObj,
 	storyProps,
+	activePageContent,
+	activePageName,
 }: MainContentProps) {
+	// Page rendering
+	if (activePageContent) {
+		const PageContent = activePageContent
+		return (
+			<main className="st:overflow-auto st:p-8 st:bg-bg">
+				<PageContent />
+			</main>
+		)
+	}
+
 	return (
 		<main className="st:overflow-auto st:p-8 st:bg-bg">
 			{activeEntry && activeStory ? (

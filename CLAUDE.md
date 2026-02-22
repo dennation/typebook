@@ -49,15 +49,17 @@ packages/studio/
   tsconfig.json
   vite.config.ts
   src/
-    index.ts                  — Public package exports (define, types)
-    types.ts                  — All shared types (DefineResult, Story, PropInfo, ComponentMeta, Registry, ComponentEntry, etc.)
-    define.ts                 — define() → DefineResult with single(), variants(), matrix(), allOf(), values(), generate()
+    index.ts                  — Public package exports (describe, define, definePage, types)
+    types.ts                  — All shared types (DescribeResult, PageResult, Story, PropInfo, ComponentMeta, Registry, etc.)
+    describe.ts               — describe() → DescribeResult with single(), variants(), matrix(), allOf(), values(), generate()
+    define.ts                 — Deprecated re-export of describe() as define()
+    definePage.ts             — definePage() → PageResult for standalone documentation pages
     resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into variant arrays (used by renderers)
-    constants.ts              — Shared constants (PACKAGE_NAME, etc.)
+    constants.ts              — Shared constants (PACKAGE_NAME, DEFAULT_PAGES_INCLUDE, etc.)
     cli.ts                    — CLI entry: `npx @dennation/ui-studio generate`
     core/
       compiler.ts             — StudioCompiler class: shared lifecycle, type caching, gen file writing
-      scanner.ts              — Glob scanner for .stories.tsx files + oxc AST analysis
+      scanner.ts              — Glob scanner for .stories.tsx + .docs.tsx files + oxc AST analysis
       generator.ts            — Generates ui-studio-registry.gen.ts and ui-studio-meta.gen.ts content
       ts-client.ts            — TypeScript Compiler API client for type extraction
       type-parser.ts          — Converts TS type strings → PropInfo[] via oxc
@@ -78,11 +80,11 @@ packages/studio/
         IframePreview.tsx     — Iframe wrapper for CSS isolation of component previews
         ErrorBoundary.tsx     — Error boundary for component crash isolation
       hooks/
-        useHashRoute.ts       — Hash-based routing: #component/story → activeComponent + activeStory
+        useHashRoute.ts       — Hash-based routing: #component/story + #page/page-name → activeComponent/activeStory/activePage
       utils/
         index.ts              — Barrel export
-        buildSidebarTree.ts   — Builds sidebar tree: path groups → ComponentNode → StoryGroup → StoryItem
-        naming.ts             — toKebabCase(), entryName() helpers
+        buildSidebarTree.ts   — Builds sidebar tree: path groups → ComponentNode + PageNode → StoryGroup → StoryItem
+        naming.ts             — toKebabCase(), entryName(), pageName() helpers
         getGridStyle.ts       — getGridStyle() — computes CSS grid layout for variant grids
       styles/
         styles.css            — Studio UI styles (Tailwind)
@@ -90,7 +92,7 @@ packages/studio/
 
 ### Build entry points
 
-- **`index`** — Library exports (`define`, types). Consumed by user code and generated `.gen.ts`.
+- **`index`** — Library exports (`describe`, `define`, `definePage`, types). Consumed by user code and generated `.gen.ts`.
 - **`react/index`** — `<Studio />` component, `ErrorBoundary`.
 - **`plugins/vite`** — Vite plugin (`uiStudio()`). Thin wrapper around `StudioCompiler`.
 - **`plugins/webpack`** — Webpack plugin (`UiStudioWebpackPlugin`). Thin wrapper around `StudioCompiler`.
@@ -98,7 +100,7 @@ packages/studio/
 
 ### Package exports
 
-- `@dennation/ui-studio` — define, types (ComponentMeta, Registry, ComponentEntry, etc.)
+- `@dennation/ui-studio` — describe, define (deprecated), definePage, types (ComponentMeta, Registry, ComponentEntry, PageEntry, etc.)
 - `@dennation/ui-studio/react` — Studio component
 - `@dennation/ui-studio/vite` — uiStudio Vite plugin
 - `@dennation/ui-studio/webpack` — UiStudioWebpackPlugin
@@ -107,19 +109,20 @@ packages/studio/
 
 ```
 .stories.tsx  →  plugin scans files  →  analyzeStoryFile()
+.docs.tsx     →  plugin scans files  →  analyzePageFile()
                                               ↓
-                                    TypeScript Compiler API  →  type string
+                                    TypeScript Compiler API  →  type string (stories only)
                                               ↓
                                     oxc parse  →  PropInfo[]
                                               ↓
                                     generateMetaFile()       →  ui-studio-meta.gen.ts (extracted types)
-                                    generateRegistryFile()   →  ui-studio-registry.gen.ts (imports + assembly)
+                                    generateRegistryFile()   →  ui-studio-registry.gen.ts (imports + assembly + pages)
                                               ↓
                                     <Studio />  sidebar tree → click story → #component/story hash
+                                                             → click page  → #page/page-name hash
                                               ↓
-                                    Single story rendered per page
-                                    RenderSingle / RenderVariants / RenderMatrix
-                                    resolve variants lazily via resolveVariantConfig()
+                                    Stories: RenderSingle / RenderVariants / RenderMatrix
+                                    Pages: render page content component directly
 ```
 
 ### Key design decisions
@@ -128,7 +131,8 @@ packages/studio/
 - **StudioCompiler** — shared core class extracted from the original Vite plugin. Encapsulates: `start()` (init TS client + first generation), `stop()` (cleanup), `regenerate(changedFile?)` (full regen cycle), `debouncedRegenerate()` (watch mode), type cache management.
 - **Type extraction via TS Compiler API** — uses TypeScript Compiler API directly (`ts-client.ts`) to get component prop types as strings. These strings are parsed by oxc into structured `PropInfo[]`.
 - **Two generated files on disk (not virtual modules)** — `ui-studio-registry.gen.ts` (imports stories/configs, exports `Registry` object with `components` array) and `ui-studio-meta.gen.ts` (extracted component metadata keyed by file path). Registry imports meta internally — user only imports registry. Both paths are independently configurable via `output` and `metaOutput`. Files are **physical and committed to git** — not Vite virtual modules. Reasons: (1) `tsc --noEmit` runs before Vite in build scripts, so it needs real files to typecheck against — virtual modules are invisible to `tsc`; (2) gen files are the primary debugging tool for type extraction — when props don't appear, you open `ui-studio-meta.gen.ts` and immediately see what was extracted; (3) PR diffs show exactly what changed in extracted types; (4) clone-and-build works without running Vite first. This matches TanStack Router's approach with `routeTree.gen.ts`. HMR works naturally — Vite's file watcher picks up gen file changes after `writeIfChanged()`, and the guard in the plugin prevents infinite regen cycles.
-- **Self-contained stories** — each story (single/variants/matrix) carries its own `component` reference and `defaults`, making stories reusable without the DefineResult.
+- **Documentation pages** — standalone `.docs.tsx` files using `definePage({ name, path?, order?, content })`. Pages appear in the sidebar alongside components, grouped by `path`. No type extraction needed — pages are pure React components. Hash route format: `#page/page-name`. The `describe()` function replaces `define()` (with deprecated alias).
+- **Self-contained stories** — each story (single/variants/matrix) carries its own `component` reference and `defaults`, making stories reusable without the DescribeResult.
 - **Lazy variant resolution** — each story kind renderer (RenderSingle, RenderVariants, RenderMatrix) resolves its own VariantConfig markers inline using `resolveVariantConfig()`. No upfront resolution step — variants are only computed for the story being displayed.
 - **Iframe isolation opt-in** — variant cards render inline by default. Add `isolate: true` to a story to render inside an iframe (`IframePreview`) for full CSS/JS isolation. Only needed for components that interact with document/body (modals, dropdowns with portals). Studio's `st:` Tailwind prefix already prevents style bleeding for normal components.
 - **Error Boundary** — React error boundaries isolate component crashes per variant.
@@ -169,6 +173,8 @@ examples/vite/
       Checkbox.stories.tsx      — Stories for @heroui/checkbox
       Input.stories.tsx         — Stories for @heroui/input
       Switch.stories.tsx        — Stories for @heroui/switch
+    docs/
+      GettingStarted.docs.tsx   — Example documentation page
 ```
 
 ---
@@ -217,7 +223,8 @@ export default defineConfig({
   plugins: [
     react(),
     uiStudio({
-      include: './src/**/*.stories.tsx',
+      include: './src/**/*.stories.tsx',        // default
+      includePages: './src/**/*.docs.tsx',      // default
       output: './ui-studio-registry.gen.ts',   // default
       metaOutput: './ui-studio-meta.gen.ts',   // default
     }),
@@ -236,7 +243,8 @@ export default {
   plugins: [
     new HtmlWebpackPlugin({ template: './src/index.html' }),
     new UiStudioWebpackPlugin({
-      include: './src/**/*.stories.tsx',   // default
+      include: './src/**/*.stories.tsx',        // default
+      includePages: './src/**/*.docs.tsx',      // default
       output: './ui-studio-registry.gen.ts',   // default
       metaOutput: './ui-studio-meta.gen.ts',   // default
     }),
@@ -247,10 +255,10 @@ export default {
 ### Component.stories.tsx
 
 ```ts
-import { define } from '@dennation/ui-studio'
+import { describe } from '@dennation/ui-studio'
 import { Button } from '@heroui/button'
 
-const button = define(Button, {
+const button = describe(Button, {
   name: 'Button',
   path: 'Forms',
   defaults: { children: 'Click me' },
@@ -278,6 +286,24 @@ export const Matrix = button.matrix({
 })
 
 export default button
+```
+
+### Page.docs.tsx
+
+```tsx
+import { definePage } from '@dennation/ui-studio'
+
+export default definePage({
+  name: 'Getting Started',
+  path: 'Guides',       // optional: sidebar grouping
+  order: 1,             // optional: sort order within group
+  content: () => (
+    <div>
+      <h1>Getting Started</h1>
+      <p>Welcome to the project</p>
+    </div>
+  ),
+})
 ```
 
 ### Variant config helpers

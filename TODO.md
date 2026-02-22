@@ -1,5 +1,69 @@
 # Studio — Roadmap
 
+## Tier 0 — Launch Prep (максимальный ROI)
+
+Без этого проект не наберёт аудиторию, независимо от качества кода.
+
+### Hero GIF / скриншот
+Анимированный GIF (5-10 секунд): пишешь `allOf('size')` → получаешь grid всех вариантов.
+Без визуала люди не понимают ценность. Записать через QuickTime/OBS или сделать before/after скриншот (код → результат).
+**Blocked by:** улучшения дизайна UI (сначала довести визуал до финального состояния, потом записывать).
+**Effort: низкий.** **Impact: критический.** Это первое, что видят на GitHub.
+
+### README: переписать на продающий формат
+Текущий README технически хорош, но не продаёт. Новая структура:
+1. One-liner: "Zero-boilerplate component stories from your TypeScript types"
+2. Hero GIF
+3. Comparison table: Storybook vs ui-studio (lines per story, type extraction, variant generation, cold start)
+4. Quick Start (30 секунд до первого результата)
+5. Features с code snippets (single, variants, matrix)
+6. API reference
+7. Requirements
+
+За 10 секунд скролла должно быть понятно зачем это нужно.
+**Blocked by:** Hero GIF.
+**Effort: низкий.** **Impact: критический.**
+
+### "Migrate from Storybook" guide
+Главный driver adoption — люди ищут "Storybook alternative", не "new story tool".
+- Маппинг концептов: CSF → define(), argTypes → automatic, decorators → defaults
+- Before/after кода (15 строк Storybook → 3 строки ui-studio)
+- Пошаговая инструкция миграции
+- Что поддерживается, чего пока нет
+**Effort: низкий.** **Impact: высокий.**
+
+### Online demo (StackBlitz)
+StackBlitz playground: Vite + React + ui-studio, 2-3 компонента (Button, Input, Card), все три вида историй.
+Ссылка "Try it online" в README.
+Люди хотят попробовать за 10 секунд без npm install. Конвертирует browser → star.
+**Effort: низкий.** **Impact: высокий.**
+
+### Landing page (одностраничник)
+Минимальный лендинг: Hero GIF + one-liner + install command, comparison table, 3 фичи с code snippets, quick start, ссылки.
+Деплой на Vercel/GitHub Pages.
+**Effort: низкий–средний.** **Impact: высокий.**
+
+### Стабилизация API → v1.0
+v0.2.0 = "не готово к production". Для v1.0:
+- Заморозить `define()` сигнатуру
+- Добавить тесты на React компоненты (Studio, StoryRenderer, ComponentPreview)
+- Edge cases в type extraction
+- CHANGELOG.md
+**Effort: средний.** **Impact: высокий.** v1.0 = "можно использовать".
+
+### Launch посты
+**Только после готовности README + demo + landing + v1.0.**
+1. **Reddit r/reactjs** — "I built a Storybook alternative that auto-generates all component variants from your TypeScript types"
+2. **Hacker News** — Show HN
+3. **Twitter/X** — thread с GIF + comparison table
+4. **Dev.to** — "Why I stopped writing Storybook stories manually"
+
+Timing: вторник-среда утром EST.
+**Blocked by:** всё выше.
+**Effort: низкий.** **Impact: критический.**
+
+---
+
 ## Tier 1 — Фундамент (дёшево, высокий профит)
 
 Технический долг и архитектурные улучшения, без которых всё остальное строится на шатком фундаменте.
@@ -19,12 +83,14 @@
 ## Tier 2 — Производительность, надёжность и Quick Wins
 
 ### Устойчивость type extraction
-`convertTsType()` в `ts-client.ts` покрывает базовые случаи (literals, boolean, string, number, function, ReactNode).
-Ломается на: discriminated unions, template literal types, conditional types, `Record<K, V>`, deep generics.
-План:
-1. **Расширить `convertTsType`** — обработка `number literal union`, intersection types, `Record`/`Omit`/`Pick` на верхнем уровне.
-2. **Тесты** — набор fixture-типов (30–50 кейсов), snapshot результата extraction.
-**Effort: средний.** Каждый тип — отдельный case, но TS Compiler API нетривиально. **Impact: высокий.** Это ядро продукта.
+`convertTsType()` в `ts-client.ts` уже покрывает: literals, boolean, string, number, function, ReactNode, template literals, conditional types (`Extract`/`Exclude`), intersection types, `Pick`/`Omit`/`Partial`, generics, nullable unions, complex unions.
+Тесты: 10 describe-блоков, ~30 кейсов (fixtures).
+Остаётся:
+- **`Record<K, V>`** — не обрабатывается, падает в `unknown`.
+- **Mapped types** (`{ [K in Keys]: V }`) — не обрабатываются.
+- **Tuple types** (`[string, number]`) — не тестировались.
+- **Расширить snapshot-тесты** — довести до 50+ кейсов для regression safety.
+**Effort: низкий–средний.** **Impact: средний.** Основные кейсы уже покрыты.
 
 ### Copy-Paste Code Snippets
 Кнопка «Copy JSX» на каждой variant-карточке и в interactive preview.
@@ -51,12 +117,8 @@ Light/dark toggle уже реализован — нужна поддержка 
 Кнопки Mobile / Tablet / Desktop — переключают ширину контейнера превью.
 Критично для UI-библиотек.
 
-### Component Documentation (MDX / Markdown)
-Сейчас UI показывает только заголовок компонента, пропсы и variants. Нет возможности добавить описание, guidelines, do/don't, примеры использования.
-Минимальная версия:
-- Поле `description: string` в `DefineConfig` — рендерится над stories как текст.
-- Опционально: `docs: './Button.docs.mdx'` → парсинг markdown, рендер между props panel и stories.
-**Effort: низкий (description) — средний (MDX).** **Impact: средний.** Без документации инструмент — только для разработчиков, не для дизайнеров/PM.
+### ~~Component Documentation (MDX / Markdown)~~ ✅ Implemented
+Реализовано через `definePage()` и `.docs.tsx` файлы. Standalone documentation pages появляются в sidebar рядом с компонентами. MDX поддерживается через пользовательский `@mdx-js/rollup` плагин.
 
 ### Prop Coverage Map
 Инструмент знает ВСЕ возможные значения пропсов из типов. Можно посчитать, какой процент комбинаций покрыт stories.

@@ -1,12 +1,17 @@
 import { relative, dirname, basename } from 'node:path'
 import type { PropInfo } from '../types.js'
-import type { StoryAnalysis } from './scanner.js'
+import type { StoryAnalysis, PageAnalysis } from './scanner.js'
 import { PACKAGE_NAME, DEFAULT_REGISTRY_FILE, DEFAULT_META_FILE } from '../constants.js'
 
 interface StoryFileInfo {
   filePath: string
   analysis: StoryAnalysis
   props: PropInfo[]
+}
+
+export interface PageFileInfo {
+  filePath: string
+  analysis: PageAnalysis
 }
 
 /**
@@ -40,10 +45,11 @@ export function generateMetaFile(
 }
 
 /**
- * Generate the content of the registry gen file — imports stories, configs, and meta.
+ * Generate the content of the registry gen file — imports stories, configs, pages, and meta.
  */
 export function generateRegistryFile(
   files: StoryFileInfo[],
+  pageFiles: PageFileInfo[],
   registryFilePath: string,
   metaFilePath: string,
   cwd: string,
@@ -61,6 +67,10 @@ export function generateRegistryFile(
 
   for (let i = 0; i < files.length; i++) {
     const { filePath, analysis } = files[i]
+
+    // Skip files without a default export — config (DescribeResult) is required
+    if (!analysis.defaultExport) continue
+
     const baseName = analysis.componentImport?.name ?? `Component${i}`
     const prefix = getUniquePrefix(baseName, usedPrefixes)
     usedPrefixes.add(prefix)
@@ -68,17 +78,12 @@ export function generateRegistryFile(
     const fileKey = relative(cwd, filePath)
 
     // Build import statement
-    const imports: string[] = []
-    if (analysis.defaultExport) {
-      imports.push(prefix)
-    }
+    const imports: string[] = [prefix]
     for (const name of analysis.namedExports) {
       imports.push(`${name} as ${prefix}_${name}`)
     }
 
-    if (imports.length > 0) {
-      importLines.push(`import ${formatImports(imports, analysis.defaultExport, prefix)} from '${importPath}'`)
-    }
+    importLines.push(`import ${formatImports(imports, true, prefix)} from '${importPath}'`)
 
     // Build stories record
     const storiesEntries = analysis.namedExports.map(
@@ -93,11 +98,29 @@ export function generateRegistryFile(
     entryLines.push(`  },`)
   }
 
+  // Page imports and entries
+  const pageEntryLines: string[] = []
+
+  for (const { filePath, analysis } of pageFiles) {
+    if (!analysis.defaultExport) continue
+
+    const prefix = getUniquePrefix('page', usedPrefixes)
+    usedPrefixes.add(prefix)
+    const importPath = buildRelativeImport(registryFilePath, filePath)
+
+    importLines.push(`import ${prefix} from '${importPath}'`)
+
+    pageEntryLines.push(`    { page: ${prefix} },`)
+  }
+
   const bodyLines: string[] = [
     '',
     `const registry: Registry = {`,
     `  components: [`,
     ...entryLines.map((line) => `  ${line}`),
+    `  ],`,
+    `  pages: [`,
+    ...pageEntryLines,
     `  ],`,
     `}`,
     '',

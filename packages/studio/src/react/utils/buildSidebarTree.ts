@@ -1,4 +1,4 @@
-import type { ComponentEntry } from '../../types.js'
+import type { ComponentEntry, PageEntry } from '../../types.js'
 import { entryName } from './naming.js'
 
 export interface StoryItem {
@@ -17,9 +17,15 @@ export interface ComponentNode {
 	groups: StoryGroup[]
 }
 
+export interface PageNode {
+	name: string
+	entry: PageEntry
+}
+
 export interface SidebarNode {
 	label: string
 	components: ComponentNode[]
+	pages: PageNode[]
 	children: SidebarNode[]
 }
 
@@ -46,15 +52,34 @@ function buildComponentNode(entry: ComponentEntry): ComponentNode {
 	}
 }
 
-export function buildSidebarTree(components: ComponentEntry[]): SidebarNode[] {
+function sortPages(pages: PageNode[]): PageNode[] {
+	return [...pages].sort((a, b) => {
+		const orderA = a.entry.page.order ?? 0
+		const orderB = b.entry.page.order ?? 0
+		if (orderA !== orderB) return orderA - orderB
+		return a.name.localeCompare(b.name)
+	})
+}
+
+export function buildSidebarTree(
+	components: ComponentEntry[],
+	pages: PageEntry[] = [],
+): SidebarNode[] {
 	const root: SidebarNode[] = []
 
-	for (const entry of components) {
-		const path = entry.config.path
-		const componentNode = buildComponentNode(entry)
+	// Place pages into tree by path
+	for (const pageEntry of pages) {
+		const path = pageEntry.page.path
+		const pageNode: PageNode = { name: pageEntry.page.name, entry: pageEntry }
 
 		if (!path) {
-			root.push({ label: '', components: [componentNode], children: [] })
+			// Find or create a root-level node for path-less pages
+			let rootNode = root.find((n) => n.label === '')
+			if (!rootNode) {
+				rootNode = { label: '', components: [], pages: [], children: [] }
+				root.push(rootNode)
+			}
+			rootNode.pages.push(pageNode)
 			continue
 		}
 
@@ -65,7 +90,33 @@ export function buildSidebarTree(components: ComponentEntry[]): SidebarNode[] {
 		for (const segment of segments) {
 			node = level.find((n) => n.label === segment)
 			if (!node) {
-				node = { label: segment, components: [], children: [] }
+				node = { label: segment, components: [], pages: [], children: [] }
+				level.push(node)
+			}
+			level = node.children
+		}
+
+		node!.pages.push(pageNode)
+	}
+
+	// Place components into tree by path
+	for (const entry of components) {
+		const path = entry.config.path
+		const componentNode = buildComponentNode(entry)
+
+		if (!path) {
+			root.push({ label: '', components: [componentNode], pages: [], children: [] })
+			continue
+		}
+
+		const segments = path.split('/')
+		let level = root
+		let node: SidebarNode | undefined
+
+		for (const segment of segments) {
+			node = level.find((n) => n.label === segment)
+			if (!node) {
+				node = { label: segment, components: [], pages: [], children: [] }
 				level.push(node)
 			}
 			level = node.children
@@ -74,5 +125,15 @@ export function buildSidebarTree(components: ComponentEntry[]): SidebarNode[] {
 		node!.components.push(componentNode)
 	}
 
+	// Sort pages within each node
+	sortPagesInTree(root)
+
 	return root
+}
+
+function sortPagesInTree(nodes: SidebarNode[]): void {
+	for (const node of nodes) {
+		node.pages = sortPages(node.pages)
+		sortPagesInTree(node.children)
+	}
 }
