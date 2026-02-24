@@ -257,15 +257,6 @@ Type extraction уже есть — AI может предложить edge case
 Каждый вариант уже в отдельном iframe. Измерить `performance.now()` до и после рендера.
 Показать время рядом с карточкой. Heatmap по матрице: красные ячейки = медленные комбинации.
 
-### Design Token Audit
-В iframe доступен `getComputedStyle`. Извлечь реальные CSS-значения и сравнить с design tokens:
-```
-Button[size=lg]:
-  font-size: 18px ✓ (token: --font-lg = 18px)
-  padding: 12px 20px ✗ (token: --spacing-lg = 16px)
-```
-Автоматический аудит: «design system compliance: 94%».
-
 ### Cross-Component Composition Stories
 Новый примитив `compose()` — определять stories для композиций компонентов (Form + Input + Button).
 Тестирует как компоненты работают вместе, не только в изоляции.
