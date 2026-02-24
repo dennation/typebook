@@ -1,6 +1,7 @@
 import { definePage } from '@dennation/ui-studio'
+import { Story } from '@dennation/ui-studio/react'
 import Content from './getting-started.md'
-import { Button } from '../components/Button'
+import { Default, Sizes } from '../stories/Button.stories'
 
 export default definePage({
 	name: 'Getting Started',
@@ -10,11 +11,9 @@ export default definePage({
 		<div style={{ maxWidth: 640, lineHeight: 1.6 }}>
 			<Content />
 			<h2>Live demo</h2>
-			<div style={{ display: 'flex', gap: '8px', margin: '16px 0' }}>
-				<Button size="sm">Small</Button>
-				<Button size="md">Medium</Button>
-				<Button size="lg">Large</Button>
-			</div>
+			<Story of={Default} />
+			<h2>All sizes</h2>
+			<Story of={Sizes} />
 		</div>
 	),
 })

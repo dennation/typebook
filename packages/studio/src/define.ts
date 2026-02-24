@@ -41,7 +41,7 @@ export function define<
     defaults,
 
     // Story creation methods
-    single(config?: { props?: any; render?: any; isolate?: boolean; name?: string; path?: string }): SingleStory {
+    single(config?: { props?: any; render?: any; isolate?: boolean; name?: string; path?: string; hidden?: boolean }): SingleStory {
       return {
         __type: 'story',
         kind: 'single',
@@ -52,6 +52,7 @@ export function define<
         isolate: config?.isolate,
         name: config?.name,
         path: config?.path,
+        hidden: config?.hidden,
       }
     },
 
@@ -62,6 +63,7 @@ export function define<
       isolate?: boolean
       name?: string
       path?: string
+      hidden?: boolean
     }): VariantsStory {
       return {
         __type: 'story',
@@ -75,6 +77,7 @@ export function define<
         isolate: config.isolate,
         name: config.name,
         path: config.path,
+        hidden: config.hidden,
       }
     },
 
@@ -85,6 +88,7 @@ export function define<
       isolate?: boolean
       name?: string
       path?: string
+      hidden?: boolean
     }): MatrixStory {
       return {
         __type: 'story',
@@ -98,6 +102,7 @@ export function define<
         isolate: config.isolate,
         name: config.name,
         path: config.path,
+        hidden: config.hidden,
       }
     },
 

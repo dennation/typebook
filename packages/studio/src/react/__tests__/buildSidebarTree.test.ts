@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { buildSidebarTree } from '../utils/buildSidebarTree.js'
-import type { ComponentEntry, PageResult } from '../../types.js'
+import type { ComponentEntry, PageResult, Story } from '../../types.js'
 
 function makeComponent(name: string, path?: string): ComponentEntry {
 	const component = () => null
@@ -22,6 +22,17 @@ function makeComponent(name: string, path?: string): ComponentEntry {
 		stories: {},
 		meta: { props: [] },
 	}
+}
+
+function makeStory(overrides?: Partial<Story>): Story {
+	return {
+		__type: 'story',
+		kind: 'single',
+		component: () => null,
+		defaults: {},
+		render: () => null,
+		...overrides,
+	} as Story
 }
 
 function makePage(name: string, path?: string, order?: number): PageResult {
@@ -120,5 +131,33 @@ describe('buildSidebarTree with pages', () => {
 
 		const names = tree[0].pages.map((p) => p.name)
 		expect(names).toEqual(['Alpha', 'Bravo', 'Charlie'])
+	})
+})
+
+describe('buildSidebarTree with hidden stories', () => {
+	test('hidden stories are excluded from sidebar tree', () => {
+		const entry = makeComponent('Button')
+		entry.stories = {
+			Default: makeStory(),
+			DocOnly: makeStory({ hidden: true }),
+		}
+		const tree = buildSidebarTree([entry])
+
+		const comp = tree[0].components[0]
+		const allStoryNames = comp.groups.flatMap((g) => g.stories.map((s) => s.name))
+		expect(allStoryNames).toContain('Default')
+		expect(allStoryNames).not.toContain('DocOnly')
+	})
+
+	test('component with only hidden stories has empty groups', () => {
+		const entry = makeComponent('Button')
+		entry.stories = {
+			DocOnly: makeStory({ hidden: true }),
+		}
+		const tree = buildSidebarTree([entry])
+
+		const comp = tree[0].components[0]
+		const allStoryNames = comp.groups.flatMap((g) => g.stories.map((s) => s.name))
+		expect(allStoryNames).toHaveLength(0)
 	})
 })

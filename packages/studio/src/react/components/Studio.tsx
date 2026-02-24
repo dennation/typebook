@@ -6,6 +6,7 @@ import { buildSidebarTree } from '../utils/buildSidebarTree.js'
 import { entryName } from '../utils/naming.js'
 import { useHashRoute } from '../hooks/useHashRoute.js'
 import { useTheme, type Theme } from '../hooks/useTheme.js'
+import { StudioMetaProvider } from '../context.js'
 import { Sidebar } from './Sidebar.js'
 import { MainContent } from './MainContent.js'
 import styles from '../styles/styles.css?inline'
@@ -69,7 +70,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 		if (!searchQuery) return pages
 		const q = searchQuery.toLowerCase()
 		return pages.filter((p) => {
-			return p.page.name.toLowerCase().includes(q) || (p.page.path?.toLowerCase().includes(q) ?? false)
+			return p.name.toLowerCase().includes(q) || (p.path?.toLowerCase().includes(q) ?? false)
 		})
 	}, [pages, searchQuery])
 
@@ -122,36 +123,38 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 	}, [])
 
 	return (
-		<div
-			className="st:grid st:grid-cols-[260px_1fr] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text"
-			data-theme={theme}
-		>
-			<Sidebar
-				tree={tree}
-				activeComponent={activeComponent}
-				activeStory={activeStory}
-				activePage={activePage}
-				selectStory={selectStory}
-				selectPage={selectPage}
-				collapsed={collapsed}
-				toggleCollapse={toggleCollapse}
-				disableSearch={disableSearch}
-				searchQuery={searchQuery}
-				onSearchChange={setSearchQuery}
-				stories={storiesMap}
-				theme={theme}
-				onToggleTheme={toggleTheme}
-			/>
+		<StudioMetaProvider value={propsMap}>
+			<div
+				className="st:grid st:grid-cols-[260px_1fr] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text"
+				data-theme={theme}
+			>
+				<Sidebar
+					tree={tree}
+					activeComponent={activeComponent}
+					activeStory={activeStory}
+					activePage={activePage}
+					selectStory={selectStory}
+					selectPage={selectPage}
+					collapsed={collapsed}
+					toggleCollapse={toggleCollapse}
+					disableSearch={disableSearch}
+					searchQuery={searchQuery}
+					onSearchChange={setSearchQuery}
+					stories={storiesMap}
+					theme={theme}
+					onToggleTheme={toggleTheme}
+				/>
 
-			<MainContent
-				activeEntry={activeEntry}
-				activeStory={activeStory}
-				isDocsPage={isDocsPage}
-				activeStoryObj={activeStoryObj}
-				storyProps={storyProps}
-				activePageContent={activePageEntry?.content ?? null}
-				activePageName={activePage}
-			/>
-		</div>
+				<MainContent
+					activeEntry={activeEntry}
+					activeStory={activeStory}
+					isDocsPage={isDocsPage}
+					activeStoryObj={activeStoryObj}
+					storyProps={storyProps}
+					activePageContent={activePageEntry?.content ?? null}
+					activePageName={activePage}
+				/>
+			</div>
+		</StudioMetaProvider>
 	)
 }

@@ -138,6 +138,8 @@ interface StoryBase {
   name?: string
   /** Path relative to component's sidebar path (default: 'Stories') */
   path?: string
+  /** When true, the story is excluded from the sidebar but remains importable for docs */
+  hidden?: boolean
 }
 
 /** Single story — one variant with fixed props */
@@ -165,6 +167,15 @@ export interface MatrixStory extends StoryBase {
 /** Exported from .stories.tsx — the result of single(), variants(), or matrix() */
 export type Story = SingleStory | VariantsStory | MatrixStory
 
+/** Common config fields shared by single(), variants(), and matrix() */
+export interface StoryConfig<Props, CoveredByDefaults extends keyof Props = never> {
+  props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
+  isolate?: boolean
+  name?: string
+  path?: string
+  hidden?: boolean
+}
+
 /** Returned by define() — component page configuration + story builder */
 export interface DefineResult<Props, CoveredByDefaults extends keyof Props = never> {
   __type: 'define'
@@ -174,28 +185,16 @@ export interface DefineResult<Props, CoveredByDefaults extends keyof Props = nev
   defaults: Record<string, unknown>
 
   // Story creation methods
-  single(config?: {
-    props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
+  single(config?: StoryConfig<Props, CoveredByDefaults> & {
     render?: (props: Props) => ReactNode
-    isolate?: boolean
-    name?: string
-    path?: string
   }): SingleStory
-  variants(config: {
+  variants(config: StoryConfig<Props, CoveredByDefaults> & {
     items: VariantConfig
-    props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
     columns?: number
-    isolate?: boolean
-    name?: string
-    path?: string
   }): VariantsStory
-  matrix(config: {
+  matrix(config: StoryConfig<Props, CoveredByDefaults> & {
     x: VariantConfig
     y: VariantConfig[]
-    props?: Partial<Props> & MissingProps<Props, CoveredByDefaults>
-    isolate?: boolean
-    name?: string
-    path?: string
   }): MatrixStory
 
   // Variant config helpers

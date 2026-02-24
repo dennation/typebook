@@ -34,6 +34,7 @@ function buildComponentNode(entry: ComponentEntry): ComponentNode {
 	const groupMap = new Map<string, StoryItem[]>()
 
 	for (const [storyName, story] of Object.entries(entry.stories)) {
+		if (story.hidden) continue
 		const groupLabel = story.path ?? 'Stories'
 		const items = groupMap.get(groupLabel) ?? []
 		items.push({ name: storyName, componentName })

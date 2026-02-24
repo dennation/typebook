@@ -22,4 +22,10 @@ export const Matrix = button.matrix({
 	path: 'Matrix',
 })
 
+// Hidden story — only used in documentation pages via <Story of={Disabled} />
+export const Disabled = button.variants({
+	items: button.values('disabled', [false, true]),
+	hidden: true,
+})
+
 export default button

@@ -49,6 +49,34 @@ describe('define()', () => {
 		expect(story.kind).toBe('matrix')
 	})
 
+	test('single story passes hidden flag', () => {
+		const result = define(MockComponent)
+		const story = result.single({ hidden: true })
+		expect(story.hidden).toBe(true)
+	})
+
+	test('variants story passes hidden flag', () => {
+		const result = define(MockComponent)
+		const story = result.variants({ items: result.allOf('size' as any), hidden: true })
+		expect(story.hidden).toBe(true)
+	})
+
+	test('matrix story passes hidden flag', () => {
+		const result = define(MockComponent)
+		const story = result.matrix({
+			x: result.allOf('color' as any),
+			y: [result.allOf('variant' as any)],
+			hidden: true,
+		})
+		expect(story.hidden).toBe(true)
+	})
+
+	test('hidden defaults to undefined', () => {
+		const result = define(MockComponent)
+		const story = result.single()
+		expect(story.hidden).toBeUndefined()
+	})
+
 	test('allOf() returns correct config', () => {
 		const result = define(MockComponent)
 		expect(result.allOf('size' as any)).toEqual({ __type: 'allOf', prop: 'size' })
