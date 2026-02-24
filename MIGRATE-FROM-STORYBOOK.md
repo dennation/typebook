@@ -26,7 +26,7 @@ A practical guide for migrating your component stories from Storybook to UI Stud
 | Decorators (per-component) | `wrapper` in `define()` | Wraps all stories of a component |
 | Controls addon | Built-in Playground | Auto-generated from prop types |
 | `tags: ['autodocs']` | Always on (or `docs: false`) | Each component gets an API page |
-| Docs addon / MDX | `definePage()` + `.docs.tsx` | |
+| Docs addon / MDX | `definePage()` + `.page.tsx` | |
 | `play` function | Not yet supported | |
 | Actions addon | Not yet supported | |
 | Viewport addon | Not yet supported | |
@@ -268,7 +268,7 @@ import * as ButtonStories from './Button.stories'
 **UI Studio:**
 
 ```tsx
-// Button.docs.tsx
+// Button.page.tsx
 import { definePage } from '@dennation/ui-studio'
 import { Story, Playground } from '@dennation/ui-studio/react'
 import button, { Default, Sizes } from './Button.stories'
@@ -347,7 +347,7 @@ Use `isolate` for components that interact with `document` or `body` (modals, dr
   - [ ] Move `args` defaults to `defaults` in `define()`
   - [ ] Move custom renders to `render` in `single()`
 - [ ] For MDX docs:
-  - [ ] Convert to `.docs.tsx` files using `definePage()`
+  - [ ] Convert to `.page.tsx` files using `definePage()`
   - [ ] Replace `<Canvas>` / `<Story>` blocks with `<Story of={...} />`
   - [ ] Replace `<ArgsTable>` with `<Playground of={...} />`
 - [ ] Remove `.storybook/` directory and Storybook dependencies
@@ -372,6 +372,6 @@ These Storybook features don't have a UI Studio equivalent yet:
 | Storybook | UI Studio |
 |---|---|
 | `Button.stories.tsx` | `Button.stories.tsx` (same) |
-| `Button.mdx` | `Button.docs.tsx` (or `ButtonGuide.docs.tsx`) |
+| `Button.mdx` | `Button.page.tsx` (or `ButtonGuide.page.tsx`) |
 | `.storybook/main.ts` | Line in `vite.config.ts` |
 | `.storybook/preview.ts` | `storyWrapper` on `<Studio />` + `wrapper` in `define()` |

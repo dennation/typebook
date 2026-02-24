@@ -93,7 +93,7 @@ if (command === 'generate') {
   @dennation/${PACKAGE_NAME}
 
   Commands:
-    generate    Generate registry and meta gen files from .stories.tsx and .docs.tsx files
+    generate    Generate registry and meta gen files from .stories.tsx and .page.tsx files
 
   Options:
     --stories=GLOB            Story files glob pattern (default: ${DEFAULT_STORIES_GLOB})

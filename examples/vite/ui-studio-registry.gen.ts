@@ -5,7 +5,7 @@ import _Switch, { Default as _Switch_Default, Sizes as _Switch_Sizes, Colors as 
 import _Input, { Default as _Input_Default, Sizes as _Input_Sizes, Variants as _Input_Variants, Colors as _Input_Colors, States as _Input_States, Matrix as _Input_Matrix } from './src/stories/Input.stories'
 import _Checkbox, { Default as _Checkbox_Default, Sizes as _Checkbox_Sizes, Colors as _Checkbox_Colors, States as _Checkbox_States, Matrix as _Checkbox_Matrix } from './src/stories/Checkbox.stories'
 import _Button, { Default as _Button_Default, Sizes as _Button_Sizes, Variants as _Button_Variants, Colors as _Button_Colors, Radiuses as _Button_Radiuses, Disabled as _Button_Disabled, Loading as _Button_Loading, Matrix as _Button_Matrix } from './src/stories/Button.stories'
-import _page from './src/docs/GettingStarted.docs'
+import _page from './src/docs/GettingStarted.page'
 
 const registry: Registry = {
   components: [

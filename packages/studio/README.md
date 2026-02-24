@@ -130,7 +130,7 @@ import { Playground } from '@dennation/ui-studio/react'
 ### Documentation pages
 
 ```tsx
-// src/docs/ButtonGuide.docs.tsx
+// src/docs/ButtonGuide.page.tsx
 import { definePage } from '@dennation/ui-studio'
 import { Story } from '@dennation/ui-studio/react'
 import { Default, Sizes } from '../stories/Button.stories'
@@ -282,7 +282,7 @@ import button from './Button.stories'
 ```ts
 uiStudio({
   stories: './src/**/*.stories.tsx',      // story files glob
-  pages: './src/**/*.docs.tsx',           // doc page files glob
+  pages: './src/**/*.page.tsx',           // doc page files glob
   output: './ui-studio-registry.gen.ts',  // registry output path
   metaOutput: './ui-studio-meta.gen.ts',  // meta output path
 })
@@ -292,7 +292,7 @@ Webpack uses the same options via `new UiStudioWebpackPlugin({ ... })`.
 
 ## How It Works
 
-1. **Scan** — Plugin finds `*.stories.tsx` and `*.docs.tsx` files matching the `include` globs.
+1. **Scan** — Plugin finds `*.stories.tsx` and `*.page.tsx` files matching the `include` globs.
 2. **Extract** — TypeScript Compiler API resolves component prop types as strings.
 3. **Parse** — [oxc](https://oxc.rs) parses type strings into structured `PropInfo[]` (literal unions, booleans, strings, numbers, nodes, functions).
 4. **Generate** — Two files are written to disk: `ui-studio-meta.gen.ts` (extracted types) and `ui-studio-registry.gen.ts` (imports + registry assembly).

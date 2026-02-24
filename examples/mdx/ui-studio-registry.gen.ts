@@ -2,10 +2,10 @@
 import type { Registry } from '@dennation/ui-studio'
 import meta from './ui-studio-meta.gen'
 import _Button, { Default as _Button_Default, Sizes as _Button_Sizes, Variants as _Button_Variants, Colors as _Button_Colors, Matrix as _Button_Matrix, Disabled as _Button_Disabled } from './src/stories/Button.stories'
-import _page from './src/docs/Theming.docs'
-import _page2 from './src/docs/GettingStarted.docs'
-import _page3 from './src/docs/Changelog.docs'
-import _page4 from './src/docs/ButtonGuide.docs'
+import _page from './src/docs/Theming.page'
+import _page2 from './src/docs/GettingStarted.page'
+import _page3 from './src/docs/Changelog.page'
+import _page4 from './src/docs/ButtonGuide.page'
 
 const registry: Registry = {
   components: [

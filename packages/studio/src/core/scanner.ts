@@ -125,7 +125,7 @@ export async function analyzeStoryFile(content: string): Promise<StoryAnalysis> 
 }
 
 /**
- * Parse a .docs.tsx file via oxc AST to check for a default export.
+ * Parse a .page.tsx file via oxc AST to check for a default export.
  */
 export async function analyzePageFile(content: string): Promise<PageAnalysis> {
   const body = await parseFile('page.tsx', content)
