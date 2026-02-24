@@ -242,8 +242,18 @@ export default definePage({
   registry={registry}    // from ui-studio-registry.gen.ts
   theme="light"          // "light" | "dark" (default: system)
   disableSearch={false}  // hide search bar
+  storyWrapper={(Story) => <ThemeProvider><Story /></ThemeProvider>}
 />
 ```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `registry` | `Registry` | — | Generated registry from `ui-studio-registry.gen.ts` |
+| `theme` | `"light" \| "dark"` | System | Color theme |
+| `disableSearch` | `boolean` | `false` | Hide the search bar |
+| `storyWrapper` | `(Story) => ReactNode` | — | Global wrapper for all stories and Playground previews |
+
+Composition order: `storyWrapper` (global) → `wrapper` (per-component in `define()`) → component render.
 
 ### `<Story />`
 
@@ -271,8 +281,8 @@ import button from './Button.stories'
 
 ```ts
 uiStudio({
-  include: './src/**/*.stories.tsx',      // story files glob
-  includePages: './src/**/*.docs.tsx',    // doc page files glob
+  stories: './src/**/*.stories.tsx',      // story files glob
+  pages: './src/**/*.docs.tsx',           // doc page files glob
   output: './ui-studio-registry.gen.ts',  // registry output path
   metaOutput: './ui-studio-meta.gen.ts',  // meta output path
 })

@@ -70,7 +70,7 @@ packages/studio/
         index.ts              — Webpack plugin: UiStudioWebpackPlugin class wrapping StudioCompiler
     react/
       index.ts                — React exports
-      context.ts              — StudioMetaContext: React Context providing Component → PropInfo[] map
+      context.ts              — StudioMetaContext (Component → PropInfo[] map) + StudioWrapperContext (global storyWrapper)
       components/
         index.ts              — Barrel export
         Studio.tsx            — <Studio /> component (per-story sidebar tree, theme, single-story rendering)
@@ -153,6 +153,7 @@ packages/studio/
 - **Auto-generated API page** — each component gets a real `PageResult` (`DEFAULT_DOCS_PAGE` constant = 'API') as its first sidebar page. The content renders `<Playground of={config} />`. Disable per-component with `docs: false` in `define()`. Override by creating a `.docs.tsx` with `name: DEFAULT_DOCS_PAGE` and `path: '{componentPath}/{componentName}'`. Clicking a component name auto-selects its API page.
 - **Story path grouping** — stories can set `path` to group them under sub-sections in the sidebar (e.g. `path: 'Matrix'`). Default path is `'Stories'`. When all stories share the same path (single group), the group level is flattened — stories appear directly under the component.
 - **Story config fields** — all story kinds share common config via `StoryConfig`: `props`, `isolate`, `name`, `path`, `hidden`. Each kind adds its own fields: `single` adds `render`, `variants` adds `items`/`columns`, `matrix` adds `x`/`y`.
+- **Global storyWrapper** — `<Studio storyWrapper={...} />` provides a global wrapper for all stories and Playground previews via `StudioWrapperContext`. Applied at render time in `VariantCard` and `Playground` (not baked into story objects). Composition order: global `storyWrapper` → per-component `wrapper` (baked into `story.render` at `define()` time) → component render. Uses React Context to avoid prop drilling through StoryRenderer/MainContent.
 
 ---
 
@@ -277,8 +278,8 @@ export default defineConfig({
   plugins: [
     react(),
     uiStudio({
-      include: './src/**/*.stories.tsx',        // default
-      includePages: './src/**/*.docs.tsx',       // default
+      stories: './src/**/*.stories.tsx',        // default
+      pages: './src/**/*.docs.tsx',             // default
       output: './ui-studio-registry.gen.ts',   // default
       metaOutput: './ui-studio-meta.gen.ts',   // default
     }),
@@ -297,8 +298,8 @@ export default {
   plugins: [
     new HtmlWebpackPlugin({ template: './src/index.html' }),
     new UiStudioWebpackPlugin({
-      include: './src/**/*.stories.tsx',        // default
-      includePages: './src/**/*.docs.tsx',      // default
+      stories: './src/**/*.stories.tsx',        // default
+      pages: './src/**/*.docs.tsx',             // default
       output: './ui-studio-registry.gen.ts',   // default
       metaOutput: './ui-studio-meta.gen.ts',   // default
     }),

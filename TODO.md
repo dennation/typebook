@@ -59,18 +59,6 @@ const button = define(Button, {
 ```
 **Effort: низкий–средний.** **Impact: критический.** Блокирует повседневную работу с интерактивным preview.
 
-### Глобальный wrapper на уровне Studio
-`wrapper` в `define()` работает per-component. Если 30+ компонентов нуждаются в `<ThemeProvider>`, приходится повторять в каждом `define()`.
-- Prop `wrapper` на `<Studio />` — оборачивает рендер каждой истории.
-- Композиция: global wrapper → per-component wrapper → story.
-```tsx
-<Studio
-  registry={registry}
-  wrapper={(Story) => <ThemeProvider><Story /></ThemeProvider>}
-/>
-```
-**Effort: низкий.** **Impact: критический.** Основная DX-фрикция для приложений с провайдерами.
-
 ### Улучшение PropControl
 `isControllable()` в `Playground.tsx` — контролы только для `literal`, `boolean`, `string`, `number`, `node`.
 Минимально необходимые доработки:
@@ -144,16 +132,50 @@ Light/dark toggle уже реализован — нужна поддержка 
 Пример: Button имеет `size × variant × color` = 45 комбинаций. Stories покрывают 12. Coverage: 27%.
 Это как code coverage, но для UI-вариантов. **Ни у кого такого нет.**
 
-### Component API Diff / Changelog
-PropInfo[] уже извлекается через TS Compiler API. Сохранять между сборками (JSON в `.studio/`), автоматический diff:
+### Component API Changelog (из git-истории)
+`ui-studio-meta.gen.ts` коммитится в git — полная история PropInfo уже хранится в репозитории. Не нужно отдельное хранилище снэпшотов.
+
+**Механизм:**
+1. `git tag --sort=version:sort` — список всех версий
+2. Для каждого тега: `git show <tag>:ui-studio-meta.gen.json` — PropInfo на тот момент
+3. Diff последовательных пар тегов по компонентам
+4. Склейка в полную историю
+
+**Предусловие:** генерировать `ui-studio-meta.gen.json` параллельно с `.ts` — чистый JSON, тривиально парсится без AST.
+
+**CLI:**
+```bash
+npx @dennation/ui-studio changelog                        # полная история всех компонентов
+npx @dennation/ui-studio changelog --component Button     # один компонент
+npx @dennation/ui-studio changelog --since v1.0.0         # с определённой версии
 ```
-Button:
-  + added prop `isLoading` (boolean)
+
+**Вывод:**
+```
+## Button
+
+### v1.3.0
+  + added prop `isLoading` (boolean, optional)
+
+### v1.2.0
   ~ `size` — added value 'xl'
-  - removed prop `outline`
+  ~ `variant` — removed value 'underlined'
+
+### v1.1.0
+  + added prop `disabled` (boolean, optional)
+  - removed prop `outline` (string)
+
+### v1.0.0
+  Initial: size, variant, color, children (4 props)
 ```
-CI-интеграция: на каждый PR — автокомментарий «Component API changes».
-Решает боль мейнтейнеров UI-библиотек: ручное отслеживание breaking changes.
+
+**Страница в Studio UI:** вкладка "Changelog" у каждого компонента — генерируется при сборке из тех же данных.
+
+**CI-интеграция:** на каждый PR — автокомментарий «Component API changes» (diff текущей ветки vs base branch).
+
+**"Since" badge:** первый тег, в котором компонент появляется в meta — версия его появления. Показывать бейдж "Since v1.2.0" в sidebar и на странице API. Аналогично для отдельных пропсов — "added in v1.3.0" в таблице Playground.
+
+Решает боль мейнтейнеров UI-библиотек: ручное отслеживание breaking changes. **Ни у кого такого нет.**
 
 ---
 

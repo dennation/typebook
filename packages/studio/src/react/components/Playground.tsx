@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import type { DefineResult, PropInfo } from '../../types.js'
-import { useStudioMeta } from '../context.js'
+import { useStudioMeta, useStudioWrapper } from '../context.js'
 import { ErrorBoundary } from './ErrorBoundary.js'
 import { PropControl } from './PropControl.js'
 
@@ -18,6 +18,7 @@ function isControllable(prop: PropInfo): boolean {
 
 export function Playground({ of: config }: { of: DefineResult<any> }) {
 	const propsMap = useStudioMeta()
+	const storyWrapper = useStudioWrapper()
 	const props: PropInfo[] = propsMap.get(config.component) ?? []
 	const Component = config.component
 
@@ -27,12 +28,16 @@ export function Playground({ of: config }: { of: DefineResult<any> }) {
 		setControlProps((prev) => ({ ...prev, [propName]: value }))
 	}, [])
 
+	const preview = storyWrapper
+		? storyWrapper(() => <Component {...controlProps} />)
+		: <Component {...controlProps} />
+
 	return (
 		<div className="st:rounded-lg st:border st:border-border st:overflow-hidden st:mb-6">
 			{/* Preview */}
 			<div className="st:bg-bg-sidebar st:flex st:items-center st:justify-center st:min-h-[120px] st:p-8">
 				<ErrorBoundary>
-					<Component {...controlProps} />
+					{preview}
 				</ErrorBoundary>
 			</div>
 

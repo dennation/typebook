@@ -22,7 +22,8 @@ A practical guide for migrating your component stories from Storybook to UI Stud
 | `args` | `defaults` | Applied to all stories |
 | `argTypes` | Automatic from TypeScript | No manual configuration needed |
 | `render` function | `button.single({ render })` | Only for custom rendering |
-| Decorators | `wrapper` in `define()` | Wraps all stories of a component |
+| Decorators (global) | `storyWrapper` on `<Studio />` | Wraps all stories and Playground previews |
+| Decorators (per-component) | `wrapper` in `define()` | Wraps all stories of a component |
 | Controls addon | Built-in Playground | Auto-generated from prop types |
 | `tags: ['autodocs']` | Always on (or `docs: false`) | Each component gets an API page |
 | Docs addon / MDX | `definePage()` + `.docs.tsx` | |
@@ -180,7 +181,7 @@ Renders a table: colors as columns, variants as rows. Every cell is a live compo
 **Storybook:**
 
 ```tsx
-// .storybook/preview.ts
+// .storybook/preview.ts — global decorator
 const preview: Preview = {
   decorators: [
     (Story) => (
@@ -200,12 +201,20 @@ export const Default: Story = {
 **UI Studio:**
 
 ```tsx
-// Per-component wrapper:
+// Global wrapper — applies to all stories and Playground previews:
+<Studio
+  registry={registry}
+  storyWrapper={(Story) => <ThemeProvider><Story /></ThemeProvider>}
+/>
+
+// Per-component wrapper (use when only some components need it):
 const button = define(Button, {
-  wrapper: (Story) => <ThemeProvider><Story /></ThemeProvider>,
+  wrapper: (Story) => <SpecialProvider><Story /></SpecialProvider>,
   defaults: { children: 'Click me' },
 })
 ```
+
+Composition order: `storyWrapper` (global) → `wrapper` (per-component) → component render.
 
 ### Custom render function
 
@@ -330,7 +339,7 @@ Use `isolate` for components that interact with `document` or `body` (modals, dr
 ## Migration checklist
 
 - [ ] Install `@dennation/ui-studio`, add plugin to `vite.config.ts`
-- [ ] Create Studio entry point (`<Studio registry={registry} />`)
+- [ ] Create Studio entry point (`<Studio registry={registry} />`) — add `storyWrapper` if you had global decorators
 - [ ] For each `.stories.tsx`:
   - [ ] Replace `meta` + `argTypes` with `define(Component, config)`
   - [ ] Replace individual `Story` objects with `single()`, `variants()`, or `matrix()`
@@ -354,7 +363,6 @@ These Storybook features don't have a UI Studio equivalent yet:
 | Actions (event logging) | Planned | `console.log` in defaults |
 | Viewport addon (responsive) | Planned | Use `isolate` + browser devtools |
 | A11y addon | Planned | Use axe browser extension |
-| Global decorators | Planned | Repeat `wrapper` per component |
 | Chromatic / visual regression | Not planned | Use Playwright screenshots |
 | Component hierarchy (auto-title) | Not needed | `path` in `define()` serves the same purpose |
 | `loaders` (async data) | Not needed | Use `defaults` with static data or `render` with hooks |
@@ -366,4 +374,4 @@ These Storybook features don't have a UI Studio equivalent yet:
 | `Button.stories.tsx` | `Button.stories.tsx` (same) |
 | `Button.mdx` | `Button.docs.tsx` (or `ButtonGuide.docs.tsx`) |
 | `.storybook/main.ts` | Line in `vite.config.ts` |
-| `.storybook/preview.ts` | `wrapper` in `define()` |
+| `.storybook/preview.ts` | `storyWrapper` on `<Studio />` + `wrapper` in `define()` |

@@ -1,13 +1,13 @@
 import { useState, useCallback, useInsertionEffect, useMemo } from 'react'
 import type { ComponentType } from 'react'
-import type { Registry, ComponentEntry, PropInfo } from '../../types.js'
+import type { Registry, ComponentEntry, PropInfo, WrapperFn } from '../../types.js'
 import { STYLE_ELEMENT_ID } from '../../constants.js'
 import { buildSidebarTree } from '../utils/buildSidebarTree.js'
 import { resolveComponentPages } from '../utils/resolveComponentPages.js'
 import { entryName } from '../utils/naming.js'
 import { useHashRoute } from '../hooks/useHashRoute.js'
 import { useTheme, type Theme } from '../hooks/useTheme.js'
-import { StudioMetaProvider } from '../context.js'
+import { StudioMetaProvider, StudioWrapperProvider } from '../context.js'
 import { Sidebar } from './Sidebar.js'
 import { MainContent } from './MainContent.js'
 import { Playground } from './Playground.js'
@@ -17,9 +17,11 @@ export interface StudioProps {
 	registry: Registry
 	theme?: Theme
 	disableSearch?: boolean
+	/** Global wrapper applied to all stories and Playground previews (e.g. a theme provider) */
+	storyWrapper?: WrapperFn
 }
 
-export function Studio({ registry, theme: themeOverride, disableSearch = false }: StudioProps) {
+export function Studio({ registry, theme: themeOverride, disableSearch = false, storyWrapper }: StudioProps) {
 	const { components, pages = [] } = registry
 	const { theme, toggleTheme } = useTheme(themeOverride)
 	const [searchQuery, setSearchQuery] = useState('')
@@ -139,30 +141,32 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 
 	return (
 		<StudioMetaProvider value={propsMap}>
-			<div
-				className="st:grid st:grid-cols-[260px_1fr] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text"
-				data-theme={theme}
-			>
-				<Sidebar
-					tree={tree}
-					route={route}
-					collapsed={collapsed}
-					toggleCollapse={toggleCollapse}
-					disableSearch={disableSearch}
-					searchQuery={searchQuery}
-					onSearchChange={setSearchQuery}
-					theme={theme}
-					onToggleTheme={toggleTheme}
-				/>
+			<StudioWrapperProvider value={storyWrapper}>
+				<div
+					className="st:grid st:grid-cols-[260px_1fr] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text"
+					data-theme={theme}
+				>
+					<Sidebar
+						tree={tree}
+						route={route}
+						collapsed={collapsed}
+						toggleCollapse={toggleCollapse}
+						disableSearch={disableSearch}
+						searchQuery={searchQuery}
+						onSearchChange={setSearchQuery}
+						theme={theme}
+						onToggleTheme={toggleTheme}
+					/>
 
-				<MainContent
-					activeEntry={activeEntry}
-					storyName={activeStoryName}
-					story={story}
-					storyProps={storyProps}
-					PageContent={PageContent}
-				/>
-			</div>
+					<MainContent
+						activeEntry={activeEntry}
+						storyName={activeStoryName}
+						story={story}
+						storyProps={storyProps}
+						PageContent={PageContent}
+					/>
+				</div>
+			</StudioWrapperProvider>
 		</StudioMetaProvider>
 	)
 }
