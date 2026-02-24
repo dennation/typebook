@@ -19,7 +19,17 @@ function mergeStoryProps(story: Story): Record<string, unknown> {
 }
 
 function RenderSingle({ story }: { story: SingleStory }) {
-	return <VariantCard label="default" props={mergeStoryProps(story)} render={story.render} isolate={story.isolate} />
+	return (
+		<VariantCard
+			label="default"
+			previewId="default"
+			component={story.component}
+			props={mergeStoryProps(story)}
+			render={story.render}
+			isolate={story.isolate}
+			trackActions={story.trackActions}
+		/>
+	)
 }
 
 function RenderVariants({ story, props }: { story: VariantsStory; props: PropInfo[] }) {
@@ -31,9 +41,12 @@ function RenderVariants({ story, props }: { story: VariantsStory; props: PropInf
 				<VariantCard
 					key={v.label}
 					label={v.label}
+					previewId={v.label}
+					component={story.component}
 					props={v.props}
 					render={story.render}
 					isolate={story.isolate}
+					trackActions={story.trackActions}
 				/>
 			))}
 		</div>
@@ -99,9 +112,12 @@ function RenderMatrix({ story, props }: { story: MatrixStory; props: PropInfo[] 
 									>
 										<VariantCard
 											label={cell.label}
+											previewId={`${row.label}-${cell.label}`}
+											component={story.component}
 											props={cell.props}
 											render={story.render}
 											isolate={story.isolate}
+											trackActions={story.trackActions}
 										/>
 									</td>
 								))}

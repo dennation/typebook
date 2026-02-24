@@ -19,7 +19,7 @@ export function docsPagePath(entry: ComponentEntry): string {
  * Resolves component-associated pages (auto-generated docs + user overrides)
  * and separates them from top-level pages.
  *
- * For each component (where docs !== false):
+ * For each component (where autoDocs !== false):
  * 1. Check if a user page overrides the default (name === DEFAULT_DOCS_PAGE, path === componentFullPath)
  * 2. If override found → use it and remove from top-level pages
  * 3. If no override → auto-generate a docs page with the provided content factory
@@ -33,7 +33,7 @@ export function resolveComponentPages(
 	const consumedPageIndices = new Set<number>()
 
 	for (const entry of components) {
-		if (entry.config.docs === false) continue
+		if (entry.config.autoDocs === false) continue
 
 		const fullPath = docsPagePath(entry)
 

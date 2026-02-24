@@ -54,6 +54,7 @@ packages/studio/
     types.ts                  — All shared types (DefineResult, PageResult, Story, StoryConfig, PropInfo, ComponentMeta, Registry, etc.)
     define.ts                 — define() → DefineResult with single(), variants(), matrix(), allOf(), values(), generate()
     definePage.ts             — definePage() → PageResult for standalone documentation pages
+    action.ts                 — ActionStore singleton (log, clear, subscribe) for action event logging
     resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into variant arrays (used by renderers)
     constants.ts              — Shared constants (PACKAGE_NAME, DEFAULT_PAGES_INCLUDE, etc.)
     cli.ts                    — CLI entry: `npx @dennation/ui-studio generate`
@@ -70,23 +71,28 @@ packages/studio/
         index.ts              — Webpack plugin: UiStudioWebpackPlugin class wrapping StudioCompiler
     react/
       index.ts                — React exports
-      context.ts              — StudioMetaContext (Component → PropInfo[] map) + StudioWrapperContext (global storyWrapper)
+      context.ts              — StudioMetaContext (Component → PropInfo[] map) + StudioWrapperContext (global storyWrapper) + InspectContext (inspect panel state)
       components/
         index.ts              — Barrel export
-        Studio.tsx            — <Studio /> component (per-story sidebar tree, theme, single-story rendering)
+        Studio.tsx            — <Studio /> component (per-story sidebar tree, theme, single-story rendering, inspect panel)
         Story.tsx             — <Story of={...} /> component for embedding stories in doc pages
         StoryRenderer.tsx     — Dispatches to RenderSingle / RenderVariants / RenderMatrix
-        Playground.tsx         — <Playground of={defineResult} /> interactive component preview with props panel
+        Playground.tsx        — <Playground of={defineResult} /> interactive component preview with props panel
+        ComponentPreview.tsx  — Unified component render: action wrapping, storyWrapper, ErrorBoundary, IsolateWrapper, inspect button
+        InspectPanel.tsx      — Right sidebar panel: actions log, action summaries, props table
         PropControl.tsx       — Prop controls: dropdown (literal), toggle (boolean), input (string), number
-        VariantCard.tsx       — Single variant preview card (inline by default, iframe when isolate: true)
+        VariantCard.tsx       — Single variant preview card with label badge, delegates rendering to ComponentPreview
         IframePreview.tsx     — Iframe wrapper for CSS isolation of component previews
         ErrorBoundary.tsx     — Error boundary for component crash isolation
       hooks/
         useHashRoute.ts       — Hash-based routing: #component/name (page or story, pages win) + #page/page-name → activeComponent/activeStory/activeComponentPage/activePage
+        useActionLog.ts       — Hook: filtered ActionLogEntry[] by previewId via useSyncExternalStore
+        useActionSummary.ts   — Hook: groups action entries by name → { actionName, callCount, lastArgs, lastTimestamp }[]
       utils/
         index.ts              — Barrel export
         buildSidebarTree.ts   — Builds sidebar tree: unified SidebarNode discriminated union (group | component | page | story)
         resolveComponentPages.ts — Generates default docs pages for components, handles user overrides
+        wrapActionProps.ts    — Wraps function props with action logging, auto-generates stubs for missing function props
         naming.ts             — toKebabCase(), entryName(), pageName() helpers
         getGridStyle.ts       — getGridStyle() — computes CSS grid layout for variant grids
       styles/
@@ -150,10 +156,16 @@ packages/studio/
 - **Per-story pages** — each story is a separate page. Sidebar shows a tree: path groups → components → stories. Clicking a story navigates to `#component/story` hash route and renders only that story.
 - **`<Playground />` component** — `<Playground of={defineResult} />` renders an interactive component preview with a props control table. Takes a `DefineResult` via the `of` prop, reads `PropInfo[]` from `StudioMetaContext`. Exported from `@dennation/ui-studio/react` for embedding in doc pages. Used internally by the auto-generated Docs page.
 - **Component pages** — pages can be associated with a component and appear inside its sidebar section. In the unified `SidebarNode` tree, component pages are `type: 'page'` nodes nested inside `type: 'component'` nodes. The sidebar renderer derives routing context (component-page vs top-level page) from tree position. `resolveComponentPages()` builds the component→pages mapping.
-- **Auto-generated API page** — each component gets a real `PageResult` (`DEFAULT_DOCS_PAGE` constant = 'API') as its first sidebar page. The content renders `<Playground of={config} />`. Disable per-component with `docs: false` in `define()`. Override by creating a `.page.tsx` with `name: DEFAULT_DOCS_PAGE` and `path: '{componentPath}/{componentName}'`. Clicking a component name auto-selects its API page.
+- **Auto-generated API page** — each component gets a real `PageResult` (`DEFAULT_DOCS_PAGE` constant = 'API') as its first sidebar page. The content renders `<Playground of={config} />`. Disable per-component with `autoDocs: false` in `define()`. Override by creating a `.page.tsx` with `name: DEFAULT_DOCS_PAGE` and `path: '{componentPath}/{componentName}'`. Clicking a component name auto-selects its API page.
 - **Story path grouping** — stories can set `path` to group them under sub-sections in the sidebar (e.g. `path: 'Matrix'`). Default path is `'Stories'`. When all stories share the same path (single group), the group level is flattened — stories appear directly under the component.
 - **Story config fields** — all story kinds share common config via `StoryConfig`: `props`, `isolate`, `name`, `path`, `hidden`. Each kind adds its own fields: `single` adds `render`, `variants` adds `items`/`columns`, `matrix` adds `x`/`y`.
-- **Global storyWrapper** — `<Studio storyWrapper={...} />` provides a global wrapper for all stories and Playground previews via `StudioWrapperContext`. Applied at render time in `VariantCard` and `Playground` (not baked into story objects). Composition order: global `storyWrapper` → per-component `wrapper` (baked into `story.render` at `define()` time) → component render. Uses React Context to avoid prop drilling through StoryRenderer/MainContent.
+- **Global storyWrapper** — `<Studio storyWrapper={...} />` provides a global wrapper for all stories and Playground previews via `StudioWrapperContext`. Applied at render time in `ComponentPreview` (not baked into story objects). Composition order: global `storyWrapper` → per-component `wrapper` (baked into `story.render` at `define()` time) → component render. Uses React Context to avoid prop drilling through StoryRenderer/MainContent.
+- **Automatic action logging** — all function props are automatically wrapped with logging in `ComponentPreview` via `wrapActionProps()`. Existing functions are wrapped (log + call original), missing function props (known from `PropInfo` with `kind: 'function'`) get auto-generated logging stubs. Action name = prop key (e.g. `onClick`, `onChange`). No manual setup needed. Disable per-component with `trackActions: false` in `define()`.
+- **ActionStore** — framework-agnostic singleton (`action.ts`) with immutable entries array and pub-sub via `Set<Listener>`. React subscribes via `useSyncExternalStore`. Each log entry has `{ id, timestamp, actionName, previewId, args }`. `previewId` is injected by `wrapActionProps` at render time to scope entries per preview instance.
+- **ComponentPreview** — unified component rendering used by both `VariantCard` and `Playground`. Handles: `wrapActionProps` (action logging + stub generation), `storyWrapper` application, `IsolateWrapper` (conditional iframe), `ErrorBoundary`, and inspect button. Reads `InspectContext` to show/highlight the inspect button — no prop drilling needed. Registers its current props in a shared `PreviewPropsMap` ref for `InspectPanel` to read.
+- **Inspect Panel** — right sidebar (push layout, 300px) that opens when user clicks the inspect button on any `ComponentPreview` hover. Grid dynamically switches between `[260px_1fr]` and `[260px_1fr_300px]`. Shows three sections: Actions summary (per-action call count + last timestamp), Action log (chronological entries with formatted args), and Props table (current props of inspected instance). Panel state (`inspectedPreviewId`) lives in `Studio.tsx`, provided via `InspectContext`. Clears on navigation. Clicking inspect on same preview toggles panel closed; clicking on another preview switches context.
+- **InspectContext** — provides `{ inspectedPreviewId, onInspect, previewPropsRef }` to the component tree. `ComponentPreview` reads it to render the inspect button and determine `isInspected` state. Avoids threading inspect props through `StoryRenderer` → `RenderVariants` → `VariantCard`. `previewPropsRef` is a `Ref<Map<string, Record<string, unknown>>>` — `ComponentPreview` writes its props via `useEffect`, `InspectPanel` reads from it.
+- **Iframe isolation + actions** — action functions are closures created in the parent frame's module scope. `IframePreview` uses `createPortal` which only moves DOM nodes — JS execution context stays in the parent. Actions from iframe-isolated components naturally flow to the parent's `ActionStore` with no special handling.
 
 ---
 
@@ -399,11 +411,23 @@ export default definePage({
 ### Disable auto-generated Docs page
 
 ```ts
-// Set docs: false in define() to disable auto-generated Docs page
+// Set autoDocs: false in define() to disable auto-generated Docs page
 const button = define(Button, {
   name: 'Button',
   path: 'Forms',
-  docs: false,   // no auto-generated Docs page
+  autoDocs: false,   // no auto-generated Docs page
+  defaults: { children: 'Click me' },
+})
+```
+
+### Disable action logging
+
+```ts
+// Set trackActions: false in define() to disable automatic action logging
+const button = define(Button, {
+  name: 'Button',
+  path: 'Forms',
+  trackActions: false,   // function props won't be logged
   defaults: { children: 'Click me' },
 })
 ```

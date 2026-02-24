@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, createElement } from 'react'
 import type { DefineResult, PropInfo } from '../../types.js'
-import { useStudioMeta, useStudioWrapper } from '../context.js'
-import { ErrorBoundary } from './ErrorBoundary.js'
+import { useStudioMeta } from '../context.js'
 import { PropControl } from './PropControl.js'
+import { ComponentPreview } from './ComponentPreview.js'
 
 function formatType(prop: PropInfo): string {
 	const { type } = prop
@@ -18,7 +18,6 @@ function isControllable(prop: PropInfo): boolean {
 
 export function Playground({ of: config }: { of: DefineResult<any> }) {
 	const propsMap = useStudioMeta()
-	const storyWrapper = useStudioWrapper()
 	const props: PropInfo[] = propsMap.get(config.component) ?? []
 	const Component = config.component
 
@@ -28,17 +27,17 @@ export function Playground({ of: config }: { of: DefineResult<any> }) {
 		setControlProps((prev) => ({ ...prev, [propName]: value }))
 	}, [])
 
-	const preview = storyWrapper
-		? storyWrapper(() => <Component {...controlProps} />)
-		: <Component {...controlProps} />
-
 	return (
 		<div className="st:rounded-lg st:border st:border-border st:overflow-hidden st:mb-6">
 			{/* Preview */}
-			<div className="st:bg-bg-sidebar st:flex st:items-center st:justify-center st:min-h-[120px] st:p-8">
-				<ErrorBoundary>
-					{preview}
-				</ErrorBoundary>
+			<div className="st:bg-bg-sidebar">
+				<ComponentPreview
+					previewId="playground"
+					component={Component}
+					props={controlProps}
+					render={(p) => createElement(Component, p)}
+					trackActions={config.trackActions}
+				/>
 			</div>
 
 			{/* Props table */}

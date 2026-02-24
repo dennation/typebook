@@ -91,8 +91,10 @@ export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof P
   props?: ReadonlyArray<IncludedProps>
   /** Wrapper applied to all stories (e.g. a theme provider) */
   wrapper?: WrapperFn
-  /** Set false to disable auto-generated docs page (default: true) */
-  docs?: boolean
+  /** Set false to disable auto-generated API docs page (default: true) */
+  autoDocs?: boolean
+  /** Set false to disable automatic action logging for function props (default: true) */
+  trackActions?: boolean
 }
 
 
@@ -140,6 +142,8 @@ interface StoryBase {
   path?: string
   /** When true, the story is excluded from the sidebar but remains importable for docs */
   hidden?: boolean
+  /** When false, automatic action logging is disabled for this story's function props */
+  trackActions?: boolean
 }
 
 /** Single story — one variant with fixed props */
@@ -183,7 +187,8 @@ export interface DefineResult<Props, CoveredByDefaults extends keyof Props = nev
   name?: string
   path?: string
   defaults: Record<string, unknown>
-  docs?: boolean
+  autoDocs?: boolean
+  trackActions?: boolean
 
   // Story creation methods
   single(config?: StoryConfig<Props, CoveredByDefaults> & {

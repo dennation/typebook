@@ -1,4 +1,4 @@
-import { useState, useCallback, useInsertionEffect, useMemo } from 'react'
+import { useState, useCallback, useInsertionEffect, useMemo, useRef, useEffect } from 'react'
 import type { ComponentType } from 'react'
 import type { Registry, ComponentEntry, PropInfo, WrapperFn } from '../../types.js'
 import { STYLE_ELEMENT_ID } from '../../constants.js'
@@ -7,9 +7,10 @@ import { resolveComponentPages } from '../utils/resolveComponentPages.js'
 import { entryName } from '../utils/naming.js'
 import { useHashRoute } from '../hooks/useHashRoute.js'
 import { useTheme, type Theme } from '../hooks/useTheme.js'
-import { StudioMetaProvider, StudioWrapperProvider } from '../context.js'
+import { StudioMetaProvider, StudioWrapperProvider, InspectProvider, type PreviewPropsMap } from '../context.js'
 import { Sidebar } from './Sidebar.js'
 import { MainContent } from './MainContent.js'
+import { InspectPanel } from './InspectPanel.js'
 import { Playground } from './Playground.js'
 import styles from '../styles/styles.css?inline'
 
@@ -26,6 +27,18 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 	const { theme, toggleTheme } = useTheme(themeOverride)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
+
+	// --- Inspect panel state ---
+	const [inspectedPreviewId, setInspectedPreviewId] = useState<string | null>(null)
+	const previewPropsRef = useRef<PreviewPropsMap>(new Map())
+
+	const handleInspect = useCallback((id: string) => {
+		setInspectedPreviewId((prev) => (prev === id ? null : id))
+	}, [])
+
+	const handleCloseInspect = useCallback(() => {
+		setInspectedPreviewId(null)
+	}, [])
 
 	// Component → PropInfo[] map for cross-file story resolution
 	const propsMap = useMemo(() => {
@@ -50,6 +63,11 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 	)
 
 	const route = useHashRoute(components, topLevelPages, componentPages)
+
+	// Clear inspect panel on navigation
+	useEffect(() => {
+		setInspectedPreviewId(null)
+	}, [route.activeView])
 
 	const toggleCollapse = useCallback((key: string) => {
 		setCollapsed((prev) => {
@@ -139,33 +157,49 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 		document.head.appendChild(style)
 	}, [])
 
+	// Inspect context value
+	const inspectState = useMemo(
+		() => ({ inspectedPreviewId, onInspect: handleInspect, previewPropsRef }),
+		[inspectedPreviewId, handleInspect],
+	)
+
+	const gridClass = inspectedPreviewId
+		? 'st:grid st:grid-cols-[260px_1fr_300px] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text'
+		: 'st:grid st:grid-cols-[260px_1fr] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text'
+
 	return (
 		<StudioMetaProvider value={propsMap}>
 			<StudioWrapperProvider value={storyWrapper}>
-				<div
-					className="st:grid st:grid-cols-[260px_1fr] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text"
-					data-theme={theme}
-				>
-					<Sidebar
-						tree={tree}
-						route={route}
-						collapsed={collapsed}
-						toggleCollapse={toggleCollapse}
-						disableSearch={disableSearch}
-						searchQuery={searchQuery}
-						onSearchChange={setSearchQuery}
-						theme={theme}
-						onToggleTheme={toggleTheme}
-					/>
+				<InspectProvider value={inspectState}>
+					<div className={gridClass} data-theme={theme}>
+						<Sidebar
+							tree={tree}
+							route={route}
+							collapsed={collapsed}
+							toggleCollapse={toggleCollapse}
+							disableSearch={disableSearch}
+							searchQuery={searchQuery}
+							onSearchChange={setSearchQuery}
+							theme={theme}
+							onToggleTheme={toggleTheme}
+						/>
 
-					<MainContent
-						activeEntry={activeEntry}
-						storyName={activeStoryName}
-						story={story}
-						storyProps={storyProps}
-						PageContent={PageContent}
-					/>
-				</div>
+						<MainContent
+							activeEntry={activeEntry}
+							storyName={activeStoryName}
+							story={story}
+							storyProps={storyProps}
+							PageContent={PageContent}
+						/>
+
+						{inspectedPreviewId && (
+							<InspectPanel
+								previewId={inspectedPreviewId}
+								onClose={handleCloseInspect}
+							/>
+						)}
+					</div>
+				</InspectProvider>
 			</StudioWrapperProvider>
 		</StudioMetaProvider>
 	)

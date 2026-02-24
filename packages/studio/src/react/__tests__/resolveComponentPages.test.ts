@@ -4,7 +4,7 @@ import type { ComponentEntry, PageResult } from '../../types.js'
 import { DEFAULT_DOCS_PAGE } from '../../constants.js'
 import { resolveComponentPages, docsPagePath } from '../utils/resolveComponentPages.js'
 
-function makeComponent(name: string, path?: string, docs?: boolean): ComponentEntry {
+function makeComponent(name: string, path?: string, autoDocs?: boolean): ComponentEntry {
 	const component = (() => null) as unknown as ComponentType<any>
 	component.displayName = name
 	return {
@@ -14,7 +14,7 @@ function makeComponent(name: string, path?: string, docs?: boolean): ComponentEn
 			name,
 			path,
 			defaults: {},
-			docs,
+			autoDocs,
 			single: () => ({}) as any,
 			variants: () => ({}) as any,
 			matrix: () => ({}) as any,
@@ -71,7 +71,7 @@ describe('resolveComponentPages', () => {
 		expect(result.topLevelPages).toEqual([])
 	})
 
-	test('skips components with docs: false', () => {
+	test('skips components with autoDocs: false', () => {
 		const button = makeComponent('Button', 'Forms')
 		const input = makeComponent('Input', 'Forms', false)
 		const result = resolveComponentPages([button, input], [], createDocsContent)
