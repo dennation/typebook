@@ -2,34 +2,40 @@
 
 # @dennation/ui-studio
 
-**Automatic component stories from your TypeScript types.**
+**Zero-boilerplate component stories from your TypeScript types.**
 
 [![npm version](https://img.shields.io/npm/v/@dennation/ui-studio)](https://www.npmjs.com/package/@dennation/ui-studio)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-[Getting Started](#getting-started) · [API Reference](#api-reference) · [Examples](#examples) · [How It Works](#how-it-works)
+[Quick Start](#quick-start) · [Features](#features) · [API Reference](#api-reference) · [Storybook Migration](MIGRATE-FROM-STORYBOOK.md)
+
+<!-- TODO: replace with actual hero GIF -->
+![UI Studio demo](https://placehold.co/800x400/1a1a2e/e2e2e2?text=Hero+GIF+coming+soon)
 
 </div>
 
 ---
 
-UI Studio reads your component prop types at build time and generates every variant automatically — no manual enumeration, no stale docs.
+Write `allOf('size')` — get a grid of every variant. UI Studio reads your TypeScript prop types at build time and generates stories automatically. No `argTypes`, no manual value lists, no separate dev server.
 
-- **Zero-config type extraction** — Reads `size: "sm" | "md" | "lg"` straight from TypeScript. No manual value lists.
-- **Three story kinds** — `single` (one card), `variants` (grid), `matrix` (cross-product table).
-- **Interactive props panel** — Tweak any prop live with auto-generated controls (dropdowns, toggles, inputs).
-- **Iframe isolation** — Each variant renders in its own iframe. No CSS bleed.
-- **Vite plugin** — Plugs into your existing Vite setup. No separate dev server.
-- **Fully typed API** — Generic `define<Props>()` propagates your component types to every story helper.
+## Storybook vs UI Studio
 
-## Getting Started
+| | Storybook | UI Studio |
+|---|---|---|
+| Lines per story | 15-40 | 3-10 |
+| Prop variants | Manual `argTypes` | Auto-extracted from TypeScript |
+| All-variants grid | One story per value | `allOf('size')` — one line |
+| Cross-product matrix | Not built-in | `matrix({ x, y })` — one line |
+| Cold start | 5-15s (separate server) | <1s (Vite plugin) |
+| Config files | `main.ts` + `preview.ts` + `manager.ts` | One line in `vite.config.ts` |
+| Dependencies | 30+ packages | 1 package |
+
+## Quick Start
 
 ### Install
 
 ```bash
 npm install @dennation/ui-studio
-# or
-pnpm add @dennation/ui-studio
 ```
 
 ### 1. Add the Vite plugin
@@ -41,10 +47,7 @@ import react from '@vitejs/plugin-react'
 import { uiStudio } from '@dennation/ui-studio/vite'
 
 export default defineConfig({
-  plugins: [
-    react(),
-    uiStudio(),
-  ],
+  plugins: [react(), uiStudio()],
 })
 ```
 
@@ -58,17 +61,11 @@ import { Button } from './Button'
 const button = define(Button, {
   path: 'Forms',
   defaults: { children: 'Click me' },
-  props: ['size', 'variant', 'color', 'disabled'],
 })
 
-export const Default = button.single({
-  props: { size: 'md', variant: 'solid' },
-})
-
-export const Sizes = button.variants({
-  items: button.allOf('size'),
-})
-
+export const Default = button.single({ props: { size: 'md', variant: 'solid' } })
+export const Sizes = button.variants({ items: button.allOf('size') })
+export const Colors = button.variants({ items: button.allOf('color'), columns: 3 })
 export const Matrix = button.matrix({
   x: button.allOf('color'),
   y: [button.allOf('variant')],
@@ -82,14 +79,85 @@ export default button
 ```tsx
 // src/main.tsx
 import { Studio } from '@dennation/ui-studio/react'
-import registry from './ui-studio-registry.gen' // auto-generated
+import registry from './ui-studio-registry.gen'
 
 function App() {
   return <Studio registry={registry} />
 }
 ```
 
-Start Vite — the plugin scans your `*.stories.tsx` files, extracts types, and generates `ui-studio-registry.gen.ts` + `ui-studio-meta.gen.ts` automatically.
+Start Vite — the plugin scans `*.stories.tsx`, extracts types, and generates the registry automatically.
+
+## Features
+
+### Single story — one card with fixed props
+
+```ts
+export const Default = button.single({
+  props: { size: 'md', variant: 'solid' },
+})
+```
+
+### Variants — grid of all values for a prop
+
+```ts
+export const Sizes = button.variants({ items: button.allOf('size') })
+```
+
+If your component has `size: "sm" | "md" | "lg"`, this generates 3 variant cards automatically. Add a new value to the type — the story updates with zero changes.
+
+### Matrix — cross-product table
+
+```ts
+export const Matrix = button.matrix({
+  x: button.allOf('color'),
+  y: [button.allOf('variant')],
+})
+```
+
+Colors as columns, variants as rows. Every cell is a live component.
+
+### Interactive Playground
+
+Each component gets an auto-generated API page with live prop controls — dropdowns for literal unions, toggles for booleans, inputs for strings and numbers.
+
+```tsx
+import { Playground } from '@dennation/ui-studio/react'
+
+<Playground of={button} />
+```
+
+### Documentation pages
+
+```tsx
+// src/docs/ButtonGuide.docs.tsx
+import { definePage } from '@dennation/ui-studio'
+import { Story } from '@dennation/ui-studio/react'
+import { Default, Sizes } from '../stories/Button.stories'
+
+export default definePage({
+  name: 'Button Guide',
+  path: 'Guides',
+  content: () => (
+    <div>
+      <h1>Button</h1>
+      <Story of={Default} />
+      <h2>All sizes</h2>
+      <Story of={Sizes} />
+    </div>
+  ),
+})
+```
+
+Supports markdown via `@mdx-js/rollup`. Hidden stories (`hidden: true`) are excluded from the sidebar but embeddable in docs via `<Story of={...} />`.
+
+### Iframe isolation
+
+Stories render inline by default (fast). Opt-in to iframe per story for components that interact with `document` or `body`:
+
+```ts
+export const Modal = modal.single({ isolate: true })
+```
 
 ## API Reference
 
@@ -99,165 +167,147 @@ Creates a story definition bound to a React component.
 
 ```ts
 const button = define(Button, {
-  title: 'Primary Button',  // display name override
-  path: 'Forms',            // sidebar path with nesting via '/'
+  name: 'Button',            // display name override
+  path: 'Forms',             // sidebar grouping via '/'
   defaults: { children: 'Click me' },
   props: ['size', 'variant', 'color'],  // limit which props to extract
+  wrapper: (Story) => <Provider><Story /></Provider>,
+  docs: true,                // auto-generate API page (default: true)
 })
 ```
 
-| Option | Type | Description |
-|---|---|---|
-| `title` | `string` | Display name in the sidebar. Defaults to `displayName` or function name. |
-| `path` | `string` | Sidebar path with nesting via `/` (e.g. `'Components/Forms'`). |
-| `defaults` | `Partial<Props>` | Default prop values applied to all stories. |
-| `props` | `string[]` | Whitelist of props to include. Omit to include all. |
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `name` | `string` | Component name | Display name in the sidebar |
+| `path` | `string` | — | Sidebar path with nesting via `/` |
+| `defaults` | `Partial<Props>` | — | Default props applied to all stories |
+| `props` | `string[]` | All props | Limit which props to extract from types |
+| `wrapper` | `(Story) => ReactNode` | — | Wrap all stories (e.g. with a provider) |
+| `docs` | `boolean` | `true` | Auto-generate API page with Playground |
 
 ### Story methods
 
-#### `button.single(config?)`
+| Method | Description |
+|---|---|
+| `button.single(config?)` | One card with fixed props |
+| `button.variants(config)` | Grid of variants from a prop |
+| `button.matrix(config)` | Cross-product table: `x` columns, `y` rows |
 
-One card with fixed props.
+**Common story config:**
 
-```ts
-export const Default = button.single({
-  props: { size: 'md', variant: 'solid' },
-})
-```
+| Option | Type | Description |
+|---|---|---|
+| `props` | `Partial<Props>` | Props for this story |
+| `isolate` | `boolean` | Render in iframe for CSS/JS isolation |
+| `name` | `string` | Display name override |
+| `path` | `string` | Group within component sidebar section |
+| `hidden` | `boolean` | Exclude from sidebar, usable in docs |
 
-#### `button.variants(config)`
-
-Grid of variants for one prop.
-
-```ts
-export const Sizes = button.variants({
-  items: button.allOf('size'),
-  columns: 4,  // optional grid columns
-})
-```
-
-#### `button.matrix(config)`
-
-Cross-product table — columns from `x`, rows from `y`.
-
-```ts
-export const Matrix = button.matrix({
-  x: button.allOf('color'),
-  y: [button.allOf('variant'), button.allOf('size')],
-})
-```
+**Variants-specific:** `items` (VariantConfig), `columns` (number).
+**Matrix-specific:** `x` (VariantConfig), `y` (VariantConfig[]).
+**Single-specific:** `render` ((props) => ReactNode) for custom rendering.
 
 ### Variant helpers
 
 | Helper | Description |
 |---|---|
-| `button.allOf('size')` | All values from the TypeScript type (`"sm" \| "md" \| "lg"` becomes 3 variants) |
+| `button.allOf('size')` | All values from the TypeScript type |
 | `button.values('size', ['sm', 'lg'])` | Explicit list of values |
-| `button.generate('id', () => crypto.randomUUID(), 5)` | Generate N values with a function |
+| `button.generate('id', () => randomId(), 5)` | Generate N values with a function |
+
+### `definePage(config)`
+
+Creates a standalone documentation page.
+
+```ts
+export default definePage({
+  name: 'Getting Started',
+  path: 'Guides',
+  order: 1,
+  content: () => <div>...</div>,
+})
+```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `name` | `string` | — | Page name in the sidebar |
+| `path` | `string` | — | Sidebar grouping via `/` |
+| `order` | `number` | `0` | Sort order within group |
+| `content` | `ComponentType` | — | React component to render |
 
 ### `<Studio />`
 
 ```tsx
-import { Studio } from '@dennation/ui-studio/react'
-
 <Studio
-  registry={registry}  // from ui-studio-registry.gen.ts
-  theme="light"        // "light" | "dark"
+  registry={registry}    // from ui-studio-registry.gen.ts
+  theme="light"          // "light" | "dark" (default: system)
+  disableSearch={false}  // hide search bar
 />
 ```
 
-### Vite plugin options
+### `<Story />`
+
+Embeds a story inside a documentation page.
+
+```tsx
+import { Story } from '@dennation/ui-studio/react'
+import { Sizes } from './Button.stories'
+
+<Story of={Sizes} />
+```
+
+### `<Playground />`
+
+Interactive component preview with live prop controls.
+
+```tsx
+import { Playground } from '@dennation/ui-studio/react'
+import button from './Button.stories'
+
+<Playground of={button} />
+```
+
+### Plugin options
 
 ```ts
 uiStudio({
-  include: './src/**/*.stories.tsx',          // glob pattern (default)
-  output: './ui-studio-registry.gen.ts',      // registry file path (default)
-  metaOutput: './ui-studio-meta.gen.ts',      // meta file path (default)
+  include: './src/**/*.stories.tsx',      // story files glob
+  includePages: './src/**/*.docs.tsx',    // doc page files glob
+  output: './ui-studio-registry.gen.ts',  // registry output path
+  metaOutput: './ui-studio-meta.gen.ts',  // meta output path
 })
 ```
 
-## Examples
-
-### Auto-generate all literal union variants
-
-If your component has `color: "primary" | "secondary" | "success" | "warning" | "danger"`, one line gives you every variant:
-
-```ts
-export const Colors = button.variants({
-  items: button.allOf('color'),
-  columns: 3,
-})
-```
-
-### Boolean prop states
-
-```ts
-export const Disabled = button.variants({
-  items: button.allOf('disabled'),
-})
-// Generates: disabled=true, disabled=false
-```
-
-### Manual values with base props
-
-```ts
-export const States = toggle.variants({
-  items: toggle.values('isSelected', [false, true]),
-  props: { color: 'success' },
-})
-```
-
-### Full matrix
-
-```ts
-export const Matrix = button.matrix({
-  x: button.allOf('color'),             // columns
-  y: [button.allOf('variant')],         // rows
-  props: { children: 'Button' },        // base props for every cell
-})
-```
+Webpack uses the same options via `new UiStudioWebpackPlugin({ ... })`.
 
 ## How It Works
 
-```
-*.stories.tsx
-     │
-     ▼
-Vite plugin scans files ──► TypeScript Compiler API extracts prop types
-                                        │
-                                        ▼
-                              oxc parses type strings into PropInfo[]
-                                        │
-                                        ▼
-                              Generates ui-studio-meta.gen.ts (extracted types)
-                              Generates ui-studio-registry.gen.ts (imports + assembly)
-                                        │
-                                        ▼
-                              <Studio /> renders sidebar + stories
-                              Each story kind resolves variants inline
-```
-
-1. **Scan** — The Vite plugin finds all `*.stories.tsx` files matching the `include` glob.
+1. **Scan** — Plugin finds `*.stories.tsx` and `*.docs.tsx` files matching the `include` globs.
 2. **Extract** — TypeScript Compiler API resolves component prop types as strings.
 3. **Parse** — [oxc](https://oxc.rs) parses type strings into structured `PropInfo[]` (literal unions, booleans, strings, numbers, nodes, functions).
-4. **Generate** — Two files are written: `ui-studio-meta.gen.ts` (extracted component metadata) and `ui-studio-registry.gen.ts` (imports stories, configs, and meta into a registry array).
-5. **Render** — `<Studio />` renders a sidebar, interactive props panel, and story cards with iframe isolation. Each story kind (single, variants, matrix) resolves its own variants lazily at render time.
+4. **Generate** — Two files are written to disk: `ui-studio-meta.gen.ts` (extracted types) and `ui-studio-registry.gen.ts` (imports + registry assembly).
+5. **Render** — `<Studio />` renders sidebar, interactive Playground, and story cards. Each story kind resolves variants lazily at render time.
 
-The plugin watches for file changes and regenerates incrementally — only re-extracting types for changed files.
+The plugin watches for file changes and regenerates incrementally.
 
 ## Package Exports
 
-```ts
-import { define } from '@dennation/ui-studio'                    // Core API + types
-import { Studio } from '@dennation/ui-studio/react'              // React components
-import { uiStudio } from '@dennation/ui-studio/vite'             // Vite plugin
-```
+| Import | Description |
+|---|---|
+| `@dennation/ui-studio` | `define`, `definePage`, types |
+| `@dennation/ui-studio/react` | `Studio`, `Story`, `Playground`, `ErrorBoundary` |
+| `@dennation/ui-studio/vite` | `uiStudio` Vite plugin |
+| `@dennation/ui-studio/webpack` | `UiStudioWebpackPlugin` |
 
 ## Requirements
 
 - React >= 18
-- Vite >= 5
+- Vite >= 5 or Webpack >= 5
 - TypeScript >= 5.7
+
+## Coming from Storybook?
+
+See the [Migration Guide](MIGRATE-FROM-STORYBOOK.md) for a step-by-step walkthrough with before/after code comparisons.
 
 ## License
 

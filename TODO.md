@@ -10,27 +10,12 @@
 **Blocked by:** улучшения дизайна UI (сначала довести визуал до финального состояния, потом записывать).
 **Effort: низкий.** **Impact: критический.** Это первое, что видят на GitHub.
 
-### README: переписать на продающий формат
-Текущий README технически хорош, но не продаёт. Новая структура:
-1. One-liner: "Zero-boilerplate component stories from your TypeScript types"
-2. Hero GIF
-3. Comparison table: Storybook vs ui-studio (lines per story, type extraction, variant generation, cold start)
-4. Quick Start (30 секунд до первого результата)
-5. Features с code snippets (single, variants, matrix)
-6. API reference
-7. Requirements
+### ~~README: переписать на продающий формат~~ ✅ Done
+Переписан: one-liner, GIF-заглушка, comparison table, quick start, features с code snippets, API reference.
+**Blocked by:** Hero GIF (заглушка на месте, заменить после записи).
 
-За 10 секунд скролла должно быть понятно зачем это нужно.
-**Blocked by:** Hero GIF.
-**Effort: низкий.** **Impact: критический.**
-
-### "Migrate from Storybook" guide
-Главный driver adoption — люди ищут "Storybook alternative", не "new story tool".
-- Маппинг концептов: CSF → define(), argTypes → automatic, decorators → defaults
-- Before/after кода (15 строк Storybook → 3 строки ui-studio)
-- Пошаговая инструкция миграции
-- Что поддерживается, чего пока нет
-**Effort: низкий.** **Impact: высокий.**
+### ~~"Migrate from Storybook" guide~~ ✅ Done
+См. `MIGRATE-FROM-STORYBOOK.md`.
 
 ### Online demo (StackBlitz)
 StackBlitz playground: Vite + React + ui-studio, 2-3 компонента (Button, Input, Card), все три вида историй.
@@ -68,13 +53,38 @@ Timing: вторник-среда утром EST.
 
 Технический долг и архитектурные улучшения, без которых всё остальное строится на шатком фундаменте.
 
+### Actions — логирование событий
+Сейчас `function`-пропсы в Playground показывают прочерк — `onClick`, `onChange` и т.д. уходят в пустоту. Без этого интерактивная превью компонентов с коллбэками ощущается сломанной.
+- Хелпер `action(name)` — фабрика, возвращающая функцию, которая логирует вызовы с аргументами в панель.
+- Панель Actions снизу в Playground/StoryRenderer: timestamp, call count, args.
+- Кнопка Clear.
+```ts
+import { action } from '@dennation/ui-studio'
+const button = define(Button, {
+  defaults: { onClick: action('onClick') },
+})
+```
+**Effort: низкий–средний.** **Impact: критический.** Блокирует повседневную работу с интерактивным preview.
+
+### Глобальный wrapper на уровне Studio
+`wrapper` в `define()` работает per-component. Если 30+ компонентов нуждаются в `<ThemeProvider>`, приходится повторять в каждом `define()`.
+- Prop `wrapper` на `<Studio />` — оборачивает рендер каждой истории.
+- Композиция: global wrapper → per-component wrapper → story.
+```tsx
+<Studio
+  registry={registry}
+  wrapper={(Story) => <ThemeProvider><Story /></ThemeProvider>}
+/>
+```
+**Effort: низкий.** **Impact: критический.** Основная DX-фрикция для приложений с провайдерами.
+
 ### Улучшение PropControl
-`isControllable()` в `ComponentPreview.tsx` — контролы только для `literal`, `boolean`, `string`, `number`, `node`.
+`isControllable()` в `Playground.tsx` — контролы только для `literal`, `boolean`, `string`, `number`, `node`.
 Минимально необходимые доработки:
+- **Children как редактируемый prop** — `children` самый частый prop в React, сейчас нет контрола для его редактирования. Textarea для строковых children.
 - **Color picker** для строковых пропсов с именем `color`/`backgroundColor`/etc. — `<input type="color">`, 0 зависимостей.
 - **Range slider** для number-пропсов — `<input type="range">` с min/max.
 - **Textarea** для длинных строк / `node`-пропсов.
-- **Actions log** — для `function`-пропсов вместо прочерка показать callback, который логирует вызовы в панель снизу (как Storybook Actions).
 Каждый контрол — независимый, можно добавлять инкрементально.
 **Effort: низкий–средний (на каждый контрол).** **Impact: высокий.** Интерактивность — ключевая ценность инструмента.
 
@@ -93,10 +103,26 @@ Timing: вторник-среда утром EST.
 **Effort: низкий–средний.** **Impact: средний.** Основные кейсы уже покрыты.
 
 ### Copy-Paste Code Snippets
-Кнопка «Copy JSX» на каждой variant-карточке и в interactive preview.
+Кнопка «Copy JSX» на каждой variant-карточке и в Playground.
 Клик → в буфере `<Button size="lg" variant="ghost">Click me</Button>`.
 Пропсы уже известны точно (включая defaults) — генерация тривиальна.
+- Живое обновление при изменении props в Playground.
+- Пропускать props, совпадающие с defaults.
+- `children` рендерить как JSX-children, не как атрибут.
 Дизайнеры и PM-ы смогут бровзить studio и копировать готовый код.
+**Blocked by:** children prop support (PropControl).
+
+### Component Status Badges
+Пометки `deprecated`, `wip`, `new`, `stable` в боковой панели рядом с именем компонента. Помогает навигации в больших библиотеках.
+```ts
+const button = define(Button, {
+  name: 'Button',
+  status: 'stable', // 'stable' | 'wip' | 'deprecated' | 'new'
+})
+```
+- Визуальный бейдж с цветовой кодировкой: new=green, wip=yellow, deprecated=red.
+- Опционально: фильтр по статусу в поиске.
+**Effort: низкий.** **Impact: средний.** Полезно для больших команд.
 
 ### Shareable State Deep Links
 Расширить hash-routing до кодирования состояния props panel:
@@ -114,7 +140,9 @@ Light/dark toggle уже реализован — нужна поддержка 
 ## Tier 2.5 — Дифференциаторы (средний effort, высокий impact)
 
 ### Responsive Preview
-Кнопки Mobile / Tablet / Desktop — переключают ширину контейнера превью.
+Кнопки Mobile (375px) / Tablet (768px) / Desktop (1024px) / Full — переключают ширину контейнера превью.
+Кастомный ввод ширины. Persists per session.
+Интегрируется с существующим iframe-механизмом (`isolate`) — можно переиспользовать `IframePreview` с настраиваемой шириной.
 Критично для UI-библиотек.
 
 ### ~~Component Documentation (MDX / Markdown)~~ ✅ Implemented
@@ -151,7 +179,25 @@ CI-интеграция: на каждый PR — автокомментарий
 Показывает как компонент ведёт себя на edge cases без единой строки конфигурации.
 По сути fuzz-testing для UI. **Ни один инструмент этого не делает.**
 
-### Testing Integration
+### Testing Utilities — переиспользование историй в тестах
+Истории уже описывают компоненты с props — логично переиспользовать их в unit-тестах.
+Новый entry point `@dennation/ui-studio/testing`:
+```ts
+import { composeStories } from '@dennation/ui-studio/testing'
+import * as stories from './Button.stories'
+
+const { Default, Sizes } = composeStories(stories)
+
+test('renders default button', () => {
+  render(<Default />)
+})
+```
+- `composeStories(module)` — конвертирует экспорты историй в рендерируемые React-компоненты.
+- Применяет defaults, wrapper, story props.
+- Без зависимости на Studio UI — чистые React-компоненты.
+**Effort: средний.** **Impact: высокий.** Включает studio в testing pipeline.
+
+### Testing Integration — Visual / A11y / Interaction
 Поэтапный план:
 1. **Visual Snapshot Testing** — `npx @dennation/ui-studio test` → скриншоты всех вариантов, diff с предыдущими. CI-интеграция. Playwright для скриншотов.
 2. **A11y Audit** — встроенный axe-core — проверка каждого варианта на accessibility прямо в UI. Бейдж pass/fail на каждой карточке.
@@ -165,6 +211,23 @@ Type extraction уже есть — AI может предложить edge case
 ---
 
 ## Tier 3.5 — Продвинутые фичи (высокий effort)
+
+### Toolbar Extensibility API
+Точки расширения для пользовательских кнопок и панелей в toolbar превью (zoom, background color, RTL toggle).
+```tsx
+<Studio
+  registry={registry}
+  toolbar={[
+    { icon: '🔄', label: 'RTL', onClick: toggleRTL },
+    { icon: '🎨', label: 'Background', panel: BackgroundPanel },
+  ]}
+/>
+```
+- Prop `toolbar` на Studio — массив дескрипторов аддонов.
+- Рендерит кнопки в toolbar области превью.
+- Поддержка toggle-кнопок и panel popovers.
+- Передаёт текущий component/story контекст в аддоны.
+**Effort: средний.** **Impact: средний.** Extensibility для продвинутых пользователей.
 
 ### Component Playground (JSX Editor)
 Встроенный редактор JSX (Monaco/CodeMirror): написал `<Button size="lg" disabled>` → видишь результат.
