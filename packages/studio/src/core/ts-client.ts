@@ -62,7 +62,7 @@ export class TypeScriptClient {
       return null
     }
 
-    // Find the variable declaration: const button = describe(Button, ...) or define(Button, ...)
+    // Find the variable declaration: const button = define(Button, ...)
     // The type of 'button' is DefineResult<Pick<Props, IncludedProps>>
     // So TypeScript already filtered props for us!
     return this.findComponentPropsInFile(sourceFile)
@@ -72,18 +72,16 @@ export class TypeScriptClient {
     // Guaranteed non-null by getComponentProps guard
     const checker = this.checker!
     let result: PropInfo[] | null = null
-    const defineFnNames = new Set(['define', 'describe'])
-
     const visit = (node: ts.Node): void => {
-      // Look for: const button = define(...) or describe(...)
+      // Look for: const button = define(...)
       if (ts.isVariableStatement(node)) {
         for (const decl of node.declarationList.declarations) {
           if (!decl.initializer || !ts.isCallExpression(decl.initializer)) continue
 
           const callExpr = decl.initializer
-          if (!ts.isIdentifier(callExpr.expression) || !defineFnNames.has(callExpr.expression.text)) continue
+          if (!ts.isIdentifier(callExpr.expression) || callExpr.expression.text !== 'define') continue
 
-          // Found define()/describe() call
+          // Found define() call
           if (!ts.isIdentifier(decl.name)) continue
 
           // Get type of the entire call expression: define(Button, {...})

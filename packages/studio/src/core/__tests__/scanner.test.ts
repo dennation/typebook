@@ -120,19 +120,6 @@ describe('component import', () => {
 		})
 	})
 
-	test('named import + describe() → resolves import', async () => {
-		const result = await analyzeStoryFile(`
-			import { describe } from '@dennation/ui-studio'
-			import { Button } from '@heroui/button'
-			const button = describe(Button)
-			export default button
-		`)
-		expect(result.componentImport).toEqual({
-			name: 'Button',
-			path: '@heroui/button',
-		})
-	})
-
 	test('default import + define() → resolves import', async () => {
 		const result = await analyzeStoryFile(`
 			import { define } from '@dennation/ui-studio'
@@ -190,36 +177,11 @@ describe('component import', () => {
 		})
 	})
 
-	test('describe() inside exported const → resolves import', async () => {
-		const result = await analyzeStoryFile(`
-			import { describe } from '@dennation/ui-studio'
-			import { Input } from '@heroui/input'
-			export const input = describe(Input)
-		`)
-		expect(result.componentImport).toEqual({
-			name: 'Input',
-			path: '@heroui/input',
-		})
-	})
-
 	test('export default define(Component) → resolves import directly', async () => {
 		const result = await analyzeStoryFile(`
 			import { define } from '@dennation/ui-studio'
 			import { Button } from '@heroui/button'
 			export default define(Button)
-		`)
-		expect(result.defaultExport).toBe(true)
-		expect(result.componentImport).toEqual({
-			name: 'Button',
-			path: '@heroui/button',
-		})
-	})
-
-	test('export default describe(Component) → resolves import directly', async () => {
-		const result = await analyzeStoryFile(`
-			import { describe } from '@dennation/ui-studio'
-			import { Button } from '@heroui/button'
-			export default describe(Button)
 		`)
 		expect(result.defaultExport).toBe(true)
 		expect(result.componentImport).toEqual({
@@ -272,28 +234,6 @@ describe('full story file', () => {
 
 		expect(result.defaultExport).toBe(true)
 		expect(result.namedExports).toEqual(['Default', 'Sizes', 'Colors', 'Matrix'])
-		expect(result.componentImport).toEqual({
-			name: 'Button',
-			path: '@heroui/button',
-		})
-	})
-
-	test('realistic story file with describe()', async () => {
-		const result = await analyzeStoryFile(`
-			import { describe } from '@dennation/ui-studio'
-			import { Button } from '@heroui/button'
-
-			const button = describe(Button, {
-				defaults: { children: 'Click me' },
-				props: ['size', 'variant'],
-			})
-
-			export const Sizes = button.variants({ items: button.allOf('size') })
-			export default button
-		`)
-
-		expect(result.defaultExport).toBe(true)
-		expect(result.namedExports).toEqual(['Sizes'])
 		expect(result.componentImport).toEqual({
 			name: 'Button',
 			path: '@heroui/button',

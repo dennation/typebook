@@ -1,6 +1,5 @@
 import { describe, test, expect } from 'vitest'
 import { define } from '../../define.js'
-import { describe as studioDescribe } from '../../describe.js'
 
 const MockComponent = () => null
 MockComponent.displayName = 'MockComponent'
@@ -103,19 +102,3 @@ describe('define()', () => {
 	})
 })
 
-describe('describe() deprecated alias', () => {
-	test('works identically to define()', () => {
-		const result = studioDescribe(MockComponent, { name: 'Test', defaults: { children: 'Hello' } })
-		expect(result.__type).toBe('define')
-		expect(result.component).toBe(MockComponent)
-		expect(result.name).toBe('Test')
-		expect(result.defaults).toEqual({ children: 'Hello' })
-	})
-
-	test('creates stories via alias', () => {
-		const result = studioDescribe(MockComponent)
-		const story = result.single()
-		expect(story.__type).toBe('story')
-		expect(story.kind).toBe('single')
-	})
-})

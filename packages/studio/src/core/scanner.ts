@@ -33,7 +33,7 @@ export interface PageAnalysis {
   defaultExport: boolean
 }
 
-const DEFINE_NAMES = new Set(['define', 'describe'])
+const DEFINE_NAMES = new Set(['define'])
 
 /**
  * Parse a .stories.tsx file via oxc AST to extract exports and the component import.
@@ -41,7 +41,7 @@ const DEFINE_NAMES = new Set(['define', 'describe'])
  * Extracts:
  * - Named exports: `export const Sizes = ...` and `export { Sizes } from ...`
  * - Default export: `export default ...`
- * - Component import: finds `define(Component, ...)` or `describe(Component, ...)` call,
+ * - Component import: finds `define(Component, ...)` call,
  *   then resolves the matching ImportDeclaration (named or default import).
  */
 export async function analyzeStoryFile(content: string): Promise<StoryAnalysis> {
@@ -55,7 +55,7 @@ export async function analyzeStoryFile(content: string): Promise<StoryAnalysis> 
   // Collect all imports: local name → { name, path }
   const imports = new Map<string, { name: string; path: string }>()
 
-  // First argument of define()/describe() call
+  // First argument of define() call
   let defineArg: string | null = null
 
   for (const node of body) {
@@ -103,7 +103,7 @@ export async function analyzeStoryFile(content: string): Promise<StoryAnalysis> 
     if (node.type === 'ExportDefaultDeclaration') {
       defaultExport = true
 
-      // Check for direct define()/describe() call: export default define(Component)
+      // Check for direct define() call: export default define(Component)
       if (!defineArg) {
         const decl = node.declaration
         if (
@@ -119,7 +119,7 @@ export async function analyzeStoryFile(content: string): Promise<StoryAnalysis> 
       }
     }
 
-    // --- Find define()/describe() call in top-level variable declarations ---
+    // --- Find define() call in top-level variable declarations ---
     if (node.type === 'VariableDeclaration' && !defineArg) {
       defineArg = findDefineArg(node.declarations)
     }
@@ -154,7 +154,7 @@ export async function analyzePageFile(content: string): Promise<PageAnalysis> {
 }
 
 /**
- * Search variable declarators for a `define(Component, ...)` or `describe(Component, ...)` call
+ * Search variable declarators for a `define(Component, ...)` call
  * and return the first argument name.
  */
 function findDefineArg(declarations: any[]): string | null {

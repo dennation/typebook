@@ -93,8 +93,6 @@ export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof P
   wrapper?: WrapperFn
 }
 
-/** @deprecated Use DefineConfig instead */
-export type DescribeConfig<Props, IncludedProps extends keyof Props = keyof Props> = DefineConfig<Props, IncludedProps>
 
 /** Auto-generate variants from prop type (boolean/literal) */
 export interface AllOfConfig {
@@ -207,8 +205,6 @@ export interface DefineResult<Props, CoveredByDefaults extends keyof Props = nev
   ): GenerateConfig
 }
 
-/** @deprecated Use DefineResult instead */
-export type DescribeResult<Props, CoveredByDefaults extends keyof Props = never> = DefineResult<Props, CoveredByDefaults>
 
 // --- Registry (output of gen file, input to <Studio />) ---
 

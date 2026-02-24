@@ -50,10 +50,9 @@ packages/studio/
   tsconfig.json
   vite.config.ts
   src/
-    index.ts                  — Public package exports (define, describe (deprecated), definePage, types)
-    types.ts                  — All shared types (DefineResult, PageResult, Story, PropInfo, ComponentMeta, Registry, etc.)
+    index.ts                  — Public package exports (define, definePage, types)
+    types.ts                  — All shared types (DefineResult, PageResult, Story, StoryConfig, PropInfo, ComponentMeta, Registry, etc.)
     define.ts                 — define() → DefineResult with single(), variants(), matrix(), allOf(), values(), generate()
-    describe.ts               — Deprecated re-export of define() as describe()
     definePage.ts             — definePage() → PageResult for standalone documentation pages
     resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into variant arrays (used by renderers)
     constants.ts              — Shared constants (PACKAGE_NAME, DEFAULT_PAGES_INCLUDE, etc.)
@@ -71,9 +70,11 @@ packages/studio/
         index.ts              — Webpack plugin: UiStudioWebpackPlugin class wrapping StudioCompiler
     react/
       index.ts                — React exports
+      context.ts              — StudioMetaContext: React Context providing Component → PropInfo[] map
       components/
         index.ts              — Barrel export
         Studio.tsx            — <Studio /> component (per-story sidebar tree, theme, single-story rendering)
+        Story.tsx             — <Story of={...} /> component for embedding stories in doc pages
         StoryRenderer.tsx     — Dispatches to RenderSingle / RenderVariants / RenderMatrix
         ComponentPreview.tsx   — Component preview with interactive props panel
         PropControl.tsx       — Prop controls: dropdown (literal), toggle (boolean), input (string), number
@@ -93,16 +94,16 @@ packages/studio/
 
 ### Build entry points
 
-- **`index`** — Library exports (`define`, `describe` (deprecated), `definePage`, types). Consumed by user code and generated `.gen.ts`.
-- **`react/index`** — `<Studio />` component, `ErrorBoundary`.
+- **`index`** — Library exports (`define`, `definePage`, types). Consumed by user code and generated `.gen.ts`.
+- **`react/index`** — `<Studio />` component, `<Story />` component, `ErrorBoundary`.
 - **`plugins/vite`** — Vite plugin (`uiStudio()`). Thin wrapper around `StudioCompiler`.
 - **`plugins/webpack`** — Webpack plugin (`UiStudioWebpackPlugin`). Thin wrapper around `StudioCompiler`.
 - **`cli/index`** — CLI entry: `npx @dennation/ui-studio generate`.
 
 ### Package exports
 
-- `@dennation/ui-studio` — define, describe (deprecated), definePage, types (ComponentMeta, Registry, ComponentEntry, PageEntry, etc.)
-- `@dennation/ui-studio/react` — Studio component
+- `@dennation/ui-studio` — define, definePage, types (ComponentMeta, Registry, ComponentEntry, etc.)
+- `@dennation/ui-studio/react` — Studio component, Story component
 - `@dennation/ui-studio/vite` — uiStudio Vite plugin
 - `@dennation/ui-studio/webpack` — UiStudioWebpackPlugin
 
@@ -124,6 +125,7 @@ packages/studio/
                                               ↓
                                     Stories: RenderSingle / RenderVariants / RenderMatrix
                                     Pages: render page content component directly
+                                           (may contain <Story of={...} /> → resolves PropInfo via StudioMetaContext)
 ```
 
 ### Key design decisions
@@ -132,7 +134,10 @@ packages/studio/
 - **StudioCompiler** — shared core class extracted from the original Vite plugin. Encapsulates: `start()` (init TS client + first generation), `stop()` (cleanup), `regenerate(changedFile?)` (full regen cycle), `debouncedRegenerate()` (watch mode), type cache management.
 - **Type extraction via TS Compiler API** — uses TypeScript Compiler API directly (`ts-client.ts`) to get component prop types as strings. These strings are parsed by oxc into structured `PropInfo[]`.
 - **Two generated files on disk (not virtual modules)** — `ui-studio-registry.gen.ts` (imports stories/configs, exports `Registry` object with `components` array) and `ui-studio-meta.gen.ts` (extracted component metadata keyed by file path). Registry imports meta internally — user only imports registry. Both paths are independently configurable via `output` and `metaOutput`. Files are **physical and committed to git** — not Vite virtual modules. Reasons: (1) `tsc --noEmit` runs before Vite in build scripts, so it needs real files to typecheck against — virtual modules are invisible to `tsc`; (2) gen files are the primary debugging tool for type extraction — when props don't appear, you open `ui-studio-meta.gen.ts` and immediately see what was extracted; (3) PR diffs show exactly what changed in extracted types; (4) clone-and-build works without running Vite first. This matches TanStack Router's approach with `routeTree.gen.ts`. HMR works naturally — Vite's file watcher picks up gen file changes after `writeIfChanged()`, and the guard in the plugin prevents infinite regen cycles.
-- **Documentation pages** — standalone `.docs.tsx` files using `definePage({ name, path?, order?, content })`. Pages appear in the sidebar alongside components, grouped by `path`. No type extraction needed — pages are pure React components. Hash route format: `#page/page-name`. For markdown content, users can import `.md` files via `@mdx-js/rollup` (configured by the user, not built-in).
+- **Documentation pages** — standalone `.docs.tsx` files using `definePage({ name, path?, order?, content })`. Pages appear in the sidebar alongside components, grouped by `path`. No type extraction needed — pages are pure React components. Hash route format: `#page/page-name`. For markdown content, users can import `.md` files via `@mdx-js/rollup` (configured by the user, not built-in). Doc pages can embed stories via `<Story of={...} />`.
+- **`<Story />` component and StudioMetaContext** — `<Story of={storyExport} />` renders any story inside a doc page. It reads `PropInfo[]` from `StudioMetaContext` (provided by `<Studio />`) to resolve `allOf()` variant markers. Without context (e.g. outside `<Studio />`), falls back to empty props — single stories still render, variant/matrix stories render empty grids gracefully.
+- **Hidden stories** — stories with `hidden: true` are excluded from the sidebar tree (`buildSidebarTree` skips them) but remain in the registry and are fully importable for use in doc pages via `<Story of={...} />`.
+- **StoryConfig shared type** — common config fields (`props`, `isolate`, `name`, `path`, `hidden`) are extracted into `StoryConfig<Props, CoveredByDefaults>`. Each `DefineResult` method (`single`, `variants`, `matrix`) extends it with method-specific fields.
 - **Self-contained stories** — each story (single/variants/matrix) carries its own `component` reference and `defaults`, making stories reusable without the DefineResult.
 - **Lazy variant resolution** — each story kind renderer (RenderSingle, RenderVariants, RenderMatrix) resolves its own VariantConfig markers inline using `resolveVariantConfig()`. No upfront resolution step — variants are only computed for the story being displayed.
 - **Iframe isolation opt-in** — variant cards render inline by default. Add `isolate: true` to a story to render inside an iframe (`IframePreview`) for full CSS/JS isolation. Only needed for components that interact with document/body (modals, dropdowns with portals). Studio's `st:` Tailwind prefix already prevents style bleeding for normal components.
@@ -142,6 +147,7 @@ packages/studio/
 - **Per-story pages** — each story is a separate page. Sidebar shows a tree: path groups → components → stories. Clicking a story navigates to `#component/story` hash route and renders only that story.
 - **Auto-generated Docs page** — each component gets a virtual "Docs" page (`DOCS_PAGE` constant) as the first sidebar item. Shows `ComponentPreview` with interactive props panel. Clicking a component name auto-selects its Docs page. The Docs page is not a real story — it's handled specially by the router and Studio. (Future: make it disableable or replaceable with custom content.)
 - **Story path grouping** — stories can set `path` to group them under sub-sections in the sidebar (e.g. `path: 'Matrix'`). Default path is `'Stories'`. When all stories share the same path (single group), the group level is flattened — stories appear directly under the component.
+- **Story config fields** — all story kinds share common config via `StoryConfig`: `props`, `isolate`, `name`, `path`, `hidden`. Each kind adds its own fields: `single` adds `render`, `variants` adds `items`/`columns`, `matrix` adds `x`/`y`.
 
 ---
 
@@ -239,10 +245,16 @@ examples/mdx/
     components/
       Button.tsx                — Simple local Button component
     stories/
-      Button.stories.tsx        — Stories for Button
+      Button.stories.tsx        — Stories for Button (includes hidden story for docs)
     docs/
-      GettingStarted.docs.tsx   — Doc page with definePage() + imported markdown + live Button
-      getting-started.md        — Markdown content imported by the docs page
+      GettingStarted.docs.tsx   — Getting started guide with embedded <Story /> demos
+      getting-started.md        — Markdown content for getting started
+      ButtonGuide.docs.tsx      — Button component guide with all story variants
+      button-guide.md           — Markdown content for button guide
+      Theming.docs.tsx          — Theming and isolation mode guide
+      theming.md                — Markdown content for theming
+      Changelog.docs.tsx        — Changelog page
+      changelog.md              — Markdown content for changelog
 ```
 
 ---
@@ -322,6 +334,12 @@ export const Matrix = button.matrix({
   path: 'Matrix',
 })
 
+// Hidden story — excluded from sidebar, usable in docs via <Story of={Disabled} />
+export const Disabled = button.variants({
+  items: button.values('disabled', [false, true]),
+  hidden: true,
+})
+
 export default button
 ```
 
@@ -329,15 +347,21 @@ export default button
 
 ```tsx
 import { definePage } from '@dennation/ui-studio'
+import { Story } from '@dennation/ui-studio/react'
+import { Default, Sizes, Disabled } from '../stories/Button.stories'
 
 export default definePage({
-  name: 'Getting Started',
+  name: 'Button Guide',
   path: 'Guides',       // optional: sidebar grouping
   order: 1,             // optional: sort order within group
   content: () => (
     <div>
-      <h1>Getting Started</h1>
-      <p>Welcome to the project</p>
+      <h1>Button Guide</h1>
+      <Story of={Default} />
+      <h2>Sizes</h2>
+      <Story of={Sizes} />
+      <h2>Disabled state</h2>
+      <Story of={Disabled} />   {/* hidden story — only appears here, not in sidebar */}
     </div>
   ),
 })
