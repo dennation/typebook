@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PropsWithChildren } from 'react'
+import { useEffect, useRef, useState, type PropsWithChildren, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { LOG_PREFIX } from '../../constants.js'
 import { IFRAME_STYLE } from '../styles/constants.js'
@@ -81,4 +81,11 @@ export function IframePreview({ children, className }: IframePreviewProps) {
 			{iframeBody && createPortal(children, iframeBody)}
 		</>
 	)
+}
+
+/** Wraps children in IframePreview when isolate is true, otherwise a plain div. */
+export function IsolateWrapper({ isolate, children }: { isolate?: boolean; children: ReactNode }) {
+	return isolate
+		? <IframePreview className="st:p-4">{children}</IframePreview>
+		: <div className="st:p-4">{children}</div>
 }

@@ -8,7 +8,7 @@ export interface MainContentProps {
 	storyName: string | null
 	story: Story | null
 	storyProps: PropInfo[]
-	activePageContent: ComponentType | null
+	PageContent: ComponentType | null
 }
 
 export function MainContent({
@@ -16,12 +16,12 @@ export function MainContent({
 	storyName,
 	story,
 	storyProps,
-	activePageContent,
+	PageContent,
 }: MainContentProps) {
 	return (
 		<main className="st:overflow-auto st:p-8 st:bg-bg">
-			{activePageContent ? (
-				(() => { const PageContent = activePageContent; return <PageContent /> })()
+			{PageContent ? (
+				<PageContent />
 			) : activeEntry && storyName && story ? (
 				<div>
 					<h1 className="st:text-2xl st:font-semibold st:mb-6">

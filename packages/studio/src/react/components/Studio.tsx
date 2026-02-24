@@ -47,8 +47,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 		[components, pages],
 	)
 
-	const { activeView, selectStory, selectPage, selectComponentPage } =
-		useHashRoute(components, topLevelPages, componentPages)
+	const route = useHashRoute(components, topLevelPages, componentPages)
 
 	const toggleCollapse = useCallback((key: string) => {
 		setCollapsed((prev) => {
@@ -90,8 +89,8 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 		[filtered, filteredPages, componentPages],
 	)
 
-	// Derive active component name from activeView
-	const activeComponentName = activeView && 'component' in activeView ? activeView.component : null
+	// Derive active component name from route.activeView
+	const activeComponentName = route.activeView && 'component' in route.activeView ? route.activeView.component : null
 
 	// Find active entry
 	const activeEntry = useMemo(
@@ -100,7 +99,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 	)
 
 	// Active story data
-	const activeStoryName = activeView?.type === 'story' ? activeView.story : null
+	const activeStoryName = route.activeView?.type === 'story' ? route.activeView.story : null
 
 	const story = useMemo(
 		() => (activeEntry && activeStoryName ? (activeEntry.stories[activeStoryName] ?? null) : null),
@@ -115,18 +114,19 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 	}, [story, activeEntry, propsMap])
 
 	// Find active page content — either top-level page or component page
-	const activePageContent = useMemo((): ComponentType | null => {
-		if (activeView?.type === 'componentPage' && activeEntry) {
+	const PageContent = useMemo((): ComponentType | null => {
+		const view = route.activeView
+		if (view?.type === 'componentPage' && activeEntry) {
 			const entryPages = componentPages.get(activeEntry)
-			const page = entryPages?.find((p) => p.name === activeView.page)
+			const page = entryPages?.find((p) => p.name === view.page)
 			return page?.content ?? null
 		}
-		if (activeView?.type === 'page') {
-			const page = topLevelPages.find((p) => p.name === activeView.name)
+		if (view?.type === 'page') {
+			const page = topLevelPages.find((p) => p.name === view.name)
 			return page?.content ?? null
 		}
 		return null
-	}, [activeView, activeEntry, topLevelPages, componentPages])
+	}, [route.activeView, activeEntry, topLevelPages, componentPages])
 
 	// Inject styles before first paint to prevent FOUC
 	useInsertionEffect(() => {
@@ -145,10 +145,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 			>
 				<Sidebar
 					tree={tree}
-					activeView={activeView}
-					selectStory={selectStory}
-					selectPage={selectPage}
-					selectComponentPage={selectComponentPage}
+					route={route}
 					collapsed={collapsed}
 					toggleCollapse={toggleCollapse}
 					disableSearch={disableSearch}
@@ -163,7 +160,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 					storyName={activeStoryName}
 					story={story}
 					storyProps={storyProps}
-					activePageContent={activePageContent}
+					PageContent={PageContent}
 				/>
 			</div>
 		</StudioMetaProvider>

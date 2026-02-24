@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { TypeScriptClient } from './core/ts-client.js'
-import { findStoryFiles, findPageFiles, analyzeStoryFile, analyzePageFile } from './core/scanner.js'
+import { findFiles, analyzeStoryFile, analyzePageFile } from './core/scanner.js'
 import { generateRegistryFile, generateMetaFile } from './core/generator.js'
 import {
   PACKAGE_NAME,
@@ -37,23 +37,20 @@ if (command === 'generate') {
     ? metaOutputArg.split('=')[1]
     : DEFAULT_META_FILE
 
-  console.log(LOG_PREFIX, 'Scanning story files...')
-  const files = await findStoryFiles(cwd, include)
+  const files = await findFiles(cwd, include)
   console.log(LOG_PREFIX, `Found ${files.length} story file(s)`)
 
-  console.log(LOG_PREFIX, 'Scanning page files...')
-  const pages = await findPageFiles(cwd, includePages)
+  const pages = await findFiles(cwd, includePages)
   console.log(LOG_PREFIX, `Found ${pages.length} page file(s)`)
 
   // Start TypeScript client
-  const tsClient = new TypeScriptClient(cwd)
-  let tsClientReady = false
+  let tsClient: TypeScriptClient | null = null
 
   try {
-    await tsClient.start()
-    tsClientReady = true
+    const client = new TypeScriptClient(cwd)
+    await client.start()
+    tsClient = client
     console.log(LOG_PREFIX, 'TypeScript client started')
-
   } catch (err) {
     console.warn(LOG_PREFIX, 'TypeScript client not available, generating without types')
     console.warn(LOG_PREFIX, (err as Error).message)
@@ -64,11 +61,7 @@ if (command === 'generate') {
     files.map(async (filePath) => {
       const content = readFileSync(filePath, 'utf-8')
       const analysis = await analyzeStoryFile(content)
-      let props: import('./types.js').PropInfo[] = []
-      if (tsClientReady) {
-        const extracted = await tsClient.getComponentProps(filePath)
-        if (extracted) props = extracted
-      }
+      const props = tsClient ? (await tsClient.getComponentProps(filePath)) ?? [] : []
       return { filePath, analysis, props }
     }),
   )
@@ -94,7 +87,7 @@ if (command === 'generate') {
   writeFileSync(registryFilePath, registryContent, 'utf-8')
   console.log(LOG_PREFIX, `Generated ${registryOutput}`)
 
-  tsClient.stop()
+  tsClient?.stop()
 } else {
   console.log(`
   @dennation/${PACKAGE_NAME}

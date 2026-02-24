@@ -2,25 +2,13 @@ import { glob } from 'glob'
 import { resolve } from 'node:path'
 
 /**
- * Find all .stories.tsx files matching the include glob.
+ * Find files matching a glob pattern relative to cwd.
  */
-export async function findStoryFiles(
+export async function findFiles(
   cwd: string,
   includeGlob: string,
 ): Promise<string[]> {
-  const pattern = resolve(cwd, includeGlob)
-  return glob(pattern, { absolute: true })
-}
-
-/**
- * Find all .docs.tsx files matching the include glob.
- */
-export async function findPageFiles(
-  cwd: string,
-  includeGlob: string,
-): Promise<string[]> {
-  const pattern = resolve(cwd, includeGlob)
-  return glob(pattern, { absolute: true })
+  return glob(resolve(cwd, includeGlob), { absolute: true })
 }
 
 export interface StoryAnalysis {
@@ -35,6 +23,11 @@ export interface PageAnalysis {
 
 const DEFINE_NAMES = new Set(['define'])
 
+async function parseFile(filename: string, content: string) {
+  const oxc = await import('oxc-parser')
+  return oxc.parseSync(filename, content).program.body as any[]
+}
+
 /**
  * Parse a .stories.tsx file via oxc AST to extract exports and the component import.
  *
@@ -45,9 +38,7 @@ const DEFINE_NAMES = new Set(['define'])
  *   then resolves the matching ImportDeclaration (named or default import).
  */
 export async function analyzeStoryFile(content: string): Promise<StoryAnalysis> {
-  const oxc = await import('oxc-parser')
-  const { program } = oxc.parseSync('story.tsx', content)
-  const body: any[] = program.body
+  const body = await parseFile('story.tsx', content)
 
   const namedExports: string[] = []
   let defaultExport = false
@@ -137,20 +128,15 @@ export async function analyzeStoryFile(content: string): Promise<StoryAnalysis> 
  * Parse a .docs.tsx file via oxc AST to check for a default export.
  */
 export async function analyzePageFile(content: string): Promise<PageAnalysis> {
-  const oxc = await import('oxc-parser')
-  const { program } = oxc.parseSync('page.tsx', content)
-  const body: any[] = program.body
-
-  let defaultExport = false
+  const body = await parseFile('page.tsx', content)
 
   for (const node of body) {
     if (node.type === 'ExportDefaultDeclaration') {
-      defaultExport = true
-      break
+      return { defaultExport: true }
     }
   }
 
-  return { defaultExport }
+  return { defaultExport: false }
 }
 
 /**

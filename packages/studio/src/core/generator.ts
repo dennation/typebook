@@ -78,12 +78,11 @@ export function generateRegistryFile(
     const fileKey = relative(cwd, filePath)
 
     // Build import statement
-    const imports: string[] = [prefix]
-    for (const name of analysis.namedExports) {
-      imports.push(`${name} as ${prefix}_${name}`)
-    }
-
-    importLines.push(`import ${formatImports(imports, true, prefix)} from '${importPath}'`)
+    const namedImports = analysis.namedExports.map((name) => `${name} as ${prefix}_${name}`)
+    const importClause = namedImports.length > 0
+      ? `${prefix}, { ${namedImports.join(', ')} }`
+      : prefix
+    importLines.push(`import ${importClause} from '${importPath}'`)
 
     // Build stories record
     const storiesEntries = analysis.namedExports.map(
@@ -128,21 +127,6 @@ export function generateRegistryFile(
   ]
 
   return [...importLines, ...bodyLines].join('\n')
-}
-
-function formatImports(
-  imports: string[],
-  hasDefault: boolean,
-  defaultName: string,
-): string {
-  if (hasDefault) {
-    const named = imports.filter((i) => i !== defaultName)
-    if (named.length > 0) {
-      return `${defaultName}, { ${named.join(', ')} }`
-    }
-    return defaultName
-  }
-  return `{ ${imports.join(', ')} }`
 }
 
 function buildRelativeImport(from: string, to: string): string {

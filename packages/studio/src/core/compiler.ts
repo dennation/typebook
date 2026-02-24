@@ -3,7 +3,7 @@ import { resolve, relative } from 'node:path'
 import picomatch from 'picomatch'
 import type { StudioConfig, PropInfo } from '../types.js'
 import { TypeScriptClient } from './ts-client.js'
-import { findStoryFiles, findPageFiles, analyzeStoryFile, analyzePageFile } from './scanner.js'
+import { findFiles, analyzeStoryFile, analyzePageFile } from './scanner.js'
 import { generateRegistryFile, generateMetaFile } from './generator.js'
 import {
 	LOG_PREFIX,
@@ -28,7 +28,6 @@ export class StudioCompiler {
 	private readonly isPageFile: (path: string) => boolean
 
 	private tsClient: TypeScriptClient | null = null
-	private tsClientReady = false
 	private storyFiles: string[] = []
 	private pageFiles: string[] = []
 	private debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -56,15 +55,14 @@ export class StudioCompiler {
 
 	/** Initialize TS client, scan story files, and generate */
 	async start(): Promise<void> {
-		this.storyFiles = await findStoryFiles(this.cwd, this.include)
-		this.pageFiles = await findPageFiles(this.cwd, this.includePages)
+		this.storyFiles = await findFiles(this.cwd, this.include)
+		this.pageFiles = await findFiles(this.cwd, this.includePages)
 		console.log(LOG_PREFIX, `Found ${this.storyFiles.length} story file(s), ${this.pageFiles.length} page file(s)`)
 
 		const client = new TypeScriptClient(this.cwd)
 		try {
 			await client.start()
 			this.tsClient = client
-			this.tsClientReady = true
 			console.log(LOG_PREFIX, 'TypeScript client started')
 		} catch (err) {
 			console.warn(LOG_PREFIX, 'TypeScript client not available, running without type extraction')
@@ -82,7 +80,6 @@ export class StudioCompiler {
 		if (this.tsClient) {
 			this.tsClient.stop()
 			this.tsClient = null
-			this.tsClientReady = false
 		}
 	}
 
@@ -103,10 +100,10 @@ export class StudioCompiler {
 
 	/** Full regeneration: rescan files, extract types, write gen files */
 	async regenerate(changedFile?: string): Promise<void> {
-		this.storyFiles = await findStoryFiles(this.cwd, this.include)
-		this.pageFiles = await findPageFiles(this.cwd, this.includePages)
+		this.storyFiles = await findFiles(this.cwd, this.include)
+		this.pageFiles = await findFiles(this.cwd, this.includePages)
 
-		if (this.tsClient && this.tsClientReady && changedFile) {
+		if (this.tsClient && changedFile) {
 			this.invalidateTypeCache(changedFile)
 			await this.tsClient.notifyChange(changedFile)
 		}
@@ -153,7 +150,7 @@ export class StudioCompiler {
 	}
 
 	private async extractTypes(filePath: string): Promise<PropInfo[]> {
-		if (!this.tsClient || !this.tsClientReady) return []
+		if (!this.tsClient) return []
 
 		const cached = this.typeCache.get(filePath)
 		if (cached) return cached

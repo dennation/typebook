@@ -1,13 +1,10 @@
-import type { ActiveView } from '../hooks/useHashRoute.js'
+import type { ActiveView, HashRouteState } from '../hooks/useHashRoute.js'
 import type { Theme } from '../hooks/useTheme.js'
 import type { SidebarNode } from '../utils/buildSidebarTree.js'
 
 export interface SidebarProps {
 	tree: SidebarNode[]
-	activeView: ActiveView | null
-	selectStory: (component: string, story: string) => void
-	selectPage: (name: string) => void
-	selectComponentPage: (component: string, page: string) => void
+	route: HashRouteState
 	collapsed: Set<string>
 	toggleCollapse: (key: string) => void
 	disableSearch: boolean
@@ -19,10 +16,7 @@ export interface SidebarProps {
 
 export function Sidebar({
 	tree,
-	activeView,
-	selectStory,
-	selectPage,
-	selectComponentPage,
+	route,
 	collapsed,
 	toggleCollapse,
 	disableSearch,
@@ -32,10 +26,7 @@ export function Sidebar({
 	onToggleTheme,
 }: SidebarProps) {
 	const ctx: RenderContext = {
-		activeView,
-		selectStory,
-		selectPage,
-		selectComponentPage,
+		...route,
 		toggleCollapse,
 		isNodeCollapsed: (key: string) => !searchQuery && collapsed.has(key),
 	}
@@ -73,11 +64,7 @@ export function Sidebar({
 	)
 }
 
-interface RenderContext {
-	activeView: ActiveView | null
-	selectStory: (component: string, story: string) => void
-	selectPage: (name: string) => void
-	selectComponentPage: (component: string, page: string) => void
+type RenderContext = HashRouteState & {
 	toggleCollapse: (key: string) => void
 	isNodeCollapsed: (key: string) => boolean
 }
