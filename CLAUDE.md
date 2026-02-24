@@ -85,7 +85,7 @@ packages/studio/
         useHashRoute.ts       — Hash-based routing: #component/name (page or story, pages win) + #page/page-name → activeComponent/activeStory/activeComponentPage/activePage
       utils/
         index.ts              — Barrel export
-        buildSidebarTree.ts   — Builds sidebar tree: path groups → ComponentNode (with pages) + PageNode → StoryGroup → StoryItem
+        buildSidebarTree.ts   — Builds sidebar tree: unified SidebarNode discriminated union (group | component | page | story)
         resolveComponentPages.ts — Generates default docs pages for components, handles user overrides
         naming.ts             — toKebabCase(), entryName(), pageName() helpers
         getGridStyle.ts       — getGridStyle() — computes CSS grid layout for variant grids
@@ -149,7 +149,7 @@ packages/studio/
 - **Three story kinds** — `single` (one card), `variants` (grid of values for one prop), `matrix` (table: x prop × y props).
 - **Per-story pages** — each story is a separate page. Sidebar shows a tree: path groups → components → stories. Clicking a story navigates to `#component/story` hash route and renders only that story.
 - **`<Playground />` component** — `<Playground of={defineResult} />` renders an interactive component preview with a props control table. Takes a `DefineResult` via the `of` prop, reads `PropInfo[]` from `StudioMetaContext`. Exported from `@dennation/ui-studio/react` for embedding in doc pages. Used internally by the auto-generated Docs page.
-- **Component pages** — pages can be associated with a component and appear inside its sidebar section. `ComponentNode` has a `pages: PageNode[]` field. Component pages use the same hash format as stories (`#component/page-name`) but route through the page rendering pipeline (`activeComponentPage` state). `resolveComponentPages()` builds the component→pages mapping.
+- **Component pages** — pages can be associated with a component and appear inside its sidebar section. In the unified `SidebarNode` tree, component pages are `type: 'page'` nodes nested inside `type: 'component'` nodes. The sidebar renderer derives routing context (component-page vs top-level page) from tree position. `resolveComponentPages()` builds the component→pages mapping.
 - **Auto-generated API page** — each component gets a real `PageResult` (`DEFAULT_DOCS_PAGE` constant = 'API') as its first sidebar page. The content renders `<Playground of={config} />`. Disable per-component with `docs: false` in `define()`. Override by creating a `.docs.tsx` with `name: DEFAULT_DOCS_PAGE` and `path: '{componentPath}/{componentName}'`. Clicking a component name auto-selects its API page.
 - **Story path grouping** — stories can set `path` to group them under sub-sections in the sidebar (e.g. `path: 'Matrix'`). Default path is `'Stories'`. When all stories share the same path (single group), the group level is flattened — stories appear directly under the component.
 - **Story config fields** — all story kinds share common config via `StoryConfig`: `props`, `isolate`, `name`, `path`, `hidden`. Each kind adds its own fields: `single` adds `render`, `variants` adds `items`/`columns`, `matrix` adds `x`/`y`.

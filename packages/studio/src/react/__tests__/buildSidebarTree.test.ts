@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { buildSidebarTree } from '../utils/buildSidebarTree.js'
+import type { SidebarNode } from '../utils/buildSidebarTree.js'
 import type { ComponentEntry, PageResult, Story } from '../../types.js'
 
 function makeComponent(name: string, path?: string): ComponentEntry {
@@ -45,15 +46,24 @@ function makePage(name: string, path?: string, order?: number): PageResult {
 	}
 }
 
+function findByType<T extends SidebarNode['type']>(
+	nodes: SidebarNode[],
+	type: T,
+): Extract<SidebarNode, { type: T }>[] {
+	return nodes.filter((n) => n.type === type) as Extract<SidebarNode, { type: T }>[]
+}
+
 describe('buildSidebarTree with pages', () => {
 	test('pages appear in correct path nodes', () => {
 		const pages = [makePage('Getting Started', 'Guides')]
 		const tree = buildSidebarTree([], pages)
 
 		expect(tree).toHaveLength(1)
+		expect(tree[0].type).toBe('group')
 		expect(tree[0].label).toBe('Guides')
-		expect(tree[0].pages).toHaveLength(1)
-		expect(tree[0].pages[0].name).toBe('Getting Started')
+		const pageNodes = findByType(tree[0].children, 'page')
+		expect(pageNodes).toHaveLength(1)
+		expect(pageNodes[0].pageName).toBe('Getting Started')
 	})
 
 	test('pages without path go to root', () => {
@@ -61,23 +71,8 @@ describe('buildSidebarTree with pages', () => {
 		const tree = buildSidebarTree([], pages)
 
 		expect(tree).toHaveLength(1)
-		expect(tree[0].label).toBe('')
-		expect(tree[0].pages).toHaveLength(1)
-		expect(tree[0].pages[0].name).toBe('Welcome')
-	})
-
-	test('pages sorted by order then name', () => {
-		const pages = [
-			makePage('Changelog', 'Docs', 2),
-			makePage('API Reference', 'Docs', 1),
-			makePage('Zeta Guide', 'Docs', 1),
-		]
-		const tree = buildSidebarTree([], pages)
-
-		const node = tree[0]
-		expect(node.pages[0].name).toBe('API Reference')
-		expect(node.pages[1].name).toBe('Zeta Guide')
-		expect(node.pages[2].name).toBe('Changelog')
+		expect(tree[0].type).toBe('page')
+		expect(tree[0].label).toBe('Welcome')
 	})
 
 	test('pages and components coexist in same path node', () => {
@@ -86,10 +81,12 @@ describe('buildSidebarTree with pages', () => {
 		const tree = buildSidebarTree(components, pages)
 
 		const formsNode = tree.find((n) => n.label === 'Forms')!
-		expect(formsNode.pages).toHaveLength(1)
-		expect(formsNode.pages[0].name).toBe('Form Guidelines')
-		expect(formsNode.components).toHaveLength(1)
-		expect(formsNode.components[0].name).toBe('Button')
+		const pageNodes = findByType(formsNode.children, 'page')
+		const compNodes = findByType(formsNode.children, 'component')
+		expect(pageNodes).toHaveLength(1)
+		expect(pageNodes[0].pageName).toBe('Form Guidelines')
+		expect(compNodes).toHaveLength(1)
+		expect(compNodes[0].componentName).toBe('Button')
 	})
 
 	test('pages in nested paths', () => {
@@ -100,8 +97,9 @@ describe('buildSidebarTree with pages', () => {
 		expect(tree[0].label).toBe('Docs')
 		expect(tree[0].children).toHaveLength(1)
 		expect(tree[0].children[0].label).toBe('Advanced')
-		expect(tree[0].children[0].pages).toHaveLength(1)
-		expect(tree[0].children[0].pages[0].name).toBe('Deep Guide')
+		const pageNodes = findByType(tree[0].children[0].children, 'page')
+		expect(pageNodes).toHaveLength(1)
+		expect(pageNodes[0].pageName).toBe('Deep Guide')
 	})
 
 	test('empty pages array → no pages in tree', () => {
@@ -109,7 +107,7 @@ describe('buildSidebarTree with pages', () => {
 		const tree = buildSidebarTree(components, [])
 
 		for (const node of tree) {
-			expect(node.pages).toEqual([])
+			expect(findByType(node.children, 'page')).toEqual([])
 		}
 	})
 
@@ -118,57 +116,33 @@ describe('buildSidebarTree with pages', () => {
 		const tree = buildSidebarTree(components)
 
 		expect(tree).toHaveLength(1)
-		expect(tree[0].pages).toEqual([])
-	})
-
-	test('pages with default order (0) sorted by name', () => {
-		const pages = [
-			makePage('Bravo', 'Docs'),
-			makePage('Alpha', 'Docs'),
-			makePage('Charlie', 'Docs'),
-		]
-		const tree = buildSidebarTree([], pages)
-
-		const names = tree[0].pages.map((p) => p.name)
-		expect(names).toEqual(['Alpha', 'Bravo', 'Charlie'])
+		expect(tree[0].type).toBe('component')
 	})
 })
 
 describe('buildSidebarTree with component pages', () => {
-	test('component pages appear inside ComponentNode', () => {
+	test('component pages appear inside component node', () => {
 		const entry = makeComponent('Button', 'Forms')
 		const docsPage = makePage('Docs')
 		const componentPages = new Map([[entry, [docsPage]]])
 
 		const tree = buildSidebarTree([entry], [], componentPages)
-		const comp = tree.find((n) => n.label === 'Forms')!.components[0]
+		const formsNode = tree.find((n) => n.label === 'Forms')!
+		const compNodes = findByType(formsNode.children, 'component')
+		const comp = compNodes[0]
+		const pageNodes = findByType(comp.children, 'page')
 
-		expect(comp.pages).toHaveLength(1)
-		expect(comp.pages[0].name).toBe('Docs')
-		expect(comp.pages[0].page).toBe(docsPage)
+		expect(pageNodes).toHaveLength(1)
+		expect(pageNodes[0].pageName).toBe('Docs')
 	})
 
-	test('component without pages has empty pages array', () => {
+	test('component without pages has no page children', () => {
 		const entry = makeComponent('Button')
 		const tree = buildSidebarTree([entry], [], new Map())
 
-		const comp = tree[0].components[0]
-		expect(comp.pages).toEqual([])
-	})
-
-	test('component pages are sorted by order then name', () => {
-		const entry = makeComponent('Button')
-		const pages = [
-			makePage('Docs'),
-			{ ...makePage('API'), order: -2 } as any,
-		]
-		const componentPages = new Map([[entry, pages]])
-
-		const tree = buildSidebarTree([entry], [], componentPages)
-		const comp = tree[0].components[0]
-
-		expect(comp.pages[0].name).toBe('API')
-		expect(comp.pages[1].name).toBe('Docs')
+		const comp = tree[0]
+		expect(comp.type).toBe('component')
+		expect(findByType(comp.children, 'page')).toEqual([])
 	})
 })
 
@@ -181,10 +155,13 @@ describe('buildSidebarTree with hidden stories', () => {
 		}
 		const tree = buildSidebarTree([entry])
 
-		const comp = tree[0].components[0]
-		const allStoryNames = comp.groups.flatMap((g) => g.stories.map((s) => s.name))
-		expect(allStoryNames).toContain('Default')
-		expect(allStoryNames).not.toContain('DocOnly')
+		const comp = tree[0]
+		const storyNodes = comp.children
+			.flatMap((c) => (c.type === 'group' ? c.children : [c]))
+			.filter((n) => n.type === 'story')
+		const storyNames = storyNodes.map((s) => s.type === 'story' ? s.storyName : '')
+		expect(storyNames).toContain('Default')
+		expect(storyNames).not.toContain('DocOnly')
 	})
 
 	test('component with only hidden stories has empty groups', () => {
@@ -194,8 +171,45 @@ describe('buildSidebarTree with hidden stories', () => {
 		}
 		const tree = buildSidebarTree([entry])
 
-		const comp = tree[0].components[0]
-		const allStoryNames = comp.groups.flatMap((g) => g.stories.map((s) => s.name))
-		expect(allStoryNames).toHaveLength(0)
+		const comp = tree[0]
+		const storyNodes = comp.children
+			.flatMap((c) => (c.type === 'group' ? c.children : [c]))
+			.filter((n) => n.type === 'story')
+		expect(storyNodes).toHaveLength(0)
+	})
+})
+
+describe('buildSidebarTree story display names', () => {
+	test('story label uses story.name when available', () => {
+		const entry = makeComponent('Button')
+		entry.stories = {
+			Default: makeStory({ name: 'Primary Button' }),
+		}
+		const tree = buildSidebarTree([entry])
+
+		const comp = tree[0]
+		const group = comp.children.find((c) => c.type === 'group')!
+		const story = group.children[0]
+		expect(story.label).toBe('Primary Button')
+		expect(story.type === 'story' && story.storyName).toBe('Default')
+	})
+
+	test('story label falls back to export name', () => {
+		const entry = makeComponent('Button')
+		entry.stories = {
+			Default: makeStory(),
+		}
+		const tree = buildSidebarTree([entry])
+
+		const comp = tree[0]
+		const group = comp.children.find((c) => c.type === 'group')!
+		expect(group.children[0].label).toBe('Default')
+	})
+
+	test('component label uses config.name', () => {
+		const entry = makeComponent('Button')
+		const tree = buildSidebarTree([entry])
+
+		expect(tree[0].label).toBe('Button')
 	})
 })

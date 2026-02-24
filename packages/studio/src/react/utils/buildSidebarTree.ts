@@ -1,74 +1,82 @@
 import type { ComponentEntry, PageResult } from '../../types.js'
 import { entryName } from './naming.js'
 
-export interface StoryItem {
-	name: string
-	componentName: string
-}
-
-export interface StoryGroup {
+export interface GroupNode {
+	type: 'group'
 	label: string
-	stories: StoryItem[]
-}
-
-export interface ComponentNode {
-	name: string
-	entry: ComponentEntry
-	groups: StoryGroup[]
-	pages: PageNode[]
-}
-
-export interface PageNode {
-	name: string
-	page: PageResult
-}
-
-export interface SidebarNode {
-	label: string
-	components: ComponentNode[]
-	pages: PageNode[]
 	children: SidebarNode[]
 }
 
-function buildComponentNode(
+export interface ComponentNode {
+	type: 'component'
+	label: string
+	componentName: string
+	children: SidebarNode[]
+}
+
+export interface PageNode {
+	type: 'page'
+	label: string
+	pageName: string
+	children: SidebarNode[]
+}
+
+export interface StoryNode {
+	type: 'story'
+	label: string
+	storyName: string
+	children: SidebarNode[]
+}
+
+export type SidebarNode = GroupNode | ComponentNode | PageNode | StoryNode
+
+function buildComponentChildren(
 	entry: ComponentEntry,
 	componentPageResults: PageResult[] = [],
-): ComponentNode {
-	const componentName = entryName(entry)
-	const groupMap = new Map<string, StoryItem[]>()
+): SidebarNode[] {
+	const children: SidebarNode[] = []
+
+	for (const page of componentPageResults) {
+		children.push({
+			type: 'page',
+			label: page.name,
+			pageName: page.name,
+			children: [],
+		})
+	}
+
+	const groupMap = new Map<string, SidebarNode[]>()
 
 	for (const [storyName, story] of Object.entries(entry.stories)) {
 		if (story.hidden) continue
 		const groupLabel = story.path ?? 'Stories'
 		const items = groupMap.get(groupLabel) ?? []
-		items.push({ name: storyName, componentName })
+		items.push({
+			type: 'story',
+			label: story.name ?? storyName,
+			storyName,
+			children: [],
+		})
 		groupMap.set(groupLabel, items)
 	}
 
-	const groups: StoryGroup[] = Array.from(groupMap, ([label, stories]) => ({
-		label,
-		stories,
-	}))
-
-	const pages = sortPages(
-		componentPageResults.map((p) => ({ name: p.name, page: p })),
-	)
-
-	return {
-		name: componentName,
-		entry,
-		groups,
-		pages,
+	for (const [groupLabel, stories] of groupMap) {
+		children.push({
+			type: 'group',
+			label: groupLabel,
+			children: stories,
+		})
 	}
+
+	return children
 }
 
-function sortPages(pages: PageNode[]): PageNode[] {
-	return [...pages].sort((a, b) => {
-		const orderA = a.page.order ?? 0
-		const orderB = b.page.order ?? 0
-		if (orderA !== orderB) return orderA - orderB
-		return a.name.localeCompare(b.name)
-	})
+function findOrCreateGroup(level: SidebarNode[], label: string): GroupNode {
+	const existing = level.find((n): n is GroupNode => n.type === 'group' && n.label === label)
+	if (existing) return existing
+	const node: GroupNode = { type: 'group', label, children: [] }
+	level.push(node)
+	return node
 }
 
 export function buildSidebarTree(
@@ -78,73 +86,51 @@ export function buildSidebarTree(
 ): SidebarNode[] {
 	const root: SidebarNode[] = []
 
-	// Place pages into tree by path
 	for (const page of pages) {
-		const path = page.path
-		const pageNode: PageNode = { name: page.name, page }
+		const pageNode: PageNode = {
+			type: 'page',
+			label: page.name,
+			pageName: page.name,
+			children: [],
+		}
 
-		if (!path) {
-			// Find or create a root-level node for path-less pages
-			let rootNode = root.find((n) => n.label === '')
-			if (!rootNode) {
-				rootNode = { label: '', components: [], pages: [], children: [] }
-				root.push(rootNode)
-			}
-			rootNode.pages.push(pageNode)
+		if (!page.path) {
+			root.push(pageNode)
 			continue
 		}
 
-		const segments = path.split('/')
+		const segments = page.path.split('/')
 		let level = root
-		let node: SidebarNode | undefined
-
 		for (const segment of segments) {
-			node = level.find((n) => n.label === segment)
-			if (!node) {
-				node = { label: segment, components: [], pages: [], children: [] }
-				level.push(node)
-			}
-			level = node.children
+			const group = findOrCreateGroup(level, segment)
+			level = group.children
 		}
-
-		node!.pages.push(pageNode)
+		level.push(pageNode)
 	}
 
-	// Place components into tree by path
 	for (const entry of components) {
-		const path = entry.config.path
-		const componentNode = buildComponentNode(entry, componentPages.get(entry))
+		const componentName = entryName(entry)
+		const componentNode: ComponentNode = {
+			type: 'component',
+			label: entry.config.name ?? componentName,
+			componentName,
+			children: buildComponentChildren(entry, componentPages.get(entry)),
+		}
 
+		const path = entry.config.path
 		if (!path) {
-			root.push({ label: '', components: [componentNode], pages: [], children: [] })
+			root.push(componentNode)
 			continue
 		}
 
 		const segments = path.split('/')
 		let level = root
-		let node: SidebarNode | undefined
-
 		for (const segment of segments) {
-			node = level.find((n) => n.label === segment)
-			if (!node) {
-				node = { label: segment, components: [], pages: [], children: [] }
-				level.push(node)
-			}
-			level = node.children
+			const group = findOrCreateGroup(level, segment)
+			level = group.children
 		}
-
-		node!.components.push(componentNode)
+		level.push(componentNode)
 	}
-
-	// Sort pages within each node
-	sortPagesInTree(root)
 
 	return root
-}
-
-function sortPagesInTree(nodes: SidebarNode[]): void {
-	for (const node of nodes) {
-		node.pages = sortPages(node.pages)
-		sortPagesInTree(node.children)
-	}
 }

@@ -1,10 +1,10 @@
 export {
 	buildSidebarTree,
 	type SidebarNode,
+	type GroupNode,
 	type ComponentNode,
 	type PageNode,
-	type StoryGroup,
-	type StoryItem,
+	type StoryNode,
 } from './buildSidebarTree.js'
 export { getGridStyle } from './getGridStyle.js'
 export { toKebabCase, entryName, pageName } from './naming.js'

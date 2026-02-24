@@ -1,6 +1,5 @@
-import type { ComponentEntry } from '../../types.js'
 import type { Theme } from '../hooks/useTheme.js'
-import type { SidebarNode, ComponentNode, PageNode } from '../utils/buildSidebarTree.js'
+import type { SidebarNode } from '../utils/buildSidebarTree.js'
 
 export interface SidebarProps {
 	tree: SidebarNode[]
@@ -16,7 +15,6 @@ export interface SidebarProps {
 	disableSearch: boolean
 	searchQuery: string
 	onSearchChange: (query: string) => void
-	stories: Record<string, ComponentEntry['stories']>
 	theme: Theme
 	onToggleTheme: () => void
 }
@@ -35,11 +33,20 @@ export function Sidebar({
 	disableSearch,
 	searchQuery,
 	onSearchChange,
-	stories,
 	theme,
 	onToggleTheme,
 }: SidebarProps) {
-	const isNodeCollapsed = (key: string) => !searchQuery && collapsed.has(key)
+	const ctx: RenderContext = {
+		activeComponent,
+		activeStory,
+		activePage,
+		activeComponentPage,
+		selectStory,
+		selectPage,
+		selectComponentPage,
+		toggleCollapse,
+		isNodeCollapsed: (key: string) => !searchQuery && collapsed.has(key),
+	}
 
 	return (
 		<nav className="st:bg-bg-sidebar st:border-r st:border-border st:flex st:flex-col st:overflow-hidden">
@@ -68,18 +75,7 @@ export function Sidebar({
 				</div>
 			)}
 			<div className="st:flex-1 st:overflow-y-auto st:pb-4">
-				{renderTree(tree, 0, '', {
-					activeComponent,
-					activeStory,
-					activePage,
-					activeComponentPage,
-					selectStory,
-					selectPage,
-					selectComponentPage,
-					toggleCollapse,
-					isNodeCollapsed,
-					stories,
-				})}
+				{renderNodes(tree, 0, '', ctx, undefined)}
 			</div>
 		</nav>
 	)
@@ -95,158 +91,91 @@ interface RenderContext {
 	selectComponentPage: (componentName: string, pageName: string) => void
 	toggleCollapse: (key: string) => void
 	isNodeCollapsed: (key: string) => boolean
-	stories: Record<string, ComponentEntry['stories']>
 }
 
-function renderTree(
+function renderNodes(
 	nodes: SidebarNode[],
 	depth: number,
 	parentPath: string,
 	ctx: RenderContext,
+	parentComponentName: string | undefined,
 ) {
-	return nodes.map((node) => {
-		if (!node.label) {
-			return (
-				<>
-					{node.pages.map((page) =>
-						renderPageNode(page, depth, ctx),
-					)}
-					{node.components.map((comp) =>
-						renderComponentNode(comp, depth, parentPath, ctx),
-					)}
-				</>
-			)
-		}
-
-		const nodeKey = parentPath ? `${parentPath}/${node.label}` : node.label
-		const hasChildren = node.children.length > 0 || node.components.length > 0 || node.pages.length > 0
-		const nodeCollapsed = ctx.isNodeCollapsed(nodeKey)
-
-		return (
-			<div key={node.label}>
-				<SidebarButton
-					label={node.label}
-					depth={depth}
-					collapsed={hasChildren ? nodeCollapsed : undefined}
-					onClick={() => hasChildren && ctx.toggleCollapse(nodeKey)}
-				/>
-				{!nodeCollapsed && (
-					<>
-						{node.pages.map((page) =>
-							renderPageNode(page, depth + 1, ctx),
-						)}
-						{node.components.map((comp) =>
-							renderComponentNode(comp, depth + 1, nodeKey, ctx),
-						)}
-						{renderTree(node.children, depth + 1, nodeKey, ctx)}
-					</>
-				)}
-			</div>
-		)
-	})
-}
-
-function renderPageNode(
-	page: PageNode,
-	depth: number,
-	ctx: RenderContext,
-) {
-	const isActive = ctx.activePage === page.name
-
-	return (
-		<SidebarButton
-			key={`page:${page.name}`}
-			label={page.name}
-			depth={depth}
-			isActive={isActive}
-			icon="\u25A2"
-			onClick={() => ctx.selectPage(page.name)}
-		/>
+	return nodes.map((node) =>
+		renderNode(node, depth, parentPath, ctx, parentComponentName),
 	)
 }
 
-function renderComponentPageNode(
-	page: PageNode,
-	componentName: string,
-	depth: number,
-	ctx: RenderContext,
-) {
-	const isActive = ctx.activeComponent === componentName && ctx.activeComponentPage === page.name
-
-	return (
-		<SidebarButton
-			key={`comp-page:${page.name}`}
-			label={page.name}
-			depth={depth}
-			isActive={isActive}
-			onClick={() => ctx.selectComponentPage(componentName, page.name)}
-		/>
-	)
-}
-
-function renderComponentNode(
-	comp: ComponentNode,
+function renderNode(
+	node: SidebarNode,
 	depth: number,
 	parentPath: string,
 	ctx: RenderContext,
+	parentComponentName: string | undefined,
 ) {
-	const compKey = parentPath ? `${parentPath}/${comp.name}` : comp.name
-	const compCollapsed = ctx.isNodeCollapsed(compKey)
-	const isActiveComp = ctx.activeComponent === comp.name
+	const nodeKey = parentPath ? `${parentPath}/${node.label}` : node.label
+	const hasChildren = node.children.length > 0
+	const nodeCollapsed = hasChildren ? ctx.isNodeCollapsed(nodeKey) : undefined
+
+	const isActive = getIsActive(node, ctx, parentComponentName)
+	const icon = node.type === 'page' ? '\u25A2' : undefined
+	const componentName = node.type === 'component' ? node.componentName : parentComponentName
+
+	const onClick = () => {
+		if (node.type === 'story') {
+			if (componentName) ctx.selectStory(componentName, node.storyName)
+		} else if (node.type === 'page') {
+			if (parentComponentName) {
+				ctx.selectComponentPage(parentComponentName, node.pageName)
+			} else {
+				ctx.selectPage(node.pageName)
+			}
+		} else if (node.type === 'component') {
+			ctx.toggleCollapse(nodeKey)
+			if (nodeCollapsed && ctx.activeComponent !== node.componentName) {
+				const firstPage = node.children.find((c) => c.type === 'page')
+				if (firstPage?.type === 'page') {
+					ctx.selectComponentPage(node.componentName, firstPage.pageName)
+				}
+			}
+		} else {
+			ctx.toggleCollapse(nodeKey)
+		}
+	}
 
 	return (
-		<div key={comp.name}>
+		<div key={`${node.type}:${node.label}`}>
 			<SidebarButton
-				label={comp.entry.config.name ?? comp.name}
+				label={node.label}
 				depth={depth}
-				isActive={isActiveComp}
-				collapsed={compCollapsed}
-				onClick={() => {
-					ctx.toggleCollapse(compKey)
-					if (compCollapsed && ctx.activeComponent !== comp.name && comp.pages.length > 0) {
-						ctx.selectComponentPage(comp.name, comp.pages[0].name)
-					}
-				}}
+				isActive={isActive}
+				collapsed={nodeCollapsed}
+				icon={icon}
+				onClick={onClick}
 			/>
-			{!compCollapsed && (
-				<>
-					{comp.pages.map((page) =>
-						renderComponentPageNode(page, comp.name, depth + 1, ctx),
-					)}
-					{comp.groups.map((group) => {
-						const groupKey = `${compKey}/${group.label}`
-						const groupCollapsed = ctx.isNodeCollapsed(groupKey)
-						return (
-							<div key={group.label}>
-								<SidebarButton
-									label={group.label}
-									depth={depth + 1}
-									collapsed={groupCollapsed}
-									onClick={() => ctx.toggleCollapse(groupKey)}
-								/>
-								{!groupCollapsed &&
-									group.stories.map((s) => {
-										const story = ctx.stories[comp.name]?.[s.name]
-										return (
-											<SidebarButton
-												key={s.name}
-												label={story?.name ?? s.name}
-												isActive={
-													ctx.activeComponent === s.componentName &&
-													ctx.activeStory === s.name
-												}
-												depth={depth + 2}
-												onClick={() => ctx.selectStory(s.componentName, s.name)}
-											/>
-										)
-									})}
-							</div>
-						)
-					})}
-				</>
-			)}
+			{hasChildren && !nodeCollapsed &&
+				renderNodes(node.children, depth + 1, nodeKey, ctx, componentName)}
 		</div>
 	)
+}
+
+function getIsActive(
+	node: SidebarNode,
+	ctx: RenderContext,
+	parentComponentName: string | undefined,
+): boolean {
+	switch (node.type) {
+		case 'component':
+			return ctx.activeComponent === node.componentName
+		case 'story':
+			return ctx.activeComponent === parentComponentName && ctx.activeStory === node.storyName
+		case 'page':
+			if (parentComponentName) {
+				return ctx.activeComponent === parentComponentName && ctx.activeComponentPage === node.pageName
+			}
+			return ctx.activePage === node.pageName
+		default:
+			return false
+	}
 }
 
 function SidebarButton({

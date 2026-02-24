@@ -95,15 +95,6 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 		[filtered, filteredPages, componentPages],
 	)
 
-	// Stories lookup for sidebar
-	const storiesMap = useMemo(() => {
-		const map: Record<string, ComponentEntry['stories']> = {}
-		for (const entry of components) {
-			map[entryName(entry)] = entry.stories
-		}
-		return map
-	}, [components])
-
 	// Find active entry
 	const activeEntry = useMemo(
 		() => components.find((e) => entryName(e) === activeComponent),
@@ -168,7 +159,6 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 					disableSearch={disableSearch}
 					searchQuery={searchQuery}
 					onSearchChange={setSearchQuery}
-					stories={storiesMap}
 					theme={theme}
 					onToggleTheme={toggleTheme}
 				/>
