@@ -10,13 +10,6 @@
 **Blocked by:** улучшения дизайна UI (сначала довести визуал до финального состояния, потом записывать).
 **Effort: низкий.** **Impact: критический.** Это первое, что видят на GitHub.
 
-### ~~README: переписать на продающий формат~~ ✅ Done
-Переписан: one-liner, GIF-заглушка, comparison table, quick start, features с code snippets, API reference.
-**Blocked by:** Hero GIF (заглушка на месте, заменить после записи).
-
-### ~~"Migrate from Storybook" guide~~ ✅ Done
-См. `MIGRATE-FROM-STORYBOOK.md`.
-
 ### Online demo (StackBlitz)
 StackBlitz playground: Vite + React + ui-studio, 2-3 компонента (Button, Input, Card), все три вида историй.
 Ссылка "Try it online" в README.
@@ -144,9 +137,6 @@ Light/dark toggle уже реализован — нужна поддержка 
 Кастомный ввод ширины. Persists per session.
 Интегрируется с существующим iframe-механизмом (`isolate`) — можно переиспользовать `IframePreview` с настраиваемой шириной.
 Критично для UI-библиотек.
-
-### ~~Component Documentation (MDX / Markdown)~~ ✅ Implemented
-Реализовано через `definePage()` и `.docs.tsx` файлы. Standalone documentation pages появляются в sidebar рядом с компонентами. MDX поддерживается через пользовательский `@mdx-js/rollup` плагин.
 
 ### Prop Coverage Map
 Инструмент знает ВСЕ возможные значения пропсов из типов. Можно посчитать, какой процент комбинаций покрыт stories.
