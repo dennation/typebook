@@ -9,7 +9,7 @@ import {
   DEFAULT_REGISTRY_FILE,
   DEFAULT_META_FILE,
   DEFAULT_STORIES_GLOB,
-  DEFAULT_PAGES_GLOB,
+  DEFAULT_DOCS_GLOB,
 } from './constants.js'
 
 const args = process.argv.slice(2)
@@ -22,10 +22,10 @@ if (command === 'generate') {
     ? storiesArg.split('=')[1]
     : DEFAULT_STORIES_GLOB
 
-  const pagesArg = args.find((a) => a.startsWith('--pages='))
-  const pagesGlob = pagesArg
-    ? pagesArg.split('=')[1]
-    : DEFAULT_PAGES_GLOB
+  const docsArg = args.find((a) => a.startsWith('--docs='))
+  const docsGlob = docsArg
+    ? docsArg.split('=')[1]
+    : DEFAULT_DOCS_GLOB
 
   const outputArg = args.find((a) => a.startsWith('--output='))
   const registryOutput = outputArg
@@ -40,8 +40,8 @@ if (command === 'generate') {
   const files = await findFiles(cwd, storiesGlob)
   console.log(LOG_PREFIX, `Found ${files.length} story file(s)`)
 
-  const pages = await findFiles(cwd, pagesGlob)
-  console.log(LOG_PREFIX, `Found ${pages.length} page file(s)`)
+  const docFiles = await findFiles(cwd, docsGlob)
+  console.log(LOG_PREFIX, `Found ${docFiles.length} docs file(s)`)
 
   // Start TypeScript client
   let tsClient: TypeScriptClient | null = null
@@ -66,9 +66,9 @@ if (command === 'generate') {
     }),
   )
 
-  // Analyze page files
-  const pageInfos = await Promise.all(
-    pages.map(async (filePath) => {
+  // Analyze docs files
+  const docInfos = await Promise.all(
+    docFiles.map(async (filePath) => {
       const content = readFileSync(filePath, 'utf-8')
       const analysis = await analyzePageFile(content)
       return { filePath, analysis }
@@ -83,7 +83,7 @@ if (command === 'generate') {
 
   // Generate registry file
   const registryFilePath = resolve(cwd, registryOutput)
-  const registryContent = generateRegistryFile(fileInfos, pageInfos, registryFilePath, metaFilePath, cwd)
+  const registryContent = generateRegistryFile(fileInfos, docInfos, registryFilePath, metaFilePath, cwd)
   writeFileSync(registryFilePath, registryContent, 'utf-8')
   console.log(LOG_PREFIX, `Generated ${registryOutput}`)
 
@@ -97,7 +97,7 @@ if (command === 'generate') {
 
   Options:
     --stories=GLOB            Story files glob pattern (default: ${DEFAULT_STORIES_GLOB})
-    --pages=GLOB              Page files glob pattern (default: ${DEFAULT_PAGES_GLOB})
+    --docs=GLOB               Docs files glob pattern (default: ${DEFAULT_DOCS_GLOB})
     --output=PATH             Output path for registry file (default: ${DEFAULT_REGISTRY_FILE})
     --meta-output=PATH        Output path for meta file (default: ${DEFAULT_META_FILE})
 

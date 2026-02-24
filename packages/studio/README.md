@@ -282,7 +282,7 @@ import button from './Button.stories'
 ```ts
 uiStudio({
   stories: './src/**/*.stories.tsx',      // story files glob
-  pages: './src/**/*.docs.tsx',           // doc page files glob
+  docs: './src/**/*.docs.tsx',            // docs files glob
   output: './ui-studio-registry.gen.ts',  // registry output path
   metaOutput: './ui-studio-meta.gen.ts',  // meta output path
 })
