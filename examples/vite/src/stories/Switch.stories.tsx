@@ -1,7 +1,7 @@
-import { describe } from '@dennation/ui-studio'
+import { define } from '@dennation/ui-studio'
 import { Switch } from '@heroui/switch'
 
-const switchComponent = describe(Switch, {
+const switchComponent = define(Switch, {
 	defaults: {
 		children: 'Enable notifications',
 	},

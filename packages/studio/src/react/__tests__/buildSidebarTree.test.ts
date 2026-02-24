@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { buildSidebarTree } from '../utils/buildSidebarTree.js'
-import type { ComponentEntry, PageEntry, PageResult } from '../../types.js'
+import type { ComponentEntry, PageResult } from '../../types.js'
 
 function makeComponent(name: string, path?: string): ComponentEntry {
 	const component = () => null
@@ -24,15 +24,14 @@ function makeComponent(name: string, path?: string): ComponentEntry {
 	}
 }
 
-function makePage(name: string, path?: string, order?: number): PageEntry {
-	const page: PageResult = {
+function makePage(name: string, path?: string, order?: number): PageResult {
+	return {
 		__type: 'page',
 		name,
 		path,
 		order,
 		content: () => null,
 	}
-	return { page }
 }
 
 describe('buildSidebarTree with pages', () => {

@@ -33,7 +33,7 @@ export interface PageAnalysis {
   defaultExport: boolean
 }
 
-const DESCRIBE_NAMES = new Set(['define', 'describe'])
+const DEFINE_NAMES = new Set(['define', 'describe'])
 
 /**
  * Parse a .stories.tsx file via oxc AST to extract exports and the component import.
@@ -109,7 +109,7 @@ export async function analyzeStoryFile(content: string): Promise<StoryAnalysis> 
         if (
           decl?.type === 'CallExpression' &&
           decl.callee?.type === 'Identifier' &&
-          DESCRIBE_NAMES.has(decl.callee.name)
+          DEFINE_NAMES.has(decl.callee.name)
         ) {
           const firstArg = decl.arguments?.[0]
           if (firstArg?.type === 'Identifier') {
@@ -121,10 +121,10 @@ export async function analyzeStoryFile(content: string): Promise<StoryAnalysis> 
 
     // --- Find define()/describe() call in top-level variable declarations ---
     if (node.type === 'VariableDeclaration' && !defineArg) {
-      defineArg = findDescribeArg(node.declarations)
+      defineArg = findDefineArg(node.declarations)
     }
     if (node.type === 'ExportNamedDeclaration' && node.declaration?.type === 'VariableDeclaration' && !defineArg) {
-      defineArg = findDescribeArg(node.declaration.declarations)
+      defineArg = findDefineArg(node.declaration.declarations)
     }
   }
 
@@ -157,11 +157,11 @@ export async function analyzePageFile(content: string): Promise<PageAnalysis> {
  * Search variable declarators for a `define(Component, ...)` or `describe(Component, ...)` call
  * and return the first argument name.
  */
-function findDescribeArg(declarations: any[]): string | null {
+function findDefineArg(declarations: any[]): string | null {
   for (const decl of declarations ?? []) {
     const init = decl.init
     if (!init || init.type !== 'CallExpression') continue
-    if (init.callee?.type !== 'Identifier' || !DESCRIBE_NAMES.has(init.callee.name)) continue
+    if (init.callee?.type !== 'Identifier' || !DEFINE_NAMES.has(init.callee.name)) continue
 
     const firstArg = init.arguments?.[0]
     if (firstArg?.type === 'Identifier') {

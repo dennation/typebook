@@ -1,4 +1,4 @@
-import type { ComponentEntry, PageEntry } from '../../types.js'
+import type { ComponentEntry, PageResult } from '../../types.js'
 import { entryName } from './naming.js'
 
 export interface StoryItem {
@@ -19,7 +19,7 @@ export interface ComponentNode {
 
 export interface PageNode {
 	name: string
-	entry: PageEntry
+	page: PageResult
 }
 
 export interface SidebarNode {
@@ -54,8 +54,8 @@ function buildComponentNode(entry: ComponentEntry): ComponentNode {
 
 function sortPages(pages: PageNode[]): PageNode[] {
 	return [...pages].sort((a, b) => {
-		const orderA = a.entry.page.order ?? 0
-		const orderB = b.entry.page.order ?? 0
+		const orderA = a.page.order ?? 0
+		const orderB = b.page.order ?? 0
 		if (orderA !== orderB) return orderA - orderB
 		return a.name.localeCompare(b.name)
 	})
@@ -63,14 +63,14 @@ function sortPages(pages: PageNode[]): PageNode[] {
 
 export function buildSidebarTree(
 	components: ComponentEntry[],
-	pages: PageEntry[] = [],
+	pages: PageResult[] = [],
 ): SidebarNode[] {
 	const root: SidebarNode[] = []
 
 	// Place pages into tree by path
-	for (const pageEntry of pages) {
-		const path = pageEntry.page.path
-		const pageNode: PageNode = { name: pageEntry.page.name, entry: pageEntry }
+	for (const page of pages) {
+		const path = page.path
+		const pageNode: PageNode = { name: page.name, page }
 
 		if (!path) {
 			// Find or create a root-level node for path-less pages

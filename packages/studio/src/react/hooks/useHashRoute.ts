@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import type { ComponentEntry, PageEntry } from '../../types.js'
+import type { ComponentEntry, PageResult } from '../../types.js'
 import { DOCS_PAGE } from '../../constants.js'
 import { toKebabCase, entryName } from '../utils/naming.js'
 
@@ -16,7 +16,7 @@ const PAGE_PREFIX = 'page/'
 
 export function useHashRoute(
 	components: ComponentEntry[],
-	pages: PageEntry[] = [],
+	pages: PageResult[] = [],
 ): HashRouteState {
 	const [activeComponent, setActiveComponent] = useState<string | null>(null)
 	const [activeStory, setActiveStory] = useState<string | null>(null)
@@ -41,9 +41,9 @@ export function useHashRoute(
 
 	const findPageByKebab = useCallback(
 		(kebabPage: string) => {
-			const entry = pages.find((e) => toKebabCase(e.page.name) === kebabPage)
-			if (!entry) return null
-			return entry.page.name
+			const page = pages.find((p) => toKebabCase(p.name) === kebabPage)
+			if (!page) return null
+			return page.name
 		},
 		[pages],
 	)

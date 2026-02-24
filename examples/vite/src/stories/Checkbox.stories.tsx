@@ -1,7 +1,7 @@
-import { describe } from '@dennation/ui-studio'
+import { define } from '@dennation/ui-studio'
 import { Checkbox } from '@heroui/checkbox'
 
-const checkbox = describe(Checkbox, {
+const checkbox = define(Checkbox, {
 	defaults: {
 		children: 'Agree to terms',
 	},

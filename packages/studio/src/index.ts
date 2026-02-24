@@ -1,16 +1,15 @@
-export { describe } from './describe.js'
-export { describe as define } from './describe.js'
+export { define } from './define.js'
+export { define as describe } from './define.js'
 export { definePage } from './definePage.js'
 export type {
   Expand,
   StudioConfig,
-  DescribeConfig,
-  DescribeResult,
   DefineConfig,
   DefineResult,
+  DescribeConfig,
+  DescribeResult,
   PageConfig,
   PageResult,
-  PageEntry,
   Story,
   SingleStory,
   VariantsStory,

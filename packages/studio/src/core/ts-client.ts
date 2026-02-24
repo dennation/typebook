@@ -63,7 +63,7 @@ export class TypeScriptClient {
     }
 
     // Find the variable declaration: const button = describe(Button, ...) or define(Button, ...)
-    // The type of 'button' is DescribeResult<Pick<Props, IncludedProps>>
+    // The type of 'button' is DefineResult<Pick<Props, IncludedProps>>
     // So TypeScript already filtered props for us!
     return this.findComponentPropsInFile(sourceFile)
   }
@@ -72,7 +72,7 @@ export class TypeScriptClient {
     // Guaranteed non-null by getComponentProps guard
     const checker = this.checker!
     let result: PropInfo[] | null = null
-    const describeFnNames = new Set(['define', 'describe'])
+    const defineFnNames = new Set(['define', 'describe'])
 
     const visit = (node: ts.Node): void => {
       // Look for: const button = define(...) or describe(...)
@@ -81,7 +81,7 @@ export class TypeScriptClient {
           if (!decl.initializer || !ts.isCallExpression(decl.initializer)) continue
 
           const callExpr = decl.initializer
-          if (!ts.isIdentifier(callExpr.expression) || !describeFnNames.has(callExpr.expression.text)) continue
+          if (!ts.isIdentifier(callExpr.expression) || !defineFnNames.has(callExpr.expression.text)) continue
 
           // Found define()/describe() call
           if (!ts.isIdentifier(decl.name)) continue

@@ -31,7 +31,7 @@ const registry: Registry = {
     },
   ],
   pages: [
-    { page: _page },
+    _page,
   ],
 }
 

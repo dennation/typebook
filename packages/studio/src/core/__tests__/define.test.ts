@@ -1,33 +1,33 @@
 import { describe, test, expect } from 'vitest'
-import { describe as studioDescribe } from '../../describe.js'
 import { define } from '../../define.js'
+import { describe as studioDescribe } from '../../describe.js'
 
 const MockComponent = () => null
 MockComponent.displayName = 'MockComponent'
 
-describe('describe()', () => {
+describe('define()', () => {
 	test('returns object with __type: "define"', () => {
-		const result = studioDescribe(MockComponent)
+		const result = define(MockComponent)
 		expect(result.__type).toBe('define')
 	})
 
 	test('stores component reference', () => {
-		const result = studioDescribe(MockComponent)
+		const result = define(MockComponent)
 		expect(result.component).toBe(MockComponent)
 	})
 
 	test('stores name from config', () => {
-		const result = studioDescribe(MockComponent, { name: 'My Button' })
+		const result = define(MockComponent, { name: 'My Button' })
 		expect(result.name).toBe('My Button')
 	})
 
 	test('stores defaults from config', () => {
-		const result = studioDescribe(MockComponent, { defaults: { children: 'Hello' } })
+		const result = define(MockComponent, { defaults: { children: 'Hello' } })
 		expect(result.defaults).toEqual({ children: 'Hello' })
 	})
 
 	test('creates single story', () => {
-		const result = studioDescribe(MockComponent)
+		const result = define(MockComponent)
 		const story = result.single({ props: { children: 'Test' } })
 		expect(story.__type).toBe('story')
 		expect(story.kind).toBe('single')
@@ -35,13 +35,13 @@ describe('describe()', () => {
 	})
 
 	test('creates variants story', () => {
-		const result = studioDescribe(MockComponent)
+		const result = define(MockComponent)
 		const story = result.variants({ items: result.allOf('size' as any) })
 		expect(story.kind).toBe('variants')
 	})
 
 	test('creates matrix story', () => {
-		const result = studioDescribe(MockComponent)
+		const result = define(MockComponent)
 		const story = result.matrix({
 			x: result.allOf('color' as any),
 			y: [result.allOf('variant' as any)],
@@ -50,12 +50,12 @@ describe('describe()', () => {
 	})
 
 	test('allOf() returns correct config', () => {
-		const result = studioDescribe(MockComponent)
+		const result = define(MockComponent)
 		expect(result.allOf('size' as any)).toEqual({ __type: 'allOf', prop: 'size' })
 	})
 
 	test('values() returns correct config', () => {
-		const result = studioDescribe(MockComponent)
+		const result = define(MockComponent)
 		expect(result.values('size' as any, ['sm', 'md'] as any)).toEqual({
 			__type: 'values',
 			prop: 'size',
@@ -65,7 +65,7 @@ describe('describe()', () => {
 
 	test('generate() returns correct config', () => {
 		const fn = () => 'test'
-		const result = studioDescribe(MockComponent)
+		const result = define(MockComponent)
 		expect(result.generate('size' as any, fn as any, 3)).toEqual({
 			__type: 'generate',
 			prop: 'size',
@@ -75,9 +75,9 @@ describe('describe()', () => {
 	})
 })
 
-describe('define() deprecated alias', () => {
-	test('works identically to describe()', () => {
-		const result = define(MockComponent, { name: 'Test', defaults: { children: 'Hello' } })
+describe('describe() deprecated alias', () => {
+	test('works identically to define()', () => {
+		const result = studioDescribe(MockComponent, { name: 'Test', defaults: { children: 'Hello' } })
 		expect(result.__type).toBe('define')
 		expect(result.component).toBe(MockComponent)
 		expect(result.name).toBe('Test')
@@ -85,7 +85,7 @@ describe('define() deprecated alias', () => {
 	})
 
 	test('creates stories via alias', () => {
-		const result = define(MockComponent)
+		const result = studioDescribe(MockComponent)
 		const story = result.single()
 		expect(story.__type).toBe('story')
 		expect(story.kind).toBe('single')

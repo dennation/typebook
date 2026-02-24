@@ -164,7 +164,7 @@ describe('generateRegistryFile', () => {
 
 		// No import line for file without default export
 		expect(result).not.toContain('_Input')
-		// No registry entry — config (DescribeResult) is required
+		// No registry entry — config (DefineResult) is required
 		expect(result).not.toContain('stories:')
 	})
 
@@ -352,7 +352,7 @@ describe('generateRegistryFile with pages', () => {
 		const result = generateRegistryFile([], [pageFile], REGISTRY_PATH, META_PATH, CWD)
 
 		expect(result).toContain("import _page from './src/docs/GettingStarted.docs'")
-		expect(result).toContain('{ page: _page },')
+		expect(result).toContain('_page,')
 	})
 
 	test('page file without default export → skipped', () => {
@@ -372,8 +372,8 @@ describe('generateRegistryFile with pages', () => {
 
 		expect(result).toContain("import _page from './src/docs/Guide.docs'")
 		expect(result).toContain("import _page2 from './src/docs/Changelog.docs'")
-		expect(result).toContain('{ page: _page },')
-		expect(result).toContain('{ page: _page2 },')
+		expect(result).toContain('_page,')
+		expect(result).toContain('_page2,')
 	})
 
 	test('empty page files → pages: []', () => {
@@ -394,6 +394,7 @@ describe('generateRegistryFile with pages', () => {
 		const result = generateRegistryFile([storyFile], [pageFile], REGISTRY_PATH, META_PATH, CWD)
 
 		expect(result).toContain('config: _Button,')
-		expect(result).toContain('{ page: _page },')
+		expect(result).toContain('_page,')
 	})
 })
+

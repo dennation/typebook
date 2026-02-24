@@ -58,10 +58,6 @@ export interface PageResult {
   content: ComponentType
 }
 
-export interface PageEntry {
-  page: PageResult
-}
-
 // --- Define API Types ---
 
 /**
@@ -81,7 +77,7 @@ export type RequiredKeys<T> = {
 export type MissingProps<Props, CoveredByDefaults extends keyof Props> =
   Pick<Props, Exclude<RequiredKeys<Props>, CoveredByDefaults>>
 
-export interface DescribeConfig<Props, IncludedProps extends keyof Props = keyof Props> {
+export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof Props> {
   /** Display name override (defaults to displayName or function name) */
   name?: string
   /** Sidebar path with nesting via '/' (e.g. 'Components/Forms') */
@@ -97,8 +93,8 @@ export interface DescribeConfig<Props, IncludedProps extends keyof Props = keyof
   wrapper?: WrapperFn
 }
 
-/** @deprecated Use DescribeConfig instead */
-export type DefineConfig<Props, IncludedProps extends keyof Props = keyof Props> = DescribeConfig<Props, IncludedProps>
+/** @deprecated Use DefineConfig instead */
+export type DescribeConfig<Props, IncludedProps extends keyof Props = keyof Props> = DefineConfig<Props, IncludedProps>
 
 /** Auto-generate variants from prop type (boolean/literal) */
 export interface AllOfConfig {
@@ -169,8 +165,8 @@ export interface MatrixStory extends StoryBase {
 /** Exported from .stories.tsx — the result of single(), variants(), or matrix() */
 export type Story = SingleStory | VariantsStory | MatrixStory
 
-/** Returned by describe() — component page configuration + story builder */
-export interface DescribeResult<Props, CoveredByDefaults extends keyof Props = never> {
+/** Returned by define() — component page configuration + story builder */
+export interface DefineResult<Props, CoveredByDefaults extends keyof Props = never> {
   __type: 'define'
   component: ComponentType<any>
   name?: string
@@ -212,20 +208,20 @@ export interface DescribeResult<Props, CoveredByDefaults extends keyof Props = n
   ): GenerateConfig
 }
 
-/** @deprecated Use DescribeResult instead */
-export type DefineResult<Props, CoveredByDefaults extends keyof Props = never> = DescribeResult<Props, CoveredByDefaults>
+/** @deprecated Use DefineResult instead */
+export type DescribeResult<Props, CoveredByDefaults extends keyof Props = never> = DefineResult<Props, CoveredByDefaults>
 
 // --- Registry (output of gen file, input to <Studio />) ---
 
 export interface ComponentEntry {
-  config: DescribeResult<any>
+  config: DefineResult<any>
   stories: Record<string, Story>
   meta: ComponentMeta
 }
 
 export interface Registry {
   components: ComponentEntry[]
-  pages: PageEntry[]
+  pages: PageResult[]
 }
 
 

@@ -68,7 +68,7 @@ export function generateRegistryFile(
   for (let i = 0; i < files.length; i++) {
     const { filePath, analysis } = files[i]
 
-    // Skip files without a default export — config (DescribeResult) is required
+    // Skip files without a default export — config (DefineResult) is required
     if (!analysis.defaultExport) continue
 
     const baseName = analysis.componentImport?.name ?? `Component${i}`
@@ -101,16 +101,15 @@ export function generateRegistryFile(
   // Page imports and entries
   const pageEntryLines: string[] = []
 
-  for (const { filePath, analysis } of pageFiles) {
+  for (const pageFile of pageFiles) {
+    const { filePath, analysis } = pageFile
     if (!analysis.defaultExport) continue
-
     const prefix = getUniquePrefix('page', usedPrefixes)
     usedPrefixes.add(prefix)
     const importPath = buildRelativeImport(registryFilePath, filePath)
 
     importLines.push(`import ${prefix} from '${importPath}'`)
-
-    pageEntryLines.push(`    { page: ${prefix} },`)
+    pageEntryLines.push(`    ${prefix},`)
   }
 
   const bodyLines: string[] = [
@@ -149,7 +148,6 @@ function formatImports(
 function buildRelativeImport(from: string, to: string): string {
   const fromDir = dirname(from)
   let rel = relative(fromDir, to)
-  // Remove .tsx/.ts extension for import
   rel = rel.replace(/\.tsx?$/, '')
   // Ensure relative path
   if (!rel.startsWith('.')) {

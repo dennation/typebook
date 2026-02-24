@@ -108,7 +108,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 
 	// Find active page entry
 	const activePageEntry = useMemo(
-		() => (activePage ? pages.find((p) => p.page.name === activePage) : undefined),
+		() => (activePage ? pages.find((p) => p.name === activePage) : undefined),
 		[pages, activePage],
 	)
 
@@ -149,7 +149,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 				isDocsPage={isDocsPage}
 				activeStoryObj={activeStoryObj}
 				storyProps={storyProps}
-				activePageContent={activePageEntry?.page.content ?? null}
+				activePageContent={activePageEntry?.content ?? null}
 				activePageName={activePage}
 			/>
 		</div>

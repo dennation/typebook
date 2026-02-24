@@ -361,3 +361,4 @@ describe('analyzePageFile', () => {
 		expect(result.defaultExport).toBe(false)
 	})
 })
+

@@ -1,7 +1,7 @@
-import { describe } from '@dennation/ui-studio'
+import { define } from '@dennation/ui-studio'
 import { Input } from '@heroui/input'
 
-const input = describe(Input, {
+const input = define(Input, {
 	defaults: {
 		placeholder: 'Enter text',
 	},

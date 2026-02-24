@@ -1,7 +1,7 @@
-import { describe } from '@dennation/ui-studio'
+import { define } from '@dennation/ui-studio'
 import { Button } from '@heroui/button'
 
-const button = describe(Button, {
+const button = define(Button, {
 	defaults: {
 		children: 'Click me',
 	},
