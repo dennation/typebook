@@ -2,14 +2,16 @@ import { useState, useCallback, useEffect } from 'react'
 import type { ComponentEntry, PageResult } from '../../types.js'
 import { toKebabCase, entryName } from '../utils/naming.js'
 
+export type ActiveView =
+	| { type: 'story'; component: string; story: string }
+	| { type: 'componentPage'; component: string; page: string }
+	| { type: 'page'; name: string }
+
 export interface HashRouteState {
-	activeComponent: string | null
-	activeStory: string | null
-	activePage: string | null
-	activeComponentPage: string | null
-	selectStory: (componentName: string, storyName: string) => void
-	selectPage: (pageName: string) => void
-	selectComponentPage: (componentName: string, pageName: string) => void
+	activeView: ActiveView | null
+	selectStory: (component: string, story: string) => void
+	selectPage: (name: string) => void
+	selectComponentPage: (component: string, page: string) => void
 }
 
 const PAGE_PREFIX = 'page/'
@@ -19,50 +21,9 @@ export function useHashRoute(
 	pages: PageResult[] = [],
 	componentPages: Map<ComponentEntry, PageResult[]> = new Map(),
 ): HashRouteState {
-	const [activeComponent, setActiveComponent] = useState<string | null>(null)
-	const [activeStory, setActiveStory] = useState<string | null>(null)
-	const [activePage, setActivePage] = useState<string | null>(null)
-	const [activeComponentPage, setActiveComponentPage] = useState<string | null>(null)
+	const [activeView, setActiveView] = useState<ActiveView | null>(null)
 
-	// Resolve #component/name → component page or story
-	const findByKebab = useCallback(
-		(kebabComponent: string, kebabName: string) => {
-			const entry = components.find((e) => toKebabCase(entryName(e)) === kebabComponent)
-			if (!entry) return null
-
-			// Component pages take priority (e.g. auto-generated Docs)
-			const entryPages = componentPages.get(entry) ?? []
-			const pageName = entryPages.find((p) => toKebabCase(p.name) === kebabName)?.name
-			if (pageName) {
-				return { type: 'componentPage' as const, component: entryName(entry), page: pageName }
-			}
-
-			// Then check stories
-			const storyName = Object.keys(entry.stories).find((s) => toKebabCase(s) === kebabName)
-			if (storyName) {
-				return { type: 'story' as const, component: entryName(entry), story: storyName }
-			}
-
-			return null
-		},
-		[components, componentPages],
-	)
-
-	const findPageByKebab = useCallback(
-		(kebabPage: string) => {
-			const page = pages.find((p) => toKebabCase(p.name) === kebabPage)
-			if (!page) return null
-			return page.name
-		},
-		[pages],
-	)
-
-	type ParsedRoute =
-		| { type: 'story'; component: string; story: string }
-		| { type: 'page'; name: string }
-		| { type: 'componentPage'; component: string; page: string }
-
-	const parseHash = useCallback((): ParsedRoute | null => {
+	const parseHash = useCallback((): ActiveView | null => {
 		try {
 			const hash = window.location.hash.slice(1)
 			if (!hash) return null
@@ -70,9 +31,8 @@ export function useHashRoute(
 			// Top-level page: #page/page-name
 			if (hash.startsWith(PAGE_PREFIX)) {
 				const kebabPage = decodeURIComponent(hash.slice(PAGE_PREFIX.length))
-				const name = findPageByKebab(kebabPage)
-				if (!name) return null
-				return { type: 'page', name }
+				const page = pages.find((p) => toKebabCase(p.name) === kebabPage)
+				return page ? { type: 'page', name: page.name } : null
 			}
 
 			// Component page or story: #component/name
@@ -80,75 +40,55 @@ export function useHashRoute(
 			if (parts.length < 2) return null
 			const kebabComp = decodeURIComponent(parts[0])
 			const kebabName = decodeURIComponent(parts[1])
-			return findByKebab(kebabComp, kebabName)
+
+			const entry = components.find((e) => toKebabCase(entryName(e)) === kebabComp)
+			if (!entry) return null
+
+			// Component pages take priority (e.g. auto-generated Docs)
+			const entryPages = componentPages.get(entry) ?? []
+			const pageName = entryPages.find((p) => toKebabCase(p.name) === kebabName)?.name
+			if (pageName) {
+				return { type: 'componentPage', component: entryName(entry), page: pageName }
+			}
+
+			// Then check stories
+			const storyName = Object.keys(entry.stories).find((s) => toKebabCase(s) === kebabName)
+			if (storyName) {
+				return { type: 'story', component: entryName(entry), story: storyName }
+			}
+
+			return null
 		} catch {
 			return null
 		}
-	}, [findByKebab, findPageByKebab])
+	}, [components, pages, componentPages])
 
-	const selectStory = useCallback((componentName: string, storyName: string) => {
-		setActiveComponent(componentName)
-		setActiveStory(storyName)
-		setActivePage(null)
-		setActiveComponentPage(null)
-		window.location.hash = `${toKebabCase(componentName)}/${toKebabCase(storyName)}`
+	const selectStory = useCallback((component: string, story: string) => {
+		setActiveView({ type: 'story', component, story })
+		window.location.hash = `${toKebabCase(component)}/${toKebabCase(story)}`
 	}, [])
 
-	const selectPage = useCallback((pageName: string) => {
-		setActivePage(pageName)
-		setActiveComponent(null)
-		setActiveStory(null)
-		setActiveComponentPage(null)
-		window.location.hash = `${PAGE_PREFIX}${toKebabCase(pageName)}`
+	const selectPage = useCallback((name: string) => {
+		setActiveView({ type: 'page', name })
+		window.location.hash = `${PAGE_PREFIX}${toKebabCase(name)}`
 	}, [])
 
-	const selectComponentPage = useCallback((componentName: string, pageName: string) => {
-		setActiveComponent(componentName)
-		setActiveComponentPage(pageName)
-		setActiveStory(null)
-		setActivePage(null)
-		window.location.hash = `${toKebabCase(componentName)}/${toKebabCase(pageName)}`
-	}, [])
-
-	const applyParsed = useCallback((parsed: ParsedRoute | null) => {
-		if (!parsed) {
-			setActiveComponent(null)
-			setActiveStory(null)
-			setActivePage(null)
-			setActiveComponentPage(null)
-			return
-		}
-		if (parsed.type === 'page') {
-			setActivePage(parsed.name)
-			setActiveComponent(null)
-			setActiveStory(null)
-			setActiveComponentPage(null)
-		} else if (parsed.type === 'componentPage') {
-			setActiveComponent(parsed.component)
-			setActiveComponentPage(parsed.page)
-			setActiveStory(null)
-			setActivePage(null)
-		} else {
-			setActiveComponent(parsed.component)
-			setActiveStory(parsed.story)
-			setActivePage(null)
-			setActiveComponentPage(null)
-		}
+	const selectComponentPage = useCallback((component: string, page: string) => {
+		setActiveView({ type: 'componentPage', component, page })
+		window.location.hash = `${toKebabCase(component)}/${toKebabCase(page)}`
 	}, [])
 
 	// Restore selection from URL hash on mount
 	useEffect(() => {
-		applyParsed(parseHash())
-	}, [parseHash, applyParsed])
+		setActiveView(parseHash())
+	}, [parseHash])
 
 	// Sync with browser back/forward navigation
 	useEffect(() => {
-		const onHashChange = () => {
-			applyParsed(parseHash())
-		}
+		const onHashChange = () => setActiveView(parseHash())
 		window.addEventListener('hashchange', onHashChange)
 		return () => window.removeEventListener('hashchange', onHashChange)
-	}, [parseHash, applyParsed])
+	}, [parseHash])
 
-	return { activeComponent, activeStory, activePage, activeComponentPage, selectStory, selectPage, selectComponentPage }
+	return { activeView, selectStory, selectPage, selectComponentPage }
 }

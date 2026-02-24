@@ -1,4 +1,4 @@
-import type { ComponentEntry, PageResult } from '../../types.js'
+import type { ComponentEntry } from '../../types.js'
 
 export function toKebabCase(str: string): string {
 	return str
@@ -15,9 +15,4 @@ export function entryName(entry: ComponentEntry): string {
 		entry.config.component.name ??
 		'Unknown'
 	)
-}
-
-/** Get display name for a page entry */
-export function pageName(page: PageResult): string {
-	return page.name
 }

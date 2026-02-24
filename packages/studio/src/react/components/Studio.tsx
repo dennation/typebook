@@ -47,7 +47,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 		[components, pages],
 	)
 
-	const { activeComponent, activeStory, activePage, activeComponentPage, selectStory, selectPage, selectComponentPage } =
+	const { activeView, selectStory, selectPage, selectComponentPage } =
 		useHashRoute(components, topLevelPages, componentPages)
 
 	const toggleCollapse = useCallback((key: string) => {
@@ -62,11 +62,11 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 		})
 	}, [])
 
-	// Filter components by search query
-	const filtered = useMemo(() => {
-		if (!searchQuery) return components
+	// Filter components and pages by search query
+	const { filtered, filteredPages } = useMemo(() => {
+		if (!searchQuery) return { filtered: components, filteredPages: topLevelPages }
 		const q = searchQuery.toLowerCase()
-		return components.filter((e) => {
+		const filtered = components.filter((e) => {
 			const matchesComponent = [
 				e.config.name,
 				e.config.component.displayName,
@@ -78,16 +78,11 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 			const matchesStory = Object.keys(e.stories).some((s) => s.toLowerCase().includes(q))
 			return matchesComponent || matchesStory
 		})
-	}, [components, searchQuery])
-
-	// Filter top-level pages by search query
-	const filteredPages = useMemo(() => {
-		if (!searchQuery) return topLevelPages
-		const q = searchQuery.toLowerCase()
-		return topLevelPages.filter((p) => {
-			return p.name.toLowerCase().includes(q) || (p.path?.toLowerCase().includes(q) ?? false)
-		})
-	}, [topLevelPages, searchQuery])
+		const filteredPages = topLevelPages.filter(
+			(p) => p.name.toLowerCase().includes(q) || (p.path?.toLowerCase().includes(q) ?? false),
+		)
+		return { filtered, filteredPages }
+	}, [components, topLevelPages, searchQuery])
 
 	// Build sidebar tree from paths
 	const tree = useMemo(
@@ -95,40 +90,43 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 		[filtered, filteredPages, componentPages],
 	)
 
+	// Derive active component name from activeView
+	const activeComponentName = activeView && 'component' in activeView ? activeView.component : null
+
 	// Find active entry
 	const activeEntry = useMemo(
-		() => components.find((e) => entryName(e) === activeComponent),
-		[components, activeComponent],
+		() => components.find((e) => entryName(e) === activeComponentName),
+		[components, activeComponentName],
 	)
 
 	// Active story data
-	const activeStoryObj = useMemo(
-		() => (activeEntry && activeStory ? (activeEntry.stories[activeStory] ?? null) : null),
-		[activeEntry, activeStory],
+	const activeStoryName = activeView?.type === 'story' ? activeView.story : null
+
+	const story = useMemo(
+		() => (activeEntry && activeStoryName ? (activeEntry.stories[activeStoryName] ?? null) : null),
+		[activeEntry, activeStoryName],
 	)
 
 	const storyProps = useMemo(() => {
-		if (!activeStoryObj || !activeEntry) return []
-		return activeStoryObj.component === activeEntry.config.component
+		if (!story || !activeEntry) return []
+		return story.component === activeEntry.config.component
 			? (activeEntry.meta?.props ?? [])
-			: (propsMap.get(activeStoryObj.component) ?? [])
-	}, [activeStoryObj, activeEntry, propsMap])
+			: (propsMap.get(story.component) ?? [])
+	}, [story, activeEntry, propsMap])
 
 	// Find active page content — either top-level page or component page
 	const activePageContent = useMemo((): ComponentType | null => {
-		// Component page (e.g., auto-generated Docs)
-		if (activeComponentPage && activeEntry) {
+		if (activeView?.type === 'componentPage' && activeEntry) {
 			const entryPages = componentPages.get(activeEntry)
-			const page = entryPages?.find((p) => p.name === activeComponentPage)
+			const page = entryPages?.find((p) => p.name === activeView.page)
 			return page?.content ?? null
 		}
-		// Top-level page
-		if (activePage) {
-			const page = topLevelPages.find((p) => p.name === activePage)
+		if (activeView?.type === 'page') {
+			const page = topLevelPages.find((p) => p.name === activeView.name)
 			return page?.content ?? null
 		}
 		return null
-	}, [activeComponentPage, activeEntry, activePage, topLevelPages, componentPages])
+	}, [activeView, activeEntry, topLevelPages, componentPages])
 
 	// Inject styles before first paint to prevent FOUC
 	useInsertionEffect(() => {
@@ -147,10 +145,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 			>
 				<Sidebar
 					tree={tree}
-					activeComponent={activeComponent}
-					activeStory={activeStory}
-					activePage={activePage}
-					activeComponentPage={activeComponentPage}
+					activeView={activeView}
 					selectStory={selectStory}
 					selectPage={selectPage}
 					selectComponentPage={selectComponentPage}
@@ -165,8 +160,8 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 
 				<MainContent
 					activeEntry={activeEntry}
-					activeStory={activeStory}
-					activeStoryObj={activeStoryObj}
+					storyName={activeStoryName}
+					story={story}
 					storyProps={storyProps}
 					activePageContent={activePageContent}
 				/>

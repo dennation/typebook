@@ -79,6 +79,18 @@ function findOrCreateGroup(level: SidebarNode[], label: string): GroupNode {
 	return node
 }
 
+function addNodeByPath(root: SidebarNode[], path: string | undefined, node: SidebarNode): void {
+	if (!path) {
+		root.push(node)
+		return
+	}
+	let level = root
+	for (const segment of path.split('/')) {
+		level = findOrCreateGroup(level, segment).children
+	}
+	level.push(node)
+}
+
 export function buildSidebarTree(
 	components: ComponentEntry[],
 	pages: PageResult[] = [],
@@ -87,49 +99,22 @@ export function buildSidebarTree(
 	const root: SidebarNode[] = []
 
 	for (const page of pages) {
-		const pageNode: PageNode = {
+		addNodeByPath(root, page.path, {
 			type: 'page',
 			label: page.name,
 			pageName: page.name,
 			children: [],
-		}
-
-		if (!page.path) {
-			root.push(pageNode)
-			continue
-		}
-
-		const segments = page.path.split('/')
-		let level = root
-		for (const segment of segments) {
-			const group = findOrCreateGroup(level, segment)
-			level = group.children
-		}
-		level.push(pageNode)
+		})
 	}
 
 	for (const entry of components) {
 		const componentName = entryName(entry)
-		const componentNode: ComponentNode = {
+		addNodeByPath(root, entry.config.path, {
 			type: 'component',
 			label: entry.config.name ?? componentName,
 			componentName,
 			children: buildComponentChildren(entry, componentPages.get(entry)),
-		}
-
-		const path = entry.config.path
-		if (!path) {
-			root.push(componentNode)
-			continue
-		}
-
-		const segments = path.split('/')
-		let level = root
-		for (const segment of segments) {
-			const group = findOrCreateGroup(level, segment)
-			level = group.children
-		}
-		level.push(componentNode)
+		})
 	}
 
 	return root

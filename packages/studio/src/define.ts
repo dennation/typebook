@@ -6,6 +6,7 @@ import type {
   SingleStory,
   VariantsStory,
   MatrixStory,
+  Story,
   StoryRenderFn,
   AllOfConfig,
   ValuesConfig,
@@ -34,6 +35,27 @@ export function define<
     return (props) => wrapper(() => renderFn(props) as any)
   }
 
+  function createStory<T extends Record<string, unknown>>(
+    kind: Story['kind'],
+    storyConfig: { props?: any; isolate?: boolean; name?: string; path?: string; hidden?: boolean },
+    renderFn: StoryRenderFn,
+    extra: T,
+  ) {
+    return {
+      __type: 'story' as const,
+      kind,
+      component,
+      defaults,
+      props: storyConfig.props ? { ...storyConfig.props } : undefined,
+      render: wrapRender(renderFn),
+      isolate: storyConfig.isolate,
+      name: storyConfig.name,
+      path: storyConfig.path,
+      hidden: storyConfig.hidden,
+      ...extra,
+    }
+  }
+
   const result: DefineResult<Expand<Pick<Props, IncludedProps>>, keyof D & IncludedProps> = {
     __type: 'define',
     component,
@@ -42,20 +64,8 @@ export function define<
     defaults,
     docs,
 
-    // Story creation methods
     single(config?: { props?: any; render?: any; isolate?: boolean; name?: string; path?: string; hidden?: boolean }): SingleStory {
-      return {
-        __type: 'story',
-        kind: 'single',
-        component,
-        defaults,
-        props: config?.props ? { ...config.props } : undefined,
-        render: wrapRender(config?.render ?? defaultRender),
-        isolate: config?.isolate,
-        name: config?.name,
-        path: config?.path,
-        hidden: config?.hidden,
-      }
+      return createStory('single', config ?? {}, config?.render ?? defaultRender, {}) as SingleStory
     },
 
     variants(config: {
@@ -67,20 +77,10 @@ export function define<
       path?: string
       hidden?: boolean
     }): VariantsStory {
-      return {
-        __type: 'story',
-        kind: 'variants',
-        component,
-        defaults,
+      return createStory('variants', config, defaultRender, {
         items: config.items,
-        props: config.props ? { ...config.props } : undefined,
         columns: config.columns,
-        render: wrapRender(defaultRender),
-        isolate: config.isolate,
-        name: config.name,
-        path: config.path,
-        hidden: config.hidden,
-      }
+      }) as VariantsStory
     },
 
     matrix(config: {
@@ -92,45 +92,22 @@ export function define<
       path?: string
       hidden?: boolean
     }): MatrixStory {
-      return {
-        __type: 'story',
-        kind: 'matrix',
-        component,
-        defaults,
+      return createStory('matrix', config, defaultRender, {
         x: config.x,
         y: config.y,
-        props: config.props ? { ...config.props } : undefined,
-        render: wrapRender(defaultRender),
-        isolate: config.isolate,
-        name: config.name,
-        path: config.path,
-        hidden: config.hidden,
-      }
+      }) as MatrixStory
     },
 
-    // Variant config helpers
     allOf(prop: any): AllOfConfig {
-      return {
-        __type: 'allOf',
-        prop: String(prop),
-      }
+      return { __type: 'allOf', prop: String(prop) }
     },
 
     values(prop: any, values: any[]): ValuesConfig {
-      return {
-        __type: 'values',
-        prop: String(prop),
-        values,
-      }
+      return { __type: 'values', prop: String(prop), values }
     },
 
     generate(prop: any, fn: () => any, count: number): GenerateConfig {
-      return {
-        __type: 'generate',
-        prop: String(prop),
-        fn,
-        count,
-      }
+      return { __type: 'generate', prop: String(prop), fn, count }
     },
   }
 

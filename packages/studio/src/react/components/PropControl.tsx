@@ -1,6 +1,9 @@
 import { memo } from 'react'
 import type { PropInfo } from '../../types.js'
 
+const INPUT_CLASS =
+	'st:w-full st:text-xs st:bg-transparent st:border st:border-border st:rounded-md st:px-2 st:py-1.5 st:text-text st:outline-none focus:st:border-accent st:transition-colors'
+
 export const PropControl = memo(function PropControl({
 	prop,
 	value,
@@ -15,7 +18,7 @@ export const PropControl = memo(function PropControl({
 	if (type.kind === 'literal') {
 		return (
 			<select
-				className="st:w-full st:text-xs st:bg-transparent st:border st:border-border st:rounded-md st:px-2 st:py-1.5 st:text-text st:cursor-pointer st:outline-none focus:st:border-accent st:transition-colors"
+				className={`${INPUT_CLASS} st:cursor-pointer`}
 				value={String(value ?? '')}
 				onChange={(e) => onChange(e.target.value)}
 			>
@@ -49,7 +52,7 @@ export const PropControl = memo(function PropControl({
 		return (
 			<input
 				type="text"
-				className="st:w-full st:text-xs st:bg-transparent st:border st:border-border st:rounded-md st:px-2 st:py-1.5 st:text-text st:outline-none focus:st:border-accent st:transition-colors"
+				className={INPUT_CLASS}
 				value={String(value ?? '')}
 				onChange={(e) => onChange(e.target.value)}
 			/>
@@ -60,7 +63,7 @@ export const PropControl = memo(function PropControl({
 		return (
 			<input
 				type="number"
-				className="st:w-full st:text-xs st:bg-transparent st:border st:border-border st:rounded-md st:px-2 st:py-1.5 st:text-text st:outline-none focus:st:border-accent st:transition-colors"
+				className={INPUT_CLASS}
 				value={Number(value ?? 0)}
 				onChange={(e) => onChange(Number(e.target.value))}
 			/>

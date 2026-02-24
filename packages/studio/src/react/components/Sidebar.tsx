@@ -1,15 +1,13 @@
+import type { ActiveView } from '../hooks/useHashRoute.js'
 import type { Theme } from '../hooks/useTheme.js'
 import type { SidebarNode } from '../utils/buildSidebarTree.js'
 
 export interface SidebarProps {
 	tree: SidebarNode[]
-	activeComponent: string | null
-	activeStory: string | null
-	activePage: string | null
-	activeComponentPage: string | null
+	activeView: ActiveView | null
 	selectStory: (component: string, story: string) => void
-	selectPage: (pageName: string) => void
-	selectComponentPage: (componentName: string, pageName: string) => void
+	selectPage: (name: string) => void
+	selectComponentPage: (component: string, page: string) => void
 	collapsed: Set<string>
 	toggleCollapse: (key: string) => void
 	disableSearch: boolean
@@ -21,10 +19,7 @@ export interface SidebarProps {
 
 export function Sidebar({
 	tree,
-	activeComponent,
-	activeStory,
-	activePage,
-	activeComponentPage,
+	activeView,
 	selectStory,
 	selectPage,
 	selectComponentPage,
@@ -37,10 +32,7 @@ export function Sidebar({
 	onToggleTheme,
 }: SidebarProps) {
 	const ctx: RenderContext = {
-		activeComponent,
-		activeStory,
-		activePage,
-		activeComponentPage,
+		activeView,
 		selectStory,
 		selectPage,
 		selectComponentPage,
@@ -82,13 +74,10 @@ export function Sidebar({
 }
 
 interface RenderContext {
-	activeComponent: string | null
-	activeStory: string | null
-	activePage: string | null
-	activeComponentPage: string | null
+	activeView: ActiveView | null
 	selectStory: (component: string, story: string) => void
-	selectPage: (pageName: string) => void
-	selectComponentPage: (componentName: string, pageName: string) => void
+	selectPage: (name: string) => void
+	selectComponentPage: (component: string, page: string) => void
 	toggleCollapse: (key: string) => void
 	isNodeCollapsed: (key: string) => boolean
 }
@@ -116,7 +105,7 @@ function renderNode(
 	const hasChildren = node.children.length > 0
 	const nodeCollapsed = hasChildren ? ctx.isNodeCollapsed(nodeKey) : undefined
 
-	const isActive = getIsActive(node, ctx, parentComponentName)
+	const isActive = getIsActive(node, ctx.activeView, parentComponentName)
 	const icon = node.type === 'page' ? '\u25A2' : undefined
 	const componentName = node.type === 'component' ? node.componentName : parentComponentName
 
@@ -131,7 +120,7 @@ function renderNode(
 			}
 		} else if (node.type === 'component') {
 			ctx.toggleCollapse(nodeKey)
-			if (nodeCollapsed && ctx.activeComponent !== node.componentName) {
+			if (nodeCollapsed && !(ctx.activeView && 'component' in ctx.activeView && ctx.activeView.component === node.componentName)) {
 				const firstPage = node.children.find((c) => c.type === 'page')
 				if (firstPage?.type === 'page') {
 					ctx.selectComponentPage(node.componentName, firstPage.pageName)
@@ -160,19 +149,25 @@ function renderNode(
 
 function getIsActive(
 	node: SidebarNode,
-	ctx: RenderContext,
+	activeView: ActiveView | null,
 	parentComponentName: string | undefined,
 ): boolean {
+	if (!activeView) return false
+
 	switch (node.type) {
 		case 'component':
-			return ctx.activeComponent === node.componentName
+			return 'component' in activeView && activeView.component === node.componentName
 		case 'story':
-			return ctx.activeComponent === parentComponentName && ctx.activeStory === node.storyName
+			return activeView.type === 'story' &&
+				activeView.component === parentComponentName &&
+				activeView.story === node.storyName
 		case 'page':
 			if (parentComponentName) {
-				return ctx.activeComponent === parentComponentName && ctx.activeComponentPage === node.pageName
+				return activeView.type === 'componentPage' &&
+					activeView.component === parentComponentName &&
+					activeView.page === node.pageName
 			}
-			return ctx.activePage === node.pageName
+			return activeView.type === 'page' && activeView.name === node.pageName
 		default:
 			return false
 	}

@@ -1,5 +1,5 @@
 import type { Story, SingleStory, VariantsStory, MatrixStory, PropInfo } from '../../types.js'
-import { resolveVariantConfig, variantConfigProp } from '../../resolve.js'
+import { resolveVariantConfig, getVariantProp } from '../../resolve.js'
 import { ErrorBoundary } from './ErrorBoundary.js'
 import { VariantCard } from './VariantCard.js'
 import { IframePreview } from './IframePreview.js'
@@ -48,7 +48,7 @@ function RenderMatrix({ story, props }: { story: MatrixStory; props: PropInfo[] 
 	const xVariants = resolveVariantConfig(story.x, props, {})
 	if (xVariants.length === 0) return null
 
-	const xProp = variantConfigProp(story.x)
+	const xProp = getVariantProp(story.x)
 	const xValues = xVariants.map((v) => v.props[xProp])
 
 	const rows: { label: string; cells: { label: string; props: Record<string, unknown> }[] }[] = []
@@ -56,7 +56,7 @@ function RenderMatrix({ story, props }: { story: MatrixStory; props: PropInfo[] 
 		const yVariants = resolveVariantConfig(yConfig, props, {})
 		if (yVariants.length === 0) continue
 
-		const yProp = variantConfigProp(yConfig)
+		const yProp = getVariantProp(yConfig)
 
 		for (const yVariant of yVariants) {
 			const yValue = yVariant.props[yProp]
