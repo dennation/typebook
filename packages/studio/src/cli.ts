@@ -8,8 +8,8 @@ import {
   LOG_PREFIX,
   DEFAULT_REGISTRY_FILE,
   DEFAULT_META_FILE,
-  DEFAULT_INCLUDE,
-  DEFAULT_PAGES_INCLUDE,
+  DEFAULT_STORIES_GLOB,
+  DEFAULT_PAGES_GLOB,
 } from './constants.js'
 
 const args = process.argv.slice(2)
@@ -17,15 +17,15 @@ const command = args[0]
 
 if (command === 'generate') {
   const cwd = process.cwd()
-  const includeArg = args.find((a) => a.startsWith('--include='))
-  const include = includeArg
-    ? includeArg.split('=')[1]
-    : DEFAULT_INCLUDE
+  const storiesArg = args.find((a) => a.startsWith('--stories='))
+  const storiesGlob = storiesArg
+    ? storiesArg.split('=')[1]
+    : DEFAULT_STORIES_GLOB
 
-  const includePagesArg = args.find((a) => a.startsWith('--include-pages='))
-  const includePages = includePagesArg
-    ? includePagesArg.split('=')[1]
-    : DEFAULT_PAGES_INCLUDE
+  const pagesArg = args.find((a) => a.startsWith('--pages='))
+  const pagesGlob = pagesArg
+    ? pagesArg.split('=')[1]
+    : DEFAULT_PAGES_GLOB
 
   const outputArg = args.find((a) => a.startsWith('--output='))
   const registryOutput = outputArg
@@ -37,10 +37,10 @@ if (command === 'generate') {
     ? metaOutputArg.split('=')[1]
     : DEFAULT_META_FILE
 
-  const files = await findFiles(cwd, include)
+  const files = await findFiles(cwd, storiesGlob)
   console.log(LOG_PREFIX, `Found ${files.length} story file(s)`)
 
-  const pages = await findFiles(cwd, includePages)
+  const pages = await findFiles(cwd, pagesGlob)
   console.log(LOG_PREFIX, `Found ${pages.length} page file(s)`)
 
   // Start TypeScript client
@@ -96,8 +96,8 @@ if (command === 'generate') {
     generate    Generate registry and meta gen files from .stories.tsx and .docs.tsx files
 
   Options:
-    --include=GLOB            Story files glob pattern (default: ${DEFAULT_INCLUDE})
-    --include-pages=GLOB      Page files glob pattern (default: ${DEFAULT_PAGES_INCLUDE})
+    --stories=GLOB            Story files glob pattern (default: ${DEFAULT_STORIES_GLOB})
+    --pages=GLOB              Page files glob pattern (default: ${DEFAULT_PAGES_GLOB})
     --output=PATH             Output path for registry file (default: ${DEFAULT_REGISTRY_FILE})
     --meta-output=PATH        Output path for meta file (default: ${DEFAULT_META_FILE})
 

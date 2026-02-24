@@ -4,9 +4,9 @@ import type { ComponentType, ReactNode } from 'react'
 
 export interface StudioConfig {
   /** Glob pattern for .stories.tsx files */
-  include?: string
+  stories?: string
   /** Glob pattern for docs page files */
-  includePages?: string
+  pages?: string
   /** Output path for the generated registry file (default: './ui-studio-registry.gen.ts') */
   output?: string
   /** Output path for the generated meta file (default: './ui-studio-meta.gen.ts') */

@@ -9,8 +9,8 @@ import {
 	LOG_PREFIX,
 	DEFAULT_REGISTRY_FILE,
 	DEFAULT_META_FILE,
-	DEFAULT_INCLUDE,
-	DEFAULT_PAGES_INCLUDE,
+	DEFAULT_STORIES_GLOB,
+	DEFAULT_PAGES_GLOB,
 	DEBOUNCE_MS,
 } from '../constants.js'
 
@@ -20,8 +20,8 @@ export interface CompilerConfig extends StudioConfig {
 
 export class StudioCompiler {
 	readonly cwd: string
-	private readonly include: string
-	private readonly includePages: string
+	private readonly storiesGlob: string
+	private readonly pagesGlob: string
 	private readonly registryOutput: string
 	private readonly metaOutput: string
 	private readonly isStoryFile: (path: string) => boolean
@@ -35,12 +35,12 @@ export class StudioCompiler {
 
 	constructor(config: CompilerConfig) {
 		this.cwd = config.cwd
-		this.include = config.include ?? DEFAULT_INCLUDE
-		this.includePages = config.includePages ?? DEFAULT_PAGES_INCLUDE
+		this.storiesGlob = config.stories ?? DEFAULT_STORIES_GLOB
+		this.pagesGlob = config.pages ?? DEFAULT_PAGES_GLOB
 		this.registryOutput = config.output ?? DEFAULT_REGISTRY_FILE
 		this.metaOutput = config.metaOutput ?? DEFAULT_META_FILE
-		this.isStoryFile = picomatch(this.include)
-		this.isPageFile = picomatch(this.includePages)
+		this.isStoryFile = picomatch(this.storiesGlob)
+		this.isPageFile = picomatch(this.pagesGlob)
 	}
 
 	/** Resolved absolute path to the registry gen file */
@@ -55,8 +55,8 @@ export class StudioCompiler {
 
 	/** Initialize TS client, scan story files, and generate */
 	async start(): Promise<void> {
-		this.storyFiles = await findFiles(this.cwd, this.include)
-		this.pageFiles = await findFiles(this.cwd, this.includePages)
+		this.storyFiles = await findFiles(this.cwd, this.storiesGlob)
+		this.pageFiles = await findFiles(this.cwd, this.pagesGlob)
 		console.log(LOG_PREFIX, `Found ${this.storyFiles.length} story file(s), ${this.pageFiles.length} page file(s)`)
 
 		const client = new TypeScriptClient(this.cwd)
@@ -100,8 +100,8 @@ export class StudioCompiler {
 
 	/** Full regeneration: rescan files, extract types, write gen files */
 	async regenerate(changedFile?: string): Promise<void> {
-		this.storyFiles = await findFiles(this.cwd, this.include)
-		this.pageFiles = await findFiles(this.cwd, this.includePages)
+		this.storyFiles = await findFiles(this.cwd, this.storiesGlob)
+		this.pageFiles = await findFiles(this.cwd, this.pagesGlob)
 
 		if (this.tsClient && changedFile) {
 			this.invalidateTypeCache(changedFile)
