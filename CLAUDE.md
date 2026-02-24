@@ -55,7 +55,7 @@ packages/studio/
     define.ts                 — define() → DefineResult with single(), variants(), matrix(), allOf(), values(), generate()
     definePage.ts             — definePage() → PageResult for standalone documentation pages
     resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into variant arrays (used by renderers)
-    constants.ts              — Shared constants (PACKAGE_NAME, DEFAULT_DOCS_GLOB, etc.)
+    constants.ts              — Shared constants (PACKAGE_NAME, DEFAULT_PAGES_INCLUDE, etc.)
     cli.ts                    — CLI entry: `npx @dennation/ui-studio generate`
     core/
       compiler.ts             — StudioCompiler class: shared lifecycle, type caching, gen file writing
@@ -279,7 +279,7 @@ export default defineConfig({
     react(),
     uiStudio({
       stories: './src/**/*.stories.tsx',        // default
-      docs: './src/**/*.docs.tsx',             // default
+      pages: './src/**/*.docs.tsx',             // default
       output: './ui-studio-registry.gen.ts',   // default
       metaOutput: './ui-studio-meta.gen.ts',   // default
     }),
@@ -299,7 +299,7 @@ export default {
     new HtmlWebpackPlugin({ template: './src/index.html' }),
     new UiStudioWebpackPlugin({
       stories: './src/**/*.stories.tsx',        // default
-      docs: './src/**/*.docs.tsx',             // default
+      pages: './src/**/*.docs.tsx',             // default
       output: './ui-studio-registry.gen.ts',   // default
       metaOutput: './ui-studio-meta.gen.ts',   // default
     }),

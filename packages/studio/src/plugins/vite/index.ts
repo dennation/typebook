@@ -43,7 +43,7 @@ export function uiStudio(config?: StudioConfig): Plugin {
 
 			server.watcher.on('add', (path) => {
 				const relPath = relative(compiler.cwd, path)
-				if (compiler.matchesStoryGlob(relPath) || compiler.matchesDocsGlob(relPath)) {
+				if (compiler.matchesStoryGlob(relPath) || compiler.matchesPageGlob(relPath)) {
 					compiler.debouncedRegenerate(path)
 				}
 			})
@@ -54,7 +54,7 @@ export function uiStudio(config?: StudioConfig): Plugin {
 					compiler.evictTypeCache(path)
 					compiler.debouncedRegenerate()
 				}
-				if (compiler.matchesDocsGlob(relPath)) {
+				if (compiler.matchesPageGlob(relPath)) {
 					compiler.debouncedRegenerate()
 				}
 			})

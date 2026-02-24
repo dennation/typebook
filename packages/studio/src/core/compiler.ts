@@ -10,7 +10,7 @@ import {
 	DEFAULT_REGISTRY_FILE,
 	DEFAULT_META_FILE,
 	DEFAULT_STORIES_GLOB,
-	DEFAULT_DOCS_GLOB,
+	DEFAULT_PAGES_GLOB,
 	DEBOUNCE_MS,
 } from '../constants.js'
 
@@ -21,26 +21,26 @@ export interface CompilerConfig extends StudioConfig {
 export class StudioCompiler {
 	readonly cwd: string
 	private readonly storiesGlob: string
-	private readonly docsGlob: string
+	private readonly pagesGlob: string
 	private readonly registryOutput: string
 	private readonly metaOutput: string
 	private readonly isStoryFile: (path: string) => boolean
-	private readonly isDocsFile: (path: string) => boolean
+	private readonly isPageFile: (path: string) => boolean
 
 	private tsClient: TypeScriptClient | null = null
 	private storyFiles: string[] = []
-	private docsFiles: string[] = []
+	private pageFiles: string[] = []
 	private debounceTimer: ReturnType<typeof setTimeout> | null = null
 	private readonly typeCache = new Map<string, PropInfo[]>()
 
 	constructor(config: CompilerConfig) {
 		this.cwd = config.cwd
 		this.storiesGlob = config.stories ?? DEFAULT_STORIES_GLOB
-		this.docsGlob = config.docs ?? DEFAULT_DOCS_GLOB
+		this.pagesGlob = config.pages ?? DEFAULT_PAGES_GLOB
 		this.registryOutput = config.output ?? DEFAULT_REGISTRY_FILE
 		this.metaOutput = config.metaOutput ?? DEFAULT_META_FILE
 		this.isStoryFile = picomatch(this.storiesGlob)
-		this.isDocsFile = picomatch(this.docsGlob)
+		this.isPageFile = picomatch(this.pagesGlob)
 	}
 
 	/** Resolved absolute path to the registry gen file */
@@ -56,8 +56,8 @@ export class StudioCompiler {
 	/** Initialize TS client, scan story files, and generate */
 	async start(): Promise<void> {
 		this.storyFiles = await findFiles(this.cwd, this.storiesGlob)
-		this.docsFiles = await findFiles(this.cwd, this.docsGlob)
-		console.log(LOG_PREFIX, `Found ${this.storyFiles.length} story file(s), ${this.docsFiles.length} docs file(s)`)
+		this.pageFiles = await findFiles(this.cwd, this.pagesGlob)
+		console.log(LOG_PREFIX, `Found ${this.storyFiles.length} story file(s), ${this.pageFiles.length} page file(s)`)
 
 		const client = new TypeScriptClient(this.cwd)
 		try {
@@ -88,9 +88,9 @@ export class StudioCompiler {
 		return this.isStoryFile(relPath)
 	}
 
-	/** Check if a relative path matches the docs file glob */
-	matchesDocsGlob(relPath: string): boolean {
-		return this.isDocsFile(relPath)
+	/** Check if a relative path matches the page file glob */
+	matchesPageGlob(relPath: string): boolean {
+		return this.isPageFile(relPath)
 	}
 
 	/** Get the relative path of a file from cwd */
@@ -101,7 +101,7 @@ export class StudioCompiler {
 	/** Full regeneration: rescan files, extract types, write gen files */
 	async regenerate(changedFile?: string): Promise<void> {
 		this.storyFiles = await findFiles(this.cwd, this.storiesGlob)
-		this.docsFiles = await findFiles(this.cwd, this.docsGlob)
+		this.pageFiles = await findFiles(this.cwd, this.pagesGlob)
 
 		if (this.tsClient && changedFile) {
 			this.invalidateTypeCache(changedFile)
@@ -118,7 +118,7 @@ export class StudioCompiler {
 		)
 
 		const pageFileInfos = await Promise.all(
-			this.docsFiles.map(async (filePath) => {
+			this.pageFiles.map(async (filePath) => {
 				const content = readFileSync(filePath, 'utf-8')
 				const analysis = await analyzePageFile(content)
 				return { filePath, analysis }

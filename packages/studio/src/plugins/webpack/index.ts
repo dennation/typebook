@@ -61,7 +61,7 @@ function findFirstMatchingFile(
 	for (const absPath of files) {
 		if (absPath.endsWith('.ts') || absPath.endsWith('.tsx')) {
 			const relPath = relative(context, absPath)
-			if (studio.matchesStoryGlob(relPath) || studio.matchesDocsGlob(relPath)) {
+			if (studio.matchesStoryGlob(relPath) || studio.matchesPageGlob(relPath)) {
 				return absPath
 			}
 		}
