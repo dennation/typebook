@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
-import type { ComponentType } from 'react'
-import type { PropInfo } from '../../types.js'
+import type { DefineResult, PropInfo } from '../../types.js'
+import { useStudioMeta } from '../context.js'
 import { ErrorBoundary } from './ErrorBoundary.js'
 import { PropControl } from './PropControl.js'
 
@@ -16,16 +16,12 @@ function isControllable(prop: PropInfo): boolean {
 	return k === 'literal' || k === 'boolean' || k === 'string' || k === 'number' || k === 'node'
 }
 
-export function ComponentPreview({
-	component: Component,
-	defaults,
-	props,
-}: {
-	component: ComponentType<any>
-	defaults: Record<string, unknown>
-	props: PropInfo[]
-}) {
-	const [controlProps, setControlProps] = useState<Record<string, unknown>>(defaults)
+export function Playground({ of: config }: { of: DefineResult<any> }) {
+	const propsMap = useStudioMeta()
+	const props: PropInfo[] = propsMap.get(config.component) ?? []
+	const Component = config.component
+
+	const [controlProps, setControlProps] = useState<Record<string, unknown>>(config.defaults)
 
 	const handleChange = useCallback((propName: string, value: unknown) => {
 		setControlProps((prev) => ({ ...prev, [propName]: value }))

@@ -76,16 +76,17 @@ packages/studio/
         Studio.tsx            — <Studio /> component (per-story sidebar tree, theme, single-story rendering)
         Story.tsx             — <Story of={...} /> component for embedding stories in doc pages
         StoryRenderer.tsx     — Dispatches to RenderSingle / RenderVariants / RenderMatrix
-        ComponentPreview.tsx   — Component preview with interactive props panel
+        Playground.tsx         — <Playground of={defineResult} /> interactive component preview with props panel
         PropControl.tsx       — Prop controls: dropdown (literal), toggle (boolean), input (string), number
         VariantCard.tsx       — Single variant preview card (inline by default, iframe when isolate: true)
         IframePreview.tsx     — Iframe wrapper for CSS isolation of component previews
         ErrorBoundary.tsx     — Error boundary for component crash isolation
       hooks/
-        useHashRoute.ts       — Hash-based routing: #component/story + #page/page-name → activeComponent/activeStory/activePage
+        useHashRoute.ts       — Hash-based routing: #component/name (page or story, pages win) + #page/page-name → activeComponent/activeStory/activeComponentPage/activePage
       utils/
         index.ts              — Barrel export
-        buildSidebarTree.ts   — Builds sidebar tree: path groups → ComponentNode + PageNode → StoryGroup → StoryItem
+        buildSidebarTree.ts   — Builds sidebar tree: path groups → ComponentNode (with pages) + PageNode → StoryGroup → StoryItem
+        resolveComponentPages.ts — Generates default docs pages for components, handles user overrides
         naming.ts             — toKebabCase(), entryName(), pageName() helpers
         getGridStyle.ts       — getGridStyle() — computes CSS grid layout for variant grids
       styles/
@@ -95,7 +96,7 @@ packages/studio/
 ### Build entry points
 
 - **`index`** — Library exports (`define`, `definePage`, types). Consumed by user code and generated `.gen.ts`.
-- **`react/index`** — `<Studio />` component, `<Story />` component, `ErrorBoundary`.
+- **`react/index`** — `<Studio />` component, `<Story />` component, `<Playground />` component, `ErrorBoundary`.
 - **`plugins/vite`** — Vite plugin (`uiStudio()`). Thin wrapper around `StudioCompiler`.
 - **`plugins/webpack`** — Webpack plugin (`UiStudioWebpackPlugin`). Thin wrapper around `StudioCompiler`.
 - **`cli/index`** — CLI entry: `npx @dennation/ui-studio generate`.
@@ -103,7 +104,7 @@ packages/studio/
 ### Package exports
 
 - `@dennation/ui-studio` — define, definePage, types (ComponentMeta, Registry, ComponentEntry, etc.)
-- `@dennation/ui-studio/react` — Studio component, Story component
+- `@dennation/ui-studio/react` — Studio component, Story component, Playground component
 - `@dennation/ui-studio/vite` — uiStudio Vite plugin
 - `@dennation/ui-studio/webpack` — UiStudioWebpackPlugin
 
@@ -120,12 +121,14 @@ packages/studio/
                                     generateMetaFile()       →  ui-studio-meta.gen.ts (extracted types)
                                     generateRegistryFile()   →  ui-studio-registry.gen.ts (imports + assembly + pages)
                                               ↓
-                                    <Studio />  sidebar tree → click story → #component/story hash
-                                                             → click page  → #page/page-name hash
+                                    <Studio />  resolveComponentPages() → auto-generated docs + overrides
+                                              sidebar tree → click story          → #component/story-name hash
+                                                           → click component page → #component/page-name hash (pages win over stories)
+                                                           → click page           → #page/page-name hash
                                               ↓
                                     Stories: RenderSingle / RenderVariants / RenderMatrix
-                                    Pages: render page content component directly
-                                           (may contain <Story of={...} /> → resolves PropInfo via StudioMetaContext)
+                                    Pages & component pages: render page content component directly
+                                           (may contain <Story of={...} /> or <Playground of={...} /> → resolves PropInfo via StudioMetaContext)
 ```
 
 ### Key design decisions
@@ -145,7 +148,9 @@ packages/studio/
 - **VariantConfig marker pattern** — `button.allOf('size')` returns a typed marker `{ __type: 'allOf', prop: 'size' }` that gets resolved at render time by the story renderer using TS-extracted type data.
 - **Three story kinds** — `single` (one card), `variants` (grid of values for one prop), `matrix` (table: x prop × y props).
 - **Per-story pages** — each story is a separate page. Sidebar shows a tree: path groups → components → stories. Clicking a story navigates to `#component/story` hash route and renders only that story.
-- **Auto-generated Docs page** — each component gets a virtual "Docs" page (`DOCS_PAGE` constant) as the first sidebar item. Shows `ComponentPreview` with interactive props panel. Clicking a component name auto-selects its Docs page. The Docs page is not a real story — it's handled specially by the router and Studio. (Future: make it disableable or replaceable with custom content.)
+- **`<Playground />` component** — `<Playground of={defineResult} />` renders an interactive component preview with a props control table. Takes a `DefineResult` via the `of` prop, reads `PropInfo[]` from `StudioMetaContext`. Exported from `@dennation/ui-studio/react` for embedding in doc pages. Used internally by the auto-generated Docs page.
+- **Component pages** — pages can be associated with a component and appear inside its sidebar section. `ComponentNode` has a `pages: PageNode[]` field. Component pages use the same hash format as stories (`#component/page-name`) but route through the page rendering pipeline (`activeComponentPage` state). `resolveComponentPages()` builds the component→pages mapping.
+- **Auto-generated Docs page** — each component gets a real `PageResult` (`DEFAULT_DOCS_PAGE` constant = 'Docs') as its first sidebar page. The content renders `<Playground of={config} />`. Disable per-component with `docs: false` in `define()`. Override by creating a `.docs.tsx` with `name: DEFAULT_DOCS_PAGE` and `path: '{componentPath}/{componentName}'`. Clicking a component name auto-selects its docs page.
 - **Story path grouping** — stories can set `path` to group them under sub-sections in the sidebar (e.g. `path: 'Matrix'`). Default path is `'Stories'`. When all stories share the same path (single group), the group level is flattened — stories appear directly under the component.
 - **Story config fields** — all story kinds share common config via `StoryConfig`: `props`, `isolate`, `name`, `path`, `hidden`. Each kind adds its own fields: `single` adds `render`, `variants` adds `items`/`columns`, `matrix` adds `x`/`y`.
 
@@ -347,8 +352,8 @@ export default button
 
 ```tsx
 import { definePage } from '@dennation/ui-studio'
-import { Story } from '@dennation/ui-studio/react'
-import { Default, Sizes, Disabled } from '../stories/Button.stories'
+import { Story, Playground } from '@dennation/ui-studio/react'
+import button, { Default, Sizes, Disabled } from '../stories/Button.stories'
 
 export default definePage({
   name: 'Button Guide',
@@ -357,6 +362,7 @@ export default definePage({
   content: () => (
     <div>
       <h1>Button Guide</h1>
+      <Playground of={button} />           {/* interactive props panel */}
       <Story of={Default} />
       <h2>Sizes</h2>
       <Story of={Sizes} />
@@ -364,6 +370,40 @@ export default definePage({
       <Story of={Disabled} />   {/* hidden story — only appears here, not in sidebar */}
     </div>
   ),
+})
+```
+
+### Override auto-generated Docs page
+
+```tsx
+// To override the auto-generated Docs page for a component:
+// Use name: 'Docs' and path: '{componentPath}/{componentName}'
+import { definePage } from '@dennation/ui-studio'
+import { Playground } from '@dennation/ui-studio/react'
+import button from '../stories/Button.stories'
+
+export default definePage({
+  name: 'Docs',              // must match DEFAULT_DOCS_PAGE
+  path: 'Forms/Button',      // must match componentPath/componentName
+  content: () => (
+    <div>
+      <h1>Custom Button Docs</h1>
+      <Playground of={button} />
+      <p>Additional custom documentation...</p>
+    </div>
+  ),
+})
+```
+
+### Disable auto-generated Docs page
+
+```ts
+// Set docs: false in define() to disable auto-generated Docs page
+const button = define(Button, {
+  name: 'Button',
+  path: 'Forms',
+  docs: false,   // no auto-generated Docs page
+  defaults: { children: 'Click me' },
 })
 ```
 

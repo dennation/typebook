@@ -1,7 +1,7 @@
 import { definePage } from '@dennation/ui-studio'
-import { Story } from '@dennation/ui-studio/react'
+import { Story, Playground } from '@dennation/ui-studio/react'
 import Content from './button-guide.md'
-import { Default, Sizes, Variants, Colors, Disabled } from '../stories/Button.stories'
+import button, { Default, Sizes, Variants, Colors, Disabled } from '../stories/Button.stories'
 
 export default definePage({
 	name: 'Button',
@@ -10,6 +10,8 @@ export default definePage({
 	content: () => (
 		<div style={{ maxWidth: 720, lineHeight: 1.6 }}>
 			<Content />
+			<h2>Playground</h2>
+			<Playground of={button} />
 			<h2>Default</h2>
 			<Story of={Default} />
 			<h2>Sizes</h2>

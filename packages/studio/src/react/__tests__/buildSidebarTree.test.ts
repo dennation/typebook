@@ -134,6 +134,44 @@ describe('buildSidebarTree with pages', () => {
 	})
 })
 
+describe('buildSidebarTree with component pages', () => {
+	test('component pages appear inside ComponentNode', () => {
+		const entry = makeComponent('Button', 'Forms')
+		const docsPage = makePage('Docs')
+		const componentPages = new Map([[entry, [docsPage]]])
+
+		const tree = buildSidebarTree([entry], [], componentPages)
+		const comp = tree.find((n) => n.label === 'Forms')!.components[0]
+
+		expect(comp.pages).toHaveLength(1)
+		expect(comp.pages[0].name).toBe('Docs')
+		expect(comp.pages[0].page).toBe(docsPage)
+	})
+
+	test('component without pages has empty pages array', () => {
+		const entry = makeComponent('Button')
+		const tree = buildSidebarTree([entry], [], new Map())
+
+		const comp = tree[0].components[0]
+		expect(comp.pages).toEqual([])
+	})
+
+	test('component pages are sorted by order then name', () => {
+		const entry = makeComponent('Button')
+		const pages = [
+			makePage('Docs'),
+			{ ...makePage('API'), order: -2 } as any,
+		]
+		const componentPages = new Map([[entry, pages]])
+
+		const tree = buildSidebarTree([entry], [], componentPages)
+		const comp = tree[0].components[0]
+
+		expect(comp.pages[0].name).toBe('API')
+		expect(comp.pages[1].name).toBe('Docs')
+	})
+})
+
 describe('buildSidebarTree with hidden stories', () => {
 	test('hidden stories are excluded from sidebar tree', () => {
 		const entry = makeComponent('Button')

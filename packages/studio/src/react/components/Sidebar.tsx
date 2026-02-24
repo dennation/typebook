@@ -1,6 +1,5 @@
 import type { ComponentEntry } from '../../types.js'
 import type { Theme } from '../hooks/useTheme.js'
-import { DOCS_PAGE } from '../../constants.js'
 import type { SidebarNode, ComponentNode, PageNode } from '../utils/buildSidebarTree.js'
 
 export interface SidebarProps {
@@ -8,8 +7,10 @@ export interface SidebarProps {
 	activeComponent: string | null
 	activeStory: string | null
 	activePage: string | null
+	activeComponentPage: string | null
 	selectStory: (component: string, story: string) => void
 	selectPage: (pageName: string) => void
+	selectComponentPage: (componentName: string, pageName: string) => void
 	collapsed: Set<string>
 	toggleCollapse: (key: string) => void
 	disableSearch: boolean
@@ -25,8 +26,10 @@ export function Sidebar({
 	activeComponent,
 	activeStory,
 	activePage,
+	activeComponentPage,
 	selectStory,
 	selectPage,
+	selectComponentPage,
 	collapsed,
 	toggleCollapse,
 	disableSearch,
@@ -69,8 +72,10 @@ export function Sidebar({
 					activeComponent,
 					activeStory,
 					activePage,
+					activeComponentPage,
 					selectStory,
 					selectPage,
+					selectComponentPage,
 					toggleCollapse,
 					isNodeCollapsed,
 					stories,
@@ -84,8 +89,10 @@ interface RenderContext {
 	activeComponent: string | null
 	activeStory: string | null
 	activePage: string | null
+	activeComponentPage: string | null
 	selectStory: (component: string, story: string) => void
 	selectPage: (pageName: string) => void
+	selectComponentPage: (componentName: string, pageName: string) => void
 	toggleCollapse: (key: string) => void
 	isNodeCollapsed: (key: string) => boolean
 	stories: Record<string, ComponentEntry['stories']>
@@ -158,6 +165,25 @@ function renderPageNode(
 	)
 }
 
+function renderComponentPageNode(
+	page: PageNode,
+	componentName: string,
+	depth: number,
+	ctx: RenderContext,
+) {
+	const isActive = ctx.activeComponent === componentName && ctx.activeComponentPage === page.name
+
+	return (
+		<SidebarButton
+			key={`comp-page:${page.name}`}
+			label={page.name}
+			depth={depth}
+			isActive={isActive}
+			onClick={() => ctx.selectComponentPage(componentName, page.name)}
+		/>
+	)
+}
+
 function renderComponentNode(
 	comp: ComponentNode,
 	depth: number,
@@ -177,19 +203,16 @@ function renderComponentNode(
 				collapsed={compCollapsed}
 				onClick={() => {
 					ctx.toggleCollapse(compKey)
-					if (compCollapsed && ctx.activeComponent !== comp.name) {
-						ctx.selectStory(comp.name, DOCS_PAGE)
+					if (compCollapsed && ctx.activeComponent !== comp.name && comp.pages.length > 0) {
+						ctx.selectComponentPage(comp.name, comp.pages[0].name)
 					}
 				}}
 			/>
 			{!compCollapsed && (
 				<>
-					<SidebarButton
-						label={DOCS_PAGE}
-						isActive={ctx.activeComponent === comp.name && ctx.activeStory === DOCS_PAGE}
-						depth={depth + 1}
-						onClick={() => ctx.selectStory(comp.name, DOCS_PAGE)}
-					/>
+					{comp.pages.map((page) =>
+						renderComponentPageNode(page, comp.name, depth + 1, ctx),
+					)}
 					{comp.groups.map((group) => {
 						const groupKey = `${compKey}/${group.label}`
 						const groupCollapsed = ctx.isNodeCollapsed(groupKey)

@@ -1,14 +1,16 @@
 import { useState, useCallback, useInsertionEffect, useMemo } from 'react'
 import type { ComponentType } from 'react'
 import type { Registry, ComponentEntry, PropInfo } from '../../types.js'
-import { STYLE_ELEMENT_ID, DOCS_PAGE } from '../../constants.js'
+import { STYLE_ELEMENT_ID } from '../../constants.js'
 import { buildSidebarTree } from '../utils/buildSidebarTree.js'
+import { resolveComponentPages } from '../utils/resolveComponentPages.js'
 import { entryName } from '../utils/naming.js'
 import { useHashRoute } from '../hooks/useHashRoute.js'
 import { useTheme, type Theme } from '../hooks/useTheme.js'
 import { StudioMetaProvider } from '../context.js'
 import { Sidebar } from './Sidebar.js'
 import { MainContent } from './MainContent.js'
+import { Playground } from './Playground.js'
 import styles from '../styles/styles.css?inline'
 
 export interface StudioProps {
@@ -19,7 +21,6 @@ export interface StudioProps {
 
 export function Studio({ registry, theme: themeOverride, disableSearch = false }: StudioProps) {
 	const { components, pages = [] } = registry
-	const { activeComponent, activeStory, activePage, selectStory, selectPage } = useHashRoute(components, pages)
 	const { theme, toggleTheme } = useTheme(themeOverride)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
@@ -34,6 +35,20 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 		}
 		return map
 	}, [components])
+
+	// Resolve component pages (auto-generated docs + user overrides)
+	const { componentPages, topLevelPages } = useMemo(
+		() =>
+			resolveComponentPages(components, pages, (entry) => {
+				const DocsContent = () => <Playground of={entry.config} />
+				DocsContent.displayName = `${entryName(entry)}Docs`
+				return DocsContent
+			}),
+		[components, pages],
+	)
+
+	const { activeComponent, activeStory, activePage, activeComponentPage, selectStory, selectPage, selectComponentPage } =
+		useHashRoute(components, topLevelPages, componentPages)
 
 	const toggleCollapse = useCallback((key: string) => {
 		setCollapsed((prev) => {
@@ -65,17 +80,20 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 		})
 	}, [components, searchQuery])
 
-	// Filter pages by search query
+	// Filter top-level pages by search query
 	const filteredPages = useMemo(() => {
-		if (!searchQuery) return pages
+		if (!searchQuery) return topLevelPages
 		const q = searchQuery.toLowerCase()
-		return pages.filter((p) => {
+		return topLevelPages.filter((p) => {
 			return p.name.toLowerCase().includes(q) || (p.path?.toLowerCase().includes(q) ?? false)
 		})
-	}, [pages, searchQuery])
+	}, [topLevelPages, searchQuery])
 
 	// Build sidebar tree from paths
-	const tree = useMemo(() => buildSidebarTree(filtered, filteredPages), [filtered, filteredPages])
+	const tree = useMemo(
+		() => buildSidebarTree(filtered, filteredPages, componentPages),
+		[filtered, filteredPages, componentPages],
+	)
 
 	// Stories lookup for sidebar
 	const storiesMap = useMemo(() => {
@@ -92,12 +110,10 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 		[components, activeComponent],
 	)
 
-	const isDocsPage = activeStory === DOCS_PAGE
-
-	// Active story data (only for non-docs pages)
+	// Active story data
 	const activeStoryObj = useMemo(
-		() => (activeEntry && activeStory && !isDocsPage ? (activeEntry.stories[activeStory] ?? null) : null),
-		[activeEntry, activeStory, isDocsPage],
+		() => (activeEntry && activeStory ? (activeEntry.stories[activeStory] ?? null) : null),
+		[activeEntry, activeStory],
 	)
 
 	const storyProps = useMemo(() => {
@@ -107,11 +123,21 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 			: (propsMap.get(activeStoryObj.component) ?? [])
 	}, [activeStoryObj, activeEntry, propsMap])
 
-	// Find active page entry
-	const activePageEntry = useMemo(
-		() => (activePage ? pages.find((p) => p.name === activePage) : undefined),
-		[pages, activePage],
-	)
+	// Find active page content — either top-level page or component page
+	const activePageContent = useMemo((): ComponentType | null => {
+		// Component page (e.g., auto-generated Docs)
+		if (activeComponentPage && activeEntry) {
+			const entryPages = componentPages.get(activeEntry)
+			const page = entryPages?.find((p) => p.name === activeComponentPage)
+			return page?.content ?? null
+		}
+		// Top-level page
+		if (activePage) {
+			const page = topLevelPages.find((p) => p.name === activePage)
+			return page?.content ?? null
+		}
+		return null
+	}, [activeComponentPage, activeEntry, activePage, topLevelPages, componentPages])
 
 	// Inject styles before first paint to prevent FOUC
 	useInsertionEffect(() => {
@@ -133,8 +159,10 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 					activeComponent={activeComponent}
 					activeStory={activeStory}
 					activePage={activePage}
+					activeComponentPage={activeComponentPage}
 					selectStory={selectStory}
 					selectPage={selectPage}
+					selectComponentPage={selectComponentPage}
 					collapsed={collapsed}
 					toggleCollapse={toggleCollapse}
 					disableSearch={disableSearch}
@@ -148,11 +176,9 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false }
 				<MainContent
 					activeEntry={activeEntry}
 					activeStory={activeStory}
-					isDocsPage={isDocsPage}
 					activeStoryObj={activeStoryObj}
 					storyProps={storyProps}
-					activePageContent={activePageEntry?.content ?? null}
-					activePageName={activePage}
+					activePageContent={activePageContent}
 				/>
 			</div>
 		</StudioMetaProvider>

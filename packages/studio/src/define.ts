@@ -25,6 +25,7 @@ export function define<
   const name = config?.name
   const path = config?.path
   const wrapper = config?.wrapper
+  const docs = config?.docs
 
   const defaultRender: StoryRenderFn = (props) => createElement(component, props)
 
@@ -39,6 +40,7 @@ export function define<
     name,
     path,
     defaults,
+    docs,
 
     // Story creation methods
     single(config?: { props?: any; render?: any; isolate?: boolean; name?: string; path?: string; hidden?: boolean }): SingleStory {

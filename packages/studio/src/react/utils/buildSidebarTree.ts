@@ -15,6 +15,7 @@ export interface ComponentNode {
 	name: string
 	entry: ComponentEntry
 	groups: StoryGroup[]
+	pages: PageNode[]
 }
 
 export interface PageNode {
@@ -29,7 +30,10 @@ export interface SidebarNode {
 	children: SidebarNode[]
 }
 
-function buildComponentNode(entry: ComponentEntry): ComponentNode {
+function buildComponentNode(
+	entry: ComponentEntry,
+	componentPageResults: PageResult[] = [],
+): ComponentNode {
 	const componentName = entryName(entry)
 	const groupMap = new Map<string, StoryItem[]>()
 
@@ -46,10 +50,15 @@ function buildComponentNode(entry: ComponentEntry): ComponentNode {
 		stories,
 	}))
 
+	const pages = sortPages(
+		componentPageResults.map((p) => ({ name: p.name, page: p })),
+	)
+
 	return {
 		name: componentName,
 		entry,
 		groups,
+		pages,
 	}
 }
 
@@ -65,6 +74,7 @@ function sortPages(pages: PageNode[]): PageNode[] {
 export function buildSidebarTree(
 	components: ComponentEntry[],
 	pages: PageResult[] = [],
+	componentPages: Map<ComponentEntry, PageResult[]> = new Map(),
 ): SidebarNode[] {
 	const root: SidebarNode[] = []
 
@@ -103,7 +113,7 @@ export function buildSidebarTree(
 	// Place components into tree by path
 	for (const entry of components) {
 		const path = entry.config.path
-		const componentNode = buildComponentNode(entry)
+		const componentNode = buildComponentNode(entry, componentPages.get(entry))
 
 		if (!path) {
 			root.push({ label: '', components: [componentNode], pages: [], children: [] })

@@ -91,6 +91,8 @@ export interface DefineConfig<Props, IncludedProps extends keyof Props = keyof P
   props?: ReadonlyArray<IncludedProps>
   /** Wrapper applied to all stories (e.g. a theme provider) */
   wrapper?: WrapperFn
+  /** Set false to disable auto-generated docs page (default: true) */
+  docs?: boolean
 }
 
 
@@ -181,6 +183,7 @@ export interface DefineResult<Props, CoveredByDefaults extends keyof Props = nev
   name?: string
   path?: string
   defaults: Record<string, unknown>
+  docs?: boolean
 
   // Story creation methods
   single(config?: StoryConfig<Props, CoveredByDefaults> & {

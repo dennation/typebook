@@ -2,28 +2,23 @@ import type { ComponentType } from 'react'
 import type { ComponentEntry, Story, PropInfo } from '../../types.js'
 import { entryName } from '../utils/naming.js'
 import { StoryRenderer } from './StoryRenderer.js'
-import { ComponentPreview } from './ComponentPreview.js'
 
 export interface MainContentProps {
 	activeEntry: ComponentEntry | undefined
 	activeStory: string | null
-	isDocsPage: boolean
 	activeStoryObj: Story | null
 	storyProps: PropInfo[]
 	activePageContent: ComponentType | null
-	activePageName: string | null
 }
 
 export function MainContent({
 	activeEntry,
 	activeStory,
-	isDocsPage,
 	activeStoryObj,
 	storyProps,
 	activePageContent,
-	activePageName,
 }: MainContentProps) {
-	// Page rendering
+	// Page rendering (top-level pages and component pages like auto-generated Docs)
 	if (activePageContent) {
 		const PageContent = activePageContent
 		return (
@@ -35,26 +30,18 @@ export function MainContent({
 
 	return (
 		<main className="st:overflow-auto st:p-8 st:bg-bg">
-			{activeEntry && activeStory ? (
+			{activeEntry && activeStory && activeStoryObj ? (
 				<div>
 					<h1 className="st:text-2xl st:font-semibold st:mb-6">
 						{entryName(activeEntry)}
 					</h1>
 
-					{isDocsPage ? (
-						<ComponentPreview
-							component={activeEntry.config.component}
-							defaults={activeEntry.config.defaults}
-							props={activeEntry.meta?.props ?? []}
-						/>
-					) : activeStoryObj ? (
-						<div className="st:mb-8">
-							<h2 className="st:text-lg st:font-medium st:mb-5 st:text-text-muted">
-								{activeStoryObj.name ?? activeStory}
-							</h2>
-							<StoryRenderer story={activeStoryObj} props={storyProps} />
-						</div>
-					) : null}
+					<div className="st:mb-8">
+						<h2 className="st:text-lg st:font-medium st:mb-5 st:text-text-muted">
+							{activeStoryObj.name ?? activeStory}
+						</h2>
+						<StoryRenderer story={activeStoryObj} props={storyProps} />
+					</div>
 				</div>
 			) : (
 				<div className="st:flex st:items-center st:justify-center st:h-full st:text-text-muted st:text-sm">
