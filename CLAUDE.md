@@ -150,7 +150,7 @@ packages/studio/
 - **Per-story pages** — each story is a separate page. Sidebar shows a tree: path groups → components → stories. Clicking a story navigates to `#component/story` hash route and renders only that story.
 - **`<Playground />` component** — `<Playground of={defineResult} />` renders an interactive component preview with a props control table. Takes a `DefineResult` via the `of` prop, reads `PropInfo[]` from `StudioMetaContext`. Exported from `@dennation/ui-studio/react` for embedding in doc pages. Used internally by the auto-generated Docs page.
 - **Component pages** — pages can be associated with a component and appear inside its sidebar section. `ComponentNode` has a `pages: PageNode[]` field. Component pages use the same hash format as stories (`#component/page-name`) but route through the page rendering pipeline (`activeComponentPage` state). `resolveComponentPages()` builds the component→pages mapping.
-- **Auto-generated Docs page** — each component gets a real `PageResult` (`DEFAULT_DOCS_PAGE` constant = 'Docs') as its first sidebar page. The content renders `<Playground of={config} />`. Disable per-component with `docs: false` in `define()`. Override by creating a `.docs.tsx` with `name: DEFAULT_DOCS_PAGE` and `path: '{componentPath}/{componentName}'`. Clicking a component name auto-selects its docs page.
+- **Auto-generated API page** — each component gets a real `PageResult` (`DEFAULT_DOCS_PAGE` constant = 'API') as its first sidebar page. The content renders `<Playground of={config} />`. Disable per-component with `docs: false` in `define()`. Override by creating a `.docs.tsx` with `name: DEFAULT_DOCS_PAGE` and `path: '{componentPath}/{componentName}'`. Clicking a component name auto-selects its API page.
 - **Story path grouping** — stories can set `path` to group them under sub-sections in the sidebar (e.g. `path: 'Matrix'`). Default path is `'Stories'`. When all stories share the same path (single group), the group level is flattened — stories appear directly under the component.
 - **Story config fields** — all story kinds share common config via `StoryConfig`: `props`, `isolate`, `name`, `path`, `hidden`. Each kind adds its own fields: `single` adds `render`, `variants` adds `items`/`columns`, `matrix` adds `x`/`y`.
 
@@ -377,13 +377,13 @@ export default definePage({
 
 ```tsx
 // To override the auto-generated Docs page for a component:
-// Use name: 'Docs' and path: '{componentPath}/{componentName}'
+// Use name: 'API' and path: '{componentPath}/{componentName}'
 import { definePage } from '@dennation/ui-studio'
 import { Playground } from '@dennation/ui-studio/react'
 import button from '../stories/Button.stories'
 
 export default definePage({
-  name: 'Docs',              // must match DEFAULT_DOCS_PAGE
+  name: 'API',               // must match DEFAULT_DOCS_PAGE
   path: 'Forms/Button',      // must match componentPath/componentName
   content: () => (
     <div>
