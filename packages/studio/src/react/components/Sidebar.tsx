@@ -28,7 +28,7 @@ export function Sidebar({
 	const ctx: RenderContext = {
 		...route,
 		toggleCollapse,
-		isNodeCollapsed: (key: string) => !searchQuery && collapsed.has(key),
+		isNodeToggled: (key: string) => !searchQuery && collapsed.has(key),
 	}
 
 	return (
@@ -66,7 +66,7 @@ export function Sidebar({
 
 type RenderContext = HashRouteState & {
 	toggleCollapse: (key: string) => void
-	isNodeCollapsed: (key: string) => boolean
+	isNodeToggled: (key: string) => boolean
 }
 
 function renderNodes(
@@ -81,6 +81,25 @@ function renderNodes(
 	)
 }
 
+function groupContainsActive(
+	node: SidebarNode,
+	activeView: ActiveView | null,
+	componentName: string | undefined,
+): boolean {
+	if (!activeView) return false
+	for (const child of node.children) {
+		if (child.type === 'story' && activeView.type === 'story' &&
+			activeView.component === componentName && activeView.story === child.storyName) return true
+		if (child.type === 'page') {
+			if (componentName && activeView.type === 'componentPage' &&
+				activeView.component === componentName && activeView.page === child.pageName) return true
+			if (!componentName && activeView.type === 'page' && activeView.name === child.pageName) return true
+		}
+		if (child.children.length > 0 && groupContainsActive(child, activeView, componentName)) return true
+	}
+	return false
+}
+
 function renderNode(
 	node: SidebarNode,
 	depth: number,
@@ -90,7 +109,23 @@ function renderNode(
 ) {
 	const nodeKey = parentPath ? `${parentPath}/${node.label}` : node.label
 	const hasChildren = node.children.length > 0
-	const nodeCollapsed = hasChildren ? ctx.isNodeCollapsed(nodeKey) : undefined
+
+	// Top-level groups and components default to collapsed; nested groups (Stories, Matrix) default to expanded
+	const defaultCollapsed = node.type === 'component' || (node.type === 'group' && !parentComponentName)
+
+	let nodeCollapsed: boolean | undefined
+	if (!hasChildren) {
+		nodeCollapsed = undefined
+	} else if (defaultCollapsed) {
+		const containsActive = groupContainsActive(node, ctx.activeView, parentComponentName)
+		if (containsActive) {
+			nodeCollapsed = false
+		} else {
+			nodeCollapsed = !ctx.isNodeToggled(nodeKey)
+		}
+	} else {
+		nodeCollapsed = ctx.isNodeToggled(nodeKey)
+	}
 
 	const isActive = getIsActive(node, ctx.activeView, parentComponentName)
 	const icon = node.type === 'page' ? '\u25A2' : undefined

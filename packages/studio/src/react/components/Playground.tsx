@@ -26,11 +26,13 @@ export function Playground({ of: config }: { of: DefineResult<any> }) {
 	const [showInherited, setShowInherited] = useState(false)
 
 	const hasInherited = allProps.some((p) => p.inherited)
-	const filteredProps = allProps.filter((p) => {
-		if (!showInherited && p.inherited) return false
-		if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
-		return true
-	})
+	const filteredProps = allProps
+		.filter((p) => {
+			if (!showInherited && p.inherited) return false
+			if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
+			return true
+		})
+		.toSorted((a, b) => a.name.localeCompare(b.name))
 
 	const handleChange = useCallback((propName: string, value: unknown) => {
 		setControlProps((prev) => ({ ...prev, [propName]: value }))
