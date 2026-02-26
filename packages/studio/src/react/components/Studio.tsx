@@ -32,7 +32,6 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 	const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
 	// --- Inspect panel state ---
-	const [inspectOpen, setInspectOpen] = useState(false)
 	const [inspectedPreviewId, setInspectedPreviewId] = useState<string | null>(null)
 	const previewPropsRef = useRef<PreviewPropsMap>(new Map())
 	const previewPropInfosRef = useRef<PreviewPropInfosMap>(new Map())
@@ -40,12 +39,6 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 
 	const handleInspect = useCallback((id: string) => {
 		setInspectedPreviewId((prev) => (prev === id ? null : id))
-		setInspectOpen(true)
-	}, [])
-
-	const handleCloseInspect = useCallback(() => {
-		setInspectOpen(false)
-		setInspectedPreviewId(null)
 	}, [])
 
 	// Component → ComponentMeta map for cross-file story resolution
@@ -199,34 +192,21 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 								onToggleTheme={toggleTheme}
 							/>
 
-							{inspectOpen ? (
-								<Group orientation="horizontal" className="st:overflow-hidden">
-									<Panel minSize={40}>
-										<MainContent
-											activeEntry={activeEntry}
-											storyName={activeStoryName}
-											story={story}
-											storyProps={storyProps}
-											PageContent={PageContent}
-										/>
-									</Panel>
-									<Separator className="st:w-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-col-resize" />
-									<Panel defaultSize={30} minSize={20}>
-										<InspectPanel
-											previewId={inspectedPreviewId}
-											onClose={handleCloseInspect}
-										/>
-									</Panel>
-								</Group>
-							) : (
-								<MainContent
-									activeEntry={activeEntry}
-									storyName={activeStoryName}
-									story={story}
-									storyProps={storyProps}
-									PageContent={PageContent}
-								/>
-							)}
+							<Group orientation="horizontal" className="st:overflow-hidden">
+								<Panel minSize={40}>
+									<MainContent
+										activeEntry={activeEntry}
+										storyName={activeStoryName}
+										story={story}
+										storyProps={storyProps}
+										PageContent={PageContent}
+									/>
+								</Panel>
+								<Separator className="st:w-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-col-resize" />
+								<Panel defaultSize={30} minSize={20}>
+									<InspectPanel previewId={inspectedPreviewId} />
+								</Panel>
+							</Group>
 						</div>
 					</InspectProvider>
 				</CodeThemeProvider>

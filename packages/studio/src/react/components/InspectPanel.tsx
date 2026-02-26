@@ -9,10 +9,9 @@ import { CodePreview } from './CodePreview.js'
 
 export interface InspectPanelProps {
 	previewId: string | null
-	onClose: () => void
 }
 
-export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
+export function InspectPanel({ previewId }: InspectPanelProps) {
 	const inspect = useInspect()
 	const entries = useActionLog(previewId)
 	const previewProps = inspect?.previewPropsRef.current?.get(previewId) ?? {}
@@ -84,16 +83,8 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 	return (
 		<aside className="st:bg-bg-sidebar st:flex st:flex-col st:overflow-hidden st:h-full">
 			{/* Header */}
-			<div className="st:flex st:items-center st:justify-between st:px-4 st:py-3 st:border-b st:border-border st:shrink-0">
+			<div className="st:px-4 st:py-3 st:border-b st:border-border st:shrink-0">
 				<span className="st:text-sm st:font-semibold st:text-text">Inspect</span>
-				<button
-					type="button"
-					onClick={onClose}
-					className="st:w-6 st:h-6 st:rounded st:text-text-muted hover:st:text-text st:flex st:items-center st:justify-center st:cursor-pointer st:border-0 st:bg-transparent"
-					title="Close"
-				>
-					&#10005;
-				</button>
 			</div>
 
 			{previewId === null ? (
