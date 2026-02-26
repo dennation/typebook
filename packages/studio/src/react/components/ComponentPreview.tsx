@@ -59,7 +59,7 @@ export const ComponentPreview = memo(function ComponentPreview({
 	useEffect(() => {
 		const ref = inspect?.previewComponentNamesRef
 		if (!ref?.current) return
-		const name = component.displayName || component.name || 'Component'
+		const name = component.name || 'Component'
 		ref.current.set(previewId, name)
 		return () => {
 			ref.current?.delete(previewId)

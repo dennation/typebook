@@ -8,6 +8,7 @@ import { entryName } from '../utils/naming.js'
 import { useHashRoute } from '../hooks/useHashRoute.js'
 import { useTheme, type Theme } from '../hooks/useTheme.js'
 import { StudioMetaProvider, StudioWrapperProvider, InspectProvider, CodeThemeProvider, DEFAULT_CODE_THEME, type PreviewPropsMap, type PreviewPropInfosMap, type PreviewComponentNamesMap, type CodeThemeConfig } from '../context.js'
+import { Group, Panel, Separator } from 'react-resizable-panels'
 import { Sidebar } from './Sidebar.js'
 import { MainContent } from './MainContent.js'
 import { InspectPanel } from './InspectPanel.js'
@@ -167,9 +168,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 		[inspectedPreviewId, handleInspect],
 	)
 
-	const gridClass = inspectedPreviewId
-		? 'st:grid st:grid-cols-[260px_1fr_300px] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text'
-		: 'st:grid st:grid-cols-[260px_1fr] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text'
+	const rootClass = 'st:grid st:grid-cols-[260px_1fr] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text'
 
 	const resolvedCodeTheme = useMemo<CodeThemeConfig>(
 		() => ({
@@ -184,7 +183,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 			<StudioWrapperProvider value={storyWrapper}>
 				<CodeThemeProvider value={resolvedCodeTheme}>
 					<InspectProvider value={inspectState}>
-						<div className={gridClass} data-theme={theme}>
+						<div className={rootClass} data-theme={theme}>
 							<Sidebar
 								tree={tree}
 								route={route}
@@ -197,18 +196,32 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 								onToggleTheme={toggleTheme}
 							/>
 
-							<MainContent
-								activeEntry={activeEntry}
-								storyName={activeStoryName}
-								story={story}
-								storyProps={storyProps}
-								PageContent={PageContent}
-							/>
-
-							{inspectedPreviewId && (
-								<InspectPanel
-									previewId={inspectedPreviewId}
-									onClose={handleCloseInspect}
+							{inspectedPreviewId ? (
+								<Group orientation="horizontal" className="st:overflow-hidden">
+									<Panel minSize={40}>
+										<MainContent
+											activeEntry={activeEntry}
+											storyName={activeStoryName}
+											story={story}
+											storyProps={storyProps}
+											PageContent={PageContent}
+										/>
+									</Panel>
+									<Separator className="st:w-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-col-resize" />
+									<Panel defaultSize={30} minSize={15}>
+										<InspectPanel
+											previewId={inspectedPreviewId}
+											onClose={handleCloseInspect}
+										/>
+									</Panel>
+								</Group>
+							) : (
+								<MainContent
+									activeEntry={activeEntry}
+									storyName={activeStoryName}
+									story={story}
+									storyProps={storyProps}
+									PageContent={PageContent}
 								/>
 							)}
 						</div>

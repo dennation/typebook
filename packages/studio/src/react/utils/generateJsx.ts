@@ -14,20 +14,16 @@ export function generateJsx(componentName: string, props: Record<string, unknown
 	}
 
 	const childContent = formatChildren(children)
-	const multiline = attrs.length > 2
-
-	if (childContent !== null) {
-		if (multiline) {
-			const indentedAttrs = attrs.map((a) => `  ${a}`).join('\n')
-			return `<${componentName}\n${indentedAttrs}\n>\n  ${childContent}\n</${componentName}>`
-		}
-		const attrStr = attrs.length > 0 ? ' ' + attrs.join(' ') : ''
-		return `<${componentName}${attrStr}>${childContent}</${componentName}>`
-	}
+	const multiline = attrs.length > 2 || childContent !== null
 
 	if (multiline) {
 		const indentedAttrs = attrs.map((a) => `  ${a}`).join('\n')
-		return `<${componentName}\n${indentedAttrs}\n/>`
+		const attrBlock = attrs.length > 0 ? `\n${indentedAttrs}\n` : ''
+
+		if (childContent !== null) {
+			return `<${componentName}${attrBlock}>\n  ${childContent}\n</${componentName}>`
+		}
+		return `<${componentName}${attrBlock}/>`
 	}
 
 	const attrStr = attrs.length > 0 ? ' ' + attrs.join(' ') : ''

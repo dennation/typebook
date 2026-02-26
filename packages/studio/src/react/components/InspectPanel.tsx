@@ -82,7 +82,7 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 	}, [previewId])
 
 	return (
-		<aside className="st:bg-bg-sidebar st:border-l st:border-border st:flex st:flex-col st:overflow-hidden st:h-full">
+		<aside className="st:bg-bg-sidebar st:flex st:flex-col st:overflow-hidden st:h-full">
 			{/* Header */}
 			<div className="st:flex st:items-center st:justify-between st:px-4 st:py-3 st:border-b st:border-border st:shrink-0">
 				<span className="st:text-sm st:font-semibold st:text-text">Inspect</span>
