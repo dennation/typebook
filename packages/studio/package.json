@@ -40,6 +40,7 @@
 		"glob": "^13.0.1",
 		"oxc-parser": "^0.60.0",
 		"picomatch": "^4.0.0",
+		"react-resizable-panels": "^4.6.5",
 		"typescript": "^5.7.0"
 	},
 	"devDependencies": {

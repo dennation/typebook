@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { Group, Panel, Separator } from 'react-resizable-panels'
 import { actionStore } from '../../action.js'
 import type { ActionLogEntry } from '../../action.js'
 import { useInspect } from '../context.js'
@@ -33,39 +34,45 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 				</button>
 			</div>
 
-			{/* Scrollable content */}
-			<div className="st:flex-1 st:overflow-y-auto">
-				{/* Props */}
-				<SectionHeader title="Props" />
-				<div className="st:px-4 st:pb-3">
-					<PropsTable props={previewProps} />
-				</div>
-
-				{/* Actions log */}
-				<SectionHeader title="Actions" count={entries.length}>
-					{entries.length > 0 && (
-						<button
-							type="button"
-							onClick={handleClear}
-							className="st:text-[10px] st:text-text-muted hover:st:text-text st:cursor-pointer st:bg-transparent st:border-0 st:px-1"
-						>
-							Clear
-						</button>
-					)}
-				</SectionHeader>
-
-				{entries.length === 0 ? (
-					<p className="st:text-xs st:text-text-muted st:px-4 st:py-3">
-						No actions logged
-					</p>
-				) : (
-					<div className="st:px-4 st:pb-3 st:space-y-0.5">
-						{entries.map((entry) => (
-							<ActionLogRow key={entry.id} entry={entry} />
-						))}
+			{/* Resizable sections */}
+			<Group orientation="vertical" className="st:flex-1 st:overflow-hidden">
+				{/* Props section */}
+				<Panel defaultSize={50} minSize={20} className="st:flex st:flex-col st:overflow-hidden">
+					<SectionHeader title="Props" />
+					<div className="st:flex-1 st:overflow-y-auto st:px-4 st:pb-3">
+						<PropsTable props={previewProps} />
 					</div>
-				)}
-			</div>
+				</Panel>
+
+				<Separator className="st:h-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-row-resize" />
+
+				{/* Log section */}
+				<Panel defaultSize={50} minSize={20} className="st:flex st:flex-col st:overflow-hidden">
+					<SectionHeader title="Log" count={entries.length}>
+						{entries.length > 0 && (
+							<button
+								type="button"
+								onClick={handleClear}
+								className="st:text-[10px] st:text-text-muted hover:st:text-text st:cursor-pointer st:bg-transparent st:border-0 st:px-1"
+							>
+								Clear
+							</button>
+						)}
+					</SectionHeader>
+
+					{entries.length === 0 ? (
+						<p className="st:text-xs st:text-text-muted st:px-4 st:py-3">
+							No actions logged
+						</p>
+					) : (
+						<div className="st:flex-1 st:overflow-y-auto st:px-4 st:pb-3 st:space-y-0.5">
+							{entries.map((entry) => (
+								<LogEntryRow key={entry.id} entry={entry} />
+							))}
+						</div>
+					)}
+				</Panel>
+			</Group>
 		</aside>
 	)
 }
@@ -82,7 +89,7 @@ function SectionHeader({
 	children?: React.ReactNode
 }) {
 	return (
-		<div className="st:flex st:items-center st:justify-between st:px-4 st:py-2 st:border-b st:border-border st:bg-bg">
+		<div className="st:flex st:items-center st:justify-between st:px-4 st:py-2 st:border-b st:border-border st:bg-bg st:shrink-0">
 			<span className="st:text-xs st:font-medium st:text-text-muted">
 				{title}
 				{count != null && count > 0 && (
@@ -96,7 +103,7 @@ function SectionHeader({
 	)
 }
 
-function ActionLogRow({ entry }: { entry: ActionLogEntry }) {
+function LogEntryRow({ entry }: { entry: ActionLogEntry }) {
 	const argsPreview = formatArgs(entry.args)
 
 	return (
