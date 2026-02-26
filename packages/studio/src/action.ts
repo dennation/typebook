@@ -5,7 +5,7 @@ export interface ActionLogEntry {
 	readonly timestamp: number
 	readonly actionName: string
 	readonly previewId: string
-	readonly args: readonly unknown[]
+	readonly formattedArgs: string
 	readonly inherited: boolean
 }
 
@@ -23,9 +23,26 @@ function emit(): void {
 	}
 }
 
+function formatArg(value: unknown): string {
+	if (value === undefined) return 'undefined'
+	if (value === null) return 'null'
+	if (typeof value === 'function') return 'fn()'
+	if (typeof value !== 'object') return String(value)
+	// DOM nodes and events — short-circuit before any property access
+	if (typeof Event !== 'undefined' && value instanceof Event) return value.constructor.name
+	if (typeof Node !== 'undefined' && value instanceof Node) return value.nodeName
+	try {
+		const json = JSON.stringify(value)
+		return json.length > 80 ? `${json.slice(0, 77)}...` : json
+	} catch {
+		return `[${value.constructor?.name ?? 'object'}]`
+	}
+}
+
 export const actionStore = {
 	log(actionName: string, previewId: string, args: readonly unknown[], inherited: boolean): void {
-		entries = [...entries, { id: nextId++, timestamp: Date.now(), actionName, previewId, args, inherited }]
+		const formattedArgs = args.length === 0 ? '' : args.map(formatArg).join(', ')
+		entries = [...entries, { id: nextId++, timestamp: Date.now(), actionName, previewId, formattedArgs, inherited }]
 		emit()
 	},
 

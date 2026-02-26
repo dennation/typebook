@@ -32,6 +32,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 	const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
 	// --- Inspect panel state ---
+	const [inspectOpen, setInspectOpen] = useState(false)
 	const [inspectedPreviewId, setInspectedPreviewId] = useState<string | null>(null)
 	const previewPropsRef = useRef<PreviewPropsMap>(new Map())
 	const previewPropInfosRef = useRef<PreviewPropInfosMap>(new Map())
@@ -39,9 +40,11 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 
 	const handleInspect = useCallback((id: string) => {
 		setInspectedPreviewId((prev) => (prev === id ? null : id))
+		setInspectOpen(true)
 	}, [])
 
 	const handleCloseInspect = useCallback(() => {
+		setInspectOpen(false)
 		setInspectedPreviewId(null)
 	}, [])
 
@@ -196,7 +199,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 								onToggleTheme={toggleTheme}
 							/>
 
-							{inspectedPreviewId ? (
+							{inspectOpen ? (
 								<Group orientation="horizontal" className="st:overflow-hidden">
 									<Panel minSize={40}>
 										<MainContent

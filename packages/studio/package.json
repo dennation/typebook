@@ -41,7 +41,6 @@
 		"oxc-parser": "^0.60.0",
 		"picomatch": "^4.0.0",
 		"react-resizable-panels": "^4.6.5",
-		"safe-stable-stringify": "^2.5.0",
 		"shiki": "^3.23.0",
 		"typescript": "^5.7.0"
 	},

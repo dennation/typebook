@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import stringify from 'safe-stable-stringify'
 import { Group, Panel, Separator } from 'react-resizable-panels'
 import { actionStore } from '../../action.js'
 import type { ActionLogEntry } from '../../action.js'
@@ -9,7 +8,7 @@ import { generateJsx } from '../utils/generateJsx.js'
 import { CodePreview } from './CodePreview.js'
 
 export interface InspectPanelProps {
-	previewId: string
+	previewId: string | null
 	onClose: () => void
 }
 
@@ -97,66 +96,72 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 				</button>
 			</div>
 
-			{/* Resizable sections */}
-			<Group orientation="vertical" className="st:flex-1 st:overflow-hidden">
-				{/* Props section */}
-				<Panel defaultSize={35} minSize={15} style={{ minHeight: 36 }} className="st:flex st:flex-col st:overflow-hidden">
-					<SectionHeader title="Props" />
-					<div className="st:flex-1 st:overflow-y-auto st:px-4 st:pb-3">
-						<PropsTable props={previewProps} />
-					</div>
-				</Panel>
-
-				<Separator className="st:h-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-row-resize" />
-
-				{/* Code section */}
-				<Panel defaultSize={30} minSize={15} style={{ minHeight: 36 }} className="st:flex st:flex-col st:overflow-hidden">
-					<SectionHeader title="Code" />
-					<div className="st:flex-1 st:overflow-y-auto">
-						<CodePreview code={code} />
-					</div>
-				</Panel>
-
-				<Separator className="st:h-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-row-resize" />
-
-				{/* Log section */}
-				<Panel defaultSize={35} minSize={15} style={{ minHeight: 36 }} className="st:flex st:flex-col st:overflow-hidden">
-					<SectionHeader title="Log" count={filteredEntries.length}>
-						<div className="st:flex st:items-center st:gap-1">
-							{entries.length > 0 && (
-								<button
-									type="button"
-									onClick={handleClear}
-									className="st:text-[10px] st:text-text-muted hover:st:text-text st:cursor-pointer st:bg-transparent st:border-0 st:px-1"
-								>
-									Clear
-								</button>
-							)}
-							{actionNames.size > 0 && (
-								<FilterDropdown
-									actionNames={actionNames}
-									isVisible={isVisible}
-									hiddenCount={hiddenCount}
-									onToggle={handleToggle}
-									onToggleAll={handleToggleAll}
-								/>
-							)}
+			{previewId === null ? (
+				<div className="st:flex-1 st:flex st:items-center st:justify-center st:px-4">
+					<p className="st:text-xs st:text-text-muted st:text-center">Click a preview to inspect</p>
+				</div>
+			) : (
+				/* Resizable sections */
+				<Group orientation="vertical" className="st:flex-1 st:overflow-hidden">
+					{/* Props section */}
+					<Panel defaultSize={35} minSize={15} style={{ minHeight: 36 }} className="st:flex st:flex-col st:overflow-hidden">
+						<SectionHeader title="Props" />
+						<div className="st:flex-1 st:overflow-y-auto st:px-4 st:pb-3">
+							<PropsTable props={previewProps} />
 						</div>
-					</SectionHeader>
+					</Panel>
 
-					{filteredEntries.length === 0 ? (
-						<p className="st:text-xs st:text-text-muted st:px-4 st:py-3">
-							{entries.length === 0 ? 'No actions logged' : 'All actions filtered'}
-						</p>
-					) : (
-						<div className="st:flex-1 st:overflow-y-auto st:px-4 st:pb-3 st:space-y-0.5">
-							{filteredEntries.map((entry) => (
-								<LogEntryRow key={entry.id} entry={entry} />
-							))}
+					<Separator className="st:h-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-row-resize" />
+
+					{/* Code section */}
+					<Panel defaultSize={30} minSize={15} style={{ minHeight: 36 }} className="st:flex st:flex-col st:overflow-hidden">
+						<SectionHeader title="Code" />
+						<div className="st:flex-1 st:overflow-y-auto">
+							<CodePreview code={code} />
 						</div>
-					)}
-				</Panel>
-			</Group>
+					</Panel>
+
+					<Separator className="st:h-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-row-resize" />
+
+					{/* Log section */}
+					<Panel defaultSize={35} minSize={15} style={{ minHeight: 36 }} className="st:flex st:flex-col st:overflow-hidden">
+						<SectionHeader title="Log" count={filteredEntries.length}>
+							<div className="st:flex st:items-center st:gap-1">
+								{entries.length > 0 && (
+									<button
+										type="button"
+										onClick={handleClear}
+										className="st:text-[10px] st:text-text-muted hover:st:text-text st:cursor-pointer st:bg-transparent st:border-0 st:px-1"
+									>
+										Clear
+									</button>
+								)}
+								{actionNames.size > 0 && (
+									<FilterDropdown
+										actionNames={actionNames}
+										isVisible={isVisible}
+										hiddenCount={hiddenCount}
+										onToggle={handleToggle}
+										onToggleAll={handleToggleAll}
+									/>
+								)}
+							</div>
+						</SectionHeader>
+
+						{filteredEntries.length === 0 ? (
+							<p className="st:text-xs st:text-text-muted st:px-4 st:py-3">
+								{entries.length === 0 ? 'No actions logged' : 'All actions filtered'}
+							</p>
+						) : (
+							<div className="st:flex-1 st:overflow-y-auto st:px-4 st:pb-3 st:space-y-0.5">
+								{filteredEntries.map((entry) => (
+									<LogEntryRow key={entry.id} entry={entry} />
+								))}
+							</div>
+						)}
+					</Panel>
+				</Group>
+			)}
 		</aside>
 	)
 }
@@ -277,17 +282,15 @@ function SectionHeader({
 }
 
 function LogEntryRow({ entry }: { entry: ActionLogEntry }) {
-	const argsPreview = formatArgs(entry.args)
-
 	return (
 		<div className="st:text-[11px] st:font-mono st:py-0.5 st:flex st:gap-2">
 			<span className="st:text-text-muted st:shrink-0">
 				{formatTime(entry.timestamp)}
 			</span>
 			<span className="st:text-accent st:shrink-0">{entry.actionName}</span>
-			{argsPreview && (
-				<span className="st:text-text-muted st:truncate" title={argsPreview}>
-					{argsPreview}
+			{entry.formattedArgs && (
+				<span className="st:text-text-muted st:truncate" title={entry.formattedArgs}>
+					{entry.formattedArgs}
 				</span>
 			)}
 		</div>
@@ -317,20 +320,6 @@ function PropsTable({ props }: { props: Record<string, unknown> }) {
 
 // --- Formatters ---
 
-function formatTime(timestamp: number): string {
-	const d = new Date(timestamp)
-	const h = String(d.getHours()).padStart(2, '0')
-	const m = String(d.getMinutes()).padStart(2, '0')
-	const s = String(d.getSeconds()).padStart(2, '0')
-	const ms = String(d.getMilliseconds()).padStart(3, '0')
-	return `${h}:${m}:${s}.${ms}`
-}
-
-function formatArgs(args: readonly unknown[]): string {
-	if (args.length === 0) return ''
-	return args.map((a) => formatValue(a)).join(', ')
-}
-
 function formatValue(value: unknown): string {
 	if (value === undefined) return 'undefined'
 	if (value === null) return 'null'
@@ -338,8 +327,21 @@ function formatValue(value: unknown): string {
 		return '__actionName' in value ? `action("${(value as any).__actionName}")` : 'fn()'
 	}
 	if (typeof value === 'object') {
-		const json = stringify(value, undefined, undefined, { maximumDepth: 3, maximumBreadth: 10 }) ?? '[unknown]'
-		return json.length > 80 ? `${json.slice(0, 77)}...` : json
+		try {
+			const json = JSON.stringify(value)
+			return json.length > 80 ? `${json.slice(0, 77)}...` : json
+		} catch {
+			return `[${(value as any).constructor?.name ?? 'object'}]`
+		}
 	}
 	return String(value)
+}
+
+function formatTime(timestamp: number): string {
+	const d = new Date(timestamp)
+	const h = String(d.getHours()).padStart(2, '0')
+	const m = String(d.getMinutes()).padStart(2, '0')
+	const s = String(d.getSeconds()).padStart(2, '0')
+	const ms = String(d.getMilliseconds()).padStart(3, '0')
+	return `${h}:${m}:${s}.${ms}`
 }
