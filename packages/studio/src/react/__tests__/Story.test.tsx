@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { renderToString } from 'react-dom/server'
-import type { SingleStory, VariantsStory, PropInfo } from '../../types.js'
+import type { SingleStory, VariantsStory, ComponentMeta, PropInfo } from '../../types.js'
 import { StudioMetaProvider } from '../context.js'
 import { Story } from '../components/Story.js'
 
@@ -53,10 +53,10 @@ describe('Story component', () => {
 		const propInfos: PropInfo[] = [
 			{ name: 'label', optional: true, type: { kind: 'literal', values: ['alpha', 'beta'] } },
 		]
-		const propsMap = new Map([[TestComponent, propInfos]]) as Map<React.ComponentType<any>, PropInfo[]>
+		const metaMap = new Map([[TestComponent, { componentName: 'TestComponent', props: propInfos }]]) as Map<React.ComponentType<any>, ComponentMeta>
 
 		const html = renderToString(
-			<StudioMetaProvider value={propsMap}>
+			<StudioMetaProvider value={metaMap}>
 				<Story of={story} />
 			</StudioMetaProvider>,
 		)

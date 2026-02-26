@@ -38,6 +38,7 @@ export interface PropInfo {
 // --- Component Meta (extracted by plugin, stored in ui-studio-meta.gen.ts) ---
 
 export interface ComponentMeta {
+  componentName: string
   props: PropInfo[]
 }
 

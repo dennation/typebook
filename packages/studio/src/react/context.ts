@@ -1,16 +1,16 @@
 import { createContext, useContext } from 'react'
 import type { ComponentType, RefObject } from 'react'
-import type { PropInfo, WrapperFn } from '../types.js'
+import type { ComponentMeta, PropInfo, WrapperFn } from '../types.js'
 
-// --- Studio Meta (Component → PropInfo[]) ---
+// --- Studio Meta (Component → ComponentMeta) ---
 
-type PropsMap = Map<ComponentType<any>, PropInfo[]>
+type MetaMap = Map<ComponentType<any>, ComponentMeta>
 
-const StudioMetaContext = createContext<PropsMap>(new Map())
+const StudioMetaContext = createContext<MetaMap>(new Map())
 
 export const StudioMetaProvider = StudioMetaContext.Provider
 
-export function useStudioMeta(): PropsMap {
+export function useStudioMeta(): MetaMap {
 	return useContext(StudioMetaContext)
 }
 

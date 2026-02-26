@@ -23,7 +23,7 @@ function makeComponent(name: string, path?: string, autoDocs?: boolean): Compone
 			generate: () => ({}) as any,
 		},
 		stories: {},
-		meta: { props: [] },
+		meta: { componentName: name, props: [] },
 	}
 }
 

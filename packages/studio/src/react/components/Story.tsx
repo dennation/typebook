@@ -3,7 +3,7 @@ import { useStudioMeta } from '../context.js'
 import { StoryRenderer } from './StoryRenderer.js'
 
 export function Story({ of }: { of: StoryType }) {
-	const propsMap = useStudioMeta()
-	const props: PropInfo[] = propsMap.get(of.component) ?? []
+	const metaMap = useStudioMeta()
+	const props: PropInfo[] = metaMap.get(of.component)?.props ?? []
 	return <StoryRenderer story={of} props={props} />
 }

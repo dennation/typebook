@@ -17,8 +17,8 @@ function isControllable(prop: PropInfo): boolean {
 }
 
 export function Playground({ of: config }: { of: DefineResult<any> }) {
-	const propsMap = useStudioMeta()
-	const allProps: PropInfo[] = propsMap.get(config.component) ?? []
+	const metaMap = useStudioMeta()
+	const allProps: PropInfo[] = metaMap.get(config.component)?.props ?? []
 	const Component = config.component
 
 	const [controlProps, setControlProps] = useState<Record<string, unknown>>(config.defaults)

@@ -21,7 +21,7 @@ function makeComponent(name: string, path?: string): ComponentEntry {
 			generate: () => ({}) as any,
 		},
 		stories: {},
-		meta: { props: [] },
+		meta: { componentName: name, props: [] },
 	}
 }
 

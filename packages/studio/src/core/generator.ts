@@ -23,9 +23,9 @@ export function generateMetaFile(
   cwd: string,
 ): string {
   const metaEntries = Object.fromEntries(
-    files.map(({ filePath, props }) => [
+    files.map(({ filePath, analysis, props }) => [
       relative(cwd, filePath),
-      { props: props.map(cleanPropInfo) },
+      { componentName: analysis.componentImport?.name ?? 'Component', props: props.map(cleanPropInfo) },
     ]),
   )
 

@@ -27,8 +27,9 @@ export const ComponentPreview = memo(function ComponentPreview({
 }: ComponentPreviewProps) {
 	const storyWrapper = useStudioWrapper()
 	const inspect = useInspect()
-	const propsMap = useStudioMeta()
-	const propInfos = propsMap.get(component)
+	const metaMap = useStudioMeta()
+	const meta = metaMap.get(component)
+	const propInfos = meta?.props
 
 	const wrappedProps = trackActions ? wrapActionProps(props, previewId, propInfos) : props
 	const content = storyWrapper
@@ -59,7 +60,7 @@ export const ComponentPreview = memo(function ComponentPreview({
 	useEffect(() => {
 		const ref = inspect?.previewComponentNamesRef
 		if (!ref?.current) return
-		const name = component.name || 'Component'
+		const name = meta?.componentName ?? 'Component'
 		ref.current.set(previewId, name)
 		return () => {
 			ref.current?.delete(previewId)

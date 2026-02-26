@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { renderToString } from 'react-dom/server'
-import type { DefineResult, PropInfo } from '../../types.js'
+import type { ComponentMeta, DefineResult, PropInfo } from '../../types.js'
 import { StudioMetaProvider } from '../context.js'
 import { Playground } from '../components/Playground.js'
 
@@ -41,13 +41,13 @@ describe('Playground component', () => {
 			{ name: 'label', optional: true, type: { kind: 'string' } },
 			{ name: 'size', optional: true, type: { kind: 'literal', values: ['sm', 'md', 'lg'] } },
 		]
-		const propsMap = new Map([[TestComponent, propInfos]]) as Map<
+		const metaMap = new Map([[TestComponent, { componentName: 'TestComponent', props: propInfos }]]) as Map<
 			React.ComponentType<any>,
-			PropInfo[]
+			ComponentMeta
 		>
 
 		const html = renderToString(
-			<StudioMetaProvider value={propsMap}>
+			<StudioMetaProvider value={metaMap}>
 				<Playground of={config} />
 			</StudioMetaProvider>,
 		)

@@ -1,6 +1,6 @@
 import { useState, useCallback, useInsertionEffect, useMemo, useRef, useEffect } from 'react'
 import type { ComponentType } from 'react'
-import type { Registry, ComponentEntry, PropInfo, WrapperFn } from '../../types.js'
+import type { Registry, ComponentEntry, ComponentMeta, WrapperFn } from '../../types.js'
 import { STYLE_ELEMENT_ID } from '../../constants.js'
 import { buildSidebarTree } from '../utils/buildSidebarTree.js'
 import { resolveComponentPages } from '../utils/resolveComponentPages.js'
@@ -45,12 +45,12 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 		setInspectedPreviewId(null)
 	}, [])
 
-	// Component → PropInfo[] map for cross-file story resolution
-	const propsMap = useMemo(() => {
-		const map = new Map<ComponentType<any>, PropInfo[]>()
+	// Component → ComponentMeta map for cross-file story resolution
+	const metaMap = useMemo(() => {
+		const map = new Map<ComponentType<any>, ComponentMeta>()
 		for (const entry of components) {
 			if (entry.meta) {
-				map.set(entry.config.component, entry.meta.props)
+				map.set(entry.config.component, entry.meta)
 			}
 		}
 		return map
@@ -135,8 +135,8 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 		if (!story || !activeEntry) return []
 		return story.component === activeEntry.config.component
 			? (activeEntry.meta?.props ?? [])
-			: (propsMap.get(story.component) ?? [])
-	}, [story, activeEntry, propsMap])
+			: (metaMap.get(story.component)?.props ?? [])
+	}, [story, activeEntry, metaMap])
 
 	// Find active page content — either top-level page or component page
 	const PageContent = useMemo((): ComponentType | null => {
@@ -179,7 +179,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 	)
 
 	return (
-		<StudioMetaProvider value={propsMap}>
+		<StudioMetaProvider value={metaMap}>
 			<StudioWrapperProvider value={storyWrapper}>
 				<CodeThemeProvider value={resolvedCodeTheme}>
 					<InspectProvider value={inspectState}>

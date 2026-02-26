@@ -14,7 +14,7 @@ export function entryName(entry: ComponentEntry): string {
 	return (
 		entry.config.name ??
 		entry.config.component.displayName ??
-		entry.config.component.name ??
+		entry.meta.componentName ??
 		'Unknown'
 	)
 }

@@ -3,6 +3,7 @@ import type { ComponentMeta } from '@dennation/ui-studio'
 
 const meta: Record<string, ComponentMeta> = {
   "src/stories/Button.stories.tsx": {
+    "componentName": "Button",
     "props": [
       {
         "name": "size",

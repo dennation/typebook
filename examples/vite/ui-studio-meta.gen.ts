@@ -3,6 +3,7 @@ import type { ComponentMeta } from '@dennation/ui-studio'
 
 const meta: Record<string, ComponentMeta> = {
   "src/stories/Switch.stories.tsx": {
+    "componentName": "Switch",
     "props": [
       {
         "name": "form",
@@ -2686,6 +2687,7 @@ const meta: Record<string, ComponentMeta> = {
     ]
   },
   "src/stories/Input.stories.tsx": {
+    "componentName": "Input",
     "props": [
       {
         "name": "form",
@@ -5514,6 +5516,7 @@ const meta: Record<string, ComponentMeta> = {
     ]
   },
   "src/stories/Checkbox.stories.tsx": {
+    "componentName": "Checkbox",
     "props": [
       {
         "name": "form",
@@ -8299,6 +8302,7 @@ const meta: Record<string, ComponentMeta> = {
     ]
   },
   "src/stories/Button.stories.tsx": {
+    "componentName": "Button",
     "props": [
       {
         "name": "form",
