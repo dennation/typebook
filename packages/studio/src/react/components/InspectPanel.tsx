@@ -338,7 +338,7 @@ function formatValue(value: unknown): string {
 		return '__actionName' in value ? `action("${(value as any).__actionName}")` : 'fn()'
 	}
 	if (typeof value === 'object') {
-		const json = stringify(value) ?? '[unknown]'
+		const json = stringify(value, undefined, undefined, { maximumDepth: 3, maximumBreadth: 10 }) ?? '[unknown]'
 		return json.length > 80 ? `${json.slice(0, 77)}...` : json
 	}
 	return String(value)
