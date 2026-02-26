@@ -208,7 +208,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 										/>
 									</Panel>
 									<Separator className="st:w-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-col-resize" />
-									<Panel defaultSize={30} minSize={15}>
+									<Panel defaultSize={30} minSize={15} style={{ minWidth: 280 }}>
 										<InspectPanel
 											previewId={inspectedPreviewId}
 											onClose={handleCloseInspect}
