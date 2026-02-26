@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import stringify from 'safe-stable-stringify'
 import { Group, Panel, Separator } from 'react-resizable-panels'
 import { actionStore } from '../../action.js'
 import type { ActionLogEntry } from '../../action.js'
@@ -337,12 +338,8 @@ function formatValue(value: unknown): string {
 		return '__actionName' in value ? `action("${(value as any).__actionName}")` : 'fn()'
 	}
 	if (typeof value === 'object') {
-		try {
-			const json = JSON.stringify(value)
-			return json.length > 80 ? `${json.slice(0, 77)}...` : json
-		} catch {
-			return '[object]'
-		}
+		const json = stringify(value) ?? '[unknown]'
+		return json.length > 80 ? `${json.slice(0, 77)}...` : json
 	}
 	return String(value)
 }
