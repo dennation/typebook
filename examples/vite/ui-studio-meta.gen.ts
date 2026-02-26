@@ -9,7 +9,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "style",
@@ -243,7 +244,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "placeholder",
@@ -301,7 +303,8 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "string | (readonly string[] & string) | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "width",
@@ -358,7 +361,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "className",
@@ -432,7 +436,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "lang",
@@ -856,7 +861,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-current",
@@ -872,7 +878,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-description",
@@ -887,7 +894,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-disabled",
@@ -988,14 +996,16 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-labelledby",
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-level",
@@ -1348,7 +1358,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onFocusCapture",
@@ -1363,7 +1374,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onBlurCapture",
@@ -1498,7 +1510,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onKeyDownCapture",
@@ -1529,7 +1542,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onKeyUpCapture",
@@ -2634,35 +2648,40 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "isSelected",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "isReadOnly",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onFocusChange",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "excludeFromTabOrder",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       }
     ]
   },
@@ -2673,14 +2692,16 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "label",
         "optional": true,
         "type": {
           "kind": "node"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "style",
@@ -2704,7 +2725,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "ref",
@@ -2746,7 +2768,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "as",
@@ -2786,7 +2809,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "capture",
@@ -2885,7 +2909,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "number"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "min",
@@ -2901,7 +2926,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "number"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "multiple",
@@ -2916,14 +2942,16 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "placeholder",
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "readOnly",
@@ -2963,7 +2991,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "value",
@@ -2971,7 +3000,8 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "string | (readonly string[] & string) | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "width",
@@ -3028,7 +3058,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "className",
@@ -3086,7 +3117,8 @@ const meta: Record<string, ComponentMeta> = {
             "previous",
             "send"
           ]
-        }
+        },
+        "inherited": true
       },
       {
         "name": "hidden",
@@ -3101,7 +3133,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "lang",
@@ -3128,7 +3161,8 @@ const meta: Record<string, ComponentMeta> = {
             "true",
             "false"
           ]
-        }
+        },
+        "inherited": true
       },
       {
         "name": "tabIndex",
@@ -3261,7 +3295,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "autoSave",
@@ -3397,7 +3432,8 @@ const meta: Record<string, ComponentMeta> = {
             "numeric",
             "decimal"
           ]
-        }
+        },
+        "inherited": true
       },
       {
         "name": "is",
@@ -3428,7 +3464,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-atomic",
@@ -3450,7 +3487,8 @@ const meta: Record<string, ComponentMeta> = {
             "inline",
             "both"
           ]
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-braillelabel",
@@ -3523,7 +3561,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-current",
@@ -3539,7 +3578,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-description",
@@ -3554,7 +3594,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-disabled",
@@ -3586,7 +3627,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-expanded",
@@ -3620,7 +3662,8 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "boolean | \"dialog\" | \"menu\" | \"true\" | \"false\" | \"grid\" | \"listbox\" | \"tree\" | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-hidden",
@@ -3653,14 +3696,16 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-labelledby",
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-level",
@@ -3918,7 +3963,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onCopyCapture",
@@ -3933,7 +3979,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onCutCapture",
@@ -3948,7 +3995,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onPasteCapture",
@@ -3963,7 +4011,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onCompositionEndCapture",
@@ -3978,7 +4027,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onCompositionStartCapture",
@@ -3993,7 +4043,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onCompositionUpdateCapture",
@@ -4008,7 +4059,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onFocusCapture",
@@ -4023,7 +4075,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onBlurCapture",
@@ -4046,7 +4099,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onBeforeInputCapture",
@@ -4061,7 +4115,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onInputCapture",
@@ -4156,7 +4211,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onKeyDownCapture",
@@ -4187,7 +4243,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onKeyUpCapture",
@@ -4842,7 +4899,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onSelectCapture",
@@ -5241,7 +5299,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "startContent",
@@ -5284,35 +5343,40 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onFocusChange",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "excludeFromTabOrder",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "isRequired",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "isInvalid",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "validationState",
@@ -5323,7 +5387,8 @@ const meta: Record<string, ComponentMeta> = {
             "valid",
             "invalid"
           ]
-        }
+        },
+        "inherited": true
       },
       {
         "name": "validationBehavior",
@@ -5334,28 +5399,32 @@ const meta: Record<string, ComponentMeta> = {
             "aria",
             "native"
           ]
-        }
+        },
+        "inherited": true
       },
       {
         "name": "validate",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "description",
         "optional": true,
         "type": {
           "kind": "node"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "errorMessage",
         "optional": true,
         "type": {
           "kind": "node"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "variant",
@@ -5451,7 +5520,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "style",
@@ -5685,7 +5755,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "placeholder",
@@ -5743,7 +5814,8 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "string | (readonly string[] & string) | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "width",
@@ -5800,7 +5872,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "className",
@@ -5874,7 +5947,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "lang",
@@ -6298,7 +6372,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-current",
@@ -6314,7 +6389,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-description",
@@ -6329,7 +6405,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-disabled",
@@ -6361,7 +6438,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-expanded",
@@ -6429,14 +6507,16 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-labelledby",
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-level",
@@ -6789,7 +6869,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onFocusCapture",
@@ -6804,7 +6885,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onBlurCapture",
@@ -6939,7 +7021,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onKeyDownCapture",
@@ -6970,7 +7053,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onKeyUpCapture",
@@ -7353,7 +7437,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onClickCapture",
@@ -8053,42 +8138,48 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "isSelected",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "isReadOnly",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onFocusChange",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "excludeFromTabOrder",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "isRequired",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "isInvalid",
@@ -8106,7 +8197,8 @@ const meta: Record<string, ComponentMeta> = {
             "valid",
             "invalid"
           ]
-        }
+        },
+        "inherited": true
       },
       {
         "name": "validationBehavior",
@@ -8117,14 +8209,16 @@ const meta: Record<string, ComponentMeta> = {
             "aria",
             "native"
           ]
-        }
+        },
+        "inherited": true
       },
       {
         "name": "validate",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "radius",
@@ -8159,42 +8253,48 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onPress",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onPressStart",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onPressEnd",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onPressChange",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onPressUp",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       }
     ]
   },
@@ -8205,7 +8305,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "style",
@@ -8290,42 +8391,48 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "string | (((formData: FormData) => void | Promise<void>) & string) | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "formEncType",
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "formMethod",
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "formNoValidate",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "formTarget",
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "name",
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "type",
@@ -8337,7 +8444,8 @@ const meta: Record<string, ComponentMeta> = {
             "reset",
             "submit"
           ]
-        }
+        },
+        "inherited": true
       },
       {
         "name": "value",
@@ -8345,7 +8453,8 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "string | (readonly string[] & string) | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onChange",
@@ -8393,7 +8502,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "className",
@@ -8467,7 +8577,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "lang",
@@ -8583,7 +8694,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "resource",
@@ -8888,7 +9000,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-current",
@@ -8896,14 +9009,16 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "boolean | \"time\" | \"step\" | \"true\" | \"false\" | \"date\" | \"page\" | \"location\" | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-describedby",
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-description",
@@ -8918,7 +9033,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-disabled",
@@ -8926,7 +9042,8 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "boolean | \"true\" | \"false\" | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-dropeffect",
@@ -8958,7 +9075,8 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "boolean | \"true\" | \"false\" | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-flowto",
@@ -8983,7 +9101,8 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "boolean | \"dialog\" | \"menu\" | \"true\" | \"false\" | \"grid\" | \"listbox\" | \"tree\" | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-hidden",
@@ -9016,14 +9135,16 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-labelledby",
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-level",
@@ -9115,7 +9236,8 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "boolean | \"true\" | \"false\" | \"mixed\" | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "aria-readonly",
@@ -9263,7 +9385,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "node"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "dangerouslySetInnerHTML",
@@ -9375,7 +9498,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onFocusCapture",
@@ -9390,7 +9514,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onBlurCapture",
@@ -9525,7 +9650,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onKeyDownCapture",
@@ -9556,7 +9682,8 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onKeyUpCapture",
@@ -10638,14 +10765,16 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "excludeFromTabOrder",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "variant",
@@ -10689,35 +10818,40 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onPressStart",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onPressEnd",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onPressChange",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "onPressUp",
         "optional": true,
         "type": {
           "kind": "function"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "isIconOnly",
@@ -10731,14 +10865,16 @@ const meta: Record<string, ComponentMeta> = {
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "target",
         "optional": true,
         "type": {
           "kind": "string"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "elementType",
@@ -10746,14 +10882,16 @@ const meta: Record<string, ComponentMeta> = {
         "type": {
           "kind": "unknown",
           "raw": "\"button\" | JSXElementConstructor<any> | undefined"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "preventFocusOnPress",
         "optional": true,
         "type": {
           "kind": "boolean"
-        }
+        },
+        "inherited": true
       },
       {
         "name": "allowTextSelectionOnPress",

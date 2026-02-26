@@ -45,4 +45,7 @@ export const DEFAULT_INHERITED_PROVIDERS = [
   '/node_modules/@types/react/',
   '/node_modules/typescript/lib/',
   '/node_modules/csstype/',
+  '/node_modules/@react-aria/',
+  '/node_modules/@react-types/',
+  '/node_modules/@react-stately/',
 ]
