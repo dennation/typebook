@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Studio frame -->
+  <rect x="4" y="4" width="112" height="112" rx="20" stroke="#171717" stroke-width="5"/>
+
+  <!-- Variant cards — asymmetric bento grid -->
+  <!-- Top-left: large dark card -->
+  <rect x="18" y="18" width="44" height="34" rx="8" fill="#171717"/>
+  <!-- Top-right: gray card -->
+  <rect x="68" y="18" width="34" height="34" rx="8" fill="#8a8a8a"/>
+  <!-- Bottom-left: gray card -->
+  <rect x="18" y="58" width="34" height="44" rx="8" fill="#8a8a8a"/>
+  <!-- Bottom-right: large dark card -->
+  <rect x="58" y="58" width="44" height="44" rx="8" fill="#171717"/>
+</svg>
