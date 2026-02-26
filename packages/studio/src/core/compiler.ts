@@ -32,7 +32,7 @@ export class StudioCompiler {
 	private pageFiles: string[] = []
 	private debounceTimer: ReturnType<typeof setTimeout> | null = null
 	private readonly typeCache = new Map<string, PropInfo[]>()
-	private readonly excludeTypePackages: string[] | undefined
+	private readonly inheritedProviders: string[] | undefined
 
 	constructor(config: CompilerConfig) {
 		this.cwd = config.cwd
@@ -42,7 +42,7 @@ export class StudioCompiler {
 		this.metaOutput = config.metaOutput ?? DEFAULT_META_FILE
 		this.isStoryFile = picomatch(this.storiesGlob)
 		this.isPageFile = picomatch(this.pagesGlob)
-		this.excludeTypePackages = config.excludeTypePackages
+		this.inheritedProviders = config.inheritedProviders
 	}
 
 	/** Resolved absolute path to the registry gen file */
@@ -61,7 +61,7 @@ export class StudioCompiler {
 		this.pageFiles = await findFiles(this.cwd, this.pagesGlob)
 		console.log(LOG_PREFIX, `Found ${this.storyFiles.length} story file(s), ${this.pageFiles.length} page file(s)`)
 
-		const client = new TypeScriptClient(this.cwd, this.excludeTypePackages)
+		const client = new TypeScriptClient(this.cwd, this.inheritedProviders)
 		try {
 			await client.start()
 			this.tsClient = client

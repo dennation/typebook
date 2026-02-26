@@ -40,8 +40,8 @@ export const DEFAULT_DOCS_PAGE = 'API'
 /** localStorage key for persisted theme preference */
 export const THEME_STORAGE_KEY = 'ui-studio-theme'
 
-/** Default package paths whose type declarations mark props as inherited */
-export const DEFAULT_EXCLUDE_TYPE_PACKAGES = [
+/** Default inherited providers — packages whose type declarations mark props as inherited */
+export const DEFAULT_INHERITED_PROVIDERS = [
   '/node_modules/@types/react/',
   '/node_modules/typescript/lib/',
   '/node_modules/csstype/',

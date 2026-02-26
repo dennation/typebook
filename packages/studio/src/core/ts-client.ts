@@ -1,7 +1,7 @@
 import ts from 'typescript'
 import { resolve } from 'node:path'
 import type { PropInfo, PropType } from '../types.js'
-import { LOG_PREFIX, DEFAULT_EXCLUDE_TYPE_PACKAGES } from '../constants.js'
+import { LOG_PREFIX, DEFAULT_INHERITED_PROVIDERS } from '../constants.js'
 
 export class TypeScriptClient {
   private program: ts.Program | null = null
@@ -11,13 +11,13 @@ export class TypeScriptClient {
   private cachedFileNames: string[] | null = null
   private cachedOptions: ts.CompilerOptions | null = null
 
-  private readonly excludeTypePaths: string[]
+  private readonly inheritedPaths: string[]
 
-  constructor(private cwd: string, excludeTypePackages?: string[]) {
-    const userPaths = (excludeTypePackages ?? []).map(
+  constructor(private cwd: string, inheritedProviders?: string[]) {
+    const userPaths = (inheritedProviders ?? []).map(
       (pkg) => `/node_modules/${pkg}/`,
     )
-    this.excludeTypePaths = [...DEFAULT_EXCLUDE_TYPE_PACKAGES, ...userPaths]
+    this.inheritedPaths = [...DEFAULT_INHERITED_PROVIDERS, ...userPaths]
   }
 
   async start(): Promise<void> {
@@ -185,7 +185,7 @@ export class TypeScriptClient {
 
     return declarations.every((decl) => {
       const fileName = decl.getSourceFile().fileName
-      return this.excludeTypePaths.some((p) => fileName.includes(p))
+      return this.inheritedPaths.some((p) => fileName.includes(p))
     })
   }
 

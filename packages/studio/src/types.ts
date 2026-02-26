@@ -11,8 +11,8 @@ export interface StudioConfig {
   output?: string
   /** Output path for the generated meta file (default: './ui-studio-meta.gen.ts') */
   metaOutput?: string
-  /** Additional package paths to treat as inherited (e.g. ['@heroui/theme'] → '/node_modules/@heroui/theme/') */
-  excludeTypePackages?: string[]
+  /** Additional packages whose type declarations mark props as inherited (e.g. ['@heroui/theme']) */
+  inheritedProviders?: string[]
 }
 
 
