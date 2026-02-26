@@ -5,7 +5,6 @@ const button = define(Button, {
 	defaults: {
 		children: 'Click me',
 	},
-	props: ['size', 'variant', 'color', 'radius', 'disabled', 'isLoading'],
 })
 
 export const Default = button.single({ props: { size: 'md', variant: 'solid', color: 'primary' } })

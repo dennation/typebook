@@ -18,10 +18,19 @@ function isControllable(prop: PropInfo): boolean {
 
 export function Playground({ of: config }: { of: DefineResult<any> }) {
 	const propsMap = useStudioMeta()
-	const props: PropInfo[] = propsMap.get(config.component) ?? []
+	const allProps: PropInfo[] = propsMap.get(config.component) ?? []
 	const Component = config.component
 
 	const [controlProps, setControlProps] = useState<Record<string, unknown>>(config.defaults)
+	const [search, setSearch] = useState('')
+	const [showInherited, setShowInherited] = useState(false)
+
+	const hasInherited = allProps.some((p) => p.inherited)
+	const filteredProps = allProps.filter((p) => {
+		if (!showInherited && p.inherited) return false
+		if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
+		return true
+	})
 
 	const handleChange = useCallback((propName: string, value: unknown) => {
 		setControlProps((prev) => ({ ...prev, [propName]: value }))
@@ -40,10 +49,36 @@ export function Playground({ of: config }: { of: DefineResult<any> }) {
 				/>
 			</div>
 
+			{/* Toolbar */}
+			{allProps.length > 0 && (
+				<div className="st:border-t st:border-border st:flex st:items-center st:gap-3 st:px-4 st:py-2">
+					<input
+						type="text"
+						placeholder="Search props..."
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+						className="st:flex-1 st:bg-transparent st:border st:border-border st:rounded st:px-2.5 st:py-1.5 st:text-xs st:text-text st:placeholder-text-muted st:outline-none focus:st:border-text-muted"
+					/>
+					{hasInherited && (
+						<label className="st:flex st:items-center st:gap-1.5 st:text-xs st:text-text-muted st:whitespace-nowrap st:cursor-pointer st:select-none">
+							<input
+								type="checkbox"
+								checked={showInherited}
+								onChange={(e) => setShowInherited(e.target.checked)}
+								className="st:accent-text-muted"
+							/>
+							Show inherited
+						</label>
+					)}
+				</div>
+			)}
+
 			{/* Props table */}
 			<div className="st:border-t st:border-border">
-				{props.length === 0 ? (
-					<p className="st:text-xs st:text-text-muted st:p-3">No props</p>
+				{filteredProps.length === 0 ? (
+					<p className="st:text-xs st:text-text-muted st:p-3">
+						{allProps.length === 0 ? 'No props' : 'No matching props'}
+					</p>
 				) : (
 					<table className="st:w-full st:text-xs">
 						<thead>
@@ -60,12 +95,12 @@ export function Playground({ of: config }: { of: DefineResult<any> }) {
 							</tr>
 						</thead>
 						<tbody>
-							{props.map((prop) => (
+							{filteredProps.map((prop) => (
 								<tr
 									key={prop.name}
 									className="st:border-b st:border-border last:st:border-b-0"
 								>
-									<td className="st:py-2.5 st:px-4 st:font-mono st:text-text st:whitespace-nowrap">
+									<td className={`st:py-2.5 st:px-4 st:font-mono st:whitespace-nowrap ${prop.inherited ? 'st:text-text-muted' : 'st:text-text'}`}>
 										{prop.name}
 										{!prop.optional && (
 											<span className="st:text-red-400 st:ml-0.5">*</span>

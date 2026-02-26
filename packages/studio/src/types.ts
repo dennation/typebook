@@ -11,6 +11,8 @@ export interface StudioConfig {
   output?: string
   /** Output path for the generated meta file (default: './ui-studio-meta.gen.ts') */
   metaOutput?: string
+  /** Additional package paths to treat as inherited (e.g. ['@heroui/theme'] → '/node_modules/@heroui/theme/') */
+  excludeTypePackages?: string[]
 }
 
 
@@ -29,6 +31,8 @@ export interface PropInfo {
   name: string
   optional: boolean
   type: PropType
+  /** When true, the prop is inherited from framework types (e.g. React.HTMLAttributes) */
+  inherited?: boolean
 }
 
 // --- Component Meta (extracted by plugin, stored in ui-studio-meta.gen.ts) ---

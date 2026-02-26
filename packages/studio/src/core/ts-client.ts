@@ -1,7 +1,7 @@
 import ts from 'typescript'
 import { resolve } from 'node:path'
 import type { PropInfo, PropType } from '../types.js'
-import { LOG_PREFIX } from '../constants.js'
+import { LOG_PREFIX, DEFAULT_EXCLUDE_TYPE_PACKAGES } from '../constants.js'
 
 export class TypeScriptClient {
   private program: ts.Program | null = null
@@ -11,7 +11,14 @@ export class TypeScriptClient {
   private cachedFileNames: string[] | null = null
   private cachedOptions: ts.CompilerOptions | null = null
 
-  constructor(private cwd: string) {}
+  private readonly excludeTypePaths: string[]
+
+  constructor(private cwd: string, excludeTypePackages?: string[]) {
+    const userPaths = (excludeTypePackages ?? []).map(
+      (pkg) => `/node_modules/${pkg}/`,
+    )
+    this.excludeTypePaths = [...DEFAULT_EXCLUDE_TYPE_PACKAGES, ...userPaths]
+  }
 
   async start(): Promise<void> {
     if (!this.cachedFileNames || !this.cachedOptions) {
@@ -92,22 +99,37 @@ export class TypeScriptClient {
           // TS checker returns ts.Type but DefineResult<T> is always a reference
           const typeRef = defineResultType as ts.TypeReference
 
+          let props: PropInfo[] | null = null
+
           // First try: typeArguments property on TypeReference
           if (typeRef.typeArguments && typeRef.typeArguments.length > 0) {
             const propsType = typeRef.typeArguments[0]
-            result = this.extractPropsFromType(checker, propsType)
+            props = this.extractPropsFromType(checker, propsType)
+          } else {
+            // Second try: getTypeArguments method
+            const typeArgs = checker.getTypeArguments(typeRef)
+            if (typeArgs && typeArgs.length > 0) {
+              const propsType = typeArgs[0]
+              props = this.extractPropsFromType(checker, propsType)
+            }
+          }
+
+          if (!props) {
+            console.warn(LOG_PREFIX, 'Could not extract Props type argument')
             return
           }
 
-          // Second try: getTypeArguments method
-          const typeArgs = checker.getTypeArguments(typeRef)
-          if (typeArgs && typeArgs.length > 0) {
-            const propsType = typeArgs[0]
-            result = this.extractPropsFromType(checker, propsType)
-            return
+          // Detect inherited props from the original component type
+          const componentArg = callExpr.arguments[0]
+          if (componentArg) {
+            const inheritedNames = this.getInheritedPropNames(checker, componentArg)
+            result = props.map((p) =>
+              inheritedNames.has(p.name) ? { ...p, inherited: true } : p,
+            )
+          } else {
+            result = props
           }
 
-          console.warn(LOG_PREFIX, 'Could not extract Props type argument')
           return
         }
       }
@@ -117,6 +139,54 @@ export class TypeScriptClient {
 
     visit(sourceFile)
     return result
+  }
+
+  /**
+   * Get the original Props type from a component and classify each property
+   * as inherited (all declarations in framework paths) or own.
+   */
+  private getInheritedPropNames(
+    checker: ts.TypeChecker,
+    componentNode: ts.Node,
+  ): Set<string> {
+    const inherited = new Set<string>()
+
+    const componentType = checker.getTypeAtLocation(componentNode)
+    const signatures = [
+      ...componentType.getCallSignatures(),
+      ...componentType.getConstructSignatures(),
+    ]
+
+    if (signatures.length === 0) return inherited
+
+    const firstSig = signatures[0]
+    const params = firstSig.getParameters()
+    if (params.length === 0) return inherited
+
+    const propsParam = params[0]
+    const propsType = checker.getTypeOfSymbol(propsParam)
+
+    for (const prop of propsType.getProperties()) {
+      if (this.isInheritedProp(prop)) {
+        inherited.add(prop.getName())
+      }
+    }
+
+    return inherited
+  }
+
+  /**
+   * A prop is inherited if ALL its declarations come from excluded type packages.
+   * Props with no declarations (synthetic) are considered own.
+   */
+  private isInheritedProp(symbol: ts.Symbol): boolean {
+    const declarations = symbol.getDeclarations()
+    if (!declarations || declarations.length === 0) return false
+
+    return declarations.every((decl) => {
+      const fileName = decl.getSourceFile().fileName
+      return this.excludeTypePaths.some((p) => fileName.includes(p))
+    })
   }
 
   private extractPropsFromType(checker: ts.TypeChecker, type: ts.Type): PropInfo[] {
