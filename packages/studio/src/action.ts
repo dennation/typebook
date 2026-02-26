@@ -6,6 +6,7 @@ export interface ActionLogEntry {
 	readonly actionName: string
 	readonly previewId: string
 	readonly args: readonly unknown[]
+	readonly inherited: boolean
 }
 
 // --- ActionStore — framework-agnostic singleton ---
@@ -23,8 +24,8 @@ function emit(): void {
 }
 
 export const actionStore = {
-	log(actionName: string, previewId: string, args: readonly unknown[]): void {
-		entries = [...entries, { id: nextId++, timestamp: Date.now(), actionName, previewId, args }]
+	log(actionName: string, previewId: string, args: readonly unknown[], inherited: boolean): void {
+		entries = [...entries, { id: nextId++, timestamp: Date.now(), actionName, previewId, args, inherited }]
 		emit()
 	},
 

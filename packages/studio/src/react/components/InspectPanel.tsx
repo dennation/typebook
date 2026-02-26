@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Group, Panel, Separator } from 'react-resizable-panels'
 import { actionStore } from '../../action.js'
 import type { ActionLogEntry } from '../../action.js'
@@ -14,6 +14,45 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 	const inspect = useInspect()
 	const entries = useActionLog(previewId)
 	const previewProps = inspect?.previewPropsRef.current?.get(previewId) ?? {}
+
+	const [overrides, setOverrides] = useState<ReadonlyMap<string, boolean>>(new Map())
+
+	// Derive unique action names with inherited status
+	const actionNames = useMemo(() => {
+		const map = new Map<string, boolean>()
+		for (const entry of entries) {
+			if (!map.has(entry.actionName)) {
+				map.set(entry.actionName, entry.inherited)
+			}
+		}
+		return map
+	}, [entries])
+
+	const isVisible = useCallback(
+		(name: string) => overrides.get(name) ?? !(actionNames.get(name) ?? false),
+		[overrides, actionNames],
+	)
+
+	const filteredEntries = useMemo(
+		() => entries.filter((e) => isVisible(e.actionName)),
+		[entries, isVisible],
+	)
+
+	const hiddenCount = useMemo(() => {
+		let count = 0
+		for (const [name] of actionNames) {
+			if (!isVisible(name)) count++
+		}
+		return count
+	}, [actionNames, isVisible])
+
+	const handleToggle = useCallback((name: string, visible: boolean) => {
+		setOverrides((prev) => {
+			const next = new Map(prev)
+			next.set(name, visible)
+			return next
+		})
+	}, [])
 
 	const handleClear = useCallback(() => {
 		actionStore.clear(previewId)
@@ -48,25 +87,35 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 
 				{/* Log section */}
 				<Panel defaultSize={50} minSize={20} className="st:flex st:flex-col st:overflow-hidden">
-					<SectionHeader title="Log" count={entries.length}>
-						{entries.length > 0 && (
-							<button
-								type="button"
-								onClick={handleClear}
-								className="st:text-[10px] st:text-text-muted hover:st:text-text st:cursor-pointer st:bg-transparent st:border-0 st:px-1"
-							>
-								Clear
-							</button>
-						)}
+					<SectionHeader title="Log" count={filteredEntries.length}>
+						<div className="st:flex st:items-center st:gap-1">
+							{entries.length > 0 && (
+								<button
+									type="button"
+									onClick={handleClear}
+									className="st:text-[10px] st:text-text-muted hover:st:text-text st:cursor-pointer st:bg-transparent st:border-0 st:px-1"
+								>
+									Clear
+								</button>
+							)}
+							{actionNames.size > 0 && (
+								<FilterDropdown
+									actionNames={actionNames}
+									isVisible={isVisible}
+									hiddenCount={hiddenCount}
+									onToggle={handleToggle}
+								/>
+							)}
+						</div>
 					</SectionHeader>
 
-					{entries.length === 0 ? (
+					{filteredEntries.length === 0 ? (
 						<p className="st:text-xs st:text-text-muted st:px-4 st:py-3">
-							No actions logged
+							{entries.length === 0 ? 'No actions logged' : 'All actions filtered'}
 						</p>
 					) : (
 						<div className="st:flex-1 st:overflow-y-auto st:px-4 st:pb-3 st:space-y-0.5">
-							{entries.map((entry) => (
+							{filteredEntries.map((entry) => (
 								<LogEntryRow key={entry.id} entry={entry} />
 							))}
 						</div>
@@ -78,6 +127,84 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 }
 
 // --- Sub-components ---
+
+function FilterDropdown({
+	actionNames,
+	isVisible,
+	hiddenCount,
+	onToggle,
+}: {
+	actionNames: ReadonlyMap<string, boolean>
+	isVisible: (name: string) => boolean
+	hiddenCount: number
+	onToggle: (name: string, visible: boolean) => void
+}) {
+	const [open, setOpen] = useState(false)
+	const ref = useRef<HTMLDivElement>(null)
+
+	useEffect(() => {
+		if (!open) return
+		const handleClick = (e: MouseEvent) => {
+			if (ref.current && !ref.current.contains(e.target as Node)) {
+				setOpen(false)
+			}
+		}
+		document.addEventListener('mousedown', handleClick)
+		return () => document.removeEventListener('mousedown', handleClick)
+	}, [open])
+
+	const sorted = useMemo(() => {
+		const entries = Array.from(actionNames.entries())
+		return entries.sort((a, b) => {
+			// Own first, inherited second
+			if (a[1] !== b[1]) return a[1] ? 1 : -1
+			return a[0].localeCompare(b[0])
+		})
+	}, [actionNames])
+
+	return (
+		<div ref={ref} className="st:relative">
+			<button
+				type="button"
+				onClick={() => setOpen((v) => !v)}
+				className={`st:text-[10px] st:cursor-pointer st:bg-transparent st:border-0 st:px-1 st:flex st:items-center st:gap-0.5 ${
+					hiddenCount > 0
+						? 'st:text-accent'
+						: 'st:text-text-muted hover:st:text-text'
+				}`}
+				title="Filter actions"
+			>
+				&#9698;
+				{hiddenCount > 0 && (
+					<span className="st:text-[9px] st:bg-accent st:text-white st:rounded-full st:w-3.5 st:h-3.5 st:flex st:items-center st:justify-center st:leading-none">
+						{hiddenCount}
+					</span>
+				)}
+			</button>
+
+			{open && (
+				<div className="st:absolute st:right-0 st:top-full st:mt-1 st:bg-bg-sidebar st:border st:border-border st:rounded st:shadow-lg st:z-50 st:min-w-[160px] st:max-h-[240px] st:overflow-y-auto st:py-1">
+					{sorted.map(([name, inherited]) => (
+						<label
+							key={name}
+							className={`st:flex st:items-center st:gap-2 st:px-3 st:py-1 st:text-[11px] st:font-mono st:cursor-pointer hover:st:bg-bg ${
+								inherited ? 'st:text-text-muted' : 'st:text-text'
+							}`}
+						>
+							<input
+								type="checkbox"
+								checked={isVisible(name)}
+								onChange={(e) => onToggle(name, e.target.checked)}
+								className="st:cursor-pointer"
+							/>
+							{name}
+						</label>
+					))}
+				</div>
+			)}
+		</div>
+	)
+}
 
 function SectionHeader({
 	title,
