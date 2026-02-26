@@ -5,7 +5,7 @@ const switchComponent = define(Switch, {
 	defaults: {
 		children: 'Enable notifications',
 	},
-	props: ['size', 'color', 'disabled', 'isSelected'],
+
 })
 
 export const Default = switchComponent.single({

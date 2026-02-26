@@ -5,7 +5,7 @@ const checkbox = define(Checkbox, {
 	defaults: {
 		children: 'Agree to terms',
 	},
-	props: ['size', 'color', 'radius', 'disabled', 'isSelected'],
+
 })
 
 export const Default = checkbox.single({ props: { size: 'md', color: 'primary' } })

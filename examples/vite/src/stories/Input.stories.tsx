@@ -5,7 +5,7 @@ const input = define(Input, {
 	defaults: {
 		placeholder: 'Enter text',
 	},
-	props: ['size', 'variant', 'color', 'radius', 'disabled', 'isReadOnly', 'isRequired'],
+
 })
 
 export const Default = input.single({ props: { size: 'md', variant: 'flat' } })
