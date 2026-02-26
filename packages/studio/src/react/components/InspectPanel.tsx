@@ -3,7 +3,6 @@ import { actionStore } from '../../action.js'
 import type { ActionLogEntry } from '../../action.js'
 import { useInspect } from '../context.js'
 import { useActionLog } from '../hooks/useActionLog.js'
-import { useActionSummary, type ActionSummary } from '../hooks/useActionSummary.js'
 
 export interface InspectPanelProps {
 	previewId: string
@@ -13,7 +12,6 @@ export interface InspectPanelProps {
 export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 	const inspect = useInspect()
 	const entries = useActionLog(previewId)
-	const summaries = useActionSummary(entries)
 	const previewProps = inspect?.previewPropsRef.current?.get(previewId) ?? {}
 
 	const handleClear = useCallback(() => {
@@ -37,7 +35,13 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 
 			{/* Scrollable content */}
 			<div className="st:flex-1 st:overflow-y-auto">
-				{/* Actions summary */}
+				{/* Props */}
+				<SectionHeader title="Props" />
+				<div className="st:px-4 st:pb-3">
+					<PropsTable props={previewProps} />
+				</div>
+
+				{/* Actions log */}
 				<SectionHeader title="Actions" count={entries.length}>
 					{entries.length > 0 && (
 						<button
@@ -50,35 +54,17 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 					)}
 				</SectionHeader>
 
-				{summaries.length === 0 ? (
+				{entries.length === 0 ? (
 					<p className="st:text-xs st:text-text-muted st:px-4 st:py-3">
 						No actions logged
 					</p>
 				) : (
-					<div className="st:px-4 st:pb-3 st:space-y-1">
-						{summaries.map((s) => (
-							<ActionRow key={s.actionName} summary={s} />
+					<div className="st:px-4 st:pb-3 st:space-y-0.5">
+						{entries.map((entry) => (
+							<ActionLogRow key={entry.id} entry={entry} />
 						))}
 					</div>
 				)}
-
-				{/* Action log */}
-				{entries.length > 0 && (
-					<>
-						<SectionHeader title="Log" count={entries.length} />
-						<div className="st:px-4 st:pb-3 st:space-y-0.5">
-							{entries.map((entry) => (
-								<ActionLogRow key={entry.id} entry={entry} />
-							))}
-						</div>
-					</>
-				)}
-
-				{/* Props */}
-				<SectionHeader title="Props" />
-				<div className="st:px-4 st:pb-4">
-					<PropsTable props={previewProps} />
-				</div>
 			</div>
 		</aside>
 	)
@@ -106,24 +92,6 @@ function SectionHeader({
 				)}
 			</span>
 			{children}
-		</div>
-	)
-}
-
-function ActionRow({ summary }: { summary: ActionSummary }) {
-	return (
-		<div className="st:flex st:items-center st:justify-between st:text-xs st:py-1">
-			<div className="st:flex st:items-center st:gap-1.5">
-				<span className="st:font-mono st:text-text">{summary.actionName}</span>
-				{summary.callCount > 1 && (
-					<span className="st:text-[10px] st:bg-accent/15 st:text-accent st:px-1.5 st:py-px st:rounded-full st:font-medium">
-						&times;{summary.callCount}
-					</span>
-				)}
-			</div>
-			<span className="st:text-text-muted st:text-[10px] st:font-mono">
-				{formatTime(summary.lastTimestamp)}
-			</span>
 		</div>
 	)
 }
