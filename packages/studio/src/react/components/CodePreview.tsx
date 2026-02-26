@@ -50,7 +50,7 @@ export function CodePreview({ code }: CodePreviewProps) {
 	}, [code, themes])
 
 	const [copied, setCopied] = useState(false)
-	const timerRef = useRef<ReturnType<typeof setTimeout>>()
+	const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
 
 	const handleCopy = useCallback(() => {
 		navigator.clipboard.writeText(code)

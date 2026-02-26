@@ -14,8 +14,8 @@ export interface InspectPanelProps {
 export function InspectPanel({ previewId }: InspectPanelProps) {
 	const inspect = useInspect()
 	const entries = useActionLog(previewId)
-	const previewProps = inspect?.previewPropsRef.current?.get(previewId) ?? {}
-	const componentName = inspect?.previewComponentNamesRef.current?.get(previewId) ?? 'Component'
+	const previewProps = (previewId && inspect?.previewPropsRef.current?.get(previewId)) ?? {}
+	const componentName = (previewId && inspect?.previewComponentNamesRef.current?.get(previewId)) ?? 'Component'
 	const code = useMemo(() => generateJsx(componentName, previewProps), [componentName, previewProps])
 
 	const [overrides, setOverrides] = useState<ReadonlyMap<string, boolean>>(new Map())
@@ -23,7 +23,7 @@ export function InspectPanel({ previewId }: InspectPanelProps) {
 	// Build full action names list from PropInfo (available immediately) + logged entries
 	const actionNames = useMemo(() => {
 		const map = new Map<string, boolean>()
-		const propInfos = inspect?.previewPropInfosRef.current?.get(previewId)
+		const propInfos = previewId ? inspect?.previewPropInfosRef.current?.get(previewId) : undefined
 		if (propInfos) {
 			for (const info of propInfos) {
 				if (info.type.kind === 'function') {
@@ -77,7 +77,7 @@ export function InspectPanel({ previewId }: InspectPanelProps) {
 	}, [actionNames])
 
 	const handleClear = useCallback(() => {
-		actionStore.clear(previewId)
+		if (previewId) actionStore.clear(previewId)
 	}, [previewId])
 
 	return (
