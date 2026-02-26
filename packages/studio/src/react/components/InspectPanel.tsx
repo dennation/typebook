@@ -17,16 +17,25 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 
 	const [overrides, setOverrides] = useState<ReadonlyMap<string, boolean>>(new Map())
 
-	// Derive unique action names with inherited status
+	// Build full action names list from PropInfo (available immediately) + logged entries
 	const actionNames = useMemo(() => {
 		const map = new Map<string, boolean>()
+		const propInfos = inspect?.previewPropInfosRef.current?.get(previewId)
+		if (propInfos) {
+			for (const info of propInfos) {
+				if (info.type.kind === 'function') {
+					map.set(info.name, info.inherited ?? false)
+				}
+			}
+		}
+		// Merge any logged actions not in PropInfo (e.g. dynamic props)
 		for (const entry of entries) {
 			if (!map.has(entry.actionName)) {
 				map.set(entry.actionName, entry.inherited)
 			}
 		}
 		return map
-	}, [entries])
+	}, [inspect?.previewPropInfosRef, previewId, entries])
 
 	const isVisible = useCallback(
 		(name: string) => overrides.get(name) ?? !(actionNames.get(name) ?? false),

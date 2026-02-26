@@ -27,11 +27,13 @@ export function useStudioWrapper(): WrapperFn | undefined {
 // --- Inspect (right panel state) ---
 
 export type PreviewPropsMap = Map<string, Record<string, unknown>>
+export type PreviewPropInfosMap = Map<string, readonly PropInfo[]>
 
 export interface InspectState {
 	inspectedPreviewId: string | null
 	onInspect: (previewId: string) => void
 	previewPropsRef: RefObject<PreviewPropsMap>
+	previewPropInfosRef: RefObject<PreviewPropInfosMap>
 }
 
 const InspectContext = createContext<InspectState | null>(null)

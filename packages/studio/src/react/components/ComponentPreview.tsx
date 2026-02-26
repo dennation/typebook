@@ -37,7 +37,7 @@ export const ComponentPreview = memo(function ComponentPreview({
 
 	const isInspected = inspect?.inspectedPreviewId === previewId
 
-	// Register props in the shared ref for InspectPanel to read
+	// Register props and propInfos in shared refs for InspectPanel to read
 	useEffect(() => {
 		const ref = inspect?.previewPropsRef
 		if (!ref?.current) return
@@ -47,15 +47,24 @@ export const ComponentPreview = memo(function ComponentPreview({
 		}
 	}, [inspect?.previewPropsRef, previewId, props])
 
+	useEffect(() => {
+		const ref = inspect?.previewPropInfosRef
+		if (!ref?.current || !propInfos) return
+		ref.current.set(previewId, propInfos)
+		return () => {
+			ref.current?.delete(previewId)
+		}
+	}, [inspect?.previewPropInfosRef, previewId, propInfos])
+
 	return (
-		<div className="st:relative st:group/preview">
+		<div className="st:relative">
 			{inspect && (
 				<button
 					type="button"
-					className={`st:absolute st:top-1.5 st:right-1.5 st:z-20 st:w-6 st:h-6 st:rounded st:text-[10px] st:cursor-pointer st:flex st:items-center st:justify-center st:transition-opacity st:border ${
+					className={`st:absolute st:top-1.5 st:right-1.5 st:z-20 st:w-6 st:h-6 st:rounded st:text-[10px] st:cursor-pointer st:flex st:items-center st:justify-center st:border ${
 						isInspected
-							? 'st:opacity-100 st:bg-accent st:text-white st:border-accent'
-							: 'st:opacity-0 group-hover/preview:st:opacity-100 st:bg-bg st:text-text-muted st:border-border hover:st:border-accent hover:st:text-accent'
+							? 'st:bg-accent st:text-white st:border-accent'
+							: 'st:bg-bg st:text-text-muted st:border-border hover:st:border-accent hover:st:text-accent'
 					}`}
 					title="Inspect"
 					onClick={() => inspect.onInspect(previewId)}

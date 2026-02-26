@@ -7,7 +7,7 @@ import { resolveComponentPages } from '../utils/resolveComponentPages.js'
 import { entryName } from '../utils/naming.js'
 import { useHashRoute } from '../hooks/useHashRoute.js'
 import { useTheme, type Theme } from '../hooks/useTheme.js'
-import { StudioMetaProvider, StudioWrapperProvider, InspectProvider, type PreviewPropsMap } from '../context.js'
+import { StudioMetaProvider, StudioWrapperProvider, InspectProvider, type PreviewPropsMap, type PreviewPropInfosMap } from '../context.js'
 import { Sidebar } from './Sidebar.js'
 import { MainContent } from './MainContent.js'
 import { InspectPanel } from './InspectPanel.js'
@@ -31,6 +31,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 	// --- Inspect panel state ---
 	const [inspectedPreviewId, setInspectedPreviewId] = useState<string | null>(null)
 	const previewPropsRef = useRef<PreviewPropsMap>(new Map())
+	const previewPropInfosRef = useRef<PreviewPropInfosMap>(new Map())
 
 	const handleInspect = useCallback((id: string) => {
 		setInspectedPreviewId((prev) => (prev === id ? null : id))
@@ -159,7 +160,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 
 	// Inspect context value
 	const inspectState = useMemo(
-		() => ({ inspectedPreviewId, onInspect: handleInspect, previewPropsRef }),
+		() => ({ inspectedPreviewId, onInspect: handleInspect, previewPropsRef, previewPropInfosRef }),
 		[inspectedPreviewId, handleInspect],
 	)
 
