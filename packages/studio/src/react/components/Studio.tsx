@@ -168,7 +168,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 		[inspectedPreviewId, handleInspect],
 	)
 
-	const rootClass = 'st:grid st:grid-cols-[260px_1fr] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text'
+	const rootClass = 'st:grid st:grid-cols-[260px_minmax(0,1fr)] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text'
 
 	const resolvedCodeTheme = useMemo<CodeThemeConfig>(
 		() => ({
@@ -208,7 +208,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 										/>
 									</Panel>
 									<Separator className="st:w-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-col-resize" />
-									<Panel defaultSize={30} minSize={15} style={{ minWidth: 280 }}>
+									<Panel defaultSize={30} minSize={20}>
 										<InspectPanel
 											previewId={inspectedPreviewId}
 											onClose={handleCloseInspect}
