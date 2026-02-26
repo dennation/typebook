@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useCodeTheme, type CodeThemeConfig } from '../context.js'
 
 // --- Shiki singleton highlighter ---
@@ -49,8 +49,14 @@ export function CodePreview({ code }: CodePreviewProps) {
 		}
 	}, [code, themes])
 
+	const [copied, setCopied] = useState(false)
+	const timerRef = useRef<ReturnType<typeof setTimeout>>()
+
 	const handleCopy = useCallback(() => {
 		navigator.clipboard.writeText(code)
+		setCopied(true)
+		clearTimeout(timerRef.current)
+		timerRef.current = setTimeout(() => setCopied(false), 1500)
 	}, [code])
 
 	return (
@@ -58,10 +64,14 @@ export function CodePreview({ code }: CodePreviewProps) {
 			<button
 				type="button"
 				onClick={handleCopy}
-				className="st:absolute st:top-2 st:right-2 st:z-10 st:opacity-0 group-hover/code:st:opacity-100 st:transition-opacity st:text-[10px] st:px-1.5 st:py-0.5 st:rounded st:border st:border-border st:bg-bg-sidebar st:text-text-muted hover:st:text-text st:cursor-pointer"
+				className={`st:absolute st:top-2 st:right-2 st:z-10 st:transition-opacity st:text-[10px] st:px-1.5 st:py-0.5 st:rounded st:border st:border-border st:bg-bg-sidebar st:cursor-pointer ${
+					copied
+						? 'st:opacity-100 st:text-accent'
+						: 'st:opacity-0 group-hover/code:st:opacity-100 st:text-text-muted hover:st:text-text'
+				}`}
 				title="Copy code"
 			>
-				Copy
+				{copied ? 'Copied!' : 'Copy'}
 			</button>
 			{html ? (
 				<div

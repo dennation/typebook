@@ -58,6 +58,20 @@
   background-color: var(--shiki-dark-bg) !important;
 }
 
+/* Shiki line numbers */
+.shiki code {
+  counter-reset: line;
+}
+.shiki code .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 1.5em;
+  margin-right: 1em;
+  text-align: right;
+  opacity: 0.35;
+}
+
 /* Scrollbar */
 [data-theme] ::-webkit-scrollbar {
   width: 6px;
