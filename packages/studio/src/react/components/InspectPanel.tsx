@@ -54,6 +54,16 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 		})
 	}, [])
 
+	const handleToggleAll = useCallback((visible: boolean) => {
+		setOverrides((prev) => {
+			const next = new Map(prev)
+			for (const [name] of actionNames) {
+				next.set(name, visible)
+			}
+			return next
+		})
+	}, [actionNames])
+
 	const handleClear = useCallback(() => {
 		actionStore.clear(previewId)
 	}, [previewId])
@@ -104,6 +114,7 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 									isVisible={isVisible}
 									hiddenCount={hiddenCount}
 									onToggle={handleToggle}
+									onToggleAll={handleToggleAll}
 								/>
 							)}
 						</div>
@@ -133,11 +144,13 @@ function FilterDropdown({
 	isVisible,
 	hiddenCount,
 	onToggle,
+	onToggleAll,
 }: {
 	actionNames: ReadonlyMap<string, boolean>
 	isVisible: (name: string) => boolean
 	hiddenCount: number
 	onToggle: (name: string, visible: boolean) => void
+	onToggleAll: (visible: boolean) => void
 }) {
 	const [open, setOpen] = useState(false)
 	const ref = useRef<HTMLDivElement>(null)
@@ -184,6 +197,15 @@ function FilterDropdown({
 
 			{open && (
 				<div className="st:absolute st:right-0 st:top-full st:mt-1 st:bg-bg-sidebar st:border st:border-border st:rounded st:shadow-lg st:z-50 st:min-w-[160px] st:max-h-[240px] st:overflow-y-auto st:py-1">
+					<label className="st:flex st:items-center st:gap-2 st:px-3 st:py-1 st:text-[11px] st:font-medium st:text-text st:cursor-pointer hover:st:bg-bg st:border-b st:border-border st:mb-1 st:pb-1.5">
+						<input
+							type="checkbox"
+							checked={hiddenCount === 0}
+							onChange={(e) => onToggleAll(e.target.checked)}
+							className="st:cursor-pointer"
+						/>
+						Select all
+					</label>
 					{sorted.map(([name, inherited]) => (
 						<label
 							key={name}
