@@ -56,6 +56,16 @@ export const ComponentPreview = memo(function ComponentPreview({
 		}
 	}, [inspect?.previewPropInfosRef, previewId, propInfos])
 
+	useEffect(() => {
+		const ref = inspect?.previewComponentNamesRef
+		if (!ref?.current) return
+		const name = component.displayName || component.name || 'Component'
+		ref.current.set(previewId, name)
+		return () => {
+			ref.current?.delete(previewId)
+		}
+	}, [inspect?.previewComponentNamesRef, previewId, component])
+
 	return (
 		<div className="st:relative">
 			{inspect && (

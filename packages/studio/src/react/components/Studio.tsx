@@ -7,7 +7,7 @@ import { resolveComponentPages } from '../utils/resolveComponentPages.js'
 import { entryName } from '../utils/naming.js'
 import { useHashRoute } from '../hooks/useHashRoute.js'
 import { useTheme, type Theme } from '../hooks/useTheme.js'
-import { StudioMetaProvider, StudioWrapperProvider, InspectProvider, type PreviewPropsMap, type PreviewPropInfosMap } from '../context.js'
+import { StudioMetaProvider, StudioWrapperProvider, InspectProvider, CodeThemeProvider, DEFAULT_CODE_THEME, type PreviewPropsMap, type PreviewPropInfosMap, type PreviewComponentNamesMap, type CodeThemeConfig } from '../context.js'
 import { Sidebar } from './Sidebar.js'
 import { MainContent } from './MainContent.js'
 import { InspectPanel } from './InspectPanel.js'
@@ -20,9 +20,11 @@ export interface StudioProps {
 	disableSearch?: boolean
 	/** Global wrapper applied to all stories and Playground previews (e.g. a theme provider) */
 	storyWrapper?: WrapperFn
+	/** Shiki themes for code preview in Inspect Panel. Defaults to github-light / github-dark. */
+	codeTheme?: { light?: string; dark?: string }
 }
 
-export function Studio({ registry, theme: themeOverride, disableSearch = false, storyWrapper }: StudioProps) {
+export function Studio({ registry, theme: themeOverride, disableSearch = false, storyWrapper, codeTheme }: StudioProps) {
 	const { components, pages = [] } = registry
 	const { theme, toggleTheme } = useTheme(themeOverride)
 	const [searchQuery, setSearchQuery] = useState('')
@@ -32,6 +34,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 	const [inspectedPreviewId, setInspectedPreviewId] = useState<string | null>(null)
 	const previewPropsRef = useRef<PreviewPropsMap>(new Map())
 	const previewPropInfosRef = useRef<PreviewPropInfosMap>(new Map())
+	const previewComponentNamesRef = useRef<PreviewComponentNamesMap>(new Map())
 
 	const handleInspect = useCallback((id: string) => {
 		setInspectedPreviewId((prev) => (prev === id ? null : id))
@@ -160,7 +163,7 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 
 	// Inspect context value
 	const inspectState = useMemo(
-		() => ({ inspectedPreviewId, onInspect: handleInspect, previewPropsRef, previewPropInfosRef }),
+		() => ({ inspectedPreviewId, onInspect: handleInspect, previewPropsRef, previewPropInfosRef, previewComponentNamesRef }),
 		[inspectedPreviewId, handleInspect],
 	)
 
@@ -168,39 +171,49 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 		? 'st:grid st:grid-cols-[260px_1fr_300px] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text'
 		: 'st:grid st:grid-cols-[260px_1fr] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text'
 
+	const resolvedCodeTheme = useMemo<CodeThemeConfig>(
+		() => ({
+			light: codeTheme?.light ?? DEFAULT_CODE_THEME.light,
+			dark: codeTheme?.dark ?? DEFAULT_CODE_THEME.dark,
+		}),
+		[codeTheme?.light, codeTheme?.dark],
+	)
+
 	return (
 		<StudioMetaProvider value={propsMap}>
 			<StudioWrapperProvider value={storyWrapper}>
-				<InspectProvider value={inspectState}>
-					<div className={gridClass} data-theme={theme}>
-						<Sidebar
-							tree={tree}
-							route={route}
-							collapsed={collapsed}
-							toggleCollapse={toggleCollapse}
-							disableSearch={disableSearch}
-							searchQuery={searchQuery}
-							onSearchChange={setSearchQuery}
-							theme={theme}
-							onToggleTheme={toggleTheme}
-						/>
-
-						<MainContent
-							activeEntry={activeEntry}
-							storyName={activeStoryName}
-							story={story}
-							storyProps={storyProps}
-							PageContent={PageContent}
-						/>
-
-						{inspectedPreviewId && (
-							<InspectPanel
-								previewId={inspectedPreviewId}
-								onClose={handleCloseInspect}
+				<CodeThemeProvider value={resolvedCodeTheme}>
+					<InspectProvider value={inspectState}>
+						<div className={gridClass} data-theme={theme}>
+							<Sidebar
+								tree={tree}
+								route={route}
+								collapsed={collapsed}
+								toggleCollapse={toggleCollapse}
+								disableSearch={disableSearch}
+								searchQuery={searchQuery}
+								onSearchChange={setSearchQuery}
+								theme={theme}
+								onToggleTheme={toggleTheme}
 							/>
-						)}
-					</div>
-				</InspectProvider>
+
+							<MainContent
+								activeEntry={activeEntry}
+								storyName={activeStoryName}
+								story={story}
+								storyProps={storyProps}
+								PageContent={PageContent}
+							/>
+
+							{inspectedPreviewId && (
+								<InspectPanel
+									previewId={inspectedPreviewId}
+									onClose={handleCloseInspect}
+								/>
+							)}
+						</div>
+					</InspectProvider>
+				</CodeThemeProvider>
 			</StudioWrapperProvider>
 		</StudioMetaProvider>
 	)

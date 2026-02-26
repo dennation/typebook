@@ -24,16 +24,37 @@ export function useStudioWrapper(): WrapperFn | undefined {
 	return useContext(StudioWrapperContext)
 }
 
+// --- Code Theme (shiki themes for light/dark) ---
+
+export interface CodeThemeConfig {
+	light: string
+	dark: string
+}
+
+const DEFAULT_CODE_THEME: CodeThemeConfig = { light: 'github-light', dark: 'github-dark' }
+
+const CodeThemeContext = createContext<CodeThemeConfig>(DEFAULT_CODE_THEME)
+
+export const CodeThemeProvider = CodeThemeContext.Provider
+
+export { DEFAULT_CODE_THEME }
+
+export function useCodeTheme(): CodeThemeConfig {
+	return useContext(CodeThemeContext)
+}
+
 // --- Inspect (right panel state) ---
 
 export type PreviewPropsMap = Map<string, Record<string, unknown>>
 export type PreviewPropInfosMap = Map<string, readonly PropInfo[]>
+export type PreviewComponentNamesMap = Map<string, string>
 
 export interface InspectState {
 	inspectedPreviewId: string | null
 	onInspect: (previewId: string) => void
 	previewPropsRef: RefObject<PreviewPropsMap>
 	previewPropInfosRef: RefObject<PreviewPropInfosMap>
+	previewComponentNamesRef: RefObject<PreviewComponentNamesMap>
 }
 
 const InspectContext = createContext<InspectState | null>(null)

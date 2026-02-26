@@ -4,6 +4,8 @@ import { actionStore } from '../../action.js'
 import type { ActionLogEntry } from '../../action.js'
 import { useInspect } from '../context.js'
 import { useActionLog } from '../hooks/useActionLog.js'
+import { generateJsx } from '../utils/generateJsx.js'
+import { CodePreview } from './CodePreview.js'
 
 export interface InspectPanelProps {
 	previewId: string
@@ -14,6 +16,8 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 	const inspect = useInspect()
 	const entries = useActionLog(previewId)
 	const previewProps = inspect?.previewPropsRef.current?.get(previewId) ?? {}
+	const componentName = inspect?.previewComponentNamesRef.current?.get(previewId) ?? 'Component'
+	const code = useMemo(() => generateJsx(componentName, previewProps), [componentName, previewProps])
 
 	const [overrides, setOverrides] = useState<ReadonlyMap<string, boolean>>(new Map())
 
@@ -95,7 +99,7 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 			{/* Resizable sections */}
 			<Group orientation="vertical" className="st:flex-1 st:overflow-hidden">
 				{/* Props section */}
-				<Panel defaultSize={50} minSize={20} className="st:flex st:flex-col st:overflow-hidden">
+				<Panel defaultSize={35} minSize={15} className="st:flex st:flex-col st:overflow-hidden">
 					<SectionHeader title="Props" />
 					<div className="st:flex-1 st:overflow-y-auto st:px-4 st:pb-3">
 						<PropsTable props={previewProps} />
@@ -104,8 +108,18 @@ export function InspectPanel({ previewId, onClose }: InspectPanelProps) {
 
 				<Separator className="st:h-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-row-resize" />
 
+				{/* Code section */}
+				<Panel defaultSize={30} minSize={15} className="st:flex st:flex-col st:overflow-hidden">
+					<SectionHeader title="Code" />
+					<div className="st:flex-1 st:overflow-y-auto">
+						<CodePreview code={code} />
+					</div>
+				</Panel>
+
+				<Separator className="st:h-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-row-resize" />
+
 				{/* Log section */}
-				<Panel defaultSize={50} minSize={20} className="st:flex st:flex-col st:overflow-hidden">
+				<Panel defaultSize={35} minSize={15} className="st:flex st:flex-col st:overflow-hidden">
 					<SectionHeader title="Log" count={filteredEntries.length}>
 						<div className="st:flex st:items-center st:gap-1">
 							{entries.length > 0 && (

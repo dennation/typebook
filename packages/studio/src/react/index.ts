@@ -1,3 +1,4 @@
+export { CodePreview } from './components/CodePreview.js'
 export { ErrorBoundary } from './components/ErrorBoundary.js'
 export { Playground } from './components/Playground.js'
 export { Story } from './components/Story.js'

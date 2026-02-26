@@ -28,8 +28,10 @@ export default defineConfig({
 				'glob',
 				'oxc-parser',
 				'picomatch',
+				'shiki',
 				/^node:/,
 				/^@oxc-parser/,
+				/^@shikijs/,
 			],
 			output: {
 				entryFileNames: '[name].mjs',
