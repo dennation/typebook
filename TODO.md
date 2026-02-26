@@ -46,19 +46,6 @@ Timing: вторник-среда утром EST.
 
 Технический долг и архитектурные улучшения, без которых всё остальное строится на шатком фундаменте.
 
-### Actions — логирование событий
-Сейчас `function`-пропсы в Playground показывают прочерк — `onClick`, `onChange` и т.д. уходят в пустоту. Без этого интерактивная превью компонентов с коллбэками ощущается сломанной.
-- Хелпер `action(name)` — фабрика, возвращающая функцию, которая логирует вызовы с аргументами в панель.
-- Панель Actions снизу в Playground/StoryRenderer: timestamp, call count, args.
-- Кнопка Clear.
-```ts
-import { action } from '@dennation/ui-studio'
-const button = define(Button, {
-  defaults: { onClick: action('onClick') },
-})
-```
-**Effort: низкий–средний.** **Impact: критический.** Блокирует повседневную работу с интерактивным preview.
-
 ### Улучшение PropControl
 `isControllable()` в `Playground.tsx` — контролы только для `literal`, `boolean`, `string`, `number`, `node`.
 Минимально необходимые доработки:
@@ -83,14 +70,10 @@ const button = define(Button, {
 - **Расширить snapshot-тесты** — довести до 50+ кейсов для regression safety.
 **Effort: низкий–средний.** **Impact: средний.** Основные кейсы уже покрыты.
 
-### Copy-Paste Code Snippets
-Кнопка «Copy JSX» на каждой variant-карточке и в Playground.
-Клик → в буфере `<Button size="lg" variant="ghost">Click me</Button>`.
-Пропсы уже известны точно (включая defaults) — генерация тривиальна.
-- Живое обновление при изменении props в Playground.
+### Copy-Paste Code Snippets — расширение
+Code preview с копированием уже реализован в Inspect Panel (JSX генерируется из props, подсветка shiki, кнопка Copy). Осталось:
+- Кнопка «Copy JSX» на каждой variant-карточке (сейчас только в Inspect Panel).
 - Пропускать props, совпадающие с defaults.
-- `children` рендерить как JSX-children, не как атрибут.
-Дизайнеры и PM-ы смогут бровзить studio и копировать готовый код.
 **Blocked by:** children prop support (PropControl).
 
 ### Component Status Badges

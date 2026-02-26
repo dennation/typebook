@@ -71,15 +71,16 @@ packages/studio/
         index.ts              — Webpack plugin: UiStudioWebpackPlugin class wrapping StudioCompiler
     react/
       index.ts                — React exports
-      context.ts              — StudioMetaContext (Component → PropInfo[] map) + StudioWrapperContext (global storyWrapper) + InspectContext (inspect panel state)
+      context.ts              — StudioMetaContext (Component → ComponentMeta map) + StudioWrapperContext (global storyWrapper) + InspectContext (inspect panel state) + CodeThemeContext (shiki themes)
       components/
         index.ts              — Barrel export
         Studio.tsx            — <Studio /> component (per-story sidebar tree, theme, single-story rendering, inspect panel)
         Story.tsx             — <Story of={...} /> component for embedding stories in doc pages
         StoryRenderer.tsx     — Dispatches to RenderSingle / RenderVariants / RenderMatrix
         Playground.tsx        — <Playground of={defineResult} /> interactive component preview with props panel
-        ComponentPreview.tsx  — Unified component render: action wrapping, storyWrapper, ErrorBoundary, IsolateWrapper, inspect button
-        InspectPanel.tsx      — Right sidebar panel: actions log, action summaries, props table
+        ComponentPreview.tsx  — Unified component render: action wrapping, storyWrapper, ErrorBoundary, IsolateWrapper, inspect button, registers componentName/propInfos
+        CodePreview.tsx       — Shiki-highlighted code block with line numbers and copy button
+        InspectPanel.tsx      — Always-visible right sidebar: Props table, Code preview (generated JSX), Action log with filter
         PropControl.tsx       — Prop controls: dropdown (literal), toggle (boolean), input (string), number
         VariantCard.tsx       — Single variant preview card with label badge, delegates rendering to ComponentPreview
         IframePreview.tsx     — Iframe wrapper for CSS isolation of component previews
@@ -87,13 +88,13 @@ packages/studio/
       hooks/
         useHashRoute.ts       — Hash-based routing: #component/name (page or story, pages win) + #page/page-name → activeComponent/activeStory/activeComponentPage/activePage
         useActionLog.ts       — Hook: filtered ActionLogEntry[] by previewId via useSyncExternalStore
-        useActionSummary.ts   — Hook: groups action entries by name → { actionName, callCount, lastArgs, lastTimestamp }[]
       utils/
         index.ts              — Barrel export
         buildSidebarTree.ts   — Builds sidebar tree: unified SidebarNode discriminated union (group | component | page | story)
         resolveComponentPages.ts — Generates default docs pages for components, handles user overrides
         wrapActionProps.ts    — Wraps function props with action logging, auto-generates stubs for missing function props
-        naming.ts             — toKebabCase(), entryName(), pageName() helpers
+        generateJsx.ts        — Generates JSX code string from component name + props (for code preview)
+        naming.ts             — toKebabCase(), entryName() helpers
         getGridStyle.ts       — getGridStyle() — computes CSS grid layout for variant grids
       styles/
         styles.css            — Studio UI styles (Tailwind)
@@ -102,7 +103,7 @@ packages/studio/
 ### Build entry points
 
 - **`index`** — Library exports (`define`, `definePage`, types). Consumed by user code and generated `.gen.ts`.
-- **`react/index`** — `<Studio />` component, `<Story />` component, `<Playground />` component, `ErrorBoundary`.
+- **`react/index`** — `<Studio />` component, `<Story />` component, `<Playground />` component, `<CodePreview />` component, `ErrorBoundary`.
 - **`plugins/vite`** — Vite plugin (`uiStudio()`). Thin wrapper around `StudioCompiler`.
 - **`plugins/webpack`** — Webpack plugin (`UiStudioWebpackPlugin`). Thin wrapper around `StudioCompiler`.
 - **`cli/index`** — CLI entry: `npx @dennation/ui-studio generate`.
@@ -161,10 +162,14 @@ packages/studio/
 - **Story config fields** — all story kinds share common config via `StoryConfig`: `props`, `isolate`, `name`, `path`, `hidden`. Each kind adds its own fields: `single` adds `render`, `variants` adds `items`/`columns`, `matrix` adds `x`/`y`.
 - **Global storyWrapper** — `<Studio storyWrapper={...} />` provides a global wrapper for all stories and Playground previews via `StudioWrapperContext`. Applied at render time in `ComponentPreview` (not baked into story objects). Composition order: global `storyWrapper` → per-component `wrapper` (baked into `story.render` at `define()` time) → component render. Uses React Context to avoid prop drilling through StoryRenderer/MainContent.
 - **Automatic action logging** — all function props are automatically wrapped with logging in `ComponentPreview` via `wrapActionProps()`. Existing functions are wrapped (log + call original), missing function props (known from `PropInfo` with `kind: 'function'`) get auto-generated logging stubs. Action name = prop key (e.g. `onClick`, `onChange`). No manual setup needed. Disable per-component with `trackActions: false` in `define()`.
-- **ActionStore** — framework-agnostic singleton (`action.ts`) with immutable entries array and pub-sub via `Set<Listener>`. React subscribes via `useSyncExternalStore`. Each log entry has `{ id, timestamp, actionName, previewId, args }`. `previewId` is injected by `wrapActionProps` at render time to scope entries per preview instance.
-- **ComponentPreview** — unified component rendering used by both `VariantCard` and `Playground`. Handles: `wrapActionProps` (action logging + stub generation), `storyWrapper` application, `IsolateWrapper` (conditional iframe), `ErrorBoundary`, and inspect button. Reads `InspectContext` to show/highlight the inspect button — no prop drilling needed. Registers its current props in a shared `PreviewPropsMap` ref for `InspectPanel` to read.
-- **Inspect Panel** — right sidebar (push layout, 300px) that opens when user clicks the inspect button on any `ComponentPreview` hover. Grid dynamically switches between `[260px_1fr]` and `[260px_1fr_300px]`. Shows three sections: Actions summary (per-action call count + last timestamp), Action log (chronological entries with formatted args), and Props table (current props of inspected instance). Panel state (`inspectedPreviewId`) lives in `Studio.tsx`, provided via `InspectContext`. Clears on navigation. Clicking inspect on same preview toggles panel closed; clicking on another preview switches context.
-- **InspectContext** — provides `{ inspectedPreviewId, onInspect, previewPropsRef }` to the component tree. `ComponentPreview` reads it to render the inspect button and determine `isInspected` state. Avoids threading inspect props through `StoryRenderer` → `RenderVariants` → `VariantCard`. `previewPropsRef` is a `Ref<Map<string, Record<string, unknown>>>` — `ComponentPreview` writes its props via `useEffect`, `InspectPanel` reads from it.
+- **ActionStore** — framework-agnostic singleton (`action.ts`) with immutable entries array and pub-sub via `Set<Listener>`. React subscribes via `useSyncExternalStore`. Each log entry has `{ id, timestamp, actionName, previewId, formattedArgs, inherited }`. Args are serialized to string at log time (not at render time) to prevent freezes on large objects like DOM events. `previewId` is injected by `wrapActionProps` at render time to scope entries per preview instance.
+- **ComponentMeta** — includes `componentName` (extracted by scanner from the first argument of `define()` calls, e.g. `define(Switch, ...)` → `"Switch"`) and `props: PropInfo[]`. The `componentName` is the real import identifier — not `displayName` (which may include namespace prefix) and not `component.name` (which is empty for HOC-wrapped components).
+- **StudioMetaContext** — provides `Map<ComponentType, ComponentMeta>` to the component tree. Used by `ComponentPreview` (component name + propInfos), `Playground` (prop controls), and `Story` (variant resolution).
+- **ComponentPreview** — unified component rendering used by both `VariantCard` and `Playground`. Handles: `wrapActionProps` (action logging + stub generation), `storyWrapper` application, `IsolateWrapper` (conditional iframe), `ErrorBoundary`, and inspect button. Reads `InspectContext` to show/highlight the inspect button — no prop drilling needed. Registers current props, propInfos, and componentName (from `ComponentMeta`) in shared refs for `InspectPanel` to read.
+- **Inspect Panel** — always-visible right sidebar (resizable, default 30% width, min 20%). Three resizable vertical sections: Props (current props of inspected preview), Code (live JSX generated from component name + props via `generateJsx`, highlighted with shiki), Log (chronological action entries with filter dropdown). When no preview is selected, shows "Click a preview to inspect" placeholder. Action log filter: checkboxes per action name, inherited actions hidden by default, "Select all" toggle. Actions are populated from PropInfo (available immediately) + logged entries.
+- **InspectContext** — provides `{ inspectedPreviewId, onInspect, previewPropsRef, previewPropInfosRef, previewComponentNamesRef }` to the component tree. `ComponentPreview` reads it to render the inspect button and determine `isInspected` state. Avoids threading inspect props through `StoryRenderer` → `RenderVariants` → `VariantCard`. Shared refs: `previewPropsRef` (props per previewId), `previewPropInfosRef` (PropInfo[] per previewId), `previewComponentNamesRef` (component name per previewId) — `ComponentPreview` writes via `useEffect`, `InspectPanel` reads.
+- **Code preview (shiki)** — `CodePreview` component renders JSX code with syntax highlighting via shiki. Dual-theme support: CSS variables (`--shiki-light`/`--shiki-dark`) mapped to `[data-theme]` attribute. Line numbers via CSS counters. Copy button with "Copied!" feedback. Module-level singleton highlighter (lazy loaded). Configurable themes via `<Studio codeTheme={{ light, dark }} />` prop and `CodeThemeContext`.
+- **`codeTheme` prop** — `<Studio codeTheme={{ light?: string, dark?: string }} />` configures shiki themes for code preview. Defaults to `{ light: 'github-light', dark: 'github-dark' }`. Shiki is externalized in the build (resolved by consuming bundler).
 - **Iframe isolation + actions** — action functions are closures created in the parent frame's module scope. `IframePreview` uses `createPortal` which only moves DOM nodes — JS execution context stays in the parent. Actions from iframe-isolated components naturally flow to the parent's `ActionStore` with no special handling.
 
 ---
