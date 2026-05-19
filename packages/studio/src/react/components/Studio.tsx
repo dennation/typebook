@@ -1,4 +1,4 @@
-import { useState, useCallback, useInsertionEffect, useMemo, useRef, useEffect } from 'react'
+import { useState, useCallback, useInsertionEffect, useMemo, useEffect } from 'react'
 import type { ComponentType } from 'react'
 import type { Registry, ComponentEntry, ComponentMeta, WrapperFn } from '../../types.js'
 import { STYLE_ELEMENT_ID } from '../../constants.js'
@@ -7,11 +7,10 @@ import { resolveComponentPages } from '../utils/resolveComponentPages.js'
 import { entryName } from '../utils/naming.js'
 import { useHashRoute } from '../hooks/useHashRoute.js'
 import { useTheme, type Theme } from '../hooks/useTheme.js'
-import { StudioMetaProvider, StudioWrapperProvider, InspectProvider, CodeThemeProvider, DEFAULT_CODE_THEME, type PreviewPropsMap, type PreviewPropInfosMap, type PreviewComponentNamesMap, type CodeThemeConfig } from '../context.js'
-import { Group, Panel, Separator } from 'react-resizable-panels'
+import { StudioMetaProvider, StudioWrapperProvider, InspectProvider, CodeThemeProvider, DEFAULT_CODE_THEME, type InspectedData, type CodeThemeConfig } from '../context.js'
 import { Sidebar } from './Sidebar.js'
 import { MainContent } from './MainContent.js'
-import { InspectPanel } from './InspectPanel.js'
+import { InspectModal } from './InspectModal.js'
 import { Playground } from './Playground.js'
 import styles from '../styles/styles.css?inline'
 
@@ -31,14 +30,11 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 	const [searchQuery, setSearchQuery] = useState('')
 	const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
-	// --- Inspect panel state ---
-	const [inspectedPreviewId, setInspectedPreviewId] = useState<string | null>(null)
-	const previewPropsRef = useRef<PreviewPropsMap>(new Map())
-	const previewPropInfosRef = useRef<PreviewPropInfosMap>(new Map())
-	const previewComponentNamesRef = useRef<PreviewComponentNamesMap>(new Map())
+	// --- Inspect modal state ---
+	const [inspectedData, setInspectedData] = useState<InspectedData | null>(null)
 
-	const handleInspect = useCallback((id: string) => {
-		setInspectedPreviewId((prev) => (prev === id ? null : id))
+	const handleInspect = useCallback((data: InspectedData) => {
+		setInspectedData((prev) => (prev?.previewId === data.previewId ? null : data))
 	}, [])
 
 	// Component → ComponentMeta map for cross-file story resolution
@@ -65,9 +61,9 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 
 	const route = useHashRoute(components, topLevelPages, componentPages)
 
-	// Clear inspect panel on navigation
+	// Close inspect modal on navigation
 	useEffect(() => {
-		setInspectedPreviewId(null)
+		setInspectedData(null)
 	}, [route.activeView])
 
 	const toggleCollapse = useCallback((key: string) => {
@@ -159,8 +155,9 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 	}, [])
 
 	// Inspect context value
+	const inspectedPreviewId = inspectedData?.previewId ?? null
 	const inspectState = useMemo(
-		() => ({ inspectedPreviewId, onInspect: handleInspect, previewPropsRef, previewPropInfosRef, previewComponentNamesRef }),
+		() => ({ inspectedPreviewId, onInspect: handleInspect }),
 		[inspectedPreviewId, handleInspect],
 	)
 
@@ -192,21 +189,18 @@ export function Studio({ registry, theme: themeOverride, disableSearch = false, 
 								onToggleTheme={toggleTheme}
 							/>
 
-							<Group orientation="horizontal" className="st:overflow-hidden">
-								<Panel minSize={40}>
-									<MainContent
-										activeEntry={activeEntry}
-										storyName={activeStoryName}
-										story={story}
-										storyProps={storyProps}
-										PageContent={PageContent}
-									/>
-								</Panel>
-								<Separator className="st:w-px st:bg-border hover:st:bg-accent st:transition-colors st:cursor-col-resize" />
-								<Panel defaultSize={30} minSize={20}>
-									<InspectPanel previewId={inspectedPreviewId} />
-								</Panel>
-							</Group>
+							<div className="st:overflow-hidden st:h-full">
+								<MainContent
+									activeEntry={activeEntry}
+									storyName={activeStoryName}
+									story={story}
+									storyProps={storyProps}
+									PageContent={PageContent}
+								/>
+							</div>
+							{inspectedData && (
+								<InspectModal data={inspectedData} onClose={() => setInspectedData(null)} />
+							)}
 						</div>
 					</InspectProvider>
 				</CodeThemeProvider>

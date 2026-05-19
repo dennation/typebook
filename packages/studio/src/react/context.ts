@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
-import type { ComponentType, RefObject } from 'react'
-import type { ComponentMeta, PropInfo, WrapperFn } from '../types.js'
+import type { ComponentType, ReactNode } from 'react'
+import type { ComponentMeta, WrapperFn } from '../types.js'
 
 // --- Studio Meta (Component → ComponentMeta) ---
 
@@ -43,18 +43,20 @@ export function useCodeTheme(): CodeThemeConfig {
 	return useContext(CodeThemeContext)
 }
 
-// --- Inspect (right panel state) ---
+// --- Inspect (modal state) ---
 
-export type PreviewPropsMap = Map<string, Record<string, unknown>>
-export type PreviewPropInfosMap = Map<string, readonly PropInfo[]>
-export type PreviewComponentNamesMap = Map<string, string>
+export interface InspectedData {
+	readonly previewId: string
+	readonly component: ComponentType<any>
+	readonly props: Record<string, unknown>
+	readonly render: (props: any) => ReactNode
+	readonly isolate: boolean
+	readonly trackActions: boolean
+}
 
 export interface InspectState {
 	inspectedPreviewId: string | null
-	onInspect: (previewId: string) => void
-	previewPropsRef: RefObject<PreviewPropsMap>
-	previewPropInfosRef: RefObject<PreviewPropInfosMap>
-	previewComponentNamesRef: RefObject<PreviewComponentNamesMap>
+	onInspect: (data: InspectedData) => void
 }
 
 const InspectContext = createContext<InspectState | null>(null)

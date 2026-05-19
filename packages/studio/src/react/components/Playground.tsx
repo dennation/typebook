@@ -32,7 +32,8 @@ export function Playground({ of: config }: { of: DefineResult<any> }) {
 			if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
 			return true
 		})
-		.toSorted((a, b) => a.name.localeCompare(b.name))
+		.slice()
+		.sort((a: PropInfo, b: PropInfo) => a.name.localeCompare(b.name))
 
 	const handleChange = useCallback((propName: string, value: unknown) => {
 		setControlProps((prev) => ({ ...prev, [propName]: value }))
@@ -97,7 +98,7 @@ export function Playground({ of: config }: { of: DefineResult<any> }) {
 							</tr>
 						</thead>
 						<tbody>
-							{filteredProps.map((prop) => (
+							{filteredProps.map((prop: PropInfo) => (
 								<tr
 									key={prop.name}
 									className="st:border-b st:border-border last:st:border-b-0"

@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react'
+import { memo } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { useStudioWrapper, useStudioMeta } from '../context.js'
 import { useInspect } from '../context.js'
@@ -38,35 +38,6 @@ export const ComponentPreview = memo(function ComponentPreview({
 
 	const isInspected = inspect?.inspectedPreviewId === previewId
 
-	// Register props and propInfos in shared refs for InspectPanel to read
-	useEffect(() => {
-		const ref = inspect?.previewPropsRef
-		if (!ref?.current) return
-		ref.current.set(previewId, props)
-		return () => {
-			ref.current?.delete(previewId)
-		}
-	}, [inspect?.previewPropsRef, previewId, props])
-
-	useEffect(() => {
-		const ref = inspect?.previewPropInfosRef
-		if (!ref?.current || !propInfos) return
-		ref.current.set(previewId, propInfos)
-		return () => {
-			ref.current?.delete(previewId)
-		}
-	}, [inspect?.previewPropInfosRef, previewId, propInfos])
-
-	useEffect(() => {
-		const ref = inspect?.previewComponentNamesRef
-		if (!ref?.current) return
-		const name = meta?.componentName ?? 'Component'
-		ref.current.set(previewId, name)
-		return () => {
-			ref.current?.delete(previewId)
-		}
-	}, [inspect?.previewComponentNamesRef, previewId, component])
-
 	return (
 		<div className="st:relative">
 			{inspect && (
@@ -78,7 +49,7 @@ export const ComponentPreview = memo(function ComponentPreview({
 							: 'st:bg-bg st:text-text-muted st:border-border hover:st:border-accent hover:st:text-accent'
 					}`}
 					title="Inspect"
-					onClick={() => inspect.onInspect(previewId)}
+					onClick={() => inspect.onInspect({ previewId, component, props, render, isolate: isolate ?? false, trackActions })}
 				>
 					&#9881;
 				</button>
