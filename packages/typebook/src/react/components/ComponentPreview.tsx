@@ -1,11 +1,10 @@
 import { memo } from 'react'
-import type { ComponentType, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { CENTERED_CONTENT_STYLE } from '../styles/constants.js'
 import { ErrorBoundary } from './ErrorBoundary.js'
 import { IsolateWrapper } from './IframePreview.js'
 
 export interface ComponentPreviewProps {
-	component: ComponentType<any>
 	props: Record<string, unknown>
 	render: (props: any) => ReactNode
 	isolate?: boolean

@@ -1,4 +1,4 @@
-import { createElement } from 'react'
+import { createElement, useCallback } from 'react'
 import type { MissingProps, Registration } from '../../types.js'
 import { useRegistration } from '../hooks/useRegistration.js'
 import { PreviewCard } from './PreviewCard.js'
@@ -22,12 +22,13 @@ export function Story<Props, CoveredByDefaults extends keyof Props = never>(
 		...(props as Record<string, unknown> | undefined),
 	}
 
+	const render = useCallback((p: any) => createElement(Component, p), [Component])
+
 	return (
 		<PreviewCard
 			label="default"
-			component={Component}
 			props={merged}
-			render={(p) => createElement(Component, p)}
+			render={render}
 			isolate={isolate}
 		/>
 	)

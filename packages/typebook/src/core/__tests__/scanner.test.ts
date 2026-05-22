@@ -19,9 +19,9 @@ describe('analyzeFile — register() discovery', () => {
 			const button = register('button', Button)
 		`)
 
-		expect(result.registers).toHaveLength(1)
-		expect(result.registers[0].id).toBe('button')
-		expect(result.registers[0].componentImport).toEqual({
+		expect(result).toHaveLength(1)
+		expect(result[0].id).toBe('button')
+		expect(result[0].componentImport).toEqual({
 			name: 'Button',
 			path: '@heroui/button',
 		})
@@ -34,9 +34,9 @@ describe('analyzeFile — register() discovery', () => {
 			export const button = register('button', Button)
 		`)
 
-		expect(result.registers).toHaveLength(1)
-		expect(result.registers[0].id).toBe('button')
-		expect(result.registers[0].componentImport).toEqual({
+		expect(result).toHaveLength(1)
+		expect(result[0].id).toBe('button')
+		expect(result[0].componentImport).toEqual({
 			name: 'Button',
 			path: './Button',
 		})
@@ -49,8 +49,8 @@ describe('analyzeFile — register() discovery', () => {
 			export default register('button', Button)
 		`)
 
-		expect(result.registers).toHaveLength(1)
-		expect(result.registers[0].componentImport.name).toBe('Button')
+		expect(result).toHaveLength(1)
+		expect(result[0].componentImport.name).toBe('Button')
 	})
 
 	test('multiple registers in one file', async () => {
@@ -62,8 +62,8 @@ describe('analyzeFile — register() discovery', () => {
 			const b = register('input', Input)
 		`)
 
-		expect(result.registers).toHaveLength(2)
-		const names = result.registers.map((d) => d.componentImport.name).sort()
+		expect(result).toHaveLength(2)
+		const names = result.map((d) => d.componentImport.name).sort()
 		expect(names).toEqual(['Button', 'Input'])
 	})
 
@@ -74,7 +74,7 @@ describe('analyzeFile — register() discovery', () => {
 			const button = register('my-button', MyButton)
 		`)
 
-		expect(result.registers[0].componentImport).toEqual({
+		expect(result[0].componentImport).toEqual({
 			name: 'MyButton',
 			path: './MyButton',
 		})
@@ -87,7 +87,7 @@ describe('analyzeFile — register() discovery', () => {
 			const comp = register('button', Btn)
 		`)
 
-		expect(result.registers[0].componentImport).toEqual({
+		expect(result[0].componentImport).toEqual({
 			name: 'Button',
 			path: './components',
 		})
@@ -98,7 +98,7 @@ describe('analyzeFile — register() discovery', () => {
 			export const foo = 1
 		`)
 
-		expect(result.registers).toEqual([])
+		expect(result).toEqual([])
 	})
 
 	test('locally-declared component → register is dropped (cannot import)', async () => {
@@ -108,7 +108,7 @@ describe('analyzeFile — register() discovery', () => {
 			const comp = register('my-comp', MyComp)
 		`)
 
-		expect(result.registers).toEqual([])
+		expect(result).toEqual([])
 	})
 
 	test('records callStart for each register()', async () => {
@@ -118,8 +118,8 @@ describe('analyzeFile — register() discovery', () => {
 			const button = register('button', Button)
 		`)
 
-		expect(typeof result.registers[0].callStart).toBe('number')
-		expect(result.registers[0].callStart).toBeGreaterThan(0)
+		expect(typeof result[0].callStart).toBe('number')
+		expect(result[0].callStart).toBeGreaterThan(0)
 	})
 
 	test('register() nested inside a function body is still found', async () => {
@@ -132,8 +132,8 @@ describe('analyzeFile — register() discovery', () => {
 			}
 		`)
 
-		expect(result.registers).toHaveLength(1)
-		expect(result.registers[0].componentImport.name).toBe('Button')
+		expect(result).toHaveLength(1)
+		expect(result[0].componentImport.name).toBe('Button')
 	})
 
 	test('non-string first arg → register is dropped', async () => {
@@ -143,11 +143,11 @@ describe('analyzeFile — register() discovery', () => {
 			const button = register(Button)
 		`)
 
-		expect(result.registers).toEqual([])
+		expect(result).toEqual([])
 	})
 
 	test('empty file → empty registers', async () => {
 		const result = await analyzeFile('file.tsx', '')
-		expect(result.registers).toEqual([])
+		expect(result).toEqual([])
 	})
 })

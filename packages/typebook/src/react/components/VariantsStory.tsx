@@ -1,4 +1,4 @@
-import { createElement } from 'react'
+import { createElement, useCallback } from 'react'
 import { resolveVariantConfig } from '../../resolve.js'
 import type { MissingProps, Registration, VariantConfig } from '../../types.js'
 import { useRegistration } from '../hooks/useRegistration.js'
@@ -27,6 +27,7 @@ export function VariantsStory<Props, CoveredByDefaults extends keyof Props = nev
 	}
 
 	const variants = resolveVariantConfig(items, propInfos, baseProps)
+	const render = useCallback((p: any) => createElement(Component, p), [Component])
 
 	return (
 		<div style={getGridStyle(variants.length, columns)}>
@@ -34,9 +35,8 @@ export function VariantsStory<Props, CoveredByDefaults extends keyof Props = nev
 				<PreviewCard
 					key={v.label}
 					label={v.label}
-					component={Component}
 					props={v.props}
-					render={(p) => createElement(Component, p)}
+					render={render}
 					isolate={isolate}
 				/>
 			))}

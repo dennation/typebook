@@ -29,7 +29,7 @@ async function extractProps(storyFile: string): Promise<PropInfo[] | null> {
 		// Let the client handle nonexistent files for that test
 		return client.getRegisterProps(filePath, 0)
 	}
-	const { registers } = await analyzeFile(filePath, content)
+	const registers = await analyzeFile(filePath, content)
 	if (registers.length === 0) return null
 	return client.getRegisterProps(filePath, registers[0].callStart)
 }

@@ -4,7 +4,6 @@ export type {
   AllOfConfig,
   ComponentMeta,
   CoveredOf,
-  Expand,
   GenerateConfig,
   MissingProps,
   PropInfo,

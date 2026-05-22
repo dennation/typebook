@@ -7,10 +7,6 @@ type IframePreviewProps = PropsWithChildren<{
 	className?: string
 }>
 
-/**
- * Renders children inside an iframe for proper isolation and viewport control.
- * Uses React portal to render into iframe's document.
- */
 function IframePreview({ children, className }: IframePreviewProps) {
 	const iframeRef = useRef<HTMLIFrameElement>(null)
 	const [iframeBody, setIframeBody] = useState<HTMLElement | null>(null)
@@ -19,23 +15,17 @@ function IframePreview({ children, className }: IframePreviewProps) {
 		const iframe = iframeRef.current
 		if (!iframe) return
 
-		// Wait for iframe to load
 		const handleLoad = () => {
 			const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
 			if (!iframeDoc) return
 
-			// Copy all stylesheets from parent document to iframe
-			const parentStyles = Array.from(document.styleSheets)
-			parentStyles.forEach((styleSheet) => {
+			Array.from(document.styleSheets).forEach((styleSheet) => {
 				try {
-					// For inline styles
 					if (styleSheet.ownerNode instanceof HTMLStyleElement) {
 						const style = iframeDoc.createElement('style')
 						style.textContent = styleSheet.ownerNode.textContent
 						iframeDoc.head.appendChild(style)
-					}
-					// For external stylesheets
-					else if (styleSheet.href) {
+					} else if (styleSheet.href) {
 						const link = iframeDoc.createElement('link')
 						link.rel = 'stylesheet'
 						link.href = styleSheet.href
@@ -47,11 +37,8 @@ function IframePreview({ children, className }: IframePreviewProps) {
 				}
 			})
 
-			// Set iframe body as portal target
 			const root = iframeDoc.getElementById('root')
-			if (root) {
-				setIframeBody(root)
-			}
+			if (root) setIframeBody(root)
 		}
 
 		iframe.addEventListener('load', handleLoad)

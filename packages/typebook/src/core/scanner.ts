@@ -1,16 +1,3 @@
-import { resolve } from 'node:path'
-import { glob } from 'glob'
-
-/**
- * Find files matching a glob pattern relative to cwd.
- */
-export async function findFiles(
-  cwd: string,
-  includeGlob: string,
-): Promise<string[]> {
-  return glob(resolve(cwd, includeGlob), { absolute: true })
-}
-
 /** Resolved component import: the component argument of `register(id, Component, ...)` */
 export interface ComponentImport {
   /** Original exported name in the source module (e.g. `Button`) */
@@ -27,10 +14,6 @@ export interface RegisterCall {
   componentImport: ComponentImport
   /** Character offset of the CallExpression in source — used by ts-client to find this exact call */
   callStart: number
-}
-
-export interface FileAnalysis {
-  registers: RegisterCall[]
 }
 
 const REGISTER_NAME = 'register'
@@ -56,7 +39,7 @@ export function mayContainRegister(content: string): boolean {
  * argument is an imported Identifier are kept — locally-declared components
  * can't be referenced from the generated registry.
  */
-export async function analyzeFile(filename: string, content: string): Promise<FileAnalysis> {
+export async function analyzeFile(filename: string, content: string): Promise<RegisterCall[]> {
   const program = await parseFile(filename, content)
   const body = (program as { body: unknown[] }).body
 
@@ -87,7 +70,7 @@ export async function analyzeFile(filename: string, content: string): Promise<Fi
     registers.push({ id, componentImport, callStart })
   }
 
-  return { registers }
+  return registers
 }
 
 /**

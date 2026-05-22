@@ -1,4 +1,4 @@
-import { createElement } from 'react'
+import { createElement, useCallback } from 'react'
 import { getVariantProp, resolveVariantConfig } from '../../resolve.js'
 import type { MissingProps, Registration, VariantConfig } from '../../types.js'
 import { useRegistration } from '../hooks/useRegistration.js'
@@ -22,6 +22,7 @@ export function MatrixStory<Props, CoveredByDefaults extends keyof Props = never
 	{ of, x, y, props, isolate }: MatrixStoryProps<Props, CoveredByDefaults>,
 ) {
 	const { Component, propInfos, defaultProps } = useRegistration(of)
+	const render = useCallback((p: any) => createElement(Component, p), [Component])
 
 	const baseProps: Record<string, unknown> = {
 		...defaultProps,
@@ -34,24 +35,21 @@ export function MatrixStory<Props, CoveredByDefaults extends keyof Props = never
 	const xProp = getVariantProp(x)
 	const xValues = xVariants.map((v) => v.props[xProp])
 
-	const rows: Array<{ label: string; cells: Array<{ label: string; props: Record<string, unknown> }> }> = []
-	for (const yConfig of y) {
+	const rows = y.flatMap((yConfig) => {
 		const yVariants = resolveVariantConfig(yConfig, propInfos, {})
-		if (yVariants.length === 0) continue
-
+		if (yVariants.length === 0) return []
 		const yProp = getVariantProp(yConfig)
-
-		for (const yVariant of yVariants) {
+		return yVariants.map((yVariant) => {
 			const yValue = yVariant.props[yProp]
-			rows.push({
+			return {
 				label: String(yValue),
 				cells: xValues.map((xValue) => ({
 					label: String(xValue),
 					props: { ...baseProps, [xProp]: xValue, [yProp]: yValue },
 				})),
-			})
-		}
-	}
+			}
+		})
+	})
 
 	return (
 		<div className="st:overflow-x-auto st:rounded-lg st:border st:border-border">
@@ -85,9 +83,8 @@ export function MatrixStory<Props, CoveredByDefaults extends keyof Props = never
 									>
 										<PreviewCard
 											label={cell.label}
-											component={Component}
 											props={cell.props}
-											render={(p) => createElement(Component, p)}
+											render={render}
 											isolate={isolate}
 										/>
 									</td>

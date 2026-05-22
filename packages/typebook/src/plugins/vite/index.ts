@@ -18,12 +18,8 @@ export function typebook(config?: TypebookConfig): Plugin {
 		},
 
 		configureServer(server) {
-			const isGenFile = (path: string) => path === builder.registryFilePath
-
-			const isWatchedSource = (path: string) => {
-				if (isGenFile(path)) return false
-				return builder.isSourceFile(path)
-			}
+			const isWatchedSource = (path: string) =>
+				path !== builder.registryFilePath && builder.isSourceFile(path)
 
 			server.watcher.on('change', (path) => {
 				if (isWatchedSource(path)) builder.scheduleFileChange(path)

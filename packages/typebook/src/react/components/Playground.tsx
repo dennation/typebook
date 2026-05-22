@@ -1,4 +1,4 @@
-import { useCallback, useState, createElement } from 'react'
+import { createElement, useCallback, useState } from 'react'
 import type { PropInfo, Registration } from '../../types.js'
 import { useRegistration } from '../hooks/useRegistration.js'
 import { ComponentPreview } from './ComponentPreview.js'
@@ -30,8 +30,7 @@ export function Playground({ of: config }: { of: Registration<any> }) {
 			if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
 			return true
 		})
-		.slice()
-		.sort((a: PropInfo, b: PropInfo) => a.name.localeCompare(b.name))
+		.sort((a, b) => a.name.localeCompare(b.name))
 
 	const handleChange = useCallback((propName: string, value: unknown) => {
 		setControlProps((prev) => ({ ...prev, [propName]: value }))
@@ -39,16 +38,13 @@ export function Playground({ of: config }: { of: Registration<any> }) {
 
 	return (
 		<div className="st:rounded-lg st:border st:border-border st:overflow-hidden st:mb-6">
-			{/* Preview */}
 			<div className="st:bg-bg-sidebar">
 				<ComponentPreview
-					component={Component}
 					props={controlProps}
 					render={(p) => createElement(Component, p)}
 				/>
 			</div>
 
-			{/* Toolbar */}
 			{allProps.length > 0 && (
 				<div className="st:border-t st:border-border st:flex st:items-center st:gap-3 st:px-4 st:py-2">
 					<input
@@ -72,7 +68,6 @@ export function Playground({ of: config }: { of: Registration<any> }) {
 				</div>
 			)}
 
-			{/* Props table */}
 			<div className="st:border-t st:border-border">
 				{filteredProps.length === 0 ? (
 					<p className="st:text-xs st:text-text-muted st:p-3">
@@ -94,7 +89,7 @@ export function Playground({ of: config }: { of: Registration<any> }) {
 							</tr>
 						</thead>
 						<tbody>
-							{filteredProps.map((prop: PropInfo) => (
+							{filteredProps.map((prop) => (
 								<tr
 									key={prop.name}
 									className="st:border-b st:border-border last:st:border-b-0"

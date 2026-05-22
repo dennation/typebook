@@ -9,11 +9,7 @@ import {
 import type { PropInfo, TypebookConfig } from '../types.js'
 import { generateRegistryFile, type RegistryComponent } from './generator.js'
 import { writeIfChanged } from './io.js'
-import {
-	type RegisterCall,
-	analyzeFile,
-	mayContainRegister,
-} from './scanner.js'
+import { analyzeFile, mayContainRegister, type RegisterCall } from './scanner.js'
 import { TypeScriptClient } from './ts-client.js'
 
 export interface RegistryBuilderConfig extends TypebookConfig {
@@ -27,19 +23,10 @@ interface FileRegister {
 	props: PropInfo[]
 }
 
-/**
- * Thrown when the same component is registered from more than one location.
- * Each component may be registered only once.
- */
 class DuplicateRegistrationError extends Error {
-	readonly componentKey: string
-	readonly files: ReadonlyArray<string>
-
-	constructor(componentKey: string, files: ReadonlyArray<string>) {
-		super(formatDuplicateMessage(componentKey, files))
+	constructor(id: string, files: ReadonlyArray<string>) {
+		super(formatDuplicateMessage(id, files))
 		this.name = 'DuplicateRegistrationError'
-		this.componentKey = componentKey
-		this.files = files
 	}
 }
 
@@ -88,10 +75,9 @@ export class RegistryBuilder {
 		await this.startTsClient()
 		await Promise.all(files.map((file) => this.indexFile(file)))
 
-		console.log(
-			LOG_PREFIX,
-			`Found ${this.registerCount()} register() call(s) across ${this.registersByFile.size} file(s)`,
-		)
+		let registerCount = 0
+		for (const list of this.registersByFile.values()) registerCount += list.length
+		console.log(LOG_PREFIX, `Found ${registerCount} register() call(s) across ${this.registersByFile.size} file(s)`)
 
 		this.flushGenFile()
 		console.log(LOG_PREFIX, `Generated ${this.registryFile}`)
@@ -112,7 +98,7 @@ export class RegistryBuilder {
 
 	async onFileChanged(filePath: string): Promise<void> {
 		this.sourceFiles.add(filePath)
-		if (this.tsClient) await this.tsClient.notifyChange(filePath)
+		if (this.tsClient) await this.tsClient.notifyChange()
 		await this.indexFile(filePath)
 		this.flushGenFile()
 	}
@@ -141,7 +127,6 @@ export class RegistryBuilder {
 		try {
 			await client.start()
 			this.tsClient = client
-			console.log(LOG_PREFIX, 'TypeScript client started')
 		} catch (err) {
 			console.warn(LOG_PREFIX, 'TypeScript client unavailable; running without type extraction')
 			console.warn(LOG_PREFIX, (err as Error).message)
@@ -155,7 +140,7 @@ export class RegistryBuilder {
 			return
 		}
 
-		const { registers } = await analyzeFile(filePath, content)
+		const registers = await analyzeFile(filePath, content)
 		if (registers.length === 0) {
 			this.registersByFile.delete(filePath)
 			return
@@ -201,12 +186,6 @@ export class RegistryBuilder {
 		}
 
 		return Array.from(byId.values())
-	}
-
-	private registerCount(): number {
-		let n = 0
-		for (const list of this.registersByFile.values()) n += list.length
-		return n
 	}
 
 	private readSafe(filePath: string): string | null {

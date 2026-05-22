@@ -28,16 +28,11 @@ export function resolveVariantConfig(
         label: String(value),
         props: { ...baseProps, [config.prop]: value },
       }))
-    case 'generate': {
-      const values: unknown[] = []
-      for (let i = 0; i < config.count; i++) {
-        values.push(config.fn())
-      }
-      return values.map((value) => ({
+    case 'generate':
+      return Array.from({ length: config.count }, () => config.fn()).map((value) => ({
         label: String(value),
         props: { ...baseProps, [config.prop]: value },
       }))
-    }
   }
 }
 

@@ -59,13 +59,8 @@ export class TypeScriptClient {
       await this.start()
     }
 
-    if (!this.program || !this.checker) {
-      console.warn(LOG_PREFIX, 'TypeScript program not initialized')
-      return null
-    }
-
     const absPath = resolve(this.cwd, filePath)
-    const sourceFile = this.program.getSourceFile(absPath)
+    const sourceFile = this.program?.getSourceFile(absPath)
     if (!sourceFile) {
       console.warn(LOG_PREFIX, 'Could not get source file:', absPath)
       return null
@@ -256,38 +251,31 @@ export class TypeScriptClient {
     const typeString = checker.typeToString(type)
     const flags = type.flags
 
-    // Check for 'any' type - skip it
     if (flags & ts.TypeFlags.Any) {
       return { kind: 'unknown', raw: 'any' }
     }
 
-    // Union type
     if (type.isUnion()) {
       const types = type.types.filter(t => !(t.flags & ts.TypeFlags.Undefined) && !(t.flags & ts.TypeFlags.Null))
 
-      // If only one type left after filtering undefined/null, unwrap it
       if (types.length === 1) {
         return this.convertTsType(checker, types[0])
       }
 
-      // String literal union: "sm" | "md" | "lg"
       if (types.every(t => t.flags & ts.TypeFlags.StringLiteral)) {
         const values = types.map(t => (t as ts.StringLiteralType).value)
         return { kind: 'literal', values }
       }
 
-      // Boolean (true | false)
       if (types.every(t => t.flags & ts.TypeFlags.BooleanLiteral)) {
         return { kind: 'boolean' }
       }
 
-      // Number literal union: 1 | 2 | 3
       if (types.every(t => t.flags & ts.TypeFlags.NumberLiteral)) {
         return { kind: 'number' }
       }
     }
 
-    // Primitives
     if (type.flags & ts.TypeFlags.Boolean || type.flags & ts.TypeFlags.BooleanLiteral) {
       return { kind: 'boolean' }
     }
@@ -303,13 +291,11 @@ export class TypeScriptClient {
       return { kind: 'number' }
     }
 
-    // Function
     const signatures = type.getCallSignatures()
     if (signatures.length > 0) {
       return { kind: 'function' }
     }
 
-    // Object/React Node
     if (typeString.includes('ReactNode') || typeString.includes('ReactElement')) {
       return { kind: 'node' }
     }
@@ -317,8 +303,7 @@ export class TypeScriptClient {
     return { kind: 'unknown', raw: typeString }
   }
 
-  async notifyChange(_filePath: string): Promise<void> {
-    // Incremental rebuild: reuses old program so TS only re-parses changed files
+  async notifyChange(): Promise<void> {
     await this.start()
   }
 }

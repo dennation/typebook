@@ -1,5 +1,7 @@
 import type { ComponentType } from 'react'
-import type { Expand, RegisterConfig, Registration } from './types.js'
+import type { RegisterConfig, Registration } from './types.js'
+
+type Expand<T> = { [K in keyof T]: T[K] } & {}
 
 /**
  * Register a component for documentation. Returns a `Registration` carrying

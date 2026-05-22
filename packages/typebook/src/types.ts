@@ -1,15 +1,11 @@
 import type { ComponentType } from 'react'
 
-// --- Config ---
-
 export interface TypebookConfig {
   /** Path to the generated registry file (default: './src/ui-registry.gen.ts') */
   registryFile?: string
   /** Additional packages whose type declarations mark props as inherited (e.g. ['@heroui/theme']) */
   inheritedProviders?: string[]
 }
-
-// --- Prop Info Types (from type extraction) ---
 
 export type PropType =
   | { kind: 'literal'; values: string[] }
@@ -39,8 +35,6 @@ export interface PropInfo {
   description?: string
 }
 
-// --- Component Meta (extracted by plugin, stored in the registry gen file) ---
-
 export interface ComponentMeta {
   /** The original component reference (used by `<Story>`-style components to render). */
   component: ComponentType<any>
@@ -48,16 +42,6 @@ export interface ComponentMeta {
   componentName: string
   props: PropInfo[]
 }
-
-// --- Register API Types ---
-
-/**
- * Flattens composed interfaces so tsgo hover shows inline types
- * instead of opaque type aliases.
- */
-export type Expand<T> = {
-  [K in keyof T]: T[K] extends string ? T[K] & string : T[K]
-} & {}
 
 /** Keys that are required (non-optional) in T */
 export type RequiredKeys<T> = {
@@ -125,8 +109,6 @@ export interface Registration<Props, CoveredByDefaults extends keyof Props = nev
   /** Phantom — keeps CoveredByDefaults reachable for `<Story>`/`<VariantsStory>`/`<MatrixStory>` typing */
   readonly __coveredByDefaults?: (k: CoveredByDefaults) => void
 }
-
-// --- UIRegistry (output of gen file, input to <RegistryProvider />) ---
 
 /** Object keyed by registration id → ComponentMeta. Built from the generated registry. */
 export type UIRegistry = Record<string, ComponentMeta>
