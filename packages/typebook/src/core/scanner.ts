@@ -16,7 +16,7 @@ export interface RegisterCall {
   callStart: number
 }
 
-const REGISTER_NAME = 'register'
+const REGISTER_NAME = 'registerComponent'
 
 async function parseFile(filename: string, content: string): Promise<unknown> {
   const oxc = await import('oxc-parser')
@@ -24,7 +24,7 @@ async function parseFile(filename: string, content: string): Promise<unknown> {
 }
 
 /**
- * Quick string check before parsing — most files won't contain register() at all.
+ * Quick string check before parsing — most files won't contain registerComponent() at all.
  */
 export function mayContainRegister(content: string): boolean {
   return content.includes(`${REGISTER_NAME}(`)

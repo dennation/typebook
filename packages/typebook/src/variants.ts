@@ -9,7 +9,7 @@ import type {
 /**
  * Auto-generate variants for a prop from its TypeScript type
  * (literal union or boolean). The first argument is the `Registration`
- * returned by `register()` — used for prop-name autocomplete.
+ * returned by `registerComponent()` — used for prop-name autocomplete.
  */
 export function allOf<R extends Registration<any>, K extends keyof PropsOf<R>>(
   _of: R,

@@ -5,9 +5,9 @@ import type { ComponentImport } from './scanner.js'
 
 /** One component's data ready to be emitted into the registry */
 export interface RegistryComponent {
-  /** Registry key (first argument of `register()`) */
+  /** Registry key (first argument of `registerComponent()`) */
   id: string
-  /** Absolute path of the file containing the `register()` call (used to resolve relative component imports) */
+  /** Absolute path of the file containing the `registerComponent()` call (used to resolve relative component imports) */
   definingFile: string
   /** The component import descriptor (name + module specifier as written in `definingFile`) */
   componentImport: ComponentImport

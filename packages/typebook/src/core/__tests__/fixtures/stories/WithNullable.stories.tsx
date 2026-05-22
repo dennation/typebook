@@ -1,8 +1,8 @@
-import { register } from '../../../../register.js'
+import { registerComponent } from '@dennation/typebook'
 import { Nullable } from '../components/WithNullable'
 
-export const comp = register('with-nullable', Nullable, {
+export const comp = registerComponent('with-nullable', Nullable, {
 	defaultProps: { value: 'test', data: 0, flag: false },
-	props: ['value', 'status', 'data', 'flag'],
+	include: ['value', 'status', 'data', 'flag'],
 })
 

@@ -1,8 +1,8 @@
-import { register } from '../../../../register.js'
+import { registerComponent } from '@dennation/typebook'
 import { WithChildren } from '../components/WithChildren'
 
-export const comp = register('with-children', WithChildren, {
+export const comp = registerComponent('with-children', WithChildren, {
 	defaultProps: { children: 'Hello' },
-	props: ['children', 'icon', 'onClick', 'renderFooter'],
+	include: ['children', 'icon', 'onClick', 'renderFooter'],
 })
 

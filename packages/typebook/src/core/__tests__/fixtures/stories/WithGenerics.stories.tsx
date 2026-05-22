@@ -1,8 +1,8 @@
-import { register } from '../../../../register.js'
+import { registerComponent } from '@dennation/typebook'
 import { Select } from '../components/WithGenerics'
 
-export const select = register('with-generics', Select<'alpha' | 'beta' | 'gamma'>, {
+export const select = registerComponent('with-generics', Select<'alpha' | 'beta' | 'gamma'>, {
 	defaultProps: { value: 'alpha', options: ['alpha', 'beta', 'gamma'], onChange: () => {} },
-	props: ['value', 'options', 'onChange', 'placeholder'],
+	include: ['value', 'options', 'onChange', 'placeholder'],
 })
 

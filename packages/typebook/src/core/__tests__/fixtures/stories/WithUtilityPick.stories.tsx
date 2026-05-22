@@ -1,8 +1,8 @@
-import { register } from '../../../../register.js'
+import { registerComponent } from '@dennation/typebook'
 import { PickedComponent } from '../components/WithUtilityTypes'
 
-export const comp = register('with-utility-pick', PickedComponent, {
+export const comp = registerComponent('with-utility-pick', PickedComponent, {
 	defaultProps: { a: 'hello' },
-	props: ['a', 'd'],
+	include: ['a', 'd'],
 })
 

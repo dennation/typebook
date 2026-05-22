@@ -61,11 +61,8 @@ export type CoveredOf<R> = R extends Registration<any, infer K> ? K : never
 export interface RegisterConfig<Props, IncludedProps extends keyof Props = keyof Props> {
   /** Default props applied to every render of this component */
   defaultProps?: Partial<Props>
-  /**
-   * Props to include in documentation and type extraction.
-   * If not specified, all props are included.
-   */
-  props?: ReadonlyArray<IncludedProps>
+  /** Props to include in documentation. If not specified, all props are included. */
+  include?: ReadonlyArray<IncludedProps>
 }
 
 /** Auto-generate variants from prop type (boolean/literal) */

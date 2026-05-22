@@ -1,8 +1,8 @@
-import { register } from '../../../../register.js'
+import { registerComponent } from '@dennation/typebook'
 import { Basic } from '../components/Basic'
 
-export const basic = register('basic', Basic, {
+export const basic = registerComponent('basic', Basic, {
 	defaultProps: { label: 'Hello' },
-	props: ['size', 'variant', 'disabled', 'label', 'count'],
+	include: ['size', 'variant', 'disabled', 'label', 'count'],
 })
 

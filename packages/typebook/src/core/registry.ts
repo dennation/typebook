@@ -30,7 +30,7 @@ class DuplicateRegistrationError extends Error {
 
 /**
  * Build-time index of every `register(Component, ...)` call found in the project.
- * Each component must be registered only once — a second `register()` call for
+ * Each component must be registered only once — a second `registerComponent()` call for
  * the same component throws `DuplicateRegistrationError`.
  *
  * Lifecycle:
@@ -70,7 +70,7 @@ export class RegistryBuilder {
 
 		let registerCount = 0
 		for (const list of this.registersByFile.values()) registerCount += list.length
-		console.log(LOG_PREFIX, `Found ${registerCount} register() call(s) across ${this.registersByFile.size} file(s)`)
+		console.log(LOG_PREFIX, `Found ${registerCount} registerComponent() call(s) across ${this.registersByFile.size} file(s)`)
 
 		this.flushGenFile()
 		console.log(LOG_PREFIX, `Generated ${this.registryFile}`)

@@ -1,7 +1,7 @@
-import { register } from '../../../../register.js'
+import { registerComponent } from '@dennation/typebook'
 import { PartialComponent } from '../components/WithUtilityTypes'
 
-export const comp = register('with-utility-partial', PartialComponent, {
-	props: ['a', 'b', 'c', 'd'],
+export const comp = registerComponent('with-utility-partial', PartialComponent, {
+	include: ['a', 'b', 'c', 'd'],
 })
 

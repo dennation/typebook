@@ -68,7 +68,7 @@ export class TypeScriptClient {
 
     const callExpr = this.findRegisterCallAt(sourceFile, callStart)
     if (!callExpr) {
-      console.warn(LOG_PREFIX, `No register() call at offset ${callStart} in ${filePath}`)
+      console.warn(LOG_PREFIX, `No registerComponent() call at offset ${callStart} in ${filePath}`)
       return null
     }
 
@@ -85,7 +85,7 @@ export class TypeScriptClient {
       if (
         ts.isCallExpression(node) &&
         ts.isIdentifier(node.expression) &&
-        node.expression.text === 'register' &&
+        node.expression.text === 'registerComponent' &&
         node.getStart(sourceFile) === callStart
       ) {
         found = node

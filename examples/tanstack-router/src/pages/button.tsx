@@ -1,9 +1,9 @@
-import { allOf, register } from '@dennation/typebook'
+import { allOf, registerComponent } from '@dennation/typebook'
 import { MatrixStory, Story, VariantsStory } from '@dennation/typebook/react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '../components/Button'
 
-const meta = register('button', Button, {
+const meta = registerComponent('button', Button, {
 	defaultProps: { children: 'Click me' },
 })
 

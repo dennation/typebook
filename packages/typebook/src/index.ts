@@ -1,4 +1,4 @@
-export { register } from './register.js'
+export { registerComponent } from './registerComponent.js'
 export { allOf, generate, values } from './variants.js'
 export type {
   AllOfConfig,

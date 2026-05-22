@@ -1,8 +1,8 @@
-import { register } from '../../../../register.js'
+import { registerComponent } from '@dennation/typebook'
 import { ExtendedButton } from '../components/WithInheritance'
 
-export const comp = register('with-inheritance-extends', ExtendedButton, {
+export const comp = registerComponent('with-inheritance-extends', ExtendedButton, {
 	defaultProps: { id: 'btn-1' },
-	props: ['id', 'className', 'variant', 'disabled'],
+	include: ['id', 'className', 'variant', 'disabled'],
 })
 
