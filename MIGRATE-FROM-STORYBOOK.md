@@ -1,10 +1,10 @@
 # Migrate from Storybook
 
-A practical guide for migrating your component stories from Storybook to UI Studio.
+A practical guide for migrating your component stories from Storybook to Typebook.
 
 ## Why migrate?
 
-| | Storybook | UI Studio |
+| | Storybook | Typebook |
 |---|---|---|
 | Lines per story | 15-40 | 3-10 |
 | Prop values | Manual `argTypes` | Auto-extracted from TypeScript |
@@ -16,7 +16,7 @@ A practical guide for migrating your component stories from Storybook to UI Stud
 
 ## Concept mapping
 
-| Storybook | UI Studio | Notes |
+| Storybook | Typebook | Notes |
 |---|---|---|
 | CSF `meta` export | `define(Component, config)` | |
 | `args` | `defaults` | Applied to all stories |
@@ -42,22 +42,22 @@ npm uninstall @storybook/react @storybook/react-vite @storybook/addon-essentials
 rm -rf .storybook
 ```
 
-Install UI Studio:
+Install Typebook:
 
 ```bash
-npm install @dennation/ui-studio
+npm install @dennation/typebook
 ```
 
 Add the plugin to your Vite config:
 
 ```ts
 // vite.config.ts
-import { uiStudio } from '@dennation/ui-studio/vite'
+import { typebook } from '@dennation/typebook/vite'
 
 export default defineConfig({
   plugins: [
     react(),
-    uiStudio(), // that's it
+    typebook(), // that's it
   ],
 })
 ```
@@ -66,8 +66,8 @@ export default defineConfig({
 
 ```tsx
 // src/main.tsx (or a dedicated route)
-import { Studio } from '@dennation/ui-studio/react'
-import registry from './ui-studio-registry.gen'
+import { Studio } from '@dennation/typebook/react'
+import registry from './ui-registry.gen'
 
 function App() {
   return <Studio registry={registry} />
@@ -113,10 +113,10 @@ export const Large: Story = { args: { size: 'lg' } }
 export const Outline: Story = { args: { variant: 'outline' } }
 ```
 
-**UI Studio (10 lines):**
+**Typebook (10 lines):**
 
 ```tsx
-import { define } from '@dennation/ui-studio'
+import { define } from '@dennation/typebook'
 import { Button } from './Button'
 
 const button = define(Button, {
@@ -130,7 +130,7 @@ export const Outline = button.single({ props: { size: 'md', variant: 'outline' }
 export default button
 ```
 
-`argTypes` is gone entirely. UI Studio reads `size: "sm" | "md" | "lg"` from your TypeScript types at build time.
+`argTypes` is gone entirely. Typebook reads `size: "sm" | "md" | "lg"` from your TypeScript types at build time.
 
 ### All variants of a prop
 
@@ -153,7 +153,7 @@ export const AllSizes: Story = {
 }
 ```
 
-**UI Studio (1 line):**
+**Typebook (1 line):**
 
 ```tsx
 export const Sizes = button.variants({ items: button.allOf('size') })
@@ -165,7 +165,7 @@ This generates a grid card for every value of `size` from the TypeScript type. W
 
 **Storybook:** No built-in support. You write a custom render function with nested loops, or one story per combination.
 
-**UI Studio (4 lines):**
+**Typebook (4 lines):**
 
 ```tsx
 export const Matrix = button.matrix({
@@ -198,7 +198,7 @@ export const Default: Story = {
 }
 ```
 
-**UI Studio:**
+**Typebook:**
 
 ```tsx
 // Global wrapper — applies to all stories and Playground previews:
@@ -231,7 +231,7 @@ export const WithIcon: Story = {
 }
 ```
 
-**UI Studio:**
+**Typebook:**
 
 ```tsx
 export const WithIcon = button.single({
@@ -265,12 +265,12 @@ import * as ButtonStories from './Button.stories'
 <ArgsTable of={ButtonStories} />
 ```
 
-**UI Studio:**
+**Typebook:**
 
 ```tsx
 // Button.page.tsx
-import { definePage } from '@dennation/ui-studio'
-import { Story, Playground } from '@dennation/ui-studio/react'
+import { definePage } from '@dennation/typebook'
+import { Story, Playground } from '@dennation/typebook/react'
 import button, { Default, Sizes } from './Button.stories'
 
 export default definePage({
@@ -311,7 +311,7 @@ export const _DisabledStates: Story = {
 }
 ```
 
-**UI Studio:**
+**Typebook:**
 
 ```tsx
 export const Disabled = button.variants({
@@ -324,7 +324,7 @@ export const Disabled = button.variants({
 
 **Storybook:** All stories render in an iframe by default (separate server).
 
-**UI Studio:** Stories render inline by default (faster). Opt-in to iframe per story:
+**Typebook:** Stories render inline by default (faster). Opt-in to iframe per story:
 
 ```tsx
 export const Modal = modal.single({
@@ -338,7 +338,7 @@ Use `isolate` for components that interact with `document` or `body` (modals, dr
 
 ## Migration checklist
 
-- [ ] Install `@dennation/ui-studio`, add plugin to `vite.config.ts`
+- [ ] Install `@dennation/typebook`, add plugin to `vite.config.ts`
 - [ ] Create Studio entry point (`<Studio registry={registry} />`) — add `storyWrapper` if you had global decorators
 - [ ] For each `.stories.tsx`:
   - [ ] Replace `meta` + `argTypes` with `define(Component, config)`
@@ -355,7 +355,7 @@ Use `isolate` for components that interact with `document` or `body` (modals, dr
 
 ## What's not yet supported
 
-These Storybook features don't have a UI Studio equivalent yet:
+These Storybook features don't have a Typebook equivalent yet:
 
 | Feature | Status | Workaround |
 |---|---|---|
@@ -369,7 +369,7 @@ These Storybook features don't have a UI Studio equivalent yet:
 
 ## File naming convention
 
-| Storybook | UI Studio |
+| Storybook | Typebook |
 |---|---|
 | `Button.stories.tsx` | `Button.stories.tsx` (same) |
 | `Button.mdx` | `Button.page.tsx` (or `ButtonGuide.page.tsx`) |
