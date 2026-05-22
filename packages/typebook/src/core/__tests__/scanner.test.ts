@@ -150,4 +150,25 @@ describe('analyzeFile — register() discovery', () => {
 		const result = await analyzeFile('file.tsx', '')
 		expect(result).toEqual([])
 	})
+
+	test('aliased import is still captured', async () => {
+		const result = await analyzeFile('file.tsx', `
+			import { registerComponent as reg } from '@dennation/typebook'
+			import { Button } from './Button'
+			const button = reg('button', Button)
+		`)
+
+		expect(result).toHaveLength(1)
+		expect(result[0].id).toBe('button')
+	})
+
+	test('registerComponent from a different package is ignored', async () => {
+		const result = await analyzeFile('file.tsx', `
+			import { registerComponent } from 'some-other-lib'
+			import { Button } from './Button'
+			const button = registerComponent('button', Button)
+		`)
+
+		expect(result).toEqual([])
+	})
 })

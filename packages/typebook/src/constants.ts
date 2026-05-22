@@ -4,6 +4,9 @@
  */
 export const PACKAGE_NAME = 'typebook'
 
+/** npm package name — used to verify registerComponent() imports at scan time */
+export const NPM_PACKAGE_NAME = '@dennation/typebook'
+
 /** Log prefix for console output */
 export const LOG_PREFIX = `[${PACKAGE_NAME}]`
 
