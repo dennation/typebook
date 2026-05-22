@@ -16,9 +16,7 @@ export interface RegistryBuilderConfig extends TypebookConfig {
 	cwd: string
 }
 
-/** A single `register()` call with its extracted props, scoped to a source file. */
 interface FileRegister {
-	filePath: string
 	call: RegisterCall
 	props: PropInfo[]
 }
@@ -60,15 +58,10 @@ export class RegistryBuilder {
 		this.inheritedProviders = config.inheritedProviders
 	}
 
-	// --- Public: file paths ---
-
 	get registryFilePath(): string {
 		return resolve(this.cwd, this.registryFile)
 	}
 
-	// --- Public: lifecycle ---
-
-	/** Initial scan of files from tsconfig → type extraction → write gen file. */
 	async start(): Promise<void> {
 		const files = getSourceFilesFromTsConfig(this.cwd)
 		this.sourceFiles = new Set(files)
@@ -89,8 +82,6 @@ export class RegistryBuilder {
 		this.tsClient?.stop()
 		this.tsClient = null
 	}
-
-	// --- Public: watcher hooks ---
 
 	isSourceFile(absPath: string): boolean {
 		return this.sourceFiles.has(absPath)
@@ -119,8 +110,6 @@ export class RegistryBuilder {
 			}
 		}, DEBOUNCE_MS)
 	}
-
-	// --- Internals ---
 
 	private async startTsClient(): Promise<void> {
 		const client = new TypeScriptClient(this.cwd, this.inheritedProviders)
@@ -151,15 +140,11 @@ export class RegistryBuilder {
 			const props = this.tsClient
 				? ((await this.tsClient.getRegisterProps(filePath, call.callStart)) ?? [])
 				: []
-			fileRegisters.push({ filePath, call, props })
+			fileRegisters.push({ call, props })
 		}
 		this.registersByFile.set(filePath, fileRegisters)
 	}
 
-	/**
-	 * Walk all registers, asserting each component is registered exactly once,
-	 * and emit the registry file.
-	 */
 	private flushGenFile(): void {
 		const components = this.collectComponents()
 		const content = generateRegistryFile(components, this.registryFilePath)
@@ -169,16 +154,16 @@ export class RegistryBuilder {
 	private collectComponents(): RegistryComponent[] {
 		const byId = new Map<string, RegistryComponent>()
 
-		for (const list of this.registersByFile.values()) {
+		for (const [filePath, list] of this.registersByFile.entries()) {
 			for (const reg of list) {
 				const id = reg.call.id
 				const existing = byId.get(id)
 				if (existing) {
-					throw new DuplicateRegistrationError(id, [existing.definingFile, reg.filePath])
+					throw new DuplicateRegistrationError(id, [existing.definingFile, filePath])
 				}
 				byId.set(id, {
 					id,
-					definingFile: reg.filePath,
+					definingFile: filePath,
 					componentImport: reg.call.componentImport,
 					props: reg.props,
 				})
