@@ -109,8 +109,8 @@ export interface GenerateConfig {
 export type VariantConfig = AllOfConfig | ValuesConfig | GenerateConfig
 
 /**
- * Returned by `register(id, Component, config)`. Holds the registry key, the
- * component reference, and default props. Variant configs are built via the
+ * Returned by `registerComponent(id, Component, config)`. Holds the registry key,
+ * the component reference, and default props. Variant configs are built via the
  * standalone `allOf` / `values` / `generate` utilities, which take a
  * `ComponentHandle` as their first argument for prop-name autocomplete and value
  * typing.
@@ -120,7 +120,7 @@ export interface ComponentHandle<Props, Defaulted extends keyof Props = never> {
   component: ComponentType<Props>
   defaultProps: Record<string, unknown>
 
-  /** Phantom — keeps Defaulted reachable for `<Story>`/`<VariantsStory>`/`<MatrixStory>` typing */
+  /** Phantom — keeps Defaulted reachable for `<Story>`/`<Variants>`/`<Matrix>` typing */
   readonly __defaulted?: (k: Defaulted) => void
 }
 

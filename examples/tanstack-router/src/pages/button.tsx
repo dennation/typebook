@@ -3,7 +3,7 @@ import { Matrix, Snippet, Story, Variants } from '@dennation/typebook/react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '../components/Button'
 
-const handle = registerComponent('button', Button, {
+const button = registerComponent('button', Button, {
 	// defaultProps: { children: 'Click me' },
 })
 
@@ -22,22 +22,22 @@ function ButtonPage() {
 
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">Default</h2>
-				<Story of={handle} />
+				<Story of={button} />
 			</section>
 
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">All sizes</h2>
-				<Variants of={handle} items={allOf(handle, 'size')} />
+				<Variants of={button} items={allOf(button, 'size')} />
 			</section>
 
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">All variants</h2>
-				<Variants of={handle} items={allOf(handle, 'variant')} />
+				<Variants of={button} items={allOf(button, 'variant')} />
 			</section>
 
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">Color × Variant matrix</h2>
-				<Matrix of={handle} x={allOf(handle, 'color')} y={[allOf(handle, 'variant')]} />
+				<Matrix of={button} x={allOf(button, 'color')} y={[allOf(button, 'variant')]} />
 			</section>
 
 			<section>

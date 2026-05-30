@@ -1,7 +1,7 @@
 import { basename, dirname, relative, resolve } from 'node:path'
 import { PACKAGE_NAME } from '../constants.js'
 import type { PropInfo } from '../types.js'
-import type { ComponentImport } from './scanner.js'
+import type { ComponentImport } from './registry-scanner.js'
 
 /** One component's data ready to be emitted into the registry */
 export interface RegistryEntry {

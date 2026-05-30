@@ -1,19 +1,19 @@
 import { describe, expect, test } from 'vitest'
-import { analyzeFile, mayContainRegister } from '../scanner.js'
+import { mayContainRegistration, scanRegistrations } from '../registry-scanner.js'
 
-describe('mayContainRegister', () => {
+describe('mayContainRegistration', () => {
 	test('detects registerComponent( substring', () => {
-		expect(mayContainRegister('const x = registerComponent(Foo)')).toBe(true)
+		expect(mayContainRegistration('const x = registerComponent(Foo)')).toBe(true)
 	})
 
 	test('returns false when registerComponent( absent', () => {
-		expect(mayContainRegister('const x = 1')).toBe(false)
+		expect(mayContainRegistration('const x = 1')).toBe(false)
 	})
 })
 
-describe('analyzeFile — register() discovery', () => {
+describe('scanRegistrations — register() discovery', () => {
 	test('local (non-exported) register is captured', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from '@heroui/button'
 			const button = registerComponent('button', Button)
@@ -28,7 +28,7 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('exported register is also captured', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from './Button'
 			export const button = registerComponent('button', Button)
@@ -43,7 +43,7 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('default-exported register is captured', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from './Button'
 			export default registerComponent('button', Button)
@@ -54,7 +54,7 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('multiple registers in one file', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from './Button'
 			import { Input } from './Input'
@@ -68,7 +68,7 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('default-imported component is resolved', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent } from '@dennation/typebook'
 			import MyButton from './MyButton'
 			const button = registerComponent('my-button', MyButton)
@@ -81,7 +81,7 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('renamed import resolves to original name', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent } from '@dennation/typebook'
 			import { Button as Btn } from './components'
 			const comp = registerComponent('button', Btn)
@@ -94,7 +94,7 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('file without register() returns empty', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			export const foo = 1
 		`)
 
@@ -102,7 +102,7 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('locally-declared component → register is dropped (cannot import)', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent } from '@dennation/typebook'
 			const MyComp = () => null
 			const comp = registerComponent('my-comp', MyComp)
@@ -112,7 +112,7 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('records callStart for each register()', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from './Button'
 			const button = registerComponent('button', Button)
@@ -123,7 +123,7 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('register() nested inside a function body is still found', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from './Button'
 			function Page() {
@@ -137,7 +137,7 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('non-string first arg → register is dropped', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from './Button'
 			const button = registerComponent(Button)
@@ -147,12 +147,12 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('empty file → empty registers', async () => {
-		const result = await analyzeFile('file.tsx', '')
+		const result = await scanRegistrations('file.tsx', '')
 		expect(result).toEqual([])
 	})
 
 	test('aliased import is still captured', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent as reg } from '@dennation/typebook'
 			import { Button } from './Button'
 			const button = reg('button', Button)
@@ -163,7 +163,7 @@ describe('analyzeFile — register() discovery', () => {
 	})
 
 	test('registerComponent from a different package is ignored', async () => {
-		const result = await analyzeFile('file.tsx', `
+		const result = await scanRegistrations('file.tsx', `
 			import { registerComponent } from 'some-other-lib'
 			import { Button } from './Button'
 			const button = registerComponent('button', Button)

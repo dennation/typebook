@@ -2,7 +2,7 @@ import {
   DEFAULT_REGISTRY_FILE,
   PACKAGE_NAME,
 } from './constants.js'
-import { RegistryBuilder } from './core/registry.js'
+import { RegistryBuilder } from './core/registry-builder.js'
 
 const args = process.argv.slice(2)
 const command = args[0]

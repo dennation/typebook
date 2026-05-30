@@ -44,19 +44,24 @@ packages/typebook/
   tsconfig.json
   vite.config.ts
   src/
-    index.ts                  — Public package exports (register, variants, types)
-    types.ts                  — Shared types (TypebookConfig, Registration, PropInfo, ComponentMeta, UIRegistry, …)
-    register.ts               — register(id, Component, config?) → Registration
+    index.ts                  — Public package exports (registerComponent, variants, types)
+    types.ts                  — Shared types (TypebookConfig, ComponentHandle, PropInfo, ComponentMeta, UIRegistry, SnippetMap, …)
+    registerComponent.ts      — registerComponent(id, Component, config?) → ComponentHandle
     variants.ts               — allOf(of, prop), values(of, prop, vs), generate(of, prop, fn, n)
     resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into arrays
-    constants.ts              — PACKAGE_NAME, DEFAULT_REGISTRY_FILE, DEFAULT_SOURCE_GLOB, …
+    constants.ts              — PACKAGE_NAME, DEFAULT_REGISTRY_FILE, DEFAULT_SNIPPETS_FILE, …
     cli.ts                    — CLI entry: `npx @dennation/typebook generate`
-    core/
-      registry.ts             — RegistryBuilder: orchestrates scan → type extraction → file write + Vite watcher
-      scanner.ts              — Glob scanner + oxc AST: finds register('id', Component) calls
+    core/                     — Two symmetric build pipelines: registry-* (components) and snippet-* (snippets)
+      registry-builder.ts     — RegistryBuilder: orchestrates scan → type extraction → file write + Vite watcher
+      registry-scanner.ts     — oxc AST: scanRegistrations() finds registerComponent('id', Component) calls
+      registry-generator.ts   — generateRegistryFile(): builds ui-registry.gen.ts content
+      snippet-builder.ts      — SnippetBuilder: orchestrates the <Snippet> extraction lifecycle
+      snippet-scanner.ts      — oxc AST: scanSnippets() finds <Snippet name="…"> elements + slices their source
+      snippet-generator.ts    — generateSnippetsFile(): builds snippets.gen.ts content
       ts-client.ts            — TypeScript Compiler API: extracts PropInfo[], defaultValues, JSDoc descriptions
-      generator.ts            — Generates ui-registry.gen.ts content
-      io.ts                   — File I/O helpers
+      ast.ts                  — Shared oxc-parser helpers (parseProgram, walk) used by both scanners
+      source-files.ts         — getSourceFilesFromTsConfig(): the files both builders scan
+      io.ts                   — File I/O helpers (writeIfChanged)
     plugins/                  — unplugin-based bundler integration
       factory.ts              — unpluginFactory + createUnplugin (shared across all bundlers)
       vite.ts                 — typebook() Vite plugin

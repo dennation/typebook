@@ -2,9 +2,9 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { DEBOUNCE_MS, DEFAULT_REGISTRY_FILE, LOG_PREFIX } from '../constants.js'
 import type { PropInfo, TypebookConfig } from '../types.js'
-import { generateRegistryFile, type RegistryEntry } from './generator.js'
+import { generateRegistryFile, type RegistryEntry } from './registry-generator.js'
 import { writeIfChanged } from './io.js'
-import { analyzeFile, mayContainRegister, type RegisterCall } from './scanner.js'
+import { mayContainRegistration, type RegisterCall, scanRegistrations } from './registry-scanner.js'
 import { getSourceFilesFromTsConfig } from './source-files.js'
 import { TypeScriptClient } from './ts-client.js'
 
@@ -12,7 +12,8 @@ export interface RegistryBuilderConfig extends TypebookConfig {
 	cwd: string
 }
 
-interface FileRegister {
+/** A scanned `registerComponent()` call paired with the props extracted for it. */
+interface IndexedRegistration {
 	call: RegisterCall
 	props: PropInfo[]
 }
@@ -33,7 +34,7 @@ export class RegistryBuilder {
 	private tsClient: TypeScriptClient | null = null
 	private debounceTimer: ReturnType<typeof setTimeout> | null = null
 
-	private readonly registersByFile = new Map<string, FileRegister[]>()
+	private readonly registrationsByFile = new Map<string, IndexedRegistration[]>()
 
 	constructor(config: RegistryBuilderConfig) {
 		this.cwd = config.cwd
@@ -51,8 +52,8 @@ export class RegistryBuilder {
 		await Promise.all(files.map((f) => this.indexFile(f)))
 
 		let count = 0
-		for (const list of this.registersByFile.values()) count += list.length
-		console.log(LOG_PREFIX, `Found ${count} registerComponent() call(s) across ${this.registersByFile.size} file(s)`)
+		for (const registrations of this.registrationsByFile.values()) count += registrations.length
+		console.log(LOG_PREFIX, `Found ${count} registerComponent() call(s) across ${this.registrationsByFile.size} file(s)`)
 
 		this.flushGenFile()
 		console.log(LOG_PREFIX, `Generated ${this.registryFile}`)
@@ -60,7 +61,7 @@ export class RegistryBuilder {
 
 	stop(): void {
 		if (this.debounceTimer) clearTimeout(this.debounceTimer)
-		this.registersByFile.clear()
+		this.registrationsByFile.clear()
 		this.tsClient?.stop()
 		this.tsClient = null
 	}
@@ -77,7 +78,7 @@ export class RegistryBuilder {
 	}
 
 	onFileRemoved(filePath: string): void {
-		if (this.registersByFile.delete(filePath)) {
+		if (this.registrationsByFile.delete(filePath)) {
 			this.flushGenFile()
 		}
 	}
@@ -86,13 +87,13 @@ export class RegistryBuilder {
 		if (this.tsClient) await this.tsClient.notifyChange()
 
 		const content = this.readSafe(filePath)
-		const hasRegister = content !== null && mayContainRegister(content)
+		const hasRegister = content !== null && mayContainRegistration(content)
 
 		if (hasRegister) {
 			await this.indexFile(filePath)
 		} else {
 			// File may affect props declared in other files — reindex all known registry files
-			await Promise.all(Array.from(this.registersByFile.keys()).map((f) => this.indexFile(f)))
+			await Promise.all(Array.from(this.registrationsByFile.keys()).map((f) => this.indexFile(f)))
 		}
 
 		this.flushGenFile()
@@ -111,25 +112,25 @@ export class RegistryBuilder {
 
 	private async indexFile(filePath: string): Promise<void> {
 		const content = this.readSafe(filePath)
-		if (content === null || !mayContainRegister(content)) {
-			this.registersByFile.delete(filePath)
+		if (content === null || !mayContainRegistration(content)) {
+			this.registrationsByFile.delete(filePath)
 			return
 		}
 
-		const registers = await analyzeFile(filePath, content)
-		if (registers.length === 0) {
-			this.registersByFile.delete(filePath)
+		const calls = await scanRegistrations(filePath, content)
+		if (calls.length === 0) {
+			this.registrationsByFile.delete(filePath)
 			return
 		}
 
-		const fileRegisters: FileRegister[] = []
-		for (const call of registers) {
+		const registrations: IndexedRegistration[] = []
+		for (const call of calls) {
 			const props = this.tsClient
 				? ((await this.tsClient.getRegisterProps(filePath, call.callStart)) ?? [])
 				: []
-			fileRegisters.push({ call, props })
+			registrations.push({ call, props })
 		}
-		this.registersByFile.set(filePath, fileRegisters)
+		this.registrationsByFile.set(filePath, registrations)
 	}
 
 	private flushGenFile(): void {
@@ -141,9 +142,9 @@ export class RegistryBuilder {
 	private collectEntries(): RegistryEntry[] {
 		const byId = new Map<string, RegistryEntry>()
 
-		for (const [filePath, list] of this.registersByFile.entries()) {
-			for (const reg of list) {
-				const id = reg.call.id
+		for (const [filePath, registrations] of this.registrationsByFile.entries()) {
+			for (const registration of registrations) {
+				const id = registration.call.id
 				const existing = byId.get(id)
 				if (existing) {
 					throw new DuplicateRegistrationError(id, [existing.definingFile, filePath])
@@ -151,8 +152,8 @@ export class RegistryBuilder {
 				byId.set(id, {
 					id,
 					definingFile: filePath,
-					componentImport: reg.call.componentImport,
-					props: reg.props,
+					componentImport: registration.call.componentImport,
+					props: registration.props,
 				})
 			}
 		}
