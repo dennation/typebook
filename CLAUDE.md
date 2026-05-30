@@ -57,9 +57,15 @@ packages/typebook/
       ts-client.ts            — TypeScript Compiler API: extracts PropInfo[], defaultValues, JSDoc descriptions
       generator.ts            — Generates ui-registry.gen.ts content
       io.ts                   — File I/O helpers
-    plugins/
-      vite/
-        index.ts              — typebook(config?) Vite plugin
+    plugins/                  — unplugin-based bundler integration
+      factory.ts              — unpluginFactory + createUnplugin (shared across all bundlers)
+      vite.ts                 — typebook() Vite plugin
+      rollup.ts               — typebook() Rollup plugin
+      rolldown.ts             — typebook() Rolldown plugin
+      webpack.ts              — typebook() webpack plugin
+      rspack.ts               — typebook() Rspack plugin
+      esbuild.ts              — typebook() esbuild plugin
+      farm.ts                 — typebook() Farm plugin
     react/                          — Runtime, organized by Feature-Sliced Design
       index.ts                      — Public exports
       widgets/                      — Large public blocks
@@ -94,14 +100,14 @@ packages/typebook/
 
 - **`index`** — `register`, `allOf`, `values`, `generate`, types.
 - **`react/index`** — `RegistryProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`.
-- **`plugins/vite`** — `typebook()` Vite plugin.
+- **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
 - **`cli/index`** — `npx @dennation/typebook generate`.
 
 ### Package exports
 
 - `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `UIRegistry`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, …)
 - `@dennation/typebook/react` — `RegistryProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`
-- `@dennation/typebook/vite` — `typebook()` Vite plugin
+- `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
 ### register() API
 
@@ -204,7 +210,41 @@ pnpm --filter @dennation/example-tanstack-router-mdx typecheck
 
 ## User-facing API
 
-### vite.config.ts
+### Bundler plugin (unplugin)
+
+The plugin is built on [unplugin](https://unplugin.unjs.io), so the **same**
+`typebook(config?)` factory is published per bundler — no bundler is privileged.
+The registry is generated during the universal `buildStart` hook (idempotent,
+re-runs on each rebuild). The Vite entry additionally wires the dev-server
+watcher for incremental, debounced regeneration (Vite's dev server doesn't
+re-run `buildStart` per change); every other bundler relies on the `buildStart`
+rebuild.
+
+```ts
+// vite      → @dennation/typebook/vite
+// rollup    → @dennation/typebook/rollup
+// rolldown  → @dennation/typebook/rolldown
+// webpack   → @dennation/typebook/webpack
+// rspack    → @dennation/typebook/rspack
+// esbuild   → @dennation/typebook/esbuild
+// farm      → @dennation/typebook/farm
+```
+
+Each entry exports the plugin both as the named `typebook` and as `default`, so
+either import style works:
+
+```ts
+import { typebook } from '@dennation/typebook/rspack'
+import typebook from '@dennation/typebook/rspack'
+```
+
+```ts
+// rspack.config.js
+const { typebook } = require('@dennation/typebook/rspack')
+module.exports = { plugins: [typebook({ /* TypebookConfig */ })] }
+```
+
+The repo's examples happen to use Vite, so a full Vite config looks like:
 
 ```ts
 import { typebook } from '@dennation/typebook/vite'
@@ -221,7 +261,6 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     typebook({
-      // sourceGlob: './src/**/*.{ts,tsx}',        // default
       // registryFile: './src/ui-registry.gen.ts', // default
     }),
     react(),
