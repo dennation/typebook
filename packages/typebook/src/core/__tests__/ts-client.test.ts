@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, test, expect, beforeAll, afterAll } from 'vitest'
 import type { PropInfo } from '../../types.js'
-import { analyzeFile } from '../scanner.js'
+import { scanRegistrations } from '../registry-scanner.js'
 import { TypeScriptClient } from '../ts-client.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -29,9 +29,9 @@ async function extractProps(storyFile: string): Promise<PropInfo[] | null> {
 		// Let the client handle nonexistent files for that test
 		return client.getRegisterProps(filePath, 0)
 	}
-	const registers = await analyzeFile(filePath, content)
-	if (registers.length === 0) return null
-	return client.getRegisterProps(filePath, registers[0].callStart)
+	const calls = await scanRegistrations(filePath, content)
+	if (calls.length === 0) return null
+	return client.getRegisterProps(filePath, calls[0].callStart)
 }
 
 function findProp(props: PropInfo[], name: string): PropInfo | undefined {

@@ -19,13 +19,13 @@ export interface RegisterCall {
   callStart: number
 }
 
-const EXPORTED_FN_NAME = 'registerComponent'
+const REGISTER_FN_NAME = 'registerComponent'
 
 /**
  * Quick string check before parsing — most files won't contain registerComponent() at all.
  */
-export function mayContainRegister(content: string): boolean {
-  return content.includes(`${EXPORTED_FN_NAME}(`)
+export function mayContainRegistration(content: string): boolean {
+  return content.includes(`${REGISTER_FN_NAME}(`)
 }
 
 /**
@@ -37,7 +37,7 @@ export function mayContainRegister(content: string): boolean {
  * imported Identifier are kept — locally-declared components can't be referenced from
  * the generated registry.
  */
-export async function analyzeFile(filename: string, content: string): Promise<RegisterCall[]> {
+export async function scanRegistrations(filename: string, content: string): Promise<RegisterCall[]> {
   const program = await parseProgram(filename, content)
   const body = (program as { body: unknown[] }).body
 
@@ -82,7 +82,7 @@ function collectRegisterNames(
   for (const spec of specifiers) {
     if (spec.type !== 'ImportSpecifier') continue
     const imported = (spec.imported as { name?: string } | undefined)?.name
-    if (imported !== EXPORTED_FN_NAME) continue
+    if (imported !== REGISTER_FN_NAME) continue
     const localName = (spec.local as { name?: string } | undefined)?.name
     if (localName) out.add(localName)
   }

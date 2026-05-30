@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 import { describe, expect, test } from 'vitest'
 import type { PropInfo } from '../../types.js'
-import { generateRegistryFile, type RegistryEntry } from '../generator.js'
+import { generateRegistryFile, type RegistryEntry } from '../registry-generator.js'
 
 const CWD = '/project'
 const REGISTRY_PATH = resolve(CWD, 'src/ui-registry.gen.ts')

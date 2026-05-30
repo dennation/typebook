@@ -4,7 +4,7 @@ import { DEBOUNCE_MS, DEFAULT_SNIPPETS_FILE, LOG_PREFIX } from '../constants.js'
 import type { TypebookConfig } from '../types.js'
 import { writeIfChanged } from './io.js'
 import { generateSnippetsFile, type SnippetEntry } from './snippet-generator.js'
-import { analyzeSnippets, mayContainSnippet, type SnippetBlock } from './snippet-scanner.js'
+import { mayContainSnippet, scanSnippets, type SnippetBlock } from './snippet-scanner.js'
 import { getSourceFilesFromTsConfig } from './source-files.js'
 
 export interface SnippetBuilderConfig extends TypebookConfig {
@@ -92,7 +92,7 @@ export class SnippetBuilder {
 			return
 		}
 
-		const blocks = await analyzeSnippets(filePath, content)
+		const blocks = await scanSnippets(filePath, content)
 		if (blocks.length === 0) {
 			this.snippetsByFile.delete(filePath)
 			return

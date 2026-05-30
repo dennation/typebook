@@ -11,13 +11,13 @@ export interface SnippetBlock {
   start: number
 }
 
-const SNIPPET_NAME = 'Snippet'
+const SNIPPET_COMPONENT_NAME = 'Snippet'
 
 /**
  * Quick string check before parsing — most files won't reference Snippet at all.
  */
 export function mayContainSnippet(content: string): boolean {
-  return content.includes(SNIPPET_NAME)
+  return content.includes(SNIPPET_COMPONENT_NAME)
 }
 
 /**
@@ -29,7 +29,7 @@ export function mayContainSnippet(content: string): boolean {
  * formatting drift. Only elements with a static string `name` are kept; anything
  * dynamic can't be resolved at build time.
  */
-export async function analyzeSnippets(filename: string, content: string): Promise<SnippetBlock[]> {
+export async function scanSnippets(filename: string, content: string): Promise<SnippetBlock[]> {
   const program = await parseProgram(filename, content)
   const body = (program as { body: unknown[] }).body
 
@@ -66,7 +66,7 @@ function collectSnippetNames(body: Array<Record<string, unknown>>): Set<string> 
     const specifiers = (node.specifiers as Array<Record<string, unknown>>) ?? []
     for (const spec of specifiers) {
       if (spec.type !== 'ImportSpecifier') continue
-      if ((spec.imported as { name?: string } | undefined)?.name !== SNIPPET_NAME) continue
+      if ((spec.imported as { name?: string } | undefined)?.name !== SNIPPET_COMPONENT_NAME) continue
       const localName = (spec.local as { name?: string } | undefined)?.name
       if (localName) names.add(localName)
     }

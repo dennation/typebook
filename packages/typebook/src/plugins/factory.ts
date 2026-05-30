@@ -1,8 +1,8 @@
 import type { UnpluginFactory } from 'unplugin'
 import { createUnplugin } from 'unplugin'
 import { PACKAGE_NAME } from '../constants.js'
-import { RegistryBuilder } from '../core/registry.js'
-import { SnippetBuilder } from '../core/snippets.js'
+import { RegistryBuilder } from '../core/registry-builder.js'
+import { SnippetBuilder } from '../core/snippet-builder.js'
 import type { TypebookConfig } from '../types.js'
 
 /** Lifecycle shared by the registry and snippet builders. */
