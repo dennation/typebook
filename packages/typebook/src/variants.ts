@@ -1,17 +1,17 @@
 import type {
   AllOfConfig,
+  ComponentHandle,
   GenerateConfig,
   PropsOf,
-  Registration,
   ValuesConfig,
 } from './types.js'
 
 /**
  * Auto-generate variants for a prop from its TypeScript type
- * (literal union or boolean). The first argument is the `Registration`
+ * (literal union or boolean). The first argument is the `ComponentHandle`
  * returned by `registerComponent()` — used for prop-name autocomplete.
  */
-export function allOf<R extends Registration<any>, K extends keyof PropsOf<R>>(
+export function allOf<R extends ComponentHandle<any>, K extends keyof PropsOf<R>>(
   _of: R,
   prop: K,
 ): AllOfConfig {
@@ -22,7 +22,7 @@ export function allOf<R extends Registration<any>, K extends keyof PropsOf<R>>(
  * Manual variant configuration with explicit values for a prop.
  * Values are typed against the prop's TypeScript type.
  */
-export function values<R extends Registration<any>, K extends keyof PropsOf<R>>(
+export function values<R extends ComponentHandle<any>, K extends keyof PropsOf<R>>(
   _of: R,
   prop: K,
   values: PropsOf<R>[K][],
@@ -34,7 +34,7 @@ export function values<R extends Registration<any>, K extends keyof PropsOf<R>>(
  * Generate `count` variants for a prop by calling `fn()` once per variant.
  * The function's return type is constrained to the prop's TypeScript type.
  */
-export function generate<R extends Registration<any>, K extends keyof PropsOf<R>>(
+export function generate<R extends ComponentHandle<any>, K extends keyof PropsOf<R>>(
   _of: R,
   prop: K,
   fn: () => PropsOf<R>[K],

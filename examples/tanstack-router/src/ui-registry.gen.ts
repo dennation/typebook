@@ -73,6 +73,6 @@ export const uiRegistry = {
         },
         "description": "Fired on click. Ignored when `disabled` is true."
       }
-    ]
+    ],
   },
 } as const satisfies UIRegistry

@@ -1,4 +1,4 @@
-import { TypebookLayout } from '@dennation/typebook/react'
+import { Layout } from '@dennation/typebook/react'
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 
 export const Route = createRootRoute({
@@ -7,7 +7,7 @@ export const Route = createRootRoute({
 
 function RootComponent() {
 	return (
-		<TypebookLayout
+		<Layout
 			sidebar={
 				<nav className="st:p-4 st:border-r st:border-border st:flex st:flex-col st:gap-2 st:overflow-y-auto">
 					<Link to="/" className="st:text-sm st:hover:underline">
@@ -20,6 +20,6 @@ function RootComponent() {
 			}
 		>
 			<Outlet />
-		</TypebookLayout>
+		</Layout>
 	)
 }

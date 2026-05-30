@@ -3,6 +3,6 @@ import { IntersectionLink } from '../components/WithInheritance'
 
 export const comp = registerComponent('with-inheritance-intersection', IntersectionLink, {
 	defaultProps: { id: 'link-1', href: '/' },
-	include: ['id', 'className', 'href', 'target'],
+	pick: ['id', 'className', 'href', 'target'],
 })
 

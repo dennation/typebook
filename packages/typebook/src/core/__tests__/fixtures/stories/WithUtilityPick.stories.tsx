@@ -3,6 +3,6 @@ import { PickedComponent } from '../components/WithUtilityTypes'
 
 export const comp = registerComponent('with-utility-pick', PickedComponent, {
 	defaultProps: { a: 'hello' },
-	include: ['a', 'd'],
+	pick: ['a', 'd'],
 })
 

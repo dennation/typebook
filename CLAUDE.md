@@ -60,50 +60,54 @@ packages/typebook/
     plugins/
       vite/
         index.ts              — typebook(config?) Vite plugin
-    react/
-      index.ts                — React public exports
-      context.ts              — TypebookMetaContext / TypebookMetaProvider / useTypebookMeta
-      components/
-        RegistryProvider.tsx  — <RegistryProvider uiRegistry={uiRegistry}>{children}</RegistryProvider>
-        TypebookLayout.tsx    — <TypebookLayout sidebar={…}>{children}</TypebookLayout>
-        Story.tsx             — <Story of={reg} props={…} /> — single variant
-        VariantsStory.tsx     — <VariantsStory of={reg} items={…} /> — prop axis grid
-        MatrixStory.tsx       — <MatrixStory of={reg} x={…} y={[…]} /> — cross-product table
-        Playground.tsx        — <Playground of={reg} /> — interactive props editor
-        ComponentPreview.tsx  — Shared render: ErrorBoundary + IframePreview wrapper
-        CodePreview.tsx       — Shiki-highlighted code block with copy button
-        PropControl.tsx       — Per-prop controls: dropdown (literal), toggle (bool), input (string/number)
-        PreviewCard.tsx       — Single variant card (ComponentPreview + label)
-        IframePreview.tsx     — Iframe wrapper for CSS isolation
-        ErrorBoundary.tsx     — Crash isolation for component previews
-      hooks/
-        useRegistration.ts    — (Registration) → { Component, propInfos, defaultProps, meta }
-        useTheme.ts           — light/dark theme with localStorage + system preference
-      utils/
-        getGridStyle.ts       — CSS grid layout for variant grids
-      styles/
-        styles.css            — Typebook UI styles (Tailwind)
-        constants.ts          — CSS constants
+    react/                          — Runtime, organized by Feature-Sliced Design
+      index.ts                      — Public exports
+      widgets/                      — Large public blocks
+        Layout/                     — <Layout sidebar={…}>{children}</Layout>
+        Story/                      — <Story of={reg} props={…} /> — single variant
+        Variants/                   — <Variants of={reg} items={…} /> — prop axis grid
+        Matrix/                     — <Matrix of={reg} x={…} y={[…]} /> — cross-product table
+          ui/MatrixTable.tsx        — Table layout
+          lib/buildMatrixRows.ts    — Pure builder (testable without React)
+        Playground/                 — <Playground of={reg} /> — interactive props editor
+          ui/PropsTable.tsx         — Search + filter + rows
+          ui/PropRow.tsx            — Single prop row
+          lib/formatPropType.ts     — Type formatter / controllability check
+      features/                     — Interactive units
+        prop-input/                 — <PropInput> per-prop controls (literal/bool/string/number)
+        code-block/                 — <CodeBlock code={…}/> — Shiki-highlighted with copy
+          lib/highlighter.ts        — Shiki singleton
+      entities/                     — Domain entities
+        component-meta/             — Registry lookup
+          model/context.ts          — Registry React Context
+          model/useComponentMeta.ts — (id) → ComponentMeta | undefined
+          ui/RegistryProvider.tsx   — <RegistryProvider registry={uiRegistry}>
+        theme/                      — Light/dark theme with localStorage + system preference
+      shared/                       — Reusable primitives
+        ui/Preview/                 — <Preview>, <PreviewFrame>, <Isolate>, <ErrorBoundary>
+        lib/getGridStyle.ts         — CSS grid layout for variant grids
+        config/styles.css           — Typebook UI styles (Tailwind)
+        config/cssConstants.ts      — CSS constants (CENTERED_CONTENT_STYLE, IFRAME_STYLE)
 ```
 
 ### Build entry points
 
 - **`index`** — `register`, `allOf`, `values`, `generate`, types.
-- **`react/index`** — `RegistryProvider`, `TypebookLayout`, `Story`, `VariantsStory`, `MatrixStory`, `Playground`, `CodePreview`, `ErrorBoundary`.
+- **`react/index`** — `RegistryProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`.
 - **`plugins/vite`** — `typebook()` Vite plugin.
 - **`cli/index`** — `npx @dennation/typebook generate`.
 
 ### Package exports
 
 - `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `UIRegistry`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, …)
-- `@dennation/typebook/react` — `RegistryProvider`, `TypebookLayout`, `Story`, `VariantsStory`, `MatrixStory`, `Playground`, `CodePreview`, `ErrorBoundary`
+- `@dennation/typebook/react` — `RegistryProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`
 - `@dennation/typebook/vite` — `typebook()` Vite plugin
 
 ### register() API
 
 ```ts
 import { allOf, register } from '@dennation/typebook'
-import { MatrixStory, Story, VariantsStory } from '@dennation/typebook/react'
+import { Matrix, Story, Variants } from '@dennation/typebook/react'
 import { Button } from '../components/Button'
 
 const button = register('button', Button, {
@@ -111,14 +115,14 @@ const button = register('button', Button, {
 })
 
 <Story of={button} />
-<VariantsStory of={button} items={allOf(button, 'size')} />
-<MatrixStory of={button} x={allOf(button, 'color')} y={[allOf(button, 'variant')]} />
+<Variants of={button} items={allOf(button, 'size')} />
+<Matrix of={button} x={allOf(button, 'color')} y={[allOf(button, 'variant')]} />
 ```
 
 - First argument is a **unique string id** — the key in the generated `uiRegistry` object.
 - `register()` calls can live anywhere in `./src/**/*.{ts,tsx}` — no special filename required.
 - Duplicate ids throw `DuplicateRegistrationError` at build time.
-- `<Story>` / `<VariantsStory>` / `<MatrixStory>` are **type-safe**: required props not covered by `defaultProps` must be passed via `props={…}` at the call site (`MissingProps` phantom type).
+- `<Story>` / `<Variants>` / `<Matrix>` are **type-safe**: required props not covered by `defaultProps` must be passed via `props={…}` at the call site (`MissingProps` phantom type).
 
 ### Data flow
 
@@ -131,14 +135,14 @@ vite.config.ts: typebook()
 
 App.tsx:
   import { uiRegistry } from './ui-registry.gen'
-  <RegistryProvider uiRegistry={uiRegistry}>   ← puts uiRegistry into TypebookMetaContext
-    <RouterProvider router={router} />          ← TanStack Router (consumer's responsibility)
+  <RegistryProvider registry={uiRegistry}>     ← puts uiRegistry into React Context
+    <RouterProvider router={router} />         ← TanStack Router (consumer's responsibility)
   </RegistryProvider>
         ↓
-  __root.tsx → TypebookLayout → <Outlet /> → page component
+  __root.tsx → Layout → <Outlet /> → page component
         ↓
   <Story of={button} />
-    └── useRegistration(button) → looks up uiRegistry[button.id] → ComponentMeta
+    └── useComponentMeta(button.id) → looks up uiRegistry[button.id] → ComponentMeta
 ```
 
 ### Key design decisions

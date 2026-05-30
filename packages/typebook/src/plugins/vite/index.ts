@@ -18,19 +18,18 @@ export function typebook(config?: TypebookConfig): Plugin {
 		},
 
 		configureServer(server) {
-			const isWatchedSource = (path: string) =>
-				path !== builder.registryFilePath && builder.isSourceFile(path)
+			const isGenFile = (path: string) => path === builder.registryFilePath
 
 			server.watcher.on('change', (path) => {
-				if (isWatchedSource(path)) builder.scheduleFileChange(path)
+				if (!isGenFile(path)) builder.scheduleFileChange(path)
 			})
 
 			server.watcher.on('add', (path) => {
-				if (isWatchedSource(path)) builder.scheduleFileChange(path)
+				if (!isGenFile(path)) builder.scheduleFileChange(path)
 			})
 
 			server.watcher.on('unlink', (path) => {
-				if (isWatchedSource(path)) builder.onFileRemoved(path)
+				if (!isGenFile(path)) builder.onFileRemoved(path)
 			})
 		},
 

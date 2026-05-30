@@ -1,13 +1,9 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import ts from 'typescript'
-import {
-	DEBOUNCE_MS,
-	DEFAULT_REGISTRY_FILE,
-	LOG_PREFIX,
-} from '../constants.js'
+import { DEBOUNCE_MS, DEFAULT_REGISTRY_FILE, LOG_PREFIX } from '../constants.js'
 import type { PropInfo, TypebookConfig } from '../types.js'
-import { generateRegistryFile, type RegistryComponent } from './generator.js'
+import { generateRegistryFile, type RegistryEntry } from './generator.js'
 import { writeIfChanged } from './io.js'
 import { analyzeFile, mayContainRegister, type RegisterCall } from './scanner.js'
 import { TypeScriptClient } from './ts-client.js'
@@ -28,28 +24,15 @@ class DuplicateRegistrationError extends Error {
 	}
 }
 
-/**
- * Build-time index of every `register(Component, ...)` call found in the project.
- * Each component must be registered only once — a second `registerComponent()` call for
- * the same component throws `DuplicateRegistrationError`.
- *
- * Lifecycle:
- *   `start()`          — initial scan, type extraction, write gen file
- *   `onFileChanged()`  — re-index one file after a watcher event
- *   `onFileRemoved()`  — drop a file from the index
- *   `stop()`           — cleanup
- */
 export class RegistryBuilder {
 	readonly cwd: string
 
 	private readonly registryFile: string
 	private readonly inheritedProviders: string[] | undefined
-	private sourceFiles: Set<string> = new Set()
 
 	private tsClient: TypeScriptClient | null = null
 	private debounceTimer: ReturnType<typeof setTimeout> | null = null
 
-	/** filePath → register calls extracted from that file */
 	private readonly registersByFile = new Map<string, FileRegister[]>()
 
 	constructor(config: RegistryBuilderConfig) {
@@ -64,13 +47,12 @@ export class RegistryBuilder {
 
 	async start(): Promise<void> {
 		const files = getSourceFilesFromTsConfig(this.cwd)
-		this.sourceFiles = new Set(files)
 		await this.startTsClient()
-		await Promise.all(files.map((file) => this.indexFile(file)))
+		await Promise.all(files.map((f) => this.indexFile(f)))
 
-		let registerCount = 0
-		for (const list of this.registersByFile.values()) registerCount += list.length
-		console.log(LOG_PREFIX, `Found ${registerCount} registerComponent() call(s) across ${this.registersByFile.size} file(s)`)
+		let count = 0
+		for (const list of this.registersByFile.values()) count += list.length
+		console.log(LOG_PREFIX, `Found ${count} registerComponent() call(s) across ${this.registersByFile.size} file(s)`)
 
 		this.flushGenFile()
 		console.log(LOG_PREFIX, `Generated ${this.registryFile}`)
@@ -83,23 +65,6 @@ export class RegistryBuilder {
 		this.tsClient = null
 	}
 
-	isSourceFile(absPath: string): boolean {
-		return this.sourceFiles.has(absPath)
-	}
-
-	async onFileChanged(filePath: string): Promise<void> {
-		this.sourceFiles.add(filePath)
-		if (this.tsClient) await this.tsClient.notifyChange()
-		await this.indexFile(filePath)
-		this.flushGenFile()
-	}
-
-	onFileRemoved(filePath: string): void {
-		if (this.registersByFile.delete(filePath)) {
-			this.flushGenFile()
-		}
-	}
-
 	scheduleFileChange(filePath: string): void {
 		if (this.debounceTimer) clearTimeout(this.debounceTimer)
 		this.debounceTimer = setTimeout(async () => {
@@ -109,6 +74,28 @@ export class RegistryBuilder {
 				console.error(LOG_PREFIX, 'Failed to regenerate:', err)
 			}
 		}, DEBOUNCE_MS)
+	}
+
+	onFileRemoved(filePath: string): void {
+		if (this.registersByFile.delete(filePath)) {
+			this.flushGenFile()
+		}
+	}
+
+	private async onFileChanged(filePath: string): Promise<void> {
+		if (this.tsClient) await this.tsClient.notifyChange()
+
+		const content = this.readSafe(filePath)
+		const hasRegister = content !== null && mayContainRegister(content)
+
+		if (hasRegister) {
+			await this.indexFile(filePath)
+		} else {
+			// File may affect props declared in other files — reindex all known registry files
+			await Promise.all(Array.from(this.registersByFile.keys()).map((f) => this.indexFile(f)))
+		}
+
+		this.flushGenFile()
 	}
 
 	private async startTsClient(): Promise<void> {
@@ -146,13 +133,13 @@ export class RegistryBuilder {
 	}
 
 	private flushGenFile(): void {
-		const components = this.collectComponents()
-		const content = generateRegistryFile(components, this.registryFilePath)
+		const entries = this.collectEntries()
+		const content = generateRegistryFile(entries, this.registryFilePath)
 		writeIfChanged(this.registryFilePath, content)
 	}
 
-	private collectComponents(): RegistryComponent[] {
-		const byId = new Map<string, RegistryComponent>()
+	private collectEntries(): RegistryEntry[] {
+		const byId = new Map<string, RegistryEntry>()
 
 		for (const [filePath, list] of this.registersByFile.entries()) {
 			for (const reg of list) {
@@ -197,10 +184,10 @@ function getSourceFilesFromTsConfig(cwd: string): string[] {
 	return fileNames
 }
 
-function formatDuplicateMessage(componentKey: string, files: ReadonlyArray<string>): string {
+function formatDuplicateMessage(id: string, files: ReadonlyArray<string>): string {
 	return [
 		`Each component may be registered only once. Duplicate found:`,
-		`  - ${componentKey}`,
+		`  - ${id}`,
 		...files.map((f) => `      ${f}`),
 	].join('\n')
 }

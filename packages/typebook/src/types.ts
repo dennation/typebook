@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import type { RequiredKeysOf } from 'type-fest'
 
 export interface TypebookConfig {
   /** Path to the generated registry file (default: './src/ui-registry.gen.ts') */
@@ -43,26 +44,37 @@ export interface ComponentMeta {
   props: PropInfo[]
 }
 
-/** Keys that are required (non-optional) in T */
-export type RequiredKeys<T> = {
-  [K in keyof T]-?: object extends Pick<T, K> ? never : K
-}[keyof T]
-
 /** Props the caller must provide (required keys not covered by defaultProps) */
-export type MissingProps<Props, CoveredByDefaults extends keyof Props> =
-  Pick<Props, Exclude<RequiredKeys<Props>, CoveredByDefaults>>
+export type MissingProps<Props extends object, Defaulted extends keyof Props> =
+  Pick<Props, Exclude<RequiredKeysOf<Props>, Defaulted>>
 
-/** Extract `Props` type from a Registration */
-export type PropsOf<R> = R extends Registration<infer P, any> ? P : never
+/** Extract `Props` type from a ComponentHandle */
+export type PropsOf<R> = R extends ComponentHandle<infer P, any> ? P : never
 
-/** Extract the keys covered by `defaultProps` from a Registration */
-export type CoveredOf<R> = R extends Registration<any, infer K> ? K : never
+/** Extract the keys covered by `defaultProps` from a ComponentHandle */
+export type DefaultedOf<R> = R extends ComponentHandle<any, infer K> ? K : never
 
-export interface RegisterConfig<Props, IncludedProps extends keyof Props = keyof Props> {
+export interface RegisterConfigBase<Defaults> {
   /** Default props applied to every render of this component */
-  defaultProps?: Partial<Props>
+  defaultProps?: Defaults
+}
+
+export interface RegisterConfigPick<
+  Props,
+  Picked extends keyof Props = keyof Props,
+  Defaults extends Partial<Props> = Partial<Props>,
+> extends RegisterConfigBase<Defaults> {
   /** Props to include in documentation. If not specified, all props are included. */
-  include?: ReadonlyArray<IncludedProps>
+  pick?: ReadonlyArray<Picked>
+}
+
+export interface RegisterConfigOmit<
+  Props,
+  Omitted extends keyof Props = never,
+  Defaults extends Partial<Props> = Partial<Props>,
+> extends RegisterConfigBase<Defaults> {
+  /** Props to omit from documentation. */
+  omit?: ReadonlyArray<Omitted>
 }
 
 /** Auto-generate variants from prop type (boolean/literal) */
@@ -93,18 +105,16 @@ export type VariantConfig = AllOfConfig | ValuesConfig | GenerateConfig
  * Returned by `register(id, Component, config)`. Holds the registry key, the
  * component reference, and default props. Variant configs are built via the
  * standalone `allOf` / `values` / `generate` utilities, which take a
- * `Registration` as their first argument for prop-name autocomplete and value
+ * `ComponentHandle` as their first argument for prop-name autocomplete and value
  * typing.
  */
-export interface Registration<Props, CoveredByDefaults extends keyof Props = never> {
+export interface ComponentHandle<Props, Defaulted extends keyof Props = never> {
   id: string
-  component: ComponentType<any>
+  component: ComponentType<Props>
   defaultProps: Record<string, unknown>
 
-  /** Phantom — keeps Props reachable for `allOf`/`values`/`generate` typing */
-  readonly __props?: (p: Props) => void
-  /** Phantom — keeps CoveredByDefaults reachable for `<Story>`/`<VariantsStory>`/`<MatrixStory>` typing */
-  readonly __coveredByDefaults?: (k: CoveredByDefaults) => void
+  /** Phantom — keeps Defaulted reachable for `<Story>`/`<VariantsStory>`/`<MatrixStory>` typing */
+  readonly __defaulted?: (k: Defaulted) => void
 }
 
 /** Object keyed by registration id → ComponentMeta. Built from the generated registry. */

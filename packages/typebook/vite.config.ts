@@ -4,6 +4,12 @@ import tailwindcss from '@tailwindcss/vite'
 import dts from 'vite-plugin-dts'
 
 export default defineConfig({
+	resolve: {
+		alias: {
+			'@': resolve(__dirname, 'src'),
+			'@react': resolve(__dirname, 'src/react'),
+		},
+	},
 	build: {
 		target: 'esnext',
 		lib: {
@@ -44,6 +50,7 @@ export default defineConfig({
 		tailwindcss(),
 		dts({
 			include: ['src/**/*.ts', 'src/**/*.tsx'],
+			exclude: ['src/**/__tests__/**'],
 			outDir: 'dist',
 			entryRoot: 'src',
 		}),

@@ -3,6 +3,6 @@ import { ComplexUnion } from '../components/WithComplexUnions'
 
 export const comp = registerComponent('with-complex-unions', ComplexUnion, {
 	defaultProps: { mixed: 'hello', numLiteral: 1, singleLiteral: 'only', boolOrString: true, wide: 'a' },
-	include: ['mixed', 'numLiteral', 'singleLiteral', 'boolOrString', 'wide'],
+	pick: ['mixed', 'numLiteral', 'singleLiteral', 'boolOrString', 'wide'],
 })
 
