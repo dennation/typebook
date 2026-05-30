@@ -19,7 +19,7 @@ export interface SnippetProps {
 /**
  * Renders its children live, plus a toggle that reveals the original source the
  * build step extracted for `name`. The source is read synchronously from the
- * `RegistryProvider` context — no runtime fetch.
+ * `TypebookProvider` context — no runtime fetch.
  */
 export function Snippet({ name, children, theme }: SnippetProps) {
 	const [open, setOpen] = useState(false)
@@ -44,7 +44,7 @@ export function Snippet({ name, children, theme }: SnippetProps) {
 						) : (
 							<p className="st:text-xs st:text-text-muted st:p-3 st:m-0">
 								No source found for snippet "{name}". Pass <code>snippets</code> to{' '}
-								<code>RegistryProvider</code> and run the build.
+								<code>TypebookProvider</code> and run the build.
 							</p>
 						)}
 					</div>

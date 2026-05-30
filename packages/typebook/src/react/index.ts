@@ -1,4 +1,5 @@
-export { RegistryProvider, type RegistryProviderProps, useComponentMeta } from './entities/component-meta/index.js'
+export { TypebookProvider, type TypebookProviderProps } from './app/index.js'
+export { useComponentMeta } from './entities/component-meta/index.js'
 export { CodeBlock, type CodeBlockProps, type CodeTheme } from './features/code-block/index.js'
 export { ErrorBoundary } from './shared/ui/preview/index.js'
 export { Layout, type LayoutProps } from './widgets/layout/index.js'

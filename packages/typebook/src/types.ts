@@ -129,6 +129,6 @@ export type UIRegistry = Record<string, ComponentMeta>
 
 /**
  * Object keyed by `<Snippet>` name → its extracted source text. Built from the
- * generated `snippets.gen.ts` and passed to `RegistryProvider`.
+ * generated `snippets.gen.ts` and passed to `TypebookProvider`.
  */
 export type SnippetMap = Record<string, string>

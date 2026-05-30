@@ -1,4 +1,4 @@
-import { RegistryProvider } from '@dennation/typebook/react'
+import { TypebookProvider } from '@dennation/typebook/react'
 import { createHashHistory, createRouter, RouterProvider } from '@tanstack/react-router'
 import { routeTree } from './route-tree.gen'
 import { snippets } from './snippets.gen'
@@ -12,8 +12,8 @@ const router = createRouter({
 
 export default function App() {
 	return (
-		<RegistryProvider registry={uiRegistry} snippets={snippets}>
+		<TypebookProvider registry={uiRegistry} snippets={snippets}>
 			<RouterProvider router={router} />
-		</RegistryProvider>
+		</TypebookProvider>
 	)
 }
