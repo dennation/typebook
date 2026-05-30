@@ -1,5 +1,5 @@
 import { NPM_REACT_PACKAGE_NAME } from '../constants.js'
-import { parseProgram, walk } from './ast.js'
+import { type Program, walk } from './ast.js'
 
 /** A single `<Snippet name="…">…</Snippet>` element found in a file */
 export interface SnippetBlock {
@@ -21,16 +21,15 @@ export function mayContainSnippet(content: string): boolean {
 }
 
 /**
- * Parse a TypeScript/JSX file and extract every `<Snippet name="…">…</Snippet>`
- * element whose `Snippet` was imported from `@dennation/typebook/react`.
+ * Extract every `<Snippet name="…">…</Snippet>` element (whose `Snippet` was imported
+ * from `@dennation/typebook/react`) from an already-parsed program.
  *
- * The children are read straight from the original source via `code.slice(start, end)`,
+ * The children are read straight from the original `content` via `code.slice(start, end)`,
  * so the captured text is exactly what the author wrote — no AST re-generation, no
  * formatting drift. Only elements with a static string `name` are kept; anything
  * dynamic can't be resolved at build time.
  */
-export async function scanSnippets(filename: string, content: string): Promise<SnippetBlock[]> {
-  const program = await parseProgram(filename, content)
+export function scanSnippets(program: Program, content: string): SnippetBlock[] {
   const body = (program as { body: unknown[] }).body
 
   const snippetLocalNames = collectSnippetNames(body as Array<Record<string, unknown>>)

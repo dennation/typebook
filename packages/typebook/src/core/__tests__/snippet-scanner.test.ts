@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'vitest'
+import { parseProgram } from '../ast.js'
 import { mayContainSnippet, scanSnippets } from '../snippet-scanner.js'
+
+/** Parse then scan, mirroring how the builder feeds a pre-parsed program + source. */
+async function scan(filename: string, content: string) {
+	return scanSnippets(await parseProgram(filename, content), content)
+}
 
 describe('mayContainSnippet', () => {
 	test('detects Snippet substring', () => {
@@ -13,7 +19,7 @@ describe('mayContainSnippet', () => {
 
 describe('scanSnippets — <Snippet> discovery', () => {
 	test('extracts children source 1:1 (dedented) and the name', async () => {
-		const result = await scanSnippets(
+		const result = await scan(
 			'file.tsx',
 			`
 				import { Snippet } from '@dennation/typebook/react'
@@ -34,7 +40,7 @@ describe('scanSnippets — <Snippet> discovery', () => {
 	})
 
 	test('preserves multi-line structure and relative indentation', async () => {
-		const result = await scanSnippets(
+		const result = await scan(
 			'file.tsx',
 			`
 				import { Snippet } from '@dennation/typebook/react'
@@ -52,7 +58,7 @@ describe('scanSnippets — <Snippet> discovery', () => {
 	})
 
 	test('captures name from an expression container', async () => {
-		const result = await scanSnippets(
+		const result = await scan(
 			'file.tsx',
 			`
 				import { Snippet } from '@dennation/typebook/react'
@@ -66,7 +72,7 @@ describe('scanSnippets — <Snippet> discovery', () => {
 	})
 
 	test('self-closing Snippet yields empty code', async () => {
-		const result = await scanSnippets(
+		const result = await scan(
 			'file.tsx',
 			`
 				import { Snippet } from '@dennation/typebook/react'
@@ -79,7 +85,7 @@ describe('scanSnippets — <Snippet> discovery', () => {
 	})
 
 	test('aliased import is still captured', async () => {
-		const result = await scanSnippets(
+		const result = await scan(
 			'file.tsx',
 			`
 				import { Snippet as Code } from '@dennation/typebook/react'
@@ -92,7 +98,7 @@ describe('scanSnippets — <Snippet> discovery', () => {
 	})
 
 	test('multiple snippets in one file', async () => {
-		const result = await scanSnippets(
+		const result = await scan(
 			'file.tsx',
 			`
 				import { Snippet } from '@dennation/typebook/react'
@@ -105,7 +111,7 @@ describe('scanSnippets — <Snippet> discovery', () => {
 	})
 
 	test('Snippet without a name is dropped', async () => {
-		const result = await scanSnippets(
+		const result = await scan(
 			'file.tsx',
 			`
 				import { Snippet } from '@dennation/typebook/react'
@@ -117,7 +123,7 @@ describe('scanSnippets — <Snippet> discovery', () => {
 	})
 
 	test('dynamic (non-static) name is dropped', async () => {
-		const result = await scanSnippets(
+		const result = await scan(
 			'file.tsx',
 			`
 				import { Snippet } from '@dennation/typebook/react'
@@ -130,7 +136,7 @@ describe('scanSnippets — <Snippet> discovery', () => {
 	})
 
 	test('Snippet imported from another package is ignored', async () => {
-		const result = await scanSnippets(
+		const result = await scan(
 			'file.tsx',
 			`
 				import { Snippet } from 'some-other-lib'
@@ -142,7 +148,7 @@ describe('scanSnippets — <Snippet> discovery', () => {
 	})
 
 	test('no Snippet import → empty result', async () => {
-		const result = await scanSnippets(
+		const result = await scan(
 			'file.tsx',
 			`
 				const x = <Snippet name="nope">hi</Snippet>
@@ -153,7 +159,7 @@ describe('scanSnippets — <Snippet> discovery', () => {
 	})
 
 	test('empty file → empty result', async () => {
-		const result = await scanSnippets('file.tsx', '')
+		const result = await scan('file.tsx', '')
 		expect(result).toEqual([])
 	})
 })

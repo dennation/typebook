@@ -51,16 +51,16 @@ packages/typebook/
     resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into arrays
     constants.ts              — PACKAGE_NAME, DEFAULT_REGISTRY_FILE, DEFAULT_SNIPPETS_FILE, …
     cli.ts                    — CLI entry: `npx @dennation/typebook generate`
-    core/                     — Two symmetric build pipelines: registry-* (components) and snippet-* (snippets)
-      registry-builder.ts     — RegistryBuilder: orchestrates scan → type extraction → file write + Vite watcher
-      registry-scanner.ts     — oxc AST: scanRegistrations() finds registerComponent('id', Component) calls
+    core/                     — Single-pass build pipeline feeding two generators
+      builder.ts              — TypebookBuilder: reads + oxc-parses each file ONCE, then runs both
+                                scanners on the one AST → type extraction → writes both .gen files + Vite watcher
+      registry-scanner.ts     — oxc AST: scanRegistrations(program) finds registerComponent('id', Component) calls
       registry-generator.ts   — generateRegistryFile(): builds ui-registry.gen.ts content
-      snippet-builder.ts      — SnippetBuilder: orchestrates the <Snippet> extraction lifecycle
-      snippet-scanner.ts      — oxc AST: scanSnippets() finds <Snippet name="…"> elements + slices their source
+      snippet-scanner.ts      — oxc AST: scanSnippets(program, src) finds <Snippet name="…"> + slices their source
       snippet-generator.ts    — generateSnippetsFile(): builds snippets.gen.ts content
       ts-client.ts            — TypeScript Compiler API: extracts PropInfo[], defaultValues, JSDoc descriptions
-      ast.ts                  — Shared oxc-parser helpers (parseProgram, walk) used by both scanners
-      source-files.ts         — getSourceFilesFromTsConfig(): the files both builders scan
+      ast.ts                  — Shared oxc-parser helpers (parseProgram → Program, walk) used by both scanners
+      source-files.ts         — getSourceFilesFromTsConfig(): the files the builder scans
       io.ts                   — File I/O helpers (writeIfChanged)
     plugins/                  — unplugin-based bundler integration
       factory.ts              — unpluginFactory + createUnplugin (shared across all bundlers)
@@ -162,10 +162,12 @@ import { Snippet } from '@dennation/typebook/react'
 
 ```
 vite.config.ts: typebook()
-  └── RegistryBuilder
-        ├── scans ./src/**/*.{ts,tsx} for register('id', Component, …)
-        ├── extracts PropInfo[] via TypeScript Compiler API (defaultValues + JSDoc)
-        └── writes ui-registry.gen.ts
+  └── TypebookBuilder  (reads + oxc-parses each file once, feeds both scanners)
+        ├── scanRegistrations: finds registerComponent('id', Component, …)
+        │     └── extracts PropInfo[] via TypeScript Compiler API (defaultValues + JSDoc)
+        │           └── writes ui-registry.gen.ts
+        └── scanSnippets: finds <Snippet name="…"> + slices source
+              └── writes snippets.gen.ts
 
 App.tsx:
   import { uiRegistry } from './ui-registry.gen'

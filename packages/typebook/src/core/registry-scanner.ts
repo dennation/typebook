@@ -1,5 +1,5 @@
 import { NPM_PACKAGE_NAME } from '../constants.js'
-import { parseProgram, walk } from './ast.js'
+import { type Program, walk } from './ast.js'
 
 /** Resolved component import: the component argument of `registerComponent(id, Component, ...)` */
 export interface ComponentImport {
@@ -29,16 +29,15 @@ export function mayContainRegistration(content: string): boolean {
 }
 
 /**
- * Parse a TypeScript/JSX file and extract every `registerComponent(id, Component, ...)`
- * call that was imported from `@dennation/typebook`. Imports are resolved so each call
- * carries the originating module path for its component argument.
+ * Extract every `registerComponent(id, Component, ...)` call (imported from
+ * `@dennation/typebook`) from an already-parsed program. Imports are resolved so each
+ * call carries the originating module path for its component argument.
  *
  * Only calls whose first argument is a string literal AND whose second argument is an
  * imported Identifier are kept — locally-declared components can't be referenced from
  * the generated registry.
  */
-export async function scanRegistrations(filename: string, content: string): Promise<RegisterCall[]> {
-  const program = await parseProgram(filename, content)
+export function scanRegistrations(program: Program): RegisterCall[] {
   const body = (program as { body: unknown[] }).body
 
   const componentImports = new Map<string, ComponentImport>()
