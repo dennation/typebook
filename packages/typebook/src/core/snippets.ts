@@ -1,17 +1,15 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { DEBOUNCE_MS, DEFAULT_SNIPPETS_DIR, LOG_PREFIX, SNIPPET_FILE_EXT } from '../constants.js'
+import { DEBOUNCE_MS, DEFAULT_SNIPPETS_FILE, LOG_PREFIX } from '../constants.js'
 import type { TypebookConfig } from '../types.js'
-import { removeIfExists, writeIfChanged } from './io.js'
+import { writeIfChanged } from './io.js'
+import { generateSnippetsFile, type SnippetEntry } from './snippet-generator.js'
 import { analyzeSnippets, mayContainSnippet, type SnippetBlock } from './snippet-scanner.js'
 import { getSourceFilesFromTsConfig } from './source-files.js'
 
 export interface SnippetBuilderConfig extends TypebookConfig {
 	cwd: string
 }
-
-/** A `name` must map to a single, traversal-safe file under the snippets dir. */
-const SAFE_NAME = /^[A-Za-z0-9._-]+$/
 
 class DuplicateSnippetError extends Error {
 	constructor(name: string, files: ReadonlyArray<string>) {
@@ -28,27 +26,25 @@ class DuplicateSnippetError extends Error {
 
 /**
  * Extracts `<Snippet name="…">…</Snippet>` source from a project's files and
- * writes each block to `{snippetsDir}/{name}.txt`. Mirrors {@link RegistryBuilder}'s
- * lifecycle (start / stop / watch hooks) so the unplugin factory can drive both
- * uniformly across every bundler.
+ * emits it as a single generated `snippets.gen.ts` map (`name → code`). Mirrors
+ * {@link RegistryBuilder}'s lifecycle (start / stop / watch hooks) so the
+ * unplugin factory can drive both uniformly across every bundler.
  */
 export class SnippetBuilder {
 	readonly cwd: string
 
-	private readonly snippetsDir: string
+	private readonly snippetsFile: string
 	private debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 	private readonly snippetsByFile = new Map<string, SnippetBlock[]>()
-	/** Absolute paths we wrote on the last flush — used to clean up stale files. */
-	private written = new Set<string>()
 
 	constructor(config: SnippetBuilderConfig) {
 		this.cwd = config.cwd
-		this.snippetsDir = config.snippetsDir ?? DEFAULT_SNIPPETS_DIR
+		this.snippetsFile = config.snippetsFile ?? DEFAULT_SNIPPETS_FILE
 	}
 
-	get snippetsDirPath(): string {
-		return resolve(this.cwd, this.snippetsDir)
+	get snippetsFilePath(): string {
+		return resolve(this.cwd, this.snippetsFile)
 	}
 
 	async start(): Promise<void> {
@@ -57,9 +53,9 @@ export class SnippetBuilder {
 
 		let count = 0
 		for (const list of this.snippetsByFile.values()) count += list.length
-		this.flush()
+		this.flushGenFile()
 		if (count > 0) {
-			console.log(LOG_PREFIX, `Extracted ${count} <Snippet> block(s) to ${this.snippetsDir}`)
+			console.log(LOG_PREFIX, `Extracted ${count} <Snippet> block(s) to ${this.snippetsFile}`)
 		}
 	}
 
@@ -73,7 +69,7 @@ export class SnippetBuilder {
 		this.debounceTimer = setTimeout(async () => {
 			try {
 				await this.indexFile(filePath)
-				this.flush()
+				this.flushGenFile()
 			} catch (err) {
 				console.error(LOG_PREFIX, 'Failed to extract snippets:', err)
 			}
@@ -82,11 +78,14 @@ export class SnippetBuilder {
 
 	onFileRemoved(filePath: string): void {
 		if (this.snippetsByFile.delete(filePath)) {
-			this.flush()
+			this.flushGenFile()
 		}
 	}
 
 	private async indexFile(filePath: string): Promise<void> {
+		// Never scan our own generated output.
+		if (filePath === this.snippetsFilePath) return
+
 		const content = this.readSafe(filePath)
 		if (content === null || !mayContainSnippet(content)) {
 			this.snippetsByFile.delete(filePath)
@@ -101,45 +100,33 @@ export class SnippetBuilder {
 		this.snippetsByFile.set(filePath, blocks)
 	}
 
-	private flush(): void {
-		const byName = this.collectByName()
+	private flushGenFile(): void {
+		const entries = this.collectEntries()
 
-		const next = new Set<string>()
-		for (const [name, block] of byName) {
-			const filePath = resolve(this.snippetsDirPath, `${name}${SNIPPET_FILE_EXT}`)
-			writeIfChanged(filePath, block.code)
-			next.add(filePath)
-		}
+		// Don't litter a stray empty file in projects that never use <Snippet>.
+		// Once the file exists we keep it in sync (even down to empty) so a
+		// consumer's `import { snippets }` keeps resolving.
+		if (entries.length === 0 && !existsSync(this.snippetsFilePath)) return
 
-		// Remove files for snippets that no longer exist (renamed / deleted).
-		for (const filePath of this.written) {
-			if (!next.has(filePath)) removeIfExists(filePath)
-		}
-		this.written = next
+		const content = generateSnippetsFile(entries, this.snippetsFilePath)
+		writeIfChanged(this.snippetsFilePath, content)
 	}
 
-	private collectByName(): Map<string, SnippetBlock> {
-		const byName = new Map<string, SnippetBlock>()
+	private collectEntries(): SnippetEntry[] {
+		const byName = new Map<string, SnippetEntry>()
 		const definingFile = new Map<string, string>()
 
 		for (const [filePath, blocks] of this.snippetsByFile.entries()) {
 			for (const block of blocks) {
-				if (!SAFE_NAME.test(block.name)) {
-					console.warn(
-						LOG_PREFIX,
-						`Skipping <Snippet> with unsafe name ${JSON.stringify(block.name)} in ${filePath} (allowed: letters, digits, ., _, -)`,
-					)
-					continue
-				}
 				if (byName.has(block.name)) {
 					throw new DuplicateSnippetError(block.name, [definingFile.get(block.name) as string, filePath])
 				}
-				byName.set(block.name, block)
+				byName.set(block.name, { name: block.name, code: block.code })
 				definingFile.set(block.name, filePath)
 			}
 		}
 
-		return byName
+		return Array.from(byName.values())
 	}
 
 	private readSafe(filePath: string): string | null {

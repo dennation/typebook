@@ -16,17 +16,8 @@ export const LOG_PREFIX = `[${PACKAGE_NAME}]`
 /** Default output file for generated registry */
 export const DEFAULT_REGISTRY_FILE = './src/ui-registry.gen.ts'
 
-/**
- * Default output directory for extracted <Snippet> source files. Defaults under
- * `public/` so a dev/build server serves them at `DEFAULT_SNIPPET_URL_BASE`.
- */
-export const DEFAULT_SNIPPETS_DIR = './public/code-blocks'
-
-/** Default URL path the runtime <Snippet> fetches extracted code from */
-export const DEFAULT_SNIPPET_URL_BASE = '/code-blocks'
-
-/** File extension for extracted snippet source files */
-export const SNIPPET_FILE_EXT = '.txt'
+/** Default output file for the generated snippet source map */
+export const DEFAULT_SNIPPETS_FILE = './src/snippets.gen.ts'
 
 /** Debounce delay (ms) for file watcher regeneration */
 export const DEBOUNCE_MS = 200

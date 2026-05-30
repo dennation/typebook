@@ -20,7 +20,7 @@ interface FileWatchTarget {
  *
  * Two builders run side by side off the same source files:
  * - `RegistryBuilder` scans `registerComponent()` calls → `ui-registry.gen.ts`.
- * - `SnippetBuilder` extracts `<Snippet name="…">` source → `{snippetsDir}/{name}.txt`.
+ * - `SnippetBuilder` extracts `<Snippet name="…">` source → `snippets.gen.ts`.
  *
  * - `buildStart` (universal) performs a full scan + generation for both. It is
  *   idempotent and re-fires on each rebuild, so watch mode in any bundler keeps
@@ -32,12 +32,14 @@ interface FileWatchTarget {
  */
 export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (config = {}) => {
 	let registry: RegistryBuilder | undefined
+	let snippets: SnippetBuilder | undefined
 	let targets: FileWatchTarget[] | undefined
 
 	const ensureBuilders = (cwd: string): FileWatchTarget[] => {
 		if (!targets) {
 			registry = new RegistryBuilder({ cwd, ...config })
-			targets = [registry, new SnippetBuilder({ cwd, ...config })]
+			snippets = new SnippetBuilder({ cwd, ...config })
+			targets = [registry, snippets]
 		}
 		return targets
 	}
@@ -60,7 +62,8 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (con
 
 			configureServer(server) {
 				const active = ensureBuilders(server.config.root)
-				const isGenFile = (path: string) => path === registry?.registryFilePath
+				const isGenFile = (path: string) =>
+					path === registry?.registryFilePath || path === snippets?.snippetsFilePath
 
 				server.watcher.on('change', (path) => {
 					if (!isGenFile(path)) active.forEach((t) => t.scheduleFileChange(path))

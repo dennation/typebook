@@ -80,8 +80,7 @@ packages/typebook/
           ui/PropRow.tsx            — Single prop row
           lib/formatPropType.ts     — Type formatter / controllability check
         Snippet/                    — <Snippet name="…">{children}</Snippet> — live render + "show source" toggle
-          ui/Snippet.tsx            — Renders children, lazily fetches extracted source on toggle
-          lib/loadSnippet.ts        — URL-memoized fetch of /code-blocks/{name}.txt
+          ui/Snippet.tsx            — Renders children; toggle reveals source read from context (no fetch)
       features/                     — Interactive units
         prop-input/                 — <PropInput> per-prop controls (literal/bool/string/number)
         code-block/                 — <CodeBlock code={…}/> — Shiki-highlighted with copy
@@ -90,7 +89,9 @@ packages/typebook/
         component-meta/             — Registry lookup
           model/context.ts          — Registry React Context
           model/useComponentMeta.ts — (id) → ComponentMeta | undefined
-          ui/RegistryProvider.tsx   — <RegistryProvider registry={uiRegistry}>
+          ui/RegistryProvider.tsx   — <RegistryProvider registry={uiRegistry} snippets={snippets}>
+        snippets/                   — Snippet source lookup
+          model/context.ts          — Snippet React Context + useSnippet(name)
         theme/                      — Light/dark theme with localStorage + system preference
       shared/                       — Reusable primitives
         ui/Preview/                 — <Preview>, <PreviewFrame>, <Isolate>, <ErrorBoundary>
@@ -108,7 +109,7 @@ packages/typebook/
 
 ### Package exports
 
-- `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `UIRegistry`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, …)
+- `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `UIRegistry`, `SnippetMap`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, …)
 - `@dennation/typebook/react` — `RegistryProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
@@ -146,10 +147,10 @@ import { Snippet } from '@dennation/typebook/react'
 </Snippet>
 ```
 
-- At build time the plugin parses each source file with **oxc-parser**, finds every `<Snippet>` JSX element (imported from `@dennation/typebook/react`), reads its children's exact source via `code.slice(openingElement.end, closingElement.start)` — 1:1 text, no regeneration artifacts — dedents it, and writes it to `{snippetsDir}/{name}.txt` (default `./public/code-blocks/{name}.txt`).
-- `name` is a **required, author-chosen string** (not `key` — reserved by React; not `codeId` — by request). It must be unique across the project and a safe filename (`[A-Za-z0-9._-]`). Duplicate names throw `DuplicateSnippetError`; only a *static* string `name` is extractable.
-- At runtime `<Snippet>` renders its children live; the "show source" toggle lazily `fetch`es `/code-blocks/{name}.txt` (override the base via `basePath`) and renders it through `<CodeBlock>` (Shiki). The fetch is memoized per URL.
-- Extraction runs in the universal unplugin `buildStart`, so it works in every bundler; the Vite dev server additionally watches for incremental, debounced re-extraction. Output dir is configurable via `snippetsDir` in `TypebookConfig`.
+- At build time the plugin parses each source file with **oxc-parser**, finds every `<Snippet>` JSX element (imported from `@dennation/typebook/react`), reads its children's exact source via `code.slice(openingElement.end, closingElement.start)` — 1:1 text, no regeneration artifacts — dedents it, and emits all blocks as a single generated map file `snippets.gen.ts` (`name → code`, `as const satisfies SnippetMap`). Same physical-file philosophy as `ui-registry.gen.ts`.
+- `name` is a **required, author-chosen string** (not `key` — reserved by React; not `codeId` — by request). It must be unique across the project. Duplicate names throw `DuplicateSnippetError`; only a *static* string `name` is extractable.
+- The consumer imports `{ snippets }` from `./snippets.gen` and passes it to `RegistryProvider`. At runtime `<Snippet>` renders its children live; the "show source" toggle reads the source **synchronously from React context** (`useSnippet(name)`) — no runtime fetch, no URL/base-path concerns — and renders it through `<CodeBlock>` (Shiki).
+- Extraction runs in the universal unplugin `buildStart`, so it works in every bundler; the Vite dev server additionally watches for incremental, debounced re-extraction. Output file is configurable via `snippetsFile` in `TypebookConfig` (default `./src/snippets.gen.ts`); it's only created once a project actually uses `<Snippet>`.
 
 ### Data flow
 
@@ -302,18 +303,21 @@ plugins: [tanstackRouter(…), mdx(), typebook(), react()]
 import { RegistryProvider } from '@dennation/typebook/react'
 import { createHashHistory, createRouter, RouterProvider } from '@tanstack/react-router'
 import { routeTree } from './route-tree.gen'
+import { snippets } from './snippets.gen'
 import { uiRegistry } from './ui-registry.gen'
 
 const router = createRouter({ routeTree, history: createHashHistory(), defaultPreload: 'intent' })
 
 export default function App() {
   return (
-    <RegistryProvider uiRegistry={uiRegistry}>
+    <RegistryProvider registry={uiRegistry} snippets={snippets}>
       <RouterProvider router={router} />
     </RegistryProvider>
   )
 }
 ```
+
+> `snippets` is optional — omit it (and the import) if the project doesn't use `<Snippet>`.
 
 ### src/pages/__root.tsx
 

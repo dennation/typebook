@@ -7,12 +7,12 @@ export interface TypebookConfig {
   /** Additional packages whose type declarations mark props as inherited (e.g. ['@heroui/theme']) */
   inheritedProviders?: string[]
   /**
-   * Output directory for source extracted from `<Snippet name="…">` elements
-   * (default: './public/code-blocks'). Each snippet is written to
-   * `{snippetsDir}/{name}.txt` at build time and fetched by the runtime
-   * `<Snippet>` component.
+   * Output file for the generated snippet source map (default:
+   * './src/snippets.gen.ts'). Source extracted from each `<Snippet name="…">`
+   * element is emitted as a `name → code` entry the runtime `<Snippet>` reads
+   * from React context.
    */
-  snippetsDir?: string
+  snippetsFile?: string
 }
 
 export type PropType =
@@ -126,3 +126,9 @@ export interface ComponentHandle<Props, Defaulted extends keyof Props = never> {
 
 /** Object keyed by registration id → ComponentMeta. Built from the generated registry. */
 export type UIRegistry = Record<string, ComponentMeta>
+
+/**
+ * Object keyed by `<Snippet>` name → its extracted source text. Built from the
+ * generated `snippets.gen.ts` and passed to `RegistryProvider`.
+ */
+export type SnippetMap = Record<string, string>

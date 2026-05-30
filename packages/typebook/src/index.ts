@@ -13,6 +13,7 @@ export type {
   RegisterConfigBase,
   RegisterConfigOmit,
   RegisterConfigPick,
+  SnippetMap,
   TypebookConfig,
   UIRegistry,
   ValuesConfig,
