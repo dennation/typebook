@@ -5,10 +5,13 @@
  * possible.
  */
 
+/** ESTree-compatible program node returned by oxc (loosely typed — walked structurally). */
+export type Program = Record<string, unknown>
+
 /** Parse a TypeScript/JSX file into an ESTree-compatible program node. */
-export async function parseProgram(filename: string, content: string): Promise<Record<string, unknown>> {
+export async function parseProgram(filename: string, content: string): Promise<Program> {
   const oxc = await import('oxc-parser')
-  return oxc.parseSync(filename, content).program as unknown as Record<string, unknown>
+  return oxc.parseSync(filename, content).program as unknown as Program
 }
 
 /**
