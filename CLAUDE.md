@@ -210,7 +210,41 @@ pnpm --filter @dennation/example-tanstack-router-mdx typecheck
 
 ## User-facing API
 
-### vite.config.ts
+### Bundler plugin (unplugin)
+
+The plugin is built on [unplugin](https://unplugin.unjs.io), so the **same**
+`typebook(config?)` factory is published per bundler — no bundler is privileged.
+The registry is generated during the universal `buildStart` hook (idempotent,
+re-runs on each rebuild). The Vite entry additionally wires the dev-server
+watcher for incremental, debounced regeneration (Vite's dev server doesn't
+re-run `buildStart` per change); every other bundler relies on the `buildStart`
+rebuild.
+
+```ts
+// vite      → @dennation/typebook/vite
+// rollup    → @dennation/typebook/rollup
+// rolldown  → @dennation/typebook/rolldown
+// webpack   → @dennation/typebook/webpack
+// rspack    → @dennation/typebook/rspack
+// esbuild   → @dennation/typebook/esbuild
+// farm      → @dennation/typebook/farm
+```
+
+Each entry exports the plugin both as the named `typebook` and as `default`, so
+either import style works:
+
+```ts
+import { typebook } from '@dennation/typebook/rspack'
+import typebook from '@dennation/typebook/rspack'
+```
+
+```ts
+// rspack.config.js
+const { typebook } = require('@dennation/typebook/rspack')
+module.exports = { plugins: [typebook({ /* TypebookConfig */ })] }
+```
+
+The repo's examples happen to use Vite, so a full Vite config looks like:
 
 ```ts
 import { typebook } from '@dennation/typebook/vite'
@@ -227,7 +261,6 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     typebook({
-      // sourceGlob: './src/**/*.{ts,tsx}',        // default
       // registryFile: './src/ui-registry.gen.ts', // default
     }),
     react(),
@@ -241,30 +274,6 @@ For MDX, add `@mdx-js/rollup` first:
 import mdx from '@mdx-js/rollup'
 plugins: [tanstackRouter(…), mdx(), typebook(), react()]
 ```
-
-### Other bundlers (unplugin)
-
-The plugin is built on [unplugin](https://unplugin.unjs.io), so the same
-`typebook(config?)` factory is exported per bundler. The registry is generated
-during the universal `buildStart` hook (idempotent, re-runs on each rebuild);
-the Vite entry additionally wires the dev-server watcher for incremental,
-debounced regeneration.
-
-```ts
-// vite      → @dennation/typebook/vite
-// rollup    → @dennation/typebook/rollup
-// rolldown  → @dennation/typebook/rolldown
-// webpack   → @dennation/typebook/webpack
-// rspack    → @dennation/typebook/rspack
-// esbuild   → @dennation/typebook/esbuild
-// farm      → @dennation/typebook/farm
-
-// webpack.config.js
-const { typebook } = require('@dennation/typebook/webpack')
-module.exports = { plugins: [typebook({ /* TypebookConfig */ })] }
-```
-
-Each entry exports the plugin both as the named `typebook` and as `default`.
 
 ### src/App.tsx
 
