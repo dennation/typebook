@@ -79,6 +79,9 @@ packages/typebook/
           ui/PropsTable.tsx         — Search + filter + rows
           ui/PropRow.tsx            — Single prop row
           lib/formatPropType.ts     — Type formatter / controllability check
+        Snippet/                    — <Snippet name="…">{children}</Snippet> — live render + "show source" toggle
+          ui/Snippet.tsx            — Renders children, lazily fetches extracted source on toggle
+          lib/loadSnippet.ts        — URL-memoized fetch of /code-blocks/{name}.txt
       features/                     — Interactive units
         prop-input/                 — <PropInput> per-prop controls (literal/bool/string/number)
         code-block/                 — <CodeBlock code={…}/> — Shiki-highlighted with copy
@@ -99,14 +102,14 @@ packages/typebook/
 ### Build entry points
 
 - **`index`** — `register`, `allOf`, `values`, `generate`, types.
-- **`react/index`** — `RegistryProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`.
+- **`react/index`** — `RegistryProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`.
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
 - **`cli/index`** — `npx @dennation/typebook generate`.
 
 ### Package exports
 
 - `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `UIRegistry`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, …)
-- `@dennation/typebook/react` — `RegistryProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`
+- `@dennation/typebook/react` — `RegistryProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
 ### register() API
@@ -129,6 +132,24 @@ const button = register('button', Button, {
 - `register()` calls can live anywhere in `./src/**/*.{ts,tsx}` — no special filename required.
 - Duplicate ids throw `DuplicateRegistrationError` at build time.
 - `<Story>` / `<Variants>` / `<Matrix>` are **type-safe**: required props not covered by `defaultProps` must be passed via `props={…}` at the call site (`MissingProps` phantom type).
+
+### Snippet API
+
+```tsx
+import { Snippet } from '@dennation/typebook/react'
+
+<Snippet name="button-group">
+  <div className="flex gap-2">
+    <Button size="sm">Small</Button>
+    <Button size="lg">Large</Button>
+  </div>
+</Snippet>
+```
+
+- At build time the plugin parses each source file with **oxc-parser**, finds every `<Snippet>` JSX element (imported from `@dennation/typebook/react`), reads its children's exact source via `code.slice(openingElement.end, closingElement.start)` — 1:1 text, no regeneration artifacts — dedents it, and writes it to `{snippetsDir}/{name}.txt` (default `./public/code-blocks/{name}.txt`).
+- `name` is a **required, author-chosen string** (not `key` — reserved by React; not `codeId` — by request). It must be unique across the project and a safe filename (`[A-Za-z0-9._-]`). Duplicate names throw `DuplicateSnippetError`; only a *static* string `name` is extractable.
+- At runtime `<Snippet>` renders its children live; the "show source" toggle lazily `fetch`es `/code-blocks/{name}.txt` (override the base via `basePath`) and renders it through `<CodeBlock>` (Shiki). The fetch is memoized per URL.
+- Extraction runs in the universal unplugin `buildStart`, so it works in every bundler; the Vite dev server additionally watches for incremental, debounced re-extraction. Output dir is configurable via `snippetsDir` in `TypebookConfig`.
 
 ### Data flow
 

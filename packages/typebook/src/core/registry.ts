@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import ts from 'typescript'
 import { DEBOUNCE_MS, DEFAULT_REGISTRY_FILE, LOG_PREFIX } from '../constants.js'
 import type { PropInfo, TypebookConfig } from '../types.js'
 import { generateRegistryFile, type RegistryEntry } from './generator.js'
 import { writeIfChanged } from './io.js'
 import { analyzeFile, mayContainRegister, type RegisterCall } from './scanner.js'
+import { getSourceFilesFromTsConfig } from './source-files.js'
 import { TypeScriptClient } from './ts-client.js'
 
 export interface RegistryBuilderConfig extends TypebookConfig {
@@ -167,21 +167,6 @@ export class RegistryBuilder {
 			return null
 		}
 	}
-}
-
-function getSourceFilesFromTsConfig(cwd: string): string[] {
-	const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, 'tsconfig.json')
-	if (!configPath) {
-		console.warn(LOG_PREFIX, 'tsconfig.json not found, no files to scan')
-		return []
-	}
-	const configFile = ts.readConfigFile(configPath, ts.sys.readFile)
-	if (configFile.error) {
-		console.warn(LOG_PREFIX, 'Failed to read tsconfig.json:', ts.flattenDiagnosticMessageText(configFile.error.messageText, '\n'))
-		return []
-	}
-	const { fileNames } = ts.parseJsonConfigFileContent(configFile.config, ts.sys, cwd)
-	return fileNames
 }
 
 function formatDuplicateMessage(id: string, files: ReadonlyArray<string>): string {

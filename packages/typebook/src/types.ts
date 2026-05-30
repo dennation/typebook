@@ -6,6 +6,13 @@ export interface TypebookConfig {
   registryFile?: string
   /** Additional packages whose type declarations mark props as inherited (e.g. ['@heroui/theme']) */
   inheritedProviders?: string[]
+  /**
+   * Output directory for source extracted from `<Snippet name="…">` elements
+   * (default: './public/code-blocks'). Each snippet is written to
+   * `{snippetsDir}/{name}.txt` at build time and fetched by the runtime
+   * `<Snippet>` component.
+   */
+  snippetsDir?: string
 }
 
 export type PropType =

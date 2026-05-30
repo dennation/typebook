@@ -1,5 +1,5 @@
 import { allOf, registerComponent } from '@dennation/typebook'
-import { Matrix, Story, Variants } from '@dennation/typebook/react'
+import { Matrix, Snippet, Story, Variants } from '@dennation/typebook/react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '../components/Button'
 
@@ -38,6 +38,17 @@ function ButtonPage() {
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">Color × Variant matrix</h2>
 				<Matrix of={handle} x={allOf(handle, 'color')} y={[allOf(handle, 'variant')]} />
+			</section>
+
+			<section>
+				<h2 className="st:text-lg st:font-semibold st:mb-3">Live example with source</h2>
+				<Snippet name="button-group">
+					<div className="st:flex st:gap-2">
+						<Button size="sm">Small</Button>
+						<Button size="md">Medium</Button>
+						<Button size="lg">Large</Button>
+					</div>
+				</Snippet>
 			</section>
 		</div>
 	)
