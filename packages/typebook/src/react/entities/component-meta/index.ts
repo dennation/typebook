@@ -1,2 +1,2 @@
+export { RegistryContextProvider, useRegistry } from './model/context.js'
 export { useComponentMeta } from './model/useComponentMeta.js'
-export { RegistryProvider, type RegistryProviderProps } from './ui/RegistryProvider.js'

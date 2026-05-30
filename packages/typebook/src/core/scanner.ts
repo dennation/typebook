@@ -1,4 +1,5 @@
 import { NPM_PACKAGE_NAME } from '../constants.js'
+import { parseProgram, walk } from './ast.js'
 
 /** Resolved component import: the component argument of `registerComponent(id, Component, ...)` */
 export interface ComponentImport {
@@ -20,11 +21,6 @@ export interface RegisterCall {
 
 const EXPORTED_FN_NAME = 'registerComponent'
 
-async function parseFile(filename: string, content: string): Promise<unknown> {
-  const oxc = await import('oxc-parser')
-  return oxc.parseSync(filename, content).program
-}
-
 /**
  * Quick string check before parsing — most files won't contain registerComponent() at all.
  */
@@ -42,7 +38,7 @@ export function mayContainRegister(content: string): boolean {
  * the generated registry.
  */
 export async function analyzeFile(filename: string, content: string): Promise<RegisterCall[]> {
-  const program = await parseFile(filename, content)
+  const program = await parseProgram(filename, content)
   const body = (program as { body: unknown[] }).body
 
   const componentImports = new Map<string, ComponentImport>()
@@ -145,31 +141,4 @@ function identifierName(node: Record<string, unknown> | undefined): string | nul
     return identifierName(node.expression as Record<string, unknown>)
   }
   return null
-}
-
-/**
- * Depth-first AST walk. Visits every object node in the tree (skips primitives,
- * arrays are descended into). Cheap enough for source files — no cycle handling
- * needed since oxc returns a tree, not a graph.
- */
-function walk(root: unknown, visit: (node: Record<string, unknown>) => void): void {
-  const stack: unknown[] = [root]
-  while (stack.length > 0) {
-    const current = stack.pop()
-    if (current === null || typeof current !== 'object') continue
-
-    if (Array.isArray(current)) {
-      for (let i = current.length - 1; i >= 0; i--) stack.push(current[i])
-      continue
-    }
-
-    const node = current as Record<string, unknown>
-    if (typeof node.type === 'string') visit(node)
-
-    for (const key in node) {
-      if (key === 'type' || key === 'start' || key === 'end' || key === 'loc' || key === 'range') continue
-      const value = node[key]
-      if (value && typeof value === 'object') stack.push(value)
-    }
-  }
 }

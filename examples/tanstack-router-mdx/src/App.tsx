@@ -1,4 +1,4 @@
-import { RegistryProvider } from '@dennation/typebook/react'
+import { TypebookProvider } from '@dennation/typebook/react'
 import { createHashHistory, createRouter, RouterProvider } from '@tanstack/react-router'
 import { routeTree } from './route-tree.gen'
 
@@ -10,8 +10,8 @@ const router = createRouter({
 
 export default function App() {
 	return (
-		<RegistryProvider>
+		<TypebookProvider>
 			<RouterProvider router={router} />
-		</RegistryProvider>
+		</TypebookProvider>
 	)
 }
