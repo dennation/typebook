@@ -133,19 +133,31 @@ export type UIRegistry = Record<string, ComponentMeta>
  */
 export type SnippetMap = Record<string, string>
 
+/** State passed to a {@link MenuSlot} for the item being rendered. */
+export interface MenuItemState {
+  /** The item's nested `items` are expanded. */
+  open: boolean
+}
+
+/** Render custom JSX before/after a menu item (e.g. a divider or section heading). */
+export type MenuSlot = (item: MenuItem, state: MenuItemState) => ReactNode
+
 /**
  * Fields shared by the stored {@link MenuItem} and the input {@link MenuItemInput}.
  *
- * Note there is no `match`/`active` here, nor `before`/`after` render slots: the
- * `<Menu>` renderer is router-agnostic and knows nothing about the active path.
- * Active-state matching and any custom JSX live entirely in the consumer's `Item`
- * component, which talks to its own router.
+ * Note there is no `match`/`active`: the `<Menu>` renderer is router-agnostic and
+ * knows nothing about the active path. Active-state matching lives entirely in the
+ * consumer's `Item` component, which talks to its own router.
  */
 export interface MenuItemBase {
   title: string
   icon?: ReactNode
   /** Initial expanded state when the item has children. Default `true`. */
   defaultOpen?: boolean
+  /** Custom JSX rendered before the item. */
+  before?: MenuSlot
+  /** Custom JSX rendered after the item. */
+  after?: MenuSlot
 }
 
 /**

@@ -12,6 +12,8 @@ export type {
   MenuItem,
   MenuItemBase,
   MenuItemInput,
+  MenuItemState,
+  MenuSlot,
   MissingProps,
   PropInfo,
   PropType,
