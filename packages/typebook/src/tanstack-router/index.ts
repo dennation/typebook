@@ -4,8 +4,11 @@ import type { RoutePaths } from '@tanstack/router-core'
 import type { MenuItemInput } from '../types.js'
 
 /**
- * Per-route menu metadata. Read by the adapter's default `getMeta` from
- * `route.options.staticData.typebook.meta`. Augment your route definitions:
+ * Per-route menu metadata: how the route *describes itself* in a menu. Read by
+ * the adapter's default `getMeta` from `route.options.staticData.typebook.meta`.
+ * Composition decisions (excluding/overriding/ordering entries) belong to the
+ * menu-authoring layer (`omit` here, keyed override / `parent` in `defineMenu`),
+ * not here. Augment your route definitions:
  *
  * ```tsx
  * createFileRoute('/button')({
@@ -20,8 +23,6 @@ export interface TypebookRouteMeta {
   /** Sort hint among siblings (lower first). */
   order?: number
   icon?: ReactNode
-  /** Exclude this route (and its subtree) from the menu. */
-  hidden?: boolean
 }
 
 declare module '@tanstack/router-core' {
@@ -90,7 +91,7 @@ function titleFromPath(fullPath: string): string {
  * - the root and pathless/layout routes (no `path`) are transparent — their
  *   children attach to the nearest navigable ancestor (or the top level);
  * - a route with a `path` becomes an entry keyed by `fullPath`;
- * - routes in `omit` or with `meta.hidden` are dropped together with their subtree;
+ * - routes in `omit` are dropped together with their subtree;
  * - `title` resolves to `meta.title` ?? title-cased last segment; `order`/`icon`
  *   come from `meta`.
  */
@@ -112,10 +113,10 @@ export function menuFromRouteTree<TRouteTree extends AnyRoute>(
 
     if (!transparent) {
       const fullPath = (route as { fullPath: string }).fullPath
-      const meta = getMeta(route) ?? {}
-      if (omit.has(fullPath) || meta.hidden) {
+      if (omit.has(fullPath)) {
         childDropped = true // drop this route and its subtree
       } else if (!dropped) {
+        const meta = getMeta(route) ?? {}
         const item: MenuItemInput = { title: meta.title ?? titleFromPath(fullPath) }
         if (parentHref != null) item.parent = parentHref
         if (meta.order != null) item.order = meta.order

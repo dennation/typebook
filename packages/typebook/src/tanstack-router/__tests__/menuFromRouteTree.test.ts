@@ -14,12 +14,6 @@ function buildTree() {
     path: 'button',
     staticData: { typebook: { meta: { title: 'Button', order: 1 } } },
   })
-  const hidden = createRoute({
-    getParentRoute: () => root,
-    path: 'hidden',
-    staticData: { typebook: { meta: { hidden: true } } },
-  })
-
   // Section: a route with a path AND children.
   const components = createRoute({ getParentRoute: () => root, path: 'components' })
   const componentsBadge = createRoute({ getParentRoute: () => components, path: 'badge' })
@@ -32,7 +26,6 @@ function buildTree() {
     index,
     about,
     button,
-    hidden,
     components.addChildren([componentsBadge]),
     layout.addChildren([settings]),
   ])
@@ -56,9 +49,8 @@ describe('menuFromRouteTree', () => {
     expect(input['/about']?.title).toBe('About')
   })
 
-  it('drops routes flagged hidden, and `omit`s with their subtree', () => {
+  it('`omit`s a route together with its subtree', () => {
     const input = menuFromRouteTree(buildTree(), { omit: ['/components'] })
-    expect(input['/hidden']).toBeUndefined()
     expect(input['/components']).toBeUndefined()
     expect(input['/components/badge']).toBeUndefined() // subtree dropped
   })
