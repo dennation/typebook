@@ -154,6 +154,13 @@ export interface MenuItemBase {
   icon?: ReactNode
   /** Initial expanded state when the item has children. Default `true`. */
   defaultOpen?: boolean
+  /**
+   * Whether a section (an item with children) can be collapsed. Default `true`.
+   * Set `false` for an always-open group header: `<Menu>` keeps it expanded and
+   * hands its `Item` the non-collapsible prop variant (no `open`/`toggle`).
+   * Ignored for leaf links (nothing to collapse).
+   */
+  collapsible?: boolean
   /** Custom JSX rendered before the item. */
   before?: MenuSlot
   /** Custom JSX rendered after the item. */

@@ -5,10 +5,12 @@ export { ErrorBoundary } from './shared/ui/preview/index.js'
 export { Layout, type LayoutProps } from './widgets/layout/index.js'
 export { Matrix, type MatrixProps } from './widgets/matrix/index.js'
 export {
+	type CollapsibleMenuItemProps,
 	Menu,
 	type MenuContainerProps,
 	type MenuItemProps,
 	type MenuProps,
+	type StaticMenuItemProps,
 } from './widgets/menu/index.js'
 export { Playground, type PlaygroundProps } from './widgets/playground/index.js'
 export { Snippet, type SnippetProps } from './widgets/snippet/index.js'
