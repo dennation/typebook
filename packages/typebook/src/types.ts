@@ -134,41 +134,18 @@ export type UIRegistry = Record<string, ComponentMeta>
 export type SnippetMap = Record<string, string>
 
 /**
- * How a {@link MenuItem} decides whether it is "active" for the current path.
- * - `'exact'` (default): `pathname === href`
- * - `'prefix'`: `pathname` starts with `href`
- * - `RegExp`: tested against `pathname`
- * - predicate: full control
+ * Fields shared by the stored {@link MenuItem} and the input {@link MenuItemInput}.
+ *
+ * Note there is no `match`/`active` here, nor `before`/`after` render slots: the
+ * `<Menu>` renderer is router-agnostic and knows nothing about the active path.
+ * Active-state matching and any custom JSX live entirely in the consumer's `Item`
+ * component, which talks to its own router.
  */
-export type MenuMatch =
-  | 'exact'
-  | 'prefix'
-  | RegExp
-  | ((pathname: string) => boolean)
-
-/** Runtime state passed to a {@link MenuSlot} for the item being rendered. */
-export interface MenuItemState {
-  /** The item matched the current path (per its `match`). */
-  active: boolean
-  /** The item's nested `items` are expanded. */
-  open: boolean
-}
-
-/** Render a custom node before/after a menu item (e.g. a divider or heading). */
-export type MenuSlot = (item: MenuItem, state: MenuItemState) => ReactNode
-
-/** Fields shared by the stored {@link MenuItem} and the input {@link MenuItemInput}. */
 export interface MenuItemBase {
   title: string
   icon?: ReactNode
-  /** Active-state matching policy. Default `'exact'`. */
-  match?: MenuMatch
   /** Initial expanded state when the item has children. Default `true`. */
   defaultOpen?: boolean
-  /** Custom JSX rendered before the item. */
-  before?: MenuSlot
-  /** Custom JSX rendered after the item. */
-  after?: MenuSlot
 }
 
 /**
