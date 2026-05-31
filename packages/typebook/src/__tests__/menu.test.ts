@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { defineMenu } from '../menu.js'
+import type { MenuInput } from '../types.js'
 
 describe('defineMenu', () => {
-  it('keeps array order when no `order` is given', () => {
+  it('keeps insertion order for top-level items without `order`', () => {
     const menu = defineMenu([
       { title: 'Home', href: '/' },
       { title: 'About', href: '/about' },
@@ -10,16 +11,17 @@ describe('defineMenu', () => {
     expect(menu.map((i) => i.href)).toEqual(['/', '/about'])
   })
 
-  it('sorts siblings by `order` and strips it', () => {
+  it('sorts siblings by `order` and strips input-only fields', () => {
     const menu = defineMenu([
       { title: 'B', href: '/b', order: 2 },
       { title: 'A', href: '/a', order: 1 },
     ])
     expect(menu.map((i) => i.title)).toEqual(['A', 'B'])
     expect(menu[0]).not.toHaveProperty('order')
+    expect(menu[0]).not.toHaveProperty('parent')
   })
 
-  it('places unordered items after ordered ones, keeping their relative order', () => {
+  it('places unordered items after ordered ones, keeping insertion order', () => {
     const menu = defineMenu([
       { title: 'Plain1', href: '/p1' },
       { title: 'Ordered', href: '/o', order: 1 },
@@ -28,48 +30,64 @@ describe('defineMenu', () => {
     expect(menu.map((i) => i.title)).toEqual(['Ordered', 'Plain1', 'Plain2'])
   })
 
+  it('resolves `parent` (href) into a nested tree', () => {
+    const menu = defineMenu([
+      { title: 'Components', href: '/components' },
+      { title: 'Button', href: '/button', parent: '/components' },
+    ])
+    expect(menu).toHaveLength(1)
+    expect(menu[0].items?.map((i) => i.href)).toEqual(['/button'])
+  })
+
+  it('resolves `parent` referencing an hrefless container by `id`', () => {
+    const menu = defineMenu([
+      { title: 'Group', id: 'grp' },
+      { title: 'Child', href: '/c', parent: 'grp' },
+    ])
+    expect(menu).toHaveLength(1)
+    expect(menu[0].href).toBeUndefined()
+    expect(menu[0].items?.[0].href).toBe('/c')
+  })
+
+  it('hoists items with an unknown parent to the top level (with a warning)', () => {
+    // Unknown-parent literals are a compile error; the runtime safety net is for
+    // dynamically built menus where `parent` widens to `string`.
+    const input: MenuInput = [{ title: 'Orphan', href: '/o', parent: '/missing' }]
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const menu = defineMenu(input)
+    expect(menu.map((i) => i.href)).toEqual(['/o'])
+    expect(warn).toHaveBeenCalledOnce()
+    warn.mockRestore()
+  })
+
   it('de-duplicates by href: later fully replaces earlier, at first position', () => {
     const menu = defineMenu([
       { title: 'Button', href: '/button' },
       { title: 'About', href: '/about' },
       { title: 'Button (override)', href: '/button', icon: 'icon' },
     ])
-    expect(menu).toHaveLength(2)
     expect(menu.map((i) => i.href)).toEqual(['/button', '/about'])
     expect(menu[0]).toMatchObject({ title: 'Button (override)', icon: 'icon' })
   })
 
-  it('full replacement drops fields not present on the later item', () => {
-    const menu = defineMenu([
-      { title: 'Button', href: '/button', items: [{ title: 'Child', href: '/button/child' }] },
-      { title: 'Button', href: '/button' },
-    ])
-    expect(menu[0].items).toBeUndefined()
-  })
-
-  it('overrides nested items from a top-level duplicate, kept in place', () => {
-    const menu = defineMenu([
-      { title: 'Components', items: [{ title: 'Button', href: '/button' }] },
-      { title: 'New title', href: '/button' },
-    ])
+  it('normalizes trailing slashes for identity and parent matching (keeps root)', () => {
+    // Trailing-slash normalization is a runtime convenience (the type-level key
+    // is the exact href); exercise it via a dynamically-typed input.
+    const input: MenuInput = [
+      { title: 'Docs', href: '/docs/' },
+      { title: 'Intro', href: '/docs/intro', parent: '/docs' },
+    ]
+    const menu = defineMenu(input)
     expect(menu).toHaveLength(1)
-    expect(menu[0].items?.[0].title).toBe('New title')
+    expect(menu[0].items?.[0].href).toBe('/docs/intro')
   })
 
-  it('normalizes trailing slashes for identity (keeps root)', () => {
+  it('lets a later flat item attach into an earlier section (custom child)', () => {
     const menu = defineMenu([
-      { title: 'Docs', href: '/docs' },
-      { title: 'Docs override', href: '/docs/' },
+      { title: 'Components', href: '/components' },
+      { title: 'Button', href: '/button', parent: '/components' },
+      { title: 'Custom', href: '/x', parent: '/components' },
     ])
-    expect(menu).toHaveLength(1)
-    expect(menu[0].title).toBe('Docs override')
-  })
-
-  it('never de-duplicates hrefless containers', () => {
-    const menu = defineMenu([
-      { title: 'Group A', items: [] },
-      { title: 'Group B', items: [] },
-    ])
-    expect(menu).toHaveLength(2)
+    expect(menu[0].items?.map((i) => i.href)).toEqual(['/button', '/x'])
   })
 })

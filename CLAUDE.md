@@ -164,22 +164,25 @@ import { Snippet } from '@dennation/typebook/react'
 
 A `Menu` is a router-agnostic navigation tree (the data behind a sidebar/navbar). It is **authored or adapter-generated, never codegen'd** — there is no `<Menu>.gen` file and the builder pipeline is not involved.
 
-```ts
+```tsx
 import { defineMenu } from '@dennation/typebook'
 import { menuFromRouteTree } from '@dennation/typebook/tanstack-router'
 import { routeTree } from './route-tree.gen'
 
 const menu = defineMenu([
   ...menuFromRouteTree(routeTree, { omit: ['/about'] }),
+  // add a custom child into a generated section — `parent` is type-checked against the routes:
+  { title: 'Changelog', href: '/changelog', parent: '/components' },
   { href: '/button', title: 'Button', icon: <Cube /> }, // overrides the generated /button in place
   { title: 'GitHub', href: 'https://github.com/dennation/ui-studio' },
 ])
 ```
 
-- **Uniform node shape (`MenuItem`)** — a node with `items` is a (collapsible) section, one with `href` is a link, one with both is a clickable section. There is no separate "group"/"separator" type; custom JSX goes in the `before`/`after` render slots (`(item, { active, open }) => ReactNode`). `match` (`'exact'` | `'prefix'` | `RegExp` | predicate) controls active-state highlighting.
-- **Order is array position.** `MenuItemInput` (the authoring/adapter input) adds an `order` hint for sources that emit items out of order; `defineMenu` sorts by it and strips it.
-- **`defineMenu(input)`** sorts siblings by `order`, **de-duplicates by `href`** (deep; the *last* occurrence fully replaces the earlier one, kept at the *first* occurrence's position — this powers spread-then-override), and returns a plain `Menu`. Hrefless containers are never de-duplicated.
-- **`menuFromRouteTree(routeTree, options?)`** mirrors a TanStack route tree into a `MenuInput`: root and pathless/layout routes are transparent (children bubble up), a route with a `path` becomes an item (`href = fullPath`, children → section), and routes in `omit` or flagged `hidden` are dropped with their subtree. Per-route metadata (`title`/`order`/`icon`/`hidden`) is read by `getMeta` (default: `route.options.staticData?.typebook?.meta`, typed via `TypebookRouteMeta`). Title falls back to a title-cased last path segment.
+- **Flat input, nested output.** The *input* (`MenuItemInput`) is a **flat** list where hierarchy is expressed by `parent` (the `href` or `id` of the parent), not by nesting. This is what makes adding a custom child to an adapter-generated section trivial — you just point `parent` at it (full-replacement dedup can't append into a nested `items`, so we avoid input nesting entirely). `defineMenu` resolves `parent` into the nested *output* (`MenuItem`, the renderer's model: a node with `items` is a collapsible section, one with `href` is a link, both → clickable section).
+- **`parent` is type-checked** to only accept keys (`href`/`id`) that exist in the same list — including route paths flowing in from the adapter *through the spread*. This relies on a phantom `MenuPathBrand<RoutePaths>` on the adapter's return (TS can't recover literal `href`s from a spread array, but a type parameter on the element type survives). `defineMenu`'s generic infers the key union; it degrades to `string` for dynamically-typed `MenuItemInput[]`.
+- **No "group"/"separator" node type.** Custom JSX goes in the `before`/`after` render slots (`(item, { active, open }) => ReactNode`). `match` (`'exact'` | `'prefix'` | `RegExp` | predicate) controls active-state highlighting.
+- **`defineMenu(input)`** resolves `parent` into the tree, sorts siblings by `order` (then insertion order; `order` stripped), **de-duplicates by `href`/`id`** (the *last* occurrence fully replaces the earlier one, kept at the *first* occurrence's position — this powers spread-then-override), hoists unknown-parent items to the top level (dev warning), and returns a plain `Menu`.
+- **`menuFromRouteTree(routeTree, options?)`** walks a TanStack route tree into a flat `MenuItemInput[]` (branded with the path union): root and pathless/layout routes are transparent (children attach to the nearest navigable ancestor), a route with a `path` becomes an item (`href = fullPath`, `parent` = ancestor), and routes in `omit` (typed via `RoutePaths`) or flagged `hidden` are dropped with their subtree. Per-route metadata (`title`/`order`/`icon`/`hidden`) is read by `getMeta` (default: `route.options.staticData?.typebook?.meta`, typed via `TypebookRouteMeta`). Title falls back to a title-cased last path segment.
 - **Router stays the consumer's responsibility.** The adapter only *reads* a route tree; rendering a `Menu` is a separate concern (a `Link` and the active path are injected at the render layer).
 
 ### Data flow

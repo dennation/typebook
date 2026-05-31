@@ -157,22 +157,15 @@ export interface MenuItemState {
 /** Render a custom node before/after a menu item (e.g. a divider or heading). */
 export type MenuSlot = (item: MenuItem, state: MenuItemState) => ReactNode
 
-/**
- * A single navigation entry. The shape is uniform: a node with `items` is a
- * (collapsible) section, a node with `href` is a link, and a node with both is
- * a clickable section. Order is the array position — there is no `order` field
- * on the stored model (see {@link MenuItemInput} for the authoring/adapter input).
- */
-export interface MenuItem {
+/** Fields shared by the stored {@link MenuItem} and the {@link MenuItemInput}. */
+export interface MenuItemBase {
   title: string
   /** Link target — internal route or external URL. Absent → pure container. */
   href?: string
-  /** Nested entries → renders as a collapsible section. */
-  items?: MenuItem[]
   icon?: ReactNode
   /** Active-state matching policy. Default `'exact'`. */
   match?: MenuMatch
-  /** Initial expanded state when `items` is present. Default `true`. */
+  /** Initial expanded state when the item has children. Default `true`. */
   defaultOpen?: boolean
   /** Custom JSX rendered before the item. */
   before?: MenuSlot
@@ -180,19 +173,51 @@ export interface MenuItem {
   after?: MenuSlot
 }
 
+/**
+ * A single, normalized navigation entry. The shape is uniform: a node with
+ * `items` is a (collapsible) section, a node with `href` is a link, and a node
+ * with both is a clickable section. This is the *output* model — the tree is
+ * built by {@link defineMenu} from the flat {@link MenuItemInput} list.
+ */
+export interface MenuItem extends MenuItemBase {
+  /** Child entries → renders as a collapsible section. */
+  items?: MenuItem[]
+}
+
 /** Stored, normalized navigation tree consumed by the renderer. */
 export type Menu = MenuItem[]
 
 /**
- * Authoring/adapter input: a {@link MenuItem} plus an `order` hint used to sort
- * siblings (router adapters emit items in arbitrary order). {@link defineMenu}
- * sorts by `order`, de-duplicates by `href`, strips `order`, and returns a
- * plain {@link Menu}.
+ * Authoring/adapter *input*: a **flat** list where hierarchy is expressed by
+ * `parent` (the `href` or `id` of the parent) rather than nesting. This is what
+ * makes adding a custom child to an adapter-generated section trivial — you
+ * just point `parent` at it. {@link defineMenu} resolves `parent` into the
+ * nested {@link MenuItem} tree, de-duplicates by `href`, sorts by `order`, and
+ * strips the input-only fields.
+ *
+ * `Parent` is the union of keys (`href`/`id`) allowed for `parent`; it is
+ * inferred by `defineMenu` so `parent` only accepts keys that exist in the
+ * same list (including route paths flowing in from a router adapter).
  */
-export interface MenuItemInput extends MenuItem {
+export interface MenuItemInput<Parent extends string = string> extends MenuItemBase {
+  /** Stable key for an hrefless item, so it can be referenced as a `parent`. */
+  id?: string
+  /** `href` (or `id`) of the parent entry. Absent → top level. */
+  parent?: Parent
+  /** Sort hint among siblings (lower first). Stripped from the output. */
   order?: number
-  items?: MenuItemInput[]
 }
 
 /** Input array accepted by {@link defineMenu}. */
 export type MenuInput = MenuItemInput[]
+
+/**
+ * Phantom (type-only) brand carrying a route-path union. A router adapter
+ * brands its returned items with it so {@link defineMenu} can type `parent`
+ * against those paths *through a spread* — TypeScript cannot recover literal
+ * `href`s from a spread array, but a type parameter on the element type
+ * survives. Never present at runtime.
+ */
+export interface MenuPathBrand<P extends string> {
+  readonly __menuPaths: P
+}
