@@ -14,7 +14,6 @@ export type {
   MenuItemInput,
   MenuItemState,
   MenuMatch,
-  MenuPathBrand,
   MenuSlot,
   MissingProps,
   PropInfo,

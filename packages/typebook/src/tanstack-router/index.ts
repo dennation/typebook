@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import type { AnyRoute } from '@tanstack/react-router'
 import type { RoutePaths } from '@tanstack/router-core'
-import type { MenuItemInput, MenuPathBrand } from '../types.js'
+import type { MenuItemInput } from '../types.js'
 
 /**
  * Per-route menu metadata. Read by the adapter's default `getMeta` from
@@ -41,12 +41,13 @@ export interface MenuFromRouteTreeOptions<TRouteTree extends AnyRoute> {
 }
 
 /**
- * The adapter's return: flat menu items whose `parent` is typed to the tree's
- * route paths, plus a phantom {@link MenuPathBrand} so `defineMenu` can keep
- * `parent` typed across a spread.
+ * The adapter's return: a {@link MenuInput} keyed by route full-path, with each
+ * value's `parent` typed to the tree's route paths. Because object spread keeps
+ * keys in the type, `defineMenu` can type `parent` against these paths through
+ * the spread — no phantom brand needed.
  */
-export type RouteMenuInput<TRouteTree extends AnyRoute> = Array<
-  MenuItemInput<RoutePaths<TRouteTree>> & MenuPathBrand<RoutePaths<TRouteTree>>
+export type RouteMenuInput<TRouteTree extends AnyRoute> = Partial<
+  Record<RoutePaths<TRouteTree>, MenuItemInput<RoutePaths<TRouteTree>>>
 >
 
 function defaultGetMeta(route: AnyRoute): TypebookRouteMeta | undefined {
@@ -71,24 +72,24 @@ function titleFromPath(fullPath: string): string {
 }
 
 /**
- * Build a flat {@link MenuInput} from a TanStack Router route tree, with each
- * item's `parent` pointing at its nearest navigable ancestor. Spread the result
- * into {@link defineMenu}, where it is resolved into a tree, sorted by `order`,
- * and de-duplicated/overridden by `href`:
+ * Build a keyed {@link MenuInput} from a TanStack Router route tree. Each entry
+ * is keyed by `fullPath`, with `parent` pointing at the nearest navigable
+ * ancestor. Spread the result into {@link defineMenu}, where `parent` is
+ * resolved into a tree, sorted by `order`, and keyed overrides are applied:
  *
  * ```tsx
- * const menu = defineMenu([
+ * const menu = defineMenu({
  *   ...menuFromRouteTree(routeTree, { omit: ['/about'] }),
  *   // add a custom child into a generated section — `parent` is typed to the routes:
- *   { title: 'Changelog', href: '/changelog', parent: '/components' },
- *   { href: '/button', title: 'Button', icon: <Cube /> }, // overrides the generated item
- * ])
+ *   '/changelog': { title: 'Changelog', parent: '/components' },
+ *   '/button': { title: 'Button', icon: <Cube /> }, // overrides the generated /button
+ * })
  * ```
  *
  * Traversal rules:
  * - the root and pathless/layout routes (no `path`) are transparent — their
  *   children attach to the nearest navigable ancestor (or the top level);
- * - a route with a `path` becomes an item (`href = fullPath`);
+ * - a route with a `path` becomes an entry keyed by `fullPath`;
  * - routes in `omit` or with `meta.hidden` are dropped together with their subtree;
  * - `title` resolves to `meta.title` ?? title-cased last segment; `order`/`icon`
  *   come from `meta`.
@@ -99,7 +100,7 @@ export function menuFromRouteTree<TRouteTree extends AnyRoute>(
 ): RouteMenuInput<TRouteTree> {
   const omit = new Set<string>((options.omit as string[] | undefined) ?? [])
   const getMeta = options.getMeta ?? defaultGetMeta
-  const out: MenuItemInput[] = []
+  const out: Record<string, MenuItemInput> = {}
 
   const walk = (route: AnyRoute, parentHref: string | undefined, dropped: boolean): void => {
     const isRoot = (route as { isRoot?: boolean }).isRoot === true
@@ -115,14 +116,11 @@ export function menuFromRouteTree<TRouteTree extends AnyRoute>(
       if (omit.has(fullPath) || meta.hidden) {
         childDropped = true // drop this route and its subtree
       } else if (!dropped) {
-        const item: MenuItemInput = {
-          title: meta.title ?? titleFromPath(fullPath),
-          href: fullPath,
-        }
+        const item: MenuItemInput = { title: meta.title ?? titleFromPath(fullPath) }
         if (parentHref != null) item.parent = parentHref
         if (meta.order != null) item.order = meta.order
         if (meta.icon != null) item.icon = meta.icon
-        out.push(item)
+        out[fullPath] = item
         childParent = fullPath
       }
     }
@@ -131,5 +129,5 @@ export function menuFromRouteTree<TRouteTree extends AnyRoute>(
   }
 
   walk(routeTree, undefined, false)
-  return out as unknown as RouteMenuInput<TRouteTree>
+  return out as RouteMenuInput<TRouteTree>
 }

@@ -157,11 +157,9 @@ export interface MenuItemState {
 /** Render a custom node before/after a menu item (e.g. a divider or heading). */
 export type MenuSlot = (item: MenuItem, state: MenuItemState) => ReactNode
 
-/** Fields shared by the stored {@link MenuItem} and the {@link MenuItemInput}. */
+/** Fields shared by the stored {@link MenuItem} and the input {@link MenuItemInput}. */
 export interface MenuItemBase {
   title: string
-  /** Link target — internal route or external URL. Absent → pure container. */
-  href?: string
   icon?: ReactNode
   /** Active-state matching policy. Default `'exact'`. */
   match?: MenuMatch
@@ -174,12 +172,13 @@ export interface MenuItemBase {
 }
 
 /**
- * A single, normalized navigation entry. The shape is uniform: a node with
- * `items` is a (collapsible) section, a node with `href` is a link, and a node
- * with both is a clickable section. This is the *output* model — the tree is
- * built by {@link defineMenu} from the flat {@link MenuItemInput} list.
+ * A single, normalized navigation entry — the renderer's model. A node with
+ * `items` is a (collapsible) section, one with `href` is a link, both → a
+ * clickable section. Built by {@link defineMenu} from the keyed {@link MenuInput}.
  */
 export interface MenuItem extends MenuItemBase {
+  /** Link target — internal route or external URL. Absent → pure container. */
+  href?: string
   /** Child entries → renders as a collapsible section. */
   items?: MenuItem[]
 }
@@ -188,36 +187,27 @@ export interface MenuItem extends MenuItemBase {
 export type Menu = MenuItem[]
 
 /**
- * Authoring/adapter *input*: a **flat** list where hierarchy is expressed by
- * `parent` (the `href` or `id` of the parent) rather than nesting. This is what
- * makes adding a custom child to an adapter-generated section trivial — you
- * just point `parent` at it. {@link defineMenu} resolves `parent` into the
- * nested {@link MenuItem} tree, de-duplicates by `href`, sorts by `order`, and
- * strips the input-only fields.
+ * Authoring/adapter *input* value. The {@link MenuInput} is an **object keyed by
+ * identity** (the item's `href`, or an arbitrary id for a pure container);
+ * hierarchy is expressed by `parent` (another key), not by nesting. This makes
+ * the keyed override (`{ ...generated, '/button': { … } }`) and adding a custom
+ * child (point `parent` at a generated key) both trivial, and lets `parent` be
+ * type-checked via `keyof` — no de-dup pass, no phantom brands.
  *
- * `Parent` is the union of keys (`href`/`id`) allowed for `parent`; it is
- * inferred by `defineMenu` so `parent` only accepts keys that exist in the
- * same list (including route paths flowing in from a router adapter).
+ * `Parent` is the union of sibling keys allowed for `parent`; {@link defineMenu}
+ * infers it (`keyof` the input, including route paths from an adapter spread).
  */
 export interface MenuItemInput<Parent extends string = string> extends MenuItemBase {
-  /** Stable key for an hrefless item, so it can be referenced as a `parent`. */
-  id?: string
-  /** `href` (or `id`) of the parent entry. Absent → top level. */
+  /**
+   * Link target. Defaults to the entry's key. Set `false` for a non-navigable
+   * container whose key is just an id.
+   */
+  href?: string | false
+  /** Key of the parent entry. Absent → top level. */
   parent?: Parent
   /** Sort hint among siblings (lower first). Stripped from the output. */
   order?: number
 }
 
-/** Input array accepted by {@link defineMenu}. */
-export type MenuInput = MenuItemInput[]
-
-/**
- * Phantom (type-only) brand carrying a route-path union. A router adapter
- * brands its returned items with it so {@link defineMenu} can type `parent`
- * against those paths *through a spread* — TypeScript cannot recover literal
- * `href`s from a spread array, but a type parameter on the element type
- * survives. Never present at runtime.
- */
-export interface MenuPathBrand<P extends string> {
-  readonly __menuPaths: P
-}
+/** Input accepted by {@link defineMenu}: an object keyed by `href`/id. */
+export type MenuInput = Record<string, MenuItemInput>

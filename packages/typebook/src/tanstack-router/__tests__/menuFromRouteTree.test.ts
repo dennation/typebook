@@ -42,28 +42,25 @@ function buildTree() {
 }
 
 describe('menuFromRouteTree', () => {
-  it('emits a flat list with `parent` set to the nearest navigable ancestor', () => {
-    const items = menuFromRouteTree(buildTree())
-    const byHref = Object.fromEntries(items.map((i) => [i.href, i]))
-    expect(byHref['/components/badge'].parent).toBe('/components')
+  it('emits a keyed object with `parent` set to the nearest navigable ancestor', () => {
+    const input = menuFromRouteTree(buildTree())
+    expect(input['/components/badge']?.parent).toBe('/components')
     // Bubbled up from the pathless `_layout` → no parent.
-    expect(byHref['/settings'].parent).toBeUndefined()
-    expect(byHref['/'].parent).toBeUndefined()
+    expect(input['/settings']?.parent).toBeUndefined()
+    expect(input['/']?.parent).toBeUndefined()
   })
 
   it('reads title/order from staticData, falls back to a title-cased segment', () => {
-    const items = menuFromRouteTree(buildTree())
-    const button = items.find((i) => i.href === '/button')
-    expect(button).toMatchObject({ title: 'Button', order: 1 })
-    expect(items.find((i) => i.href === '/about')?.title).toBe('About')
+    const input = menuFromRouteTree(buildTree())
+    expect(input['/button']).toMatchObject({ title: 'Button', order: 1 })
+    expect(input['/about']?.title).toBe('About')
   })
 
   it('drops routes flagged hidden, and `omit`s with their subtree', () => {
-    const items = menuFromRouteTree(buildTree(), { omit: ['/components'] })
-    const hrefs = items.map((i) => i.href)
-    expect(hrefs).not.toContain('/hidden')
-    expect(hrefs).not.toContain('/components')
-    expect(hrefs).not.toContain('/components/badge') // subtree dropped
+    const input = menuFromRouteTree(buildTree(), { omit: ['/components'] })
+    expect(input['/hidden']).toBeUndefined()
+    expect(input['/components']).toBeUndefined()
+    expect(input['/components/badge']).toBeUndefined() // subtree dropped
   })
 
   it('composes into a nested tree via defineMenu', () => {
@@ -74,22 +71,19 @@ describe('menuFromRouteTree', () => {
   })
 
   it('lets a custom child be injected into a generated section', () => {
-    const menu = defineMenu([
+    const menu = defineMenu({
       ...menuFromRouteTree(buildTree()),
-      { title: 'Changelog', href: '/changelog', parent: '/components' },
-    ])
+      '/changelog': { title: 'Changelog', parent: '/components' },
+    })
     const components = menu.find((i) => i.href === '/components')
     expect(components?.items?.map((i) => i.href)).toEqual(['/components/badge', '/changelog'])
   })
 
   it('honors a custom getMeta', () => {
-    const items = menuFromRouteTree(buildTree(), {
+    const input = menuFromRouteTree(buildTree(), {
       getMeta: (route) =>
         route.fullPath === '/about' ? { title: 'Custom About', order: 0 } : undefined,
     })
-    expect(items.find((i) => i.href === '/about')).toMatchObject({
-      title: 'Custom About',
-      order: 0,
-    })
+    expect(input['/about']).toMatchObject({ title: 'Custom About', order: 0 })
   })
 })
