@@ -2,10 +2,8 @@ import { Fragment, useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import type { Menu as MenuModel, MenuItem } from '@/types.js'
 
-/** Wraps one nesting level. Rendered once per depth (the consumer's `<ul>`/`<nav>`). */
+/** The single outer shell wrapping the whole menu (the consumer's `<nav>`/`<ul>`). */
 export interface MenuContainerProps {
-	/** Nesting depth of this level: `0` at the top, `+1` per level down. */
-	level: number
 	children: ReactNode
 }
 
@@ -57,7 +55,12 @@ export interface MenuProps {
  * collapsible sections, the recursion, and the `before`/`after` slots (rendered
  * as the `Item`'s direct siblings, no wrapper). It knows nothing about the
  * current path or active state — that lives entirely in the consumer's `Item`
- * (which asks its own router). Render shells are the `Container`/`Item`.
+ * (which asks its own router).
+ *
+ * `Container` is the single outer shell wrapping the whole menu; nested levels
+ * are rendered as a bare list of `Item`s and handed to the parent `Item` as
+ * `children`, so the per-level wrapper (e.g. a nested `<ul>`) is the `Item`'s
+ * own concern.
  *
  * Collapsibility is data-driven: an item with children is collapsible unless it
  * sets `collapsible: false` (an always-open group). The `Item` is handed the
@@ -66,50 +69,46 @@ export interface MenuProps {
 export function Menu({ menu, Container, Item }: MenuProps) {
 	const [overrides, setOverrides] = useState<Record<string, boolean>>({})
 
-	function renderLevel(items: MenuModel, prefix: string, level: number): ReactNode {
-		return (
-			<Container level={level}>
-				{items.map((item, i) => {
-					const key = `${prefix}${i}`
-					const hasItems = !!item.items?.length
-					const collapsible = hasItems && item.collapsible !== false
-					const children = hasItems
-						? renderLevel(item.items as MenuModel, `${key}.`, level + 1)
-						: undefined
-					// Slot state: a collapsible section follows its toggle; a static
-					// group is always open; a leaf has nothing to open.
-					const open = collapsible ? (overrides[key] ?? item.defaultOpen ?? true) : hasItems
-					const state = { open, level }
-					return (
-						<Fragment key={key}>
-							{item.before?.(item, state)}
-							{collapsible ? (
-								<Item
-									collapsible
-									item={item}
-									level={level}
-									open={open}
-									toggle={() =>
-										setOverrides((o) => ({
-											...o,
-											[key]: !(o[key] ?? item.defaultOpen ?? true),
-										}))
-									}
-								>
-									{children}
-								</Item>
-							) : (
-								<Item collapsible={false} item={item} level={level}>
-									{children}
-								</Item>
-							)}
-							{item.after?.(item, state)}
-						</Fragment>
-					)
-				})}
-			</Container>
-		)
+	function renderItems(items: MenuModel, prefix: string, level: number): ReactNode {
+		return items.map((item, i) => {
+			const key = `${prefix}${i}`
+			const hasItems = !!item.items?.length
+			const collapsible = hasItems && item.collapsible !== false
+			const children = hasItems
+				? renderItems(item.items as MenuModel, `${key}.`, level + 1)
+				: undefined
+			// Slot state: a collapsible section follows its toggle; a static
+			// group is always open; a leaf has nothing to open.
+			const open = collapsible ? (overrides[key] ?? item.defaultOpen ?? true) : hasItems
+			const state = { open, level }
+			return (
+				<Fragment key={key}>
+					{item.before?.(item, state)}
+					{collapsible ? (
+						<Item
+							collapsible
+							item={item}
+							level={level}
+							open={open}
+							toggle={() =>
+								setOverrides((o) => ({
+									...o,
+									[key]: !(o[key] ?? item.defaultOpen ?? true),
+								}))
+							}
+						>
+							{children}
+						</Item>
+					) : (
+						<Item collapsible={false} item={item} level={level}>
+							{children}
+						</Item>
+					)}
+					{item.after?.(item, state)}
+				</Fragment>
+			)
+		})
 	}
 
-	return renderLevel(menu, '', 0)
+	return <Container>{renderItems(menu, '', 0)}</Container>
 }
