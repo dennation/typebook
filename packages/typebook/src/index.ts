@@ -13,7 +13,6 @@ export type {
   MenuItemBase,
   MenuItemInput,
   MenuItemState,
-  MenuMatch,
   MenuSlot,
   MissingProps,
   PropInfo,

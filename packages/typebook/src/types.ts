@@ -133,38 +133,36 @@ export type UIRegistry = Record<string, ComponentMeta>
  */
 export type SnippetMap = Record<string, string>
 
-/**
- * How a {@link MenuItem} decides whether it is "active" for the current path.
- * - `'exact'` (default): `pathname === href`
- * - `'prefix'`: `pathname` starts with `href`
- * - `RegExp`: tested against `pathname`
- * - predicate: full control
- */
-export type MenuMatch =
-  | 'exact'
-  | 'prefix'
-  | RegExp
-  | ((pathname: string) => boolean)
-
-/** Runtime state passed to a {@link MenuSlot} for the item being rendered. */
+/** State passed to a {@link MenuSlot} for the item being rendered. */
 export interface MenuItemState {
-  /** The item matched the current path (per its `match`). */
-  active: boolean
   /** The item's nested `items` are expanded. */
   open: boolean
+  /** Nesting depth of the item: `0` at the top, `+1` per level down. */
+  level: number
 }
 
-/** Render a custom node before/after a menu item (e.g. a divider or heading). */
+/** Render custom JSX before/after a menu item (e.g. a divider or section heading). */
 export type MenuSlot = (item: MenuItem, state: MenuItemState) => ReactNode
 
-/** Fields shared by the stored {@link MenuItem} and the input {@link MenuItemInput}. */
+/**
+ * Fields shared by the stored {@link MenuItem} and the input {@link MenuItemInput}.
+ *
+ * Note there is no `match`/`active`: the `<Menu>` renderer is router-agnostic and
+ * knows nothing about the active path. Active-state matching lives entirely in the
+ * consumer's `Item` component, which talks to its own router.
+ */
 export interface MenuItemBase {
   title: string
   icon?: ReactNode
-  /** Active-state matching policy. Default `'exact'`. */
-  match?: MenuMatch
   /** Initial expanded state when the item has children. Default `true`. */
   defaultOpen?: boolean
+  /**
+   * Whether a section (an item with children) can be collapsed. Default `true`.
+   * Set `false` for an always-open group header: `<Menu>` keeps it expanded and
+   * hands its `Item` the non-collapsible prop variant (no `open`/`toggle`).
+   * Ignored for leaf links (nothing to collapse).
+   */
+  collapsible?: boolean
   /** Custom JSX rendered before the item. */
   before?: MenuSlot
   /** Custom JSX rendered after the item. */
