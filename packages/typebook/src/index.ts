@@ -1,3 +1,4 @@
+export { defineMenu } from './menu.js'
 export { registerComponent } from './registerComponent.js'
 export { allOf, generate, values } from './variants.js'
 export type {
@@ -6,6 +7,13 @@ export type {
   ComponentMeta,
   DefaultedOf,
   GenerateConfig,
+  Menu,
+  MenuInput,
+  MenuItem,
+  MenuItemInput,
+  MenuItemState,
+  MenuMatch,
+  MenuSlot,
   MissingProps,
   PropInfo,
   PropType,

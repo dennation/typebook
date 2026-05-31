@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import type { RequiredKeysOf } from 'type-fest'
 
 export interface TypebookConfig {
@@ -132,3 +132,67 @@ export type UIRegistry = Record<string, ComponentMeta>
  * generated `snippets.gen.ts` and passed to `TypebookProvider`.
  */
 export type SnippetMap = Record<string, string>
+
+/**
+ * How a {@link MenuItem} decides whether it is "active" for the current path.
+ * - `'exact'` (default): `pathname === href`
+ * - `'prefix'`: `pathname` starts with `href`
+ * - `RegExp`: tested against `pathname`
+ * - predicate: full control
+ */
+export type MenuMatch =
+  | 'exact'
+  | 'prefix'
+  | RegExp
+  | ((pathname: string) => boolean)
+
+/** Runtime state passed to a {@link MenuSlot} for the item being rendered. */
+export interface MenuItemState {
+  /** The item matched the current path (per its `match`). */
+  active: boolean
+  /** The item's nested `items` are expanded. */
+  open: boolean
+}
+
+/** Render a custom node before/after a menu item (e.g. a divider or heading). */
+export type MenuSlot = (item: MenuItem, state: MenuItemState) => ReactNode
+
+/**
+ * A single navigation entry. The shape is uniform: a node with `items` is a
+ * (collapsible) section, a node with `href` is a link, and a node with both is
+ * a clickable section. Order is the array position — there is no `order` field
+ * on the stored model (see {@link MenuItemInput} for the authoring/adapter input).
+ */
+export interface MenuItem {
+  title: string
+  /** Link target — internal route or external URL. Absent → pure container. */
+  href?: string
+  /** Nested entries → renders as a collapsible section. */
+  items?: MenuItem[]
+  icon?: ReactNode
+  /** Active-state matching policy. Default `'exact'`. */
+  match?: MenuMatch
+  /** Initial expanded state when `items` is present. Default `true`. */
+  defaultOpen?: boolean
+  /** Custom JSX rendered before the item. */
+  before?: MenuSlot
+  /** Custom JSX rendered after the item. */
+  after?: MenuSlot
+}
+
+/** Stored, normalized navigation tree consumed by the renderer. */
+export type Menu = MenuItem[]
+
+/**
+ * Authoring/adapter input: a {@link MenuItem} plus an `order` hint used to sort
+ * siblings (router adapters emit items in arbitrary order). {@link defineMenu}
+ * sorts by `order`, de-duplicates by `href`, strips `order`, and returns a
+ * plain {@link Menu}.
+ */
+export interface MenuItemInput extends MenuItem {
+  order?: number
+  items?: MenuItemInput[]
+}
+
+/** Input array accepted by {@link defineMenu}. */
+export type MenuInput = MenuItemInput[]

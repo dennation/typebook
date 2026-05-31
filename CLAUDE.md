@@ -108,15 +108,17 @@ packages/typebook/
 
 ### Build entry points
 
-- **`index`** — `register`, `allOf`, `values`, `generate`, types.
+- **`index`** — `register`, `allOf`, `values`, `generate`, `defineMenu`, types.
 - **`react/index`** — `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`.
+- **`tanstack-router/index`** — `menuFromRouteTree()` adapter (builds a `Menu` from a TanStack route tree).
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
 - **`cli/index`** — `npx @dennation/typebook generate`.
 
 ### Package exports
 
-- `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `UIRegistry`, `SnippetMap`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, …)
+- `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, `defineMenu`, types (`TypebookConfig`, `UIRegistry`, `SnippetMap`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, `Menu`, `MenuItem`, `MenuInput`, `MenuItemInput`, `MenuMatch`, `MenuSlot`, `MenuItemState`, …)
 - `@dennation/typebook/react` — `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`
+- `@dennation/typebook/tanstack-router` — `menuFromRouteTree()`, `TypebookRouteMeta` (optional peer: `@tanstack/react-router`)
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
 ### register() API
@@ -157,6 +159,28 @@ import { Snippet } from '@dennation/typebook/react'
 - `name` is a **required, author-chosen string** (not `key` — reserved by React; not `codeId` — by request). It must be unique across the project. Duplicate names throw `DuplicateSnippetError`; only a *static* string `name` is extractable.
 - The consumer imports `{ snippets }` from `./snippets.gen` and passes it to `TypebookProvider`. At runtime `<Snippet>` renders its children live; the "show source" toggle reads the source **synchronously from React context** (`useSnippet(name)`) — no runtime fetch, no URL/base-path concerns — and renders it through `<CodeBlock>` (Shiki).
 - Extraction runs in the universal unplugin `buildStart`, so it works in every bundler; the Vite dev server additionally watches for incremental, debounced re-extraction. Output file is configurable via `snippetsFile` in `TypebookConfig` (default `./src/snippets.gen.ts`); it's only created once a project actually uses `<Snippet>`.
+
+### Menu API
+
+A `Menu` is a router-agnostic navigation tree (the data behind a sidebar/navbar). It is **authored or adapter-generated, never codegen'd** — there is no `<Menu>.gen` file and the builder pipeline is not involved.
+
+```ts
+import { defineMenu } from '@dennation/typebook'
+import { menuFromRouteTree } from '@dennation/typebook/tanstack-router'
+import { routeTree } from './route-tree.gen'
+
+const menu = defineMenu([
+  ...menuFromRouteTree(routeTree, { omit: ['/about'] }),
+  { href: '/button', title: 'Button', icon: <Cube /> }, // overrides the generated /button in place
+  { title: 'GitHub', href: 'https://github.com/dennation/ui-studio' },
+])
+```
+
+- **Uniform node shape (`MenuItem`)** — a node with `items` is a (collapsible) section, one with `href` is a link, one with both is a clickable section. There is no separate "group"/"separator" type; custom JSX goes in the `before`/`after` render slots (`(item, { active, open }) => ReactNode`). `match` (`'exact'` | `'prefix'` | `RegExp` | predicate) controls active-state highlighting.
+- **Order is array position.** `MenuItemInput` (the authoring/adapter input) adds an `order` hint for sources that emit items out of order; `defineMenu` sorts by it and strips it.
+- **`defineMenu(input)`** sorts siblings by `order`, **de-duplicates by `href`** (deep; the *last* occurrence fully replaces the earlier one, kept at the *first* occurrence's position — this powers spread-then-override), and returns a plain `Menu`. Hrefless containers are never de-duplicated.
+- **`menuFromRouteTree(routeTree, options?)`** mirrors a TanStack route tree into a `MenuInput`: root and pathless/layout routes are transparent (children bubble up), a route with a `path` becomes an item (`href = fullPath`, children → section), and routes in `omit` or flagged `hidden` are dropped with their subtree. Per-route metadata (`title`/`order`/`icon`/`hidden`) is read by `getMeta` (default: `route.options.staticData?.typebook?.meta`, typed via `TypebookRouteMeta`). Title falls back to a title-cased last path segment.
+- **Router stays the consumer's responsibility.** The adapter only *reads* a route tree; rendering a `Menu` is a separate concern (a `Link` and the active path are injected at the render layer).
 
 ### Data flow
 
