@@ -4,12 +4,16 @@ import type { Menu as MenuModel, MenuItem } from '@/types.js'
 
 /** Wraps one nesting level. Rendered once per depth (the consumer's `<ul>`/`<nav>`). */
 export interface MenuContainerProps {
+	/** Nesting depth of this level: `0` at the top, `+1` per level down. */
+	level: number
 	children: ReactNode
 }
 
 /** Fields every rendered entry receives, collapsible or not. */
 interface MenuItemPropsBase {
 	item: MenuItem
+	/** Nesting depth of this item: `0` at the top, `+1` per level down. */
+	level: number
 }
 
 /**
@@ -62,20 +66,20 @@ export interface MenuProps {
 export function Menu({ menu, Container, Item }: MenuProps) {
 	const [overrides, setOverrides] = useState<Record<string, boolean>>({})
 
-	function renderLevel(items: MenuModel, prefix: string): ReactNode {
+	function renderLevel(items: MenuModel, prefix: string, level: number): ReactNode {
 		return (
-			<Container>
+			<Container level={level}>
 				{items.map((item, i) => {
 					const key = `${prefix}${i}`
 					const hasItems = !!item.items?.length
 					const collapsible = hasItems && item.collapsible !== false
 					const children = hasItems
-						? renderLevel(item.items as MenuModel, `${key}.`)
+						? renderLevel(item.items as MenuModel, `${key}.`, level + 1)
 						: undefined
 					// Slot state: a collapsible section follows its toggle; a static
 					// group is always open; a leaf has nothing to open.
 					const open = collapsible ? (overrides[key] ?? item.defaultOpen ?? true) : hasItems
-					const state = { open }
+					const state = { open, level }
 					return (
 						<Fragment key={key}>
 							{item.before?.(item, state)}
@@ -83,6 +87,7 @@ export function Menu({ menu, Container, Item }: MenuProps) {
 								<Item
 									collapsible
 									item={item}
+									level={level}
 									open={open}
 									toggle={() =>
 										setOverrides((o) => ({
@@ -94,7 +99,7 @@ export function Menu({ menu, Container, Item }: MenuProps) {
 									{children}
 								</Item>
 							) : (
-								<Item collapsible={false} item={item}>
+								<Item collapsible={false} item={item} level={level}>
 									{children}
 								</Item>
 							)}
@@ -106,5 +111,5 @@ export function Menu({ menu, Container, Item }: MenuProps) {
 		)
 	}
 
-	return renderLevel(menu, '')
+	return renderLevel(menu, '', 0)
 }

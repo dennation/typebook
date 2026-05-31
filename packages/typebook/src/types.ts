@@ -137,6 +137,8 @@ export type SnippetMap = Record<string, string>
 export interface MenuItemState {
   /** The item's nested `items` are expanded. */
   open: boolean
+  /** Nesting depth of the item: `0` at the top, `+1` per level down. */
+  level: number
 }
 
 /** Render custom JSX before/after a menu item (e.g. a divider or section heading). */
