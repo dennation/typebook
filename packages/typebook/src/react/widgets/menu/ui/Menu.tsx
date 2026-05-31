@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import type { Menu as MenuModel, MenuItem } from '@/types.js'
 
@@ -32,10 +32,11 @@ export interface MenuProps {
 const noop = () => {}
 
 /**
- * Router-agnostic sidebar/nav renderer. Owns **only** the open/closed state of
- * collapsible sections and the recursion; it knows nothing about the current
- * path or active state — that lives entirely in the consumer's `Item` (which
- * asks its own router). Render slots are the `Container`/`Item` components.
+ * Router-agnostic sidebar/nav renderer. Owns the open/closed state of
+ * collapsible sections, the recursion, and the `before`/`after` slots (rendered
+ * as the `Item`'s direct siblings, no wrapper). It knows nothing about the
+ * current path or active state — that lives entirely in the consumer's `Item`
+ * (which asks its own router). Render shells are the `Container`/`Item`.
  */
 export function Menu({ menu, Container, Item }: MenuProps) {
 	const [overrides, setOverrides] = useState<Record<string, boolean>>({})
@@ -46,16 +47,19 @@ export function Menu({ menu, Container, Item }: MenuProps) {
 				{items.map((item, i) => {
 					const key = `${prefix}${i}`
 					const isSection = !!item.items?.length
-					if (!isSection) {
-						return <Item key={key} item={item} open={false} toggle={noop} />
-					}
-					const open = overrides[key] ?? item.defaultOpen ?? true
-					const toggle = () =>
-						setOverrides((o) => ({ ...o, [key]: !(o[key] ?? item.defaultOpen ?? true) }))
+					const open = isSection ? (overrides[key] ?? item.defaultOpen ?? true) : false
+					const toggle = isSection
+						? () => setOverrides((o) => ({ ...o, [key]: !(o[key] ?? item.defaultOpen ?? true) }))
+						: noop
+					const state = { open }
 					return (
-						<Item key={key} item={item} open={open} toggle={toggle}>
-							{renderLevel(item.items as MenuModel, `${key}.`)}
-						</Item>
+						<Fragment key={key}>
+							{item.before?.(item, state)}
+							<Item item={item} open={open} toggle={toggle}>
+								{isSection ? renderLevel(item.items as MenuModel, `${key}.`) : undefined}
+							</Item>
+							{item.after?.(item, state)}
+						</Fragment>
 					)
 				})}
 			</Container>
