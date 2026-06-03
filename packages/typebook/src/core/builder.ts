@@ -123,17 +123,12 @@ export class TypebookBuilder {
 		if (filePaths.length === 0) return
 		if (this.tsClient) await this.tsClient.notifyChange(filePaths)
 
-		let anyNonRegistration = false
-		for (const filePath of filePaths) {
-			const hadRegistration = await this.indexFile(filePath)
-			if (!hadRegistration) anyNonRegistration = true
-		}
+		for (const filePath of filePaths) await this.indexFile(filePath)
 
-		// A changed non-registration file (a component or a shared type) may define props
-		// consumed by registrations elsewhere. Their call sites are unchanged, so re-resolve
-		// props for the *other* registrations against the refreshed TS program — skipping the
-		// files we just re-indexed (already fresh). No re-read/re-parse.
-		if (anyNonRegistration) await this.refreshRegistrationProps(new Set(filePaths))
+		// A changed file may define props consumed by registrations *elsewhere*. Re-resolve only
+		// the registrations whose Props type can actually reach the change (TypeScript's reference
+		// graph), rather than re-extracting every registration on every edit.
+		await this.refreshAffectedRegistrationProps(filePaths)
 
 		this.writeRegistry()
 		this.writeSnippets()
@@ -201,11 +196,21 @@ export class TypebookBuilder {
 		this.snippetsByFile.set(filePath, blocks)
 	}
 
-	/** Re-resolve props for known registrations outside `skipFiles` (call sites unchanged, types may not be). */
-	private async refreshRegistrationProps(skipFiles: ReadonlySet<string>): Promise<void> {
+	/**
+	 * Re-resolve props for registrations whose Props type transitively depends on one of the
+	 * changed files, per TypeScript's own file reference graph (BuilderProgram). The changed
+	 * files themselves are skipped — their own registrations were just re-indexed. When the TS
+	 * client can't provide dependencies (running without type extraction) it refreshes all.
+	 */
+	private async refreshAffectedRegistrationProps(changedFiles: string[]): Promise<void> {
+		const changed = new Set(changedFiles.map(normalizePath))
+		// A declaration file may declare ambient/global types consumed without an import, which
+		// the per-file dependency graph won't capture — refresh every registration to stay correct.
+		const force = changedFiles.some((f) => f.endsWith('.d.ts'))
 		await Promise.all(
 			Array.from(this.registrationsByFile.entries())
-				.filter(([filePath]) => !skipFiles.has(filePath))
+				.filter(([filePath]) => !changed.has(normalizePath(filePath)))
+				.filter(([filePath]) => force || this.registrationDependsOn(filePath, changed))
 				.map(async ([filePath, registrations]) => {
 					const refreshed = await Promise.all(
 						registrations.map(async ({ call }) => ({
@@ -216,6 +221,16 @@ export class TypebookBuilder {
 					this.registrationsByFile.set(filePath, refreshed)
 				}),
 		)
+	}
+
+	/** Whether `registrationFile` transitively depends on any changed file (TS reference graph). */
+	private registrationDependsOn(registrationFile: string, changed: ReadonlySet<string>): boolean {
+		const deps = this.tsClient?.getDependencies(registrationFile)
+		if (!deps) return true // no dependency info → refresh conservatively
+		for (const dep of deps) {
+			if (changed.has(normalizePath(dep))) return true
+		}
+		return false
 	}
 
 	private async resolveProps(filePath: string, callStart: number): Promise<PropInfo[]> {
@@ -297,6 +312,11 @@ export class TypebookBuilder {
 			return null
 		}
 	}
+}
+
+/** Normalize a path for cross-source comparison (the watcher and TS may use different slashes). */
+function normalizePath(p: string): string {
+	return p.replace(/\\/g, '/')
 }
 
 function formatDuplicate(headline: string, key: string, files: ReadonlyArray<string>): string {

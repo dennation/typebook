@@ -4,6 +4,8 @@ import type { PropInfo, PropType } from '../types.js'
 import { LOG_PREFIX, DEFAULT_INHERITED_PROVIDERS } from '../constants.js'
 
 export class TypeScriptClient {
+  private builder: ts.SemanticDiagnosticsBuilderProgram | null = null
+  private host: ts.CompilerHost | null = null
   private program: ts.Program | null = null
   private checker: ts.TypeChecker | null = null
 
@@ -33,21 +35,43 @@ export class TypeScriptClient {
       this.cachedOptions = options
     }
 
-    // Pass oldProgram so TS reuses unchanged source files
-    this.program = ts.createProgram(
+    // A BuilderProgram is TypeScript's own incremental engine (what `tsc --watch` uses):
+    // passing the previous builder as oldProgram reuses unchanged source files AND maintains
+    // the file reference graph we query via getAllDependencies for affected-only refreshes.
+    // It needs an *incremental* compiler host (the default one doesn't version source files,
+    // which the builder requires); the host is reused across rebuilds so versions stay stable.
+    if (!this.host) this.host = ts.createIncrementalCompilerHost(this.cachedOptions)
+    this.builder = ts.createSemanticDiagnosticsBuilderProgram(
       this.cachedFileNames,
       this.cachedOptions,
-      undefined,
-      this.program ?? undefined,
+      this.host,
+      this.builder ?? undefined,
     )
+    this.program = this.builder.getProgram()
     this.checker = this.program.getTypeChecker()
   }
 
   stop(): void {
+    this.builder = null
+    this.host = null
     this.program = null
     this.checker = null
     this.cachedFileNames = null
     this.cachedOptions = null
+  }
+
+  /**
+   * Files the given file transitively depends on, per TypeScript's own file reference graph
+   * (the BuilderProgram). Lets the caller re-resolve only the registrations a change can
+   * actually reach, instead of re-extracting every registration on every edit. Returns null
+   * when the program isn't available or the file isn't part of it (caller falls back to a
+   * full refresh).
+   */
+  getDependencies(filePath: string): readonly string[] | null {
+    if (!this.builder || !this.program) return null
+    const sourceFile = this.program.getSourceFile(resolve(this.cwd, filePath))
+    if (!sourceFile) return null
+    return this.builder.getAllDependencies(sourceFile)
   }
 
   /**
