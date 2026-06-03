@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, test, expect, beforeAll, afterAll } from 'vitest'
@@ -405,5 +405,29 @@ describe('edge cases', () => {
 		expect(props!.length).toBeGreaterThan(0)
 		expect(findProp(props!, 'size')).toBeDefined()
 		expect(findProp(props!, 'label')).toBeDefined()
+	})
+
+	test('file created after start → props extracted once notifyChange adds it as a root', async () => {
+		// A brand-new file that nothing imports isn't in the program's root set captured
+		// at start; notifyChange([file]) must add it so getSourceFile resolves.
+		const newFile = resolve(FIXTURES, 'stories/_DynamicallyAdded.stories.tsx')
+		const fresh = new TypeScriptClient(FIXTURES)
+		await fresh.start() // captures roots while the file does not exist yet
+		try {
+			writeFileSync(
+				newFile,
+				"import { registerComponent } from '@dennation/typebook'\n" +
+					"import { Basic } from '../components/Basic'\n" +
+					"export const added = registerComponent('dynamically-added', Basic, { defaultProps: { label: 'h' } })\n",
+			)
+			const calls = scanRegistrations(await parseProgram(newFile, readFileSync(newFile, 'utf-8')))
+			await fresh.notifyChange([newFile])
+			const props = await fresh.getRegisterProps(newFile, calls[0].callStart)
+			expect(props).not.toBeNull()
+			expect(findProp(props!, 'size')).toBeDefined()
+		} finally {
+			rmSync(newFile, { force: true })
+			fresh.stop()
+		}
 	})
 })

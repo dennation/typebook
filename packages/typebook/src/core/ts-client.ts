@@ -302,10 +302,40 @@ export class TypeScriptClient {
     return { kind: 'unknown', raw: typeString }
   }
 
-  async notifyChange(): Promise<void> {
+  async notifyChange(changedFiles: string[] = []): Promise<void> {
+    this.addRootFiles(changedFiles)
     await this.start()
   }
+
+  /**
+   * Ensure the given files are part of the program's root set before the next rebuild.
+   * The root list is read from tsconfig once at start and reused across rebuilds, so a
+   * newly-created file that nothing imports yet would otherwise never enter the program
+   * (`getSourceFile` → undefined) and its registrations would get no props until a full
+   * restart. Already-known roots and non-TS files (e.g. a changed `.css`) are ignored.
+   */
+  private addRootFiles(files: string[]): void {
+    if (!this.cachedFileNames || files.length === 0) return
+    const known = new Set(this.cachedFileNames)
+    const additions: string[] = []
+    for (const f of files) {
+      if (!TS_SOURCE_EXT.test(f)) continue
+      const abs = resolve(this.cwd, f)
+      if (!known.has(abs)) {
+        known.add(abs)
+        additions.push(abs)
+      }
+    }
+    // Replace the array rather than mutate it: the previous program (passed as
+    // `oldProgram` to the next `createProgram`) holds the old array by reference, and an
+    // in-place push would make its root set look unchanged — TS would then reuse the old
+    // structure and silently ignore the new file. A fresh array forces the diff.
+    if (additions.length > 0) this.cachedFileNames = [...this.cachedFileNames, ...additions]
+  }
 }
+
+/** Extensions TypeScript will accept as program root files. */
+const TS_SOURCE_EXT = /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/
 
 /**
  * Pull the JSDoc description (the prose before any `@tag` lines) for a symbol.

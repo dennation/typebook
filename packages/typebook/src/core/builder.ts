@@ -121,7 +121,7 @@ export class TypebookBuilder {
 	 */
 	private async flushChanges(filePaths: string[]): Promise<void> {
 		if (filePaths.length === 0) return
-		if (this.tsClient) await this.tsClient.notifyChange()
+		if (this.tsClient) await this.tsClient.notifyChange(filePaths)
 
 		let anyNonRegistration = false
 		for (const filePath of filePaths) {
