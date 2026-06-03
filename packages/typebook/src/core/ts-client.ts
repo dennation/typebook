@@ -12,10 +12,10 @@ export class TypeScriptClient {
 
   // tsconfig compiler options — read once.
   private options: ts.CompilerOptions | null = null
-  // Live root file set + per-file version backing the LanguageServiceHost. Bumping a file's
-  // version tells the service its snapshot changed; adding a name brings a new file in.
-  private readonly fileNames: string[] = []
-  private readonly versions = new Map<string, number>()
+  // The program's files mapped to their versions — the single source of truth for both. Backs
+  // the LanguageServiceHost: the keys are the root file set, and bumping a file's version tells
+  // the service its snapshot changed, so it re-reads and reparses only that file.
+  private readonly fileVersions = new Map<string, number>()
 
   private readonly inheritedPaths: string[]
 
@@ -36,10 +36,7 @@ export class TypeScriptClient {
       const { config } = ts.readConfigFile(configPath, ts.sys.readFile)
       const { options, fileNames } = ts.parseJsonConfigFileContent(config, ts.sys, this.cwd)
       this.options = options
-      for (const f of fileNames) {
-        this.fileNames.push(f)
-        this.versions.set(f, 0)
-      }
+      for (const f of fileNames) this.fileVersions.set(f, 0)
     }
 
     if (!this.service) {
@@ -60,14 +57,13 @@ export class TypeScriptClient {
     this.program = null
     this.checker = null
     this.options = null
-    this.fileNames.length = 0
-    this.versions.clear()
+    this.fileVersions.clear()
   }
 
   private createHost(): ts.LanguageServiceHost {
     return {
-      getScriptFileNames: () => this.fileNames,
-      getScriptVersion: (f) => String(this.versions.get(f) ?? 0),
+      getScriptFileNames: () => [...this.fileVersions.keys()],
+      getScriptVersion: (f) => String(this.fileVersions.get(f) ?? 0),
       getScriptSnapshot: (f) => {
         const text = ts.sys.readFile(f)
         return text === undefined ? undefined : ts.ScriptSnapshot.fromString(text)
@@ -365,32 +361,21 @@ export class TypeScriptClient {
       await this.start()
       return
     }
-    this.addRootFiles(changedFiles)
-    // Bump the version of each changed file so the service re-reads its snapshot; without the
-    // bump it would reuse the cached AST and extraction would go stale.
-    for (const f of changedFiles) {
-      const abs = resolve(this.cwd, f)
-      const current = this.versions.get(abs)
-      if (current !== undefined) this.versions.set(abs, current + 1)
-    }
+    this.markChanged(changedFiles)
     this.refreshProgram()
   }
 
   /**
-   * Bring newly-created source files into the program. The root set seeds from tsconfig once;
-   * a brand-new file that nothing imports yet would otherwise never enter the program
-   * (`getSourceFile` → undefined) and its registrations would get no props. The service reads
-   * `getScriptFileNames` live, so an in-place addition is picked up on the next refresh.
-   * Non-TS files (e.g. a changed `.css`) are ignored.
+   * Record changed files for the next program refresh by bumping their versions. The bump makes
+   * the service re-read the file's snapshot (without it the cached AST is reused → stale
+   * extraction); for a not-yet-seen file the same bump adds it to the root set, so a brand-new
+   * file that nothing imports yet still enters the program. Non-TS changes (e.g. `.css`) are ignored.
    */
-  private addRootFiles(files: string[]): void {
+  private markChanged(files: string[]): void {
     for (const f of files) {
       if (!TS_SOURCE_EXT.test(f)) continue
       const abs = resolve(this.cwd, f)
-      if (!this.versions.has(abs)) {
-        this.fileNames.push(abs)
-        this.versions.set(abs, 0)
-      }
+      this.fileVersions.set(abs, (this.fileVersions.get(abs) ?? 0) + 1)
     }
   }
 }

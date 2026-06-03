@@ -198,9 +198,9 @@ export class TypebookBuilder {
 
 	/**
 	 * Re-resolve props for registrations whose Props type transitively depends on one of the
-	 * changed files, per TypeScript's own file reference graph (BuilderProgram). The changed
-	 * files themselves are skipped — their own registrations were just re-indexed. When the TS
-	 * client can't provide dependencies (running without type extraction) it refreshes all.
+	 * changed files, per TypeScript's own file reference graph. The changed files themselves are
+	 * skipped — their own registrations were just re-indexed. When the TS client can't provide
+	 * dependencies (running without type extraction) it refreshes all.
 	 */
 	private async refreshAffectedRegistrationProps(changedFiles: string[]): Promise<void> {
 		const changed = new Set(changedFiles.map(normalizePath))
