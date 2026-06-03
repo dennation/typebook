@@ -4,13 +4,18 @@ import type { PropInfo, PropType } from '../types.js'
 import { LOG_PREFIX, DEFAULT_INHERITED_PROVIDERS } from '../constants.js'
 
 export class TypeScriptClient {
-  private builder: ts.SemanticDiagnosticsBuilderProgram | null = null
+  private service: ts.LanguageService | null = null
+  /** Thin builder over the warm program, only for the dependency graph (rebuilt on change). */
+  private depBuilder: ts.SemanticDiagnosticsBuilderProgram | null = null
   private program: ts.Program | null = null
   private checker: ts.TypeChecker | null = null
 
-  // Cached tsconfig — read once, reuse across rebuilds
-  private cachedFileNames: string[] | null = null
-  private cachedOptions: ts.CompilerOptions | null = null
+  // tsconfig compiler options — read once.
+  private options: ts.CompilerOptions | null = null
+  // Live root file set + per-file version backing the LanguageServiceHost. Bumping a file's
+  // version tells the service its snapshot changed; adding a name brings a new file in.
+  private readonly fileNames: string[] = []
+  private readonly versions = new Map<string, number>()
 
   private readonly inheritedPaths: string[]
 
@@ -22,7 +27,7 @@ export class TypeScriptClient {
   }
 
   async start(): Promise<void> {
-    if (!this.cachedFileNames || !this.cachedOptions) {
+    if (!this.options) {
       const configPath = ts.findConfigFile(this.cwd, ts.sys.fileExists, 'tsconfig.json')
       if (!configPath) {
         throw new Error('tsconfig.json not found')
@@ -30,48 +35,77 @@ export class TypeScriptClient {
 
       const { config } = ts.readConfigFile(configPath, ts.sys.readFile)
       const { options, fileNames } = ts.parseJsonConfigFileContent(config, ts.sys, this.cwd)
-      this.cachedFileNames = fileNames
-      this.cachedOptions = options
+      this.options = options
+      for (const f of fileNames) {
+        this.fileNames.push(f)
+        this.versions.set(f, 0)
+      }
     }
 
-    // A BuilderProgram is TypeScript's own incremental engine (what `tsc --watch` uses):
-    // passing the previous builder as oldProgram reuses unchanged source files (matched by
-    // content-hash version) AND maintains the file reference graph we query via
-    // getAllDependencies for affected-only refreshes. It needs an *incremental* compiler host
-    // (the default one doesn't version source files, which the builder requires). A fresh host
-    // per rebuild reads file contents from disk — like the previous plain createProgram did —
-    // so an edited file is never served stale from a persisted host cache.
-    const host = ts.createIncrementalCompilerHost(this.cachedOptions)
-    this.builder = ts.createSemanticDiagnosticsBuilderProgram(
-      this.cachedFileNames,
-      this.cachedOptions,
-      host,
-      this.builder ?? undefined,
-    )
-    this.program = this.builder.getProgram()
-    this.checker = this.program.getTypeChecker()
+    if (!this.service) {
+      // A LanguageService keeps ONE program warm across edits (the model tsserver/editors use):
+      // the default lib and node_modules `.d.ts` are parsed once and reused via the
+      // DocumentRegistry, so an incremental rebuild reparses only the files whose version we
+      // bumped — orders of magnitude cheaper than recreating the whole program on each change.
+      this.service = ts.createLanguageService(this.createHost(), ts.createDocumentRegistry())
+    }
+
+    this.refreshProgram()
   }
 
   stop(): void {
-    this.builder = null
+    this.service?.dispose()
+    this.service = null
+    this.depBuilder = null
     this.program = null
     this.checker = null
-    this.cachedFileNames = null
-    this.cachedOptions = null
+    this.options = null
+    this.fileNames.length = 0
+    this.versions.clear()
+  }
+
+  private createHost(): ts.LanguageServiceHost {
+    return {
+      getScriptFileNames: () => this.fileNames,
+      getScriptVersion: (f) => String(this.versions.get(f) ?? 0),
+      getScriptSnapshot: (f) => {
+        const text = ts.sys.readFile(f)
+        return text === undefined ? undefined : ts.ScriptSnapshot.fromString(text)
+      },
+      getCurrentDirectory: () => this.cwd,
+      getCompilationSettings: () => this.options ?? {},
+      getDefaultLibFileName: (o) => ts.getDefaultLibFilePath(o),
+      fileExists: ts.sys.fileExists,
+      readFile: ts.sys.readFile,
+      readDirectory: ts.sys.readDirectory,
+      directoryExists: ts.sys.directoryExists,
+      getDirectories: ts.sys.getDirectories,
+    }
+  }
+
+  /** Pull the latest warm program from the service and drop the now-stale dependency builder. */
+  private refreshProgram(): void {
+    this.program = this.service?.getProgram() ?? null
+    this.checker = this.program?.getTypeChecker() ?? null
+    this.depBuilder = null
   }
 
   /**
-   * Files the given file transitively depends on, per TypeScript's own file reference graph
-   * (the BuilderProgram). Lets the caller re-resolve only the registrations a change can
-   * actually reach, instead of re-extracting every registration on every edit. Returns null
-   * when the program isn't available or the file isn't part of it (caller falls back to a
-   * full refresh).
+   * Files the given file transitively depends on, per TypeScript's own file reference graph.
+   * Lets the caller re-resolve only the registrations a change can actually reach, instead of
+   * re-extracting every registration on every edit. Returns null when the program isn't
+   * available or the file isn't part of it (caller falls back to a full refresh).
    */
   getDependencies(filePath: string): readonly string[] | null {
-    if (!this.builder || !this.program) return null
+    if (!this.program) return null
     const sourceFile = this.program.getSourceFile(resolve(this.cwd, filePath))
     if (!sourceFile) return null
-    return this.builder.getAllDependencies(sourceFile)
+    if (!this.depBuilder) {
+      // Thin builder *over the existing warm program* — builds only the reference graph, with no
+      // re-parse or re-check. Rebuilt lazily whenever the program changes (see refreshProgram).
+      this.depBuilder = ts.createSemanticDiagnosticsBuilderProgram(this.program, {})
+    }
+    return this.depBuilder.getAllDependencies(sourceFile)
   }
 
   /**
@@ -327,34 +361,37 @@ export class TypeScriptClient {
   }
 
   async notifyChange(changedFiles: string[] = []): Promise<void> {
+    if (!this.service) {
+      await this.start()
+      return
+    }
     this.addRootFiles(changedFiles)
-    await this.start()
+    // Bump the version of each changed file so the service re-reads its snapshot; without the
+    // bump it would reuse the cached AST and extraction would go stale.
+    for (const f of changedFiles) {
+      const abs = resolve(this.cwd, f)
+      const current = this.versions.get(abs)
+      if (current !== undefined) this.versions.set(abs, current + 1)
+    }
+    this.refreshProgram()
   }
 
   /**
-   * Ensure the given files are part of the program's root set before the next rebuild.
-   * The root list is read from tsconfig once at start and reused across rebuilds, so a
-   * newly-created file that nothing imports yet would otherwise never enter the program
-   * (`getSourceFile` → undefined) and its registrations would get no props until a full
-   * restart. Already-known roots and non-TS files (e.g. a changed `.css`) are ignored.
+   * Bring newly-created source files into the program. The root set seeds from tsconfig once;
+   * a brand-new file that nothing imports yet would otherwise never enter the program
+   * (`getSourceFile` → undefined) and its registrations would get no props. The service reads
+   * `getScriptFileNames` live, so an in-place addition is picked up on the next refresh.
+   * Non-TS files (e.g. a changed `.css`) are ignored.
    */
   private addRootFiles(files: string[]): void {
-    if (!this.cachedFileNames || files.length === 0) return
-    const known = new Set(this.cachedFileNames)
-    const additions: string[] = []
     for (const f of files) {
       if (!TS_SOURCE_EXT.test(f)) continue
       const abs = resolve(this.cwd, f)
-      if (!known.has(abs)) {
-        known.add(abs)
-        additions.push(abs)
+      if (!this.versions.has(abs)) {
+        this.fileNames.push(abs)
+        this.versions.set(abs, 0)
       }
     }
-    // Replace the array rather than mutate it: the previous program (passed as
-    // `oldProgram` to the next `createProgram`) holds the old array by reference, and an
-    // in-place push would make its root set look unchanged — TS would then reuse the old
-    // structure and silently ignore the new file. A fresh array forces the diff.
-    if (additions.length > 0) this.cachedFileNames = [...this.cachedFileNames, ...additions]
   }
 }
 
