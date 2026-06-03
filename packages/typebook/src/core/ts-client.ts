@@ -82,12 +82,11 @@ export class TypeScriptClient {
     let found: ts.CallExpression | null = null
     const visit = (node: ts.Node): void => {
       if (found) return
-      if (
-        ts.isCallExpression(node) &&
-        ts.isIdentifier(node.expression) &&
-        node.expression.text === 'registerComponent' &&
-        node.getStart(sourceFile) === callStart
-      ) {
+      // The scanner already validated this is a registerComponent() call (resolving any
+      // import alias such as `import { registerComponent as reg }`). `callStart` uniquely
+      // pins the exact CallExpression, so match on the offset rather than re-checking the
+      // callee name — a name check here would silently reject aliased calls and drop their props.
+      if (ts.isCallExpression(node) && node.getStart(sourceFile) === callStart) {
         found = node
         return
       }

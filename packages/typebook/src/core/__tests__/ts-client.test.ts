@@ -396,4 +396,14 @@ describe('edge cases', () => {
 		const props = await extractProps('stories/DoesNotExist.stories.tsx')
 		expect(props).toBeNull()
 	})
+
+	test('aliased registerComponent import → props still extracted', async () => {
+		// `import { registerComponent as reg }` — the call is located by offset, so the
+		// aliased callee name must not prevent prop extraction (previously returned []).
+		const props = await extractProps('stories/Aliased.stories.tsx')
+		expect(props).not.toBeNull()
+		expect(props!.length).toBeGreaterThan(0)
+		expect(findProp(props!, 'size')).toBeDefined()
+		expect(findProp(props!, 'label')).toBeDefined()
+	})
 })

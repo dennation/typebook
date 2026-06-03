@@ -54,6 +54,7 @@ export class TypebookBuilder {
 
 	private tsClient: TypeScriptClient | null = null
 	private debounceTimer: ReturnType<typeof setTimeout> | null = null
+	private readonly pendingChanges = new Set<string>()
 
 	private readonly registrationsByFile = new Map<string, IndexedRegistration[]>()
 	private readonly snippetsByFile = new Map<string, SnippetBlock[]>()
@@ -85,6 +86,8 @@ export class TypebookBuilder {
 
 	stop(): void {
 		if (this.debounceTimer) clearTimeout(this.debounceTimer)
+		this.debounceTimer = null
+		this.pendingChanges.clear()
 		this.registrationsByFile.clear()
 		this.snippetsByFile.clear()
 		this.tsClient?.stop()
@@ -92,13 +95,15 @@ export class TypebookBuilder {
 	}
 
 	scheduleFileChange(filePath: string): void {
+		this.pendingChanges.add(filePath)
 		if (this.debounceTimer) clearTimeout(this.debounceTimer)
-		this.debounceTimer = setTimeout(async () => {
-			try {
-				await this.onFileChanged(filePath)
-			} catch (err) {
+		this.debounceTimer = setTimeout(() => {
+			this.debounceTimer = null
+			const changed = Array.from(this.pendingChanges)
+			this.pendingChanges.clear()
+			this.flushChanges(changed).catch((err) => {
 				console.error(LOG_PREFIX, 'Failed to regenerate:', err)
-			}
+			})
 		}, DEBOUNCE_MS)
 	}
 
@@ -109,15 +114,26 @@ export class TypebookBuilder {
 		if (hadSnippets) this.writeSnippets()
 	}
 
-	private async onFileChanged(filePath: string): Promise<void> {
+	/**
+	 * Re-index every file that changed within the debounce window. A single timer
+	 * coalesces rapid bursts (save-all, git checkout, codemods); without batching only
+	 * the last path would survive the debounce and the rest would silently go stale.
+	 */
+	private async flushChanges(filePaths: string[]): Promise<void> {
+		if (filePaths.length === 0) return
 		if (this.tsClient) await this.tsClient.notifyChange()
 
-		const hadRegistration = await this.indexFile(filePath)
+		let anyNonRegistration = false
+		for (const filePath of filePaths) {
+			const hadRegistration = await this.indexFile(filePath)
+			if (!hadRegistration) anyNonRegistration = true
+		}
 
-		// A non-registration file (e.g. a component or a shared type) may still define
-		// props consumed by registrations elsewhere. Their call sites are unchanged, so
-		// just re-resolve props against the refreshed TS program — no re-read/re-parse.
-		if (!hadRegistration) await this.refreshRegistrationProps(filePath)
+		// A changed non-registration file (a component or a shared type) may define props
+		// consumed by registrations elsewhere. Their call sites are unchanged, so re-resolve
+		// props for the *other* registrations against the refreshed TS program — skipping the
+		// files we just re-indexed (already fresh). No re-read/re-parse.
+		if (anyNonRegistration) await this.refreshRegistrationProps(new Set(filePaths))
 
 		this.writeRegistry()
 		this.writeSnippets()
@@ -185,11 +201,11 @@ export class TypebookBuilder {
 		this.snippetsByFile.set(filePath, blocks)
 	}
 
-	/** Re-resolve props for every known registration (call sites unchanged, types may not be). */
-	private async refreshRegistrationProps(changedFile: string): Promise<void> {
+	/** Re-resolve props for known registrations outside `skipFiles` (call sites unchanged, types may not be). */
+	private async refreshRegistrationProps(skipFiles: ReadonlySet<string>): Promise<void> {
 		await Promise.all(
 			Array.from(this.registrationsByFile.entries())
-				.filter(([filePath]) => filePath !== changedFile)
+				.filter(([filePath]) => !skipFiles.has(filePath))
 				.map(async ([filePath, registrations]) => {
 					const refreshed = await Promise.all(
 						registrations.map(async ({ call }) => ({
