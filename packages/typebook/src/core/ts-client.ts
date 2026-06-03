@@ -5,7 +5,6 @@ import { LOG_PREFIX, DEFAULT_INHERITED_PROVIDERS } from '../constants.js'
 
 export class TypeScriptClient {
   private builder: ts.SemanticDiagnosticsBuilderProgram | null = null
-  private host: ts.CompilerHost | null = null
   private program: ts.Program | null = null
   private checker: ts.TypeChecker | null = null
 
@@ -36,15 +35,17 @@ export class TypeScriptClient {
     }
 
     // A BuilderProgram is TypeScript's own incremental engine (what `tsc --watch` uses):
-    // passing the previous builder as oldProgram reuses unchanged source files AND maintains
-    // the file reference graph we query via getAllDependencies for affected-only refreshes.
-    // It needs an *incremental* compiler host (the default one doesn't version source files,
-    // which the builder requires); the host is reused across rebuilds so versions stay stable.
-    if (!this.host) this.host = ts.createIncrementalCompilerHost(this.cachedOptions)
+    // passing the previous builder as oldProgram reuses unchanged source files (matched by
+    // content-hash version) AND maintains the file reference graph we query via
+    // getAllDependencies for affected-only refreshes. It needs an *incremental* compiler host
+    // (the default one doesn't version source files, which the builder requires). A fresh host
+    // per rebuild reads file contents from disk — like the previous plain createProgram did —
+    // so an edited file is never served stale from a persisted host cache.
+    const host = ts.createIncrementalCompilerHost(this.cachedOptions)
     this.builder = ts.createSemanticDiagnosticsBuilderProgram(
       this.cachedFileNames,
       this.cachedOptions,
-      this.host,
+      host,
       this.builder ?? undefined,
     )
     this.program = this.builder.getProgram()
@@ -53,7 +54,6 @@ export class TypeScriptClient {
 
   stop(): void {
     this.builder = null
-    this.host = null
     this.program = null
     this.checker = null
     this.cachedFileNames = null

@@ -423,6 +423,37 @@ describe('edge cases', () => {
 		expect(client.getDependencies(resolve(FIXTURES, 'stories/DoesNotExist.tsx'))).toBeNull()
 	})
 
+	test('edit to a dependency after start → re-extraction sees new content (no stale host cache)', async () => {
+		// Guards the BuilderProgram switch: an incremental compiler host must not serve an
+		// edited dependency from a stale cache across rebuilds.
+		const compFile = resolve(FIXTURES, 'components/_EditProbe.tsx')
+		const storyFile = resolve(FIXTURES, 'stories/_EditProbe.stories.tsx')
+		const fresh = new TypeScriptClient(FIXTURES)
+		try {
+			writeFileSync(compFile, "export function EditProbe(props: { size: 'sm' | 'md' }) {\n\treturn props.size\n}\n")
+			writeFileSync(
+				storyFile,
+				"import { registerComponent } from '@dennation/typebook'\n" +
+					"import { EditProbe } from '../components/_EditProbe'\n" +
+					"export const probe = registerComponent('edit-probe', EditProbe)\n",
+			)
+			await fresh.start()
+			const calls = scanRegistrations(await parseProgram(storyFile, readFileSync(storyFile, 'utf-8')))
+			const before = await fresh.getRegisterProps(storyFile, calls[0].callStart)
+			expect(findProp(before!, 'size')!.type).toEqual({ kind: 'literal', values: ['sm', 'md'] })
+
+			// Change the prop type in the dependency, not the registration file itself.
+			writeFileSync(compFile, "export function EditProbe(props: { size: 'sm' | 'md' | 'lg' }) {\n\treturn props.size\n}\n")
+			await fresh.notifyChange([compFile])
+			const after = await fresh.getRegisterProps(storyFile, calls[0].callStart)
+			expect(findProp(after!, 'size')!.type).toEqual({ kind: 'literal', values: ['sm', 'md', 'lg'] })
+		} finally {
+			rmSync(compFile, { force: true })
+			rmSync(storyFile, { force: true })
+			fresh.stop()
+		}
+	})
+
 	test('file created after start → props extracted once notifyChange adds it as a root', async () => {
 		// A brand-new file that nothing imports isn't in the program's root set captured
 		// at start; notifyChange([file]) must add it so getSourceFile resolves.
