@@ -54,6 +54,7 @@ export class TypebookBuilder {
 
 	private tsClient: TypeScriptClient | null = null
 	private debounceTimer: ReturnType<typeof setTimeout> | null = null
+	private readonly pendingChanges = new Set<string>()
 
 	private readonly registrationsByFile = new Map<string, IndexedRegistration[]>()
 	private readonly snippetsByFile = new Map<string, SnippetBlock[]>()
@@ -85,6 +86,8 @@ export class TypebookBuilder {
 
 	stop(): void {
 		if (this.debounceTimer) clearTimeout(this.debounceTimer)
+		this.debounceTimer = null
+		this.pendingChanges.clear()
 		this.registrationsByFile.clear()
 		this.snippetsByFile.clear()
 		this.tsClient?.stop()
@@ -92,13 +95,15 @@ export class TypebookBuilder {
 	}
 
 	scheduleFileChange(filePath: string): void {
+		this.pendingChanges.add(filePath)
 		if (this.debounceTimer) clearTimeout(this.debounceTimer)
-		this.debounceTimer = setTimeout(async () => {
-			try {
-				await this.onFileChanged(filePath)
-			} catch (err) {
+		this.debounceTimer = setTimeout(() => {
+			this.debounceTimer = null
+			const changed = Array.from(this.pendingChanges)
+			this.pendingChanges.clear()
+			this.flushChanges(changed).catch((err) => {
 				console.error(LOG_PREFIX, 'Failed to regenerate:', err)
-			}
+			})
 		}, DEBOUNCE_MS)
 	}
 
@@ -109,15 +114,21 @@ export class TypebookBuilder {
 		if (hadSnippets) this.writeSnippets()
 	}
 
-	private async onFileChanged(filePath: string): Promise<void> {
-		if (this.tsClient) await this.tsClient.notifyChange()
+	/**
+	 * Re-index every file that changed within the debounce window. A single timer
+	 * coalesces rapid bursts (save-all, git checkout, codemods); without batching only
+	 * the last path would survive the debounce and the rest would silently go stale.
+	 */
+	private async flushChanges(filePaths: string[]): Promise<void> {
+		if (filePaths.length === 0) return
+		if (this.tsClient) await this.tsClient.notifyChange(filePaths)
 
-		const hadRegistration = await this.indexFile(filePath)
+		for (const filePath of filePaths) await this.indexFile(filePath)
 
-		// A non-registration file (e.g. a component or a shared type) may still define
-		// props consumed by registrations elsewhere. Their call sites are unchanged, so
-		// just re-resolve props against the refreshed TS program — no re-read/re-parse.
-		if (!hadRegistration) await this.refreshRegistrationProps(filePath)
+		// A changed file may define props consumed by registrations *elsewhere*. Re-resolve only
+		// the registrations whose Props type can actually reach the change (TypeScript's reference
+		// graph), rather than re-extracting every registration on every edit.
+		await this.refreshAffectedRegistrationProps(filePaths)
 
 		this.writeRegistry()
 		this.writeSnippets()
@@ -185,11 +196,21 @@ export class TypebookBuilder {
 		this.snippetsByFile.set(filePath, blocks)
 	}
 
-	/** Re-resolve props for every known registration (call sites unchanged, types may not be). */
-	private async refreshRegistrationProps(changedFile: string): Promise<void> {
+	/**
+	 * Re-resolve props for registrations whose Props type transitively depends on one of the
+	 * changed files, per TypeScript's own file reference graph. The changed files themselves are
+	 * skipped — their own registrations were just re-indexed. When the TS client can't provide
+	 * dependencies (running without type extraction) it refreshes all.
+	 */
+	private async refreshAffectedRegistrationProps(changedFiles: string[]): Promise<void> {
+		const changed = new Set(changedFiles.map(normalizePath))
+		// A declaration file may declare ambient/global types consumed without an import, which
+		// the per-file dependency graph won't capture — refresh every registration to stay correct.
+		const force = changedFiles.some((f) => f.endsWith('.d.ts'))
 		await Promise.all(
 			Array.from(this.registrationsByFile.entries())
-				.filter(([filePath]) => filePath !== changedFile)
+				.filter(([filePath]) => !changed.has(normalizePath(filePath)))
+				.filter(([filePath]) => force || this.registrationDependsOn(filePath, changed))
 				.map(async ([filePath, registrations]) => {
 					const refreshed = await Promise.all(
 						registrations.map(async ({ call }) => ({
@@ -200,6 +221,16 @@ export class TypebookBuilder {
 					this.registrationsByFile.set(filePath, refreshed)
 				}),
 		)
+	}
+
+	/** Whether `registrationFile` transitively depends on any changed file (TS reference graph). */
+	private registrationDependsOn(registrationFile: string, changed: ReadonlySet<string>): boolean {
+		const deps = this.tsClient?.getDependencies(registrationFile)
+		if (!deps) return true // no dependency info → refresh conservatively
+		for (const dep of deps) {
+			if (changed.has(normalizePath(dep))) return true
+		}
+		return false
 	}
 
 	private async resolveProps(filePath: string, callStart: number): Promise<PropInfo[]> {
@@ -281,6 +312,11 @@ export class TypebookBuilder {
 			return null
 		}
 	}
+}
+
+/** Normalize a path for cross-source comparison (the watcher and TS may use different slashes). */
+function normalizePath(p: string): string {
+	return p.replace(/\\/g, '/')
 }
 
 function formatDuplicate(headline: string, key: string, files: ReadonlyArray<string>): string {

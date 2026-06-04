@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, test, expect, beforeAll, afterAll } from 'vitest'
@@ -395,5 +395,86 @@ describe('edge cases', () => {
 	test('nonexistent file → null', async () => {
 		const props = await extractProps('stories/DoesNotExist.stories.tsx')
 		expect(props).toBeNull()
+	})
+
+	test('aliased registerComponent import → props still extracted', async () => {
+		// `import { registerComponent as reg }` — the call is located by offset, so the
+		// aliased callee name must not prevent prop extraction (previously returned []).
+		const props = await extractProps('stories/Aliased.stories.tsx')
+		expect(props).not.toBeNull()
+		expect(props!.length).toBeGreaterThan(0)
+		expect(findProp(props!, 'size')).toBeDefined()
+		expect(findProp(props!, 'label')).toBeDefined()
+	})
+
+	test('getDependencies reflects the import graph and excludes unrelated files', () => {
+		// Drives the affected-only refresh: a registration is re-extracted on change only when
+		// the changed file is in its dependency closure (TypeScript's reference graph).
+		const deps = client.getDependencies(resolve(FIXTURES, 'stories/Basic.stories.tsx'))
+		expect(deps).not.toBeNull()
+		const norm = deps!.map((d) => d.replace(/\\/g, '/'))
+		// Basic.stories imports ../components/Basic → that file is a dependency …
+		expect(norm.some((d) => d.endsWith('/components/Basic.tsx'))).toBe(true)
+		// … but a component it never imports is not, so editing it won't re-extract this one.
+		expect(norm.some((d) => d.endsWith('/components/WithGenerics.tsx'))).toBe(false)
+	})
+
+	test('getDependencies for an unknown file → null (caller falls back to a full refresh)', () => {
+		expect(client.getDependencies(resolve(FIXTURES, 'stories/DoesNotExist.tsx'))).toBeNull()
+	})
+
+	test('edit to a dependency after start → re-extraction sees new content (no stale host cache)', async () => {
+		// Guards the BuilderProgram switch: an incremental compiler host must not serve an
+		// edited dependency from a stale cache across rebuilds.
+		const compFile = resolve(FIXTURES, 'components/_EditProbe.tsx')
+		const storyFile = resolve(FIXTURES, 'stories/_EditProbe.stories.tsx')
+		const fresh = new TypeScriptClient(FIXTURES)
+		try {
+			writeFileSync(compFile, "export function EditProbe(props: { size: 'sm' | 'md' }) {\n\treturn props.size\n}\n")
+			writeFileSync(
+				storyFile,
+				"import { registerComponent } from '@dennation/typebook'\n" +
+					"import { EditProbe } from '../components/_EditProbe'\n" +
+					"export const probe = registerComponent('edit-probe', EditProbe)\n",
+			)
+			await fresh.start()
+			const calls = scanRegistrations(await parseProgram(storyFile, readFileSync(storyFile, 'utf-8')))
+			const before = await fresh.getRegisterProps(storyFile, calls[0].callStart)
+			expect(findProp(before!, 'size')!.type).toEqual({ kind: 'literal', values: ['sm', 'md'] })
+
+			// Change the prop type in the dependency, not the registration file itself.
+			writeFileSync(compFile, "export function EditProbe(props: { size: 'sm' | 'md' | 'lg' }) {\n\treturn props.size\n}\n")
+			await fresh.notifyChange([compFile])
+			const after = await fresh.getRegisterProps(storyFile, calls[0].callStart)
+			expect(findProp(after!, 'size')!.type).toEqual({ kind: 'literal', values: ['sm', 'md', 'lg'] })
+		} finally {
+			rmSync(compFile, { force: true })
+			rmSync(storyFile, { force: true })
+			fresh.stop()
+		}
+	})
+
+	test('file created after start → props extracted once notifyChange adds it as a root', async () => {
+		// A brand-new file that nothing imports isn't in the program's root set captured
+		// at start; notifyChange([file]) must add it so getSourceFile resolves.
+		const newFile = resolve(FIXTURES, 'stories/_DynamicallyAdded.stories.tsx')
+		const fresh = new TypeScriptClient(FIXTURES)
+		await fresh.start() // captures roots while the file does not exist yet
+		try {
+			writeFileSync(
+				newFile,
+				"import { registerComponent } from '@dennation/typebook'\n" +
+					"import { Basic } from '../components/Basic'\n" +
+					"export const added = registerComponent('dynamically-added', Basic, { defaultProps: { label: 'h' } })\n",
+			)
+			const calls = scanRegistrations(await parseProgram(newFile, readFileSync(newFile, 'utf-8')))
+			await fresh.notifyChange([newFile])
+			const props = await fresh.getRegisterProps(newFile, calls[0].callStart)
+			expect(props).not.toBeNull()
+			expect(findProp(props!, 'size')).toBeDefined()
+		} finally {
+			rmSync(newFile, { force: true })
+			fresh.stop()
+		}
 	})
 })
