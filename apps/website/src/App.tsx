@@ -1,5 +1,19 @@
-import { Landing } from "./widgets/Landing.js";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { routeTree } from "./route-tree.gen.js";
+
+const router = createRouter({
+	routeTree,
+	// GitHub Pages serves the site from /<repo>/ — Vite injects the base.
+	basepath: import.meta.env.BASE_URL,
+	defaultPreload: "intent",
+});
+
+declare module "@tanstack/react-router" {
+	interface Register {
+		router: typeof router;
+	}
+}
 
 export default function App() {
-	return <Landing githubHref="https://github.com/dennation/typebook" />;
+	return <RouterProvider router={router} />;
 }
