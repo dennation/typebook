@@ -16,131 +16,97 @@ export function PageInstallation({ go }: { go: DocsGo }) {
 	return (
 		<>
 			<Lead>
-				Add Typebok to a new or existing React project. The CLI scaffolds a
-				working docs route; the manual path drops the pieces in yourself.
+				Install the package, add the <C>typebook()</C> plugin to your bundler,
+				and wrap the app in <C>TypebookProvider</C>. The plugin generates the
+				component registry; the provider serves it to the story components.
 			</Lead>
 
 			<Callout type="warning" title="Requirements">
-				Typebok needs <strong>Node 18.17+</strong> and a React 18 or 19 app. It
-				works with Next.js, Vite and Astro out of the box.
+				A React 18 or 19 app and TypeScript sources — prop extraction runs on
+				the TypeScript Compiler API. Vite, Rollup, Rolldown, webpack, Rspack,
+				esbuild and Farm are supported.
 			</Callout>
 
-			<H2>Install with the CLI</H2>
-			<P>
-				The quickest way to start. The initializer creates the content folder,
-				config file and a docs route, then installs dependencies.
-			</P>
+			<H2>Install the package</H2>
 			<CodeBlock
 				tabs={[
-					{
-						label: "npm",
-						lang: "bash",
-						icon: <Icon.terminal size={13} />,
-						code: "npx create-typebok@latest my-docs",
-					},
 					{
 						label: "pnpm",
 						lang: "bash",
 						icon: <Icon.terminal size={13} />,
-						code: "pnpm create typebok my-docs",
+						code: "pnpm add @dennation/typebook",
+					},
+					{
+						label: "npm",
+						lang: "bash",
+						icon: <Icon.terminal size={13} />,
+						code: "npm install @dennation/typebook",
 					},
 					{
 						label: "yarn",
 						lang: "bash",
 						icon: <Icon.terminal size={13} />,
-						code: "yarn create typebok my-docs",
-					},
-					{
-						label: "bun",
-						lang: "bash",
-						icon: <Icon.terminal size={13} />,
-						code: "bun create typebok my-docs",
+						code: "yarn add @dennation/typebook",
 					},
 				]}
 			/>
 
-			<H2>Manual installation</H2>
-			<P>
-				Already have an app? Install the package and add the source loader
-				yourself.
-			</P>
+			<H2>Wire it up</H2>
 			<Steps>
-				<Step title="Install the package">
-					<CodeBlock
-						tabs={[
-							{
-								label: "npm",
-								lang: "bash",
-								icon: <Icon.terminal size={13} />,
-								code: "npm install typebok",
-							},
-							{
-								label: "pnpm",
-								lang: "bash",
-								icon: <Icon.terminal size={13} />,
-								code: "pnpm add typebok",
-							},
-							{
-								label: "yarn",
-								lang: "bash",
-								icon: <Icon.terminal size={13} />,
-								code: "yarn add typebok",
-							},
-						]}
-					/>
-				</Step>
-				<Step title="Create the source loader">
+				<Step title="Add the bundler plugin">
 					<P>
-						Point the loader at the directory that holds your content files.
+						Import the plugin from the entry that matches your bundler —{" "}
+						<C>/vite</C>, <C>/rollup</C>, <C>/rolldown</C>, <C>/webpack</C>,{" "}
+						<C>/rspack</C>, <C>/esbuild</C> or <C>/farm</C>.
 					</P>
 					<CodeBlock
-						file="lib/source.ts"
+						file="vite.config.ts"
 						icon={<Icon.ts size={14} />}
 						lang="tsx"
-						code={`import { createDocs } from "typebok";
-
-export const source = createDocs({
-  dir: "content/docs",
-  baseUrl: "/docs",
-});`}
-					/>
-				</Step>
-				<Step title="Add the config file">
-					<CodeBlock
-						file="typebok.config.ts"
-						icon={<Icon.ts size={14} />}
-						lang="tsx"
-						code={`import { defineConfig } from "typebok/config";
+						code={`import { typebook } from "@dennation/typebook/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
 export default defineConfig({
-  name: "Acme Docs",
-  theme: { accent: "indigo", defaultMode: "system" },
+  plugins: [typebook(), react()],
 });`}
 					/>
 				</Step>
-				<Step title="Write your first page">
+				<Step title="Provide the generated registry">
 					<P>
-						Create <C>content/docs/index.mdx</C> and start the dev server.
-						That's it.
+						The plugin writes <C>src/ui-registry.gen.ts</C> on every build. Pass
+						it to <C>TypebookProvider</C> at the root; <C>snippets</C> is
+						optional and only needed once you use <C>{"<Snippet>"}</C>.
 					</P>
 					<CodeBlock
-						file="content/docs/index.mdx"
-						lang="bash"
-						code={`---
-title: Hello world
----
+						file="src/App.tsx"
+						icon={<Icon.react size={14} />}
+						lang="tsx"
+						code={`import { TypebookProvider } from "@dennation/typebook/react";
+import { uiRegistry } from "./ui-registry.gen";
 
-# Welcome
-
-Your first **Typebok** page is live.`}
+export default function App() {
+  return (
+    <TypebookProvider registry={uiRegistry}>
+      {/* your router / pages */}
+    </TypebookProvider>
+  );
+}`}
 					/>
+				</Step>
+				<Step title="Load the styles">
+					<P>
+						The storybook UI injects its CSS through <C>{"<Layout>"}</C>. If you
+						render your own pages instead, import the shared <C>theme.css</C>{" "}
+						tokens and <C>@source</C>-scan the package — see{" "}
+						<A onClick={() => go("theming")}>Theming</A>.
+					</P>
 				</Step>
 			</Steps>
 
 			<Callout type="info">
-				Using a monorepo or a custom bundler? See{" "}
-				<A onClick={() => go("configuration")}>Configuration</A> for
-				framework-specific adapters.
+				A registry can also be generated without a bundler:{" "}
+				<C>npx @dennation/typebook generate</C>.
 			</Callout>
 		</>
 	);

@@ -16,102 +16,76 @@ export function PageIntroduction({ go }: { go: DocsGo }) {
 	return (
 		<>
 			<Lead>
-				Typebok is a documentation framework for building fast, content-first
-				docs sites. Author in Markdown or MDX, get a polished sidebar, full-text
-				command palette, and themeable components out of the box.
+				@dennation/typebook is a React component documentation library. Register
+				a component once — the bundler plugin extracts its prop types via the
+				TypeScript Compiler API and you render stories, variant grids, matrices
+				and interactive playgrounds on any page.
 			</Lead>
 			<P>
-				It pairs a file-based content layer with a small set of
-				unstyled-but-beautiful React components. You bring the words; Typebok
-				handles navigation, search indexing, syntax highlighting, and dark mode
-				— without locking you into a rigid template.
+				It ships two things that work together: a{" "}
+				<strong>storybook runtime</strong> (<C>Story</C>, <C>Variants</C>,{" "}
+				<C>Matrix</C>, <C>Playground</C>, <C>Snippet</C>) driven by a generated
+				registry, and a <strong>docs component kit</strong> (callouts, code
+				blocks, tabs, steps, search palette, sidebar — everything this site is
+				built from).
 			</P>
 
-			<Callout type="info" title="Looking for the fast path?">
-				Jump straight to <A onClick={() => go("installation")}>Installation</A>,
-				or run <C>npx create-typebok@latest</C> to scaffold a starter in
-				seconds.
+			<Callout type="info" title="This site is the demo">
+				Every component documented here renders the documentation you are
+				reading: the sidebar is <C>DocsSidebar</C>, the ⌘K palette is{" "}
+				<C>SearchPalette</C>, this note is <C>Callout</C>.
 			</Callout>
 
-			<H2>Why Typebok</H2>
+			<H2>How it works</H2>
 			<P>
-				Most docs tooling forces a trade-off between authoring comfort and
-				design control. Typebok keeps both: content stays plain Markdown, while
-				every rendered block is a component you can restyle or replace.
-			</P>
-			<Cards>
-				<DocCard
-					icon={<Icon.zap size={20} />}
-					title="Content-first"
-					desc="Write .md or .mdx files in any folder structure. The sidebar mirrors your filesystem automatically."
-					onClick={() => go("writing-content")}
-				/>
-				<DocCard
-					icon={<Icon.search size={20} />}
-					title="Search built in"
-					desc="A pre-built command palette indexes headings and prose at build time — no external service."
-					onClick={() => go("search-setup")}
-				/>
-				<DocCard
-					icon={<Icon.palette size={20} />}
-					title="Themeable"
-					desc="Design tokens drive every color, radius and font. Override with a single CSS file."
-					onClick={() => go("theming")}
-				/>
-				<DocCard
-					icon={<Icon.layers size={20} />}
-					title="MDX components"
-					desc="Callouts, tabs, steps, props tables and cards ship ready to drop into any page."
-					onClick={() => go("markdown")}
-				/>
-			</Cards>
-
-			<H2>How it fits together</H2>
-			<P>
-				A Typebok site is three pieces: a content source, a config file, and the
-				layout component. The source loader reads your files, the config wires
-				up navigation and theme, and <C>{"<DocsLayout />"}</C> renders the
-				shell.
+				The <C>typebook()</C> bundler plugin scans your sources for{" "}
+				<C>register('id', Component)</C> calls, resolves prop types, default
+				values and JSDoc through the TypeScript Compiler API, and writes a
+				physical <C>ui-registry.gen.ts</C> file. At runtime{" "}
+				<C>TypebookProvider</C> puts the registry into context and the story
+				components look their metadata up by id.
 			</P>
 			<CodeBlock
-				file="app/docs/layout.tsx"
+				file="src/pages/button.tsx"
 				icon={<Icon.react size={14} />}
 				lang="tsx"
 				showLineNumbers
-				highlightLines={[6]}
-				code={`import { DocsLayout } from "typebok/layout";
-import { source } from "@/lib/source";
+				code={`import { allOf, register } from "@dennation/typebook";
+import { Story, Variants } from "@dennation/typebook/react";
+import { Button } from "../components/Button";
 
-export default function Layout({ children }) {
-  return (
-    <DocsLayout tree={source.pageTree} sidebar={{ collapsible: true }}>
-      {children}
-    </DocsLayout>
-  );
-}`}
+const button = register("button", Button, {
+  defaultProps: { children: "Click me" },
+});
+
+<Story of={button} />
+<Variants of={button} items={allOf(button, "size")} />`}
 			/>
 
-			<Callout type="success" title="Zero-config defaults">
-				Everything you see in these docs — this sidebar, the <C>⌘K</C> palette,
-				the right-hand table of contents — is the default output. You can ship
-				without writing a line of CSS.
-			</Callout>
+			<H2>Key design decisions</H2>
+			<P>
+				The generated registry is a <strong>real file on disk</strong> —{" "}
+				<C>tsc</C> needs it, PR diffs show what changed, clone-and-build works
+				without the bundler. Routing is the{" "}
+				<strong>consumer's responsibility</strong>: <C>TypebookProvider</C> is a
+				pure context provider, so the library works with any router. And the
+				same <C>typebook()</C> factory is published for every bundler via{" "}
+				<A href="https://unplugin.unjs.io">unplugin</A> — no bundler is
+				privileged.
+			</P>
 
 			<H2>Next steps</H2>
-			<P>
-				Ready to build? Start with installation, then wire up your first page.
-			</P>
 			<Cards>
 				<DocCard
 					icon={<Icon.rocket size={20} />}
 					title="Installation"
-					desc="Add Typebok to a new or existing app."
+					desc="Add the package and wire the bundler plugin."
 					onClick={() => go("installation")}
 				/>
 				<DocCard
 					icon={<Icon.book size={20} />}
 					title="Quick Start"
-					desc="From empty folder to live docs page."
+					desc="From register() to a rendered story."
 					onClick={() => go("quick-start")}
 				/>
 			</Cards>

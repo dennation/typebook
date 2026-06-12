@@ -15,84 +15,84 @@ export function PageQuickStart({ go }: { go: DocsGo }) {
 	return (
 		<>
 			<Lead>
-				Go from an empty folder to a navigable docs site. This assumes you ran{" "}
-				<C>create-typebok</C> or finished the manual setup.
+				From a component to a documented page in three moves: register it, let
+				the plugin extract its props, render its stories. This assumes the{" "}
+				<A onClick={() => go("installation")}>installation</A> is done.
 			</Lead>
 
-			<H2>Project structure</H2>
+			<H2>Register a component</H2>
 			<P>
-				Typebok is filesystem-driven. Folders become sidebar groups; files
-				become pages. A <C>meta.json</C> controls order and labels.
+				<C>register()</C> calls can live anywhere in <C>{"src/**/*.tsx"}</C> — no
+				special filename required. The first argument is a unique string id, the
+				key in the generated registry. Duplicate ids throw at build time.
 			</P>
 			<CodeBlock
-				file="content/docs"
-				icon={<Icon.box size={14} />}
-				lang="bash"
-				code={`content/docs
-├── index.mdx          # /docs
-├── meta.json          # group order + labels
-├── getting-started
-│   ├── index.mdx
-│   └── installation.mdx
-└── components
-    ├── callout.mdx
-    └── tabs.mdx`}
+				file="src/pages/button.tsx"
+				icon={<Icon.react size={14} />}
+				lang="tsx"
+				code={`import { register } from "@dennation/typebook";
+import { Button } from "../components/Button";
+
+const button = register("button", Button, {
+  defaultProps: { children: "Click me" },
+});`}
 			/>
 
-			<H2>Ordering pages</H2>
+			<H2>Render stories</H2>
 			<P>
-				Drop a <C>meta.json</C> into any folder to set its title, icon and the
-				order of its children.
+				Pass the handle to any story component. They are type-safe: required
+				props not covered by <C>defaultProps</C> must be supplied via{" "}
+				<C>props</C> at the call site.
 			</P>
 			<CodeBlock
-				file="content/docs/meta.json"
-				icon={<Icon.doc size={14} />}
-				lang="json"
-				code={`{
-  "title": "Getting Started",
-  "icon": "rocket",
-  "pages": ["index", "installation", "quick-start"]
-}`}
+				file="src/pages/button.tsx"
+				icon={<Icon.react size={14} />}
+				lang="tsx"
+				showLineNumbers
+				code={`import { allOf } from "@dennation/typebook";
+import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
+
+<Story of={button} />
+<Variants of={button} items={allOf(button, "size")} />
+<Matrix of={button} x={allOf(button, "color")} y={[allOf(button, "variant")]} />
+<Playground of={button} />`}
 			/>
 
-			<Callout type="success" title="Hot reload">
-				Edits to content and <C>meta.json</C> reflect instantly in dev — no
-				restart needed.
+			<Callout type="success" title="Hot regeneration">
+				In Vite dev mode the registry re-generates incrementally (debounced) as
+				you edit sources — no restart needed. Other bundlers regenerate on each
+				rebuild.
 			</Callout>
 
-			<H2>Add frontmatter</H2>
-			<P>
-				Every page supports a small set of frontmatter keys. Only <C>title</C>{" "}
-				is required.
-			</P>
+			<H2>What each story does</H2>
 			<MDTable
-				head={["Key", "Type", "Description"]}
+				head={["Component", "Renders"]}
 				rows={[
 					[
-						<C key="k">title</C>,
-						<C key="t">string</C>,
-						"Page heading and sidebar label",
+						<C key="c">{"<Story>"}</C>,
+						"One variant with merged defaultProps + props",
 					],
 					[
-						<C key="k">description</C>,
-						<C key="t">string</C>,
-						"Lead paragraph and meta description",
+						<C key="c">{"<Variants>"}</C>,
+						"A grid along one prop axis (allOf / values / generate)",
 					],
 					[
-						<C key="k">icon</C>,
-						<C key="t">string</C>,
-						"Optional sidebar icon name",
+						<C key="c">{"<Matrix>"}</C>,
+						"A cross-product table of an x axis and y axes",
 					],
 					[
-						<C key="k">full</C>,
-						<C key="t">boolean</C>,
-						"Hide the TOC and use full width",
+						<C key="c">{"<Playground>"}</C>,
+						"Live preview + editable props table",
+					],
+					[
+						<C key="c">{"<Snippet>"}</C>,
+						"Arbitrary JSX with a show-source toggle",
 					],
 				]}
 			/>
 			<P>
-				Continue to <A onClick={() => go("markdown")}>Markdown & MDX</A> to see
-				every block you can use inside a page.
+				Continue with <A onClick={() => go("story")}>Story</A> for the full prop
+				reference of each story component.
 			</P>
 		</>
 	);
