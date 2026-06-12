@@ -1,4 +1,4 @@
-import { Icon, type IconProps } from "@dennation/typebook/react";
+import { Icon, type IconProps } from "@react/shared/ui/icon/index.js";
 import type { CSSProperties, ReactNode } from "react";
 
 export type CalloutType = "info" | "warning" | "danger" | "success";

@@ -1,4 +1,4 @@
-import { Icon } from "@dennation/typebook/react";
+import { Icon } from "@react/shared/ui/icon/index.js";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
 export interface AccordionItem {

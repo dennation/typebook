@@ -1,17 +1,27 @@
-import { cx, Icon } from "@dennation/typebook/react";
+import { cx } from "@react/shared/lib/cx.js";
+import { Icon } from "@react/shared/ui/icon/index.js";
 import { useState } from "react";
-import { type DocsNavSection, NAV } from "../../entities/docs/nav.js";
-import type { DocsGo } from "./go.js";
+import type { DocsNavSection } from "../model/types.js";
 
 export interface DocsSidebarProps {
+	/** Navigation sections to render. */
+	sections: DocsNavSection[];
+	/** Slug of the currently open page. */
 	current: string;
-	go: DocsGo;
+	onNavigate: (slug: string) => void;
+	/** Mobile drawer state. */
 	open: boolean;
 	onClose: () => void;
 }
 
 /** Left navigation: collapsible sections, active page highlight, mobile drawer. */
-export function DocsSidebar({ current, go, open, onClose }: DocsSidebarProps) {
+export function DocsSidebar({
+	sections,
+	current,
+	onNavigate,
+	open,
+	onClose,
+}: DocsSidebarProps) {
 	return (
 		<>
 			<div
@@ -32,8 +42,13 @@ export function DocsSidebar({ current, go, open, onClose }: DocsSidebarProps) {
 						: "max-[820px]:-translate-x-[102%]",
 				)}
 			>
-				{NAV.map((sec) => (
-					<SidebarSection key={sec.label} sec={sec} current={current} go={go} />
+				{sections.map((sec) => (
+					<SidebarSection
+						key={sec.label}
+						sec={sec}
+						current={current}
+						onNavigate={onNavigate}
+					/>
 				))}
 			</aside>
 		</>
@@ -43,11 +58,11 @@ export function DocsSidebar({ current, go, open, onClose }: DocsSidebarProps) {
 function SidebarSection({
 	sec,
 	current,
-	go,
+	onNavigate,
 }: {
 	sec: DocsNavSection;
 	current: string;
-	go: DocsGo;
+	onNavigate: (slug: string) => void;
 }) {
 	const [collapsed, setCollapsed] = useState(false);
 	const Ic = Icon[sec.icon];
@@ -85,7 +100,7 @@ function SidebarSection({
 										? "text-accent bg-accent-soft font-medium"
 										: "text-fg-muted font-[450] hover:text-fg hover:bg-bg-tertiary",
 								)}
-								onClick={() => go(it.slug)}
+								onClick={() => onNavigate(it.slug)}
 							>
 								<span
 									className={cx(

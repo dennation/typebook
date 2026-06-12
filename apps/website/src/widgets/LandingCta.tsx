@@ -1,5 +1,9 @@
-import { ARROW_CLASS, buttonClass, Icon } from "@dennation/typebook/react";
-import { CopyCommand } from "../features/CopyCommand.js";
+import {
+	ARROW_CLASS,
+	buttonClass,
+	CopyCommand,
+	Icon,
+} from "@dennation/typebook/react";
 import { CONTAINER } from "../shared/lib/landingLayout.js";
 
 export interface LandingCtaProps {

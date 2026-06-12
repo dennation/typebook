@@ -91,10 +91,18 @@ packages/typebook/
           lib/formatPropType.ts     — Type formatter / controllability check
         Snippet/                    — <Snippet name="…">{children}</Snippet> — live render + "show source" toggle
           ui/Snippet.tsx            — Renders children; toggle reveals source read from context (no fetch)
+        docs-sidebar/               — <DocsSidebar sections={…} current onNavigate/> — collapsible docs nav + mobile drawer
+        docs-toc/                   — <DocsToc/> "On this page" + useDocHeadings() (collect + scrollspy + jump)
+        breadcrumbs/                — <Breadcrumbs items={[…]}/> — chevron trail above a docs title
+        prev-next-nav/              — <PrevNextNav prev next onPrev onNext/> — footer page cards
       features/                     — Interactive units
         prop-input/                 — <PropInput> per-prop controls (literal/bool/string/number)
-        code-block/                 — <CodeBlock code={…}/> — Shiki-highlighted with copy
+        code-block/                 — <CodeBlock tabs|code file lang showLineNumbers highlightLines/> —
+                                      docs code block; lib/highlight.ts — lightweight tok-* highlighter (tsx/bash/json)
+        source-code/                — <SourceCode code={…}/> — Shiki-highlighted source display (storybook runtime)
           lib/highlighter.ts        — Shiki singleton
+        search-palette/             — <SearchPalette index={…}/> — ⌘K palette + useSearchHotkeys() + SearchEntry
+        copy-command/               — <CopyCommand cmd="npx …"/> — copy-able install-command pill
       entities/                     — Domain entities
         component-meta/             — Registry lookup
           model/context.ts          — Registry React Context
@@ -104,7 +112,10 @@ packages/typebook/
         theme/                      — Light/dark theme with localStorage + system preference
       shared/                       — Reusable primitives
         ui/Preview/                 — <Preview>, <PreviewFrame>, <Isolate>, <ErrorBoundary>
+        ui/md/                      — Markdown/MDX content set: Callout, MDTable, PropsTable, Tabs,
+                                      Steps, Accordion, Cards/DocCard, H2/H3, P/Lead/C/A/Ul/Ol/Li/Hr/Quote, ImgPlaceholder
         lib/getGridStyle.ts         — CSS grid layout for variant grids
+        lib/slugify.ts, childText.ts — heading anchor helpers used by the md set
         config/styles.css           — Typebook UI styles (Tailwind)
         config/cssConstants.ts      — CSS constants (CENTERED_CONTENT_STYLE, IFRAME_STYLE)
 ```
@@ -112,17 +123,17 @@ packages/typebook/
 ### Build entry points
 
 - **`index`** — `register`, `allOf`, `values`, `generate`, types.
-- **`react/index`** — `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`.
+- **`react/index`** — `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `SourceCode`, `ErrorBoundary`, `useComponentMeta` + the docs component kit (md set, `CodeBlock`, `SearchPalette`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`).
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
 - **`cli/index`** — `npx @dennation/typebook generate`.
 
 ### Package exports
 
 - `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `UIRegistry`, `SnippetMap`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, …)
-- `@dennation/typebook/react` — **storybook runtime:** `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`. **universal primitives** (reusable by any consumer docs site): `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
+- `@dennation/typebook/react` — **storybook runtime:** `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `SourceCode` (Shiki source display, ex-`CodeBlock`), `ErrorBoundary`, `useComponentMeta`. **docs kit** (for consumer documentation sites): md set (`Callout`, `MDTable`, `PropsTable`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines, lightweight tok-* highlighter), `SearchPalette`/`useSearchHotkeys`/`SearchEntry`, `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `slugify`/`childText`. **universal primitives:** `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
-> **What lives where.** The package exports only what is **universal** — the storybook runtime plus generic primitives (`Icon`, `Button`, `ThemeToggle`, `cx`) and the design system. Anything **specific to one site** (marketing landing sections, copy-command pill, section heading, scroll-reveal hook, layout constants) lives in that app — see `apps/website`, not the package.
+> **What lives where.** The package exports only what is **universal** — the storybook runtime, the docs component kit (md set, CodeBlock, search palette, sidebar/toc/breadcrumbs/prev-next, CopyCommand), generic primitives (`Icon`, `Button`, `ThemeToggle`, `cx`) and the design system. Anything **specific to one site** (marketing landing sections, demo "gifs", section heading, scroll-reveal hook, layout constants, page content and nav data) lives in that app — see `apps/website`, not the package.
 
 > **Design system.** The package ships one OKLCH token system in `src/react/shared/config/theme.css` (`--bg`/`--fg`/`--accent`/… with a `[data-theme="dark"]` block), re-exported into Tailwind utilities via `@theme inline` (`bg-bg`, `text-fg-muted`, `border-border`, `text-accent`, `bg-accent-soft`, `text-tok-*`, …) and including the `.reveal`/`.in` and `.tok-*` helpers + keyframes. The old `st:`-prefixed token set is gone; the storybook UI and any consumer site read these tokens. `shared/config/styles.css` (`@import "tailwindcss"` + theme + `@source`) is injected at runtime by `<Layout>`; a consumer that renders its own page (not via `<Layout>`) supplies the CSS itself by importing the shared `theme.css` and `@source`-scanning its components (see `apps/website`).
 
@@ -323,7 +334,7 @@ pnpm --filter @dennation/example-tanstack-router-mdx typecheck
 
 ## apps/website
 
-`@dennation/website` — the marketing landing site, built from the Typebok design handoff. A Vite + React app. The landing-specific components live **here** (they aren't reusable by other consumers, so they don't belong in the package); they import the **universal** primitives (`Icon`, `Button`, `ThemeToggle`, `cx`) and the design tokens from `@dennation/typebook/react`. Organized FSD-style: `shared/`, `features/`, `widgets/`.
+`@dennation/website` — the marketing landing + docs site, built from the Typebok design handoff. A Vite + React app with TanStack Router (file-based routes in `src/pages/`, basepath from `import.meta.env.BASE_URL` for GitHub Pages). Site-specific components live **here**; the docs UI itself (md set, CodeBlock, SearchPalette, DocsSidebar/DocsToc, Breadcrumbs, PrevNextNav, CopyCommand) comes from `@dennation/typebook/react`. Organized FSD-style: `pages/`, `entities/`, `shared/`, `widgets/`. Deployed to GitHub Pages by `.github/workflows/deploy-website.yml` (SPA fallback via `404.html`).
 
 ### Commands
 
@@ -338,20 +349,32 @@ pnpm --filter @dennation/website typecheck
 ```
 apps/website/
   index.html              — fonts (Geist/Geist Mono/Source Serif 4) + pre-paint theme bootstrap (data-theme on <html>)
-  vite.config.ts          — react() + tailwindcss()
+  vite.config.ts          — tanstackRouter() + react() + tailwindcss(); base from VITE_BASE (CI sets /typebook/)
   src/
     main.tsx              — mounts <App /> and imports styles.css
-    App.tsx               — renders <Landing />
+    App.tsx               — createRouter(routeTree, basepath) + <RouterProvider/>
     styles.css            — @import "tailwindcss" + the shared theme.css + @source for the app and the typebook react package
+    route-tree.gen.ts     — generated by @tanstack/router-plugin (excluded from biome)
+    pages/                — file-based routes
+      __root.tsx          — RootLayout (shared SiteHeader + ⌘K palette + <Outlet/>)
+      index.tsx           — landing
+      docs.index.tsx      — redirect → /docs/introduction
+      docs.$slug.tsx      — docs page (unknown slugs redirect to introduction)
+    entities/docs/nav.ts  — NAV sections, FLAT order, pageMeta(), SEARCH_INDEX (this site's content data)
     shared/
-      lib/{useReveal.ts, landingLayout.ts}   — scroll-reveal hook + CONTAINER/SECTION_PAD class constants
+      lib/{useReveal.ts, landingLayout.ts, siteLinks.ts}   — scroll-reveal hook + class constants + GITHUB_URL
       ui/SectionHead.tsx                      — section eyebrow + title + subtitle
-    features/CopyCommand.tsx                  — copy-able install-command pill
     widgets/
-      Landing.tsx                             — composes the whole page (drives useReveal)
-      SiteHeader.tsx, SiteFooter.tsx
+      layout/{RootLayout.tsx, ShellContext.ts} — root shell: header, global ⌘K search, docs drawer state
+      SiteHeader.tsx                          — unified sticky header (nav, search, theme, CTA)
+      Landing.tsx                             — composes the landing (drives useReveal)
+      SiteFooter.tsx
       LandingHero.tsx, LandingFeatures.tsx, LandingCompare.tsx, LandingStats.tsx, LandingCta.tsx
       demos/{DemoSearch,DemoTree,DemoTheme,DemoMdx}.tsx + demoClasses.ts   — looping feature "gifs"
+      docs/
+        DocsPage.tsx                          — docs screen: DocsSidebar + content + DocsToc (package components)
+        go.ts                                 — DocsGo navigation type
+        pages/                                — page content (Introduction, Installation, Quick Start, Markdown, Callout, GenericPage)
 ```
 
 - **Styling.** `styles.css` imports the package's single source of truth, `packages/typebook/src/react/shared/config/theme.css`, and `@source`-scans both the app and `packages/typebook/src/react/**/*.tsx` (the latter so the universal primitives' utilities are emitted). Theme switching writes `data-theme` on `<html>` (key `typebook-theme`); a small inline script in `index.html` applies it before paint to avoid a flash.

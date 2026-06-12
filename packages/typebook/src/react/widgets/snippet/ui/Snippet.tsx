@@ -1,5 +1,8 @@
 import { useSnippet } from "@react/entities/snippets/index.js";
-import { CodeBlock, type CodeTheme } from "@react/features/code-block/index.js";
+import {
+	type CodeTheme,
+	SourceCode,
+} from "@react/features/source-code/index.js";
 import { type ReactNode, useState } from "react";
 
 export interface SnippetProps {
@@ -12,7 +15,7 @@ export interface SnippetProps {
 	name: string;
 	/** Live content rendered above the "show source" toggle. */
 	children: ReactNode;
-	/** Shiki light/dark theme override forwarded to the underlying CodeBlock. */
+	/** Shiki light/dark theme override forwarded to the underlying SourceCode. */
 	theme?: CodeTheme;
 }
 
@@ -40,7 +43,7 @@ export function Snippet({ name, children, theme }: SnippetProps) {
 				{open && (
 					<div className="border-t border-border">
 						{code !== undefined ? (
-							<CodeBlock code={code} theme={theme} />
+							<SourceCode code={code} theme={theme} />
 						) : (
 							<p className="text-xs text-fg-muted p-3 m-0">
 								No source found for snippet "{name}". Pass <code>snippets</code>{" "}

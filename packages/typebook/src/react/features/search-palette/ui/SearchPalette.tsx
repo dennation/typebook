@@ -1,13 +1,16 @@
-import { cx, Icon } from "@dennation/typebook/react";
+import { cx } from "@react/shared/lib/cx.js";
+import { Icon } from "@react/shared/ui/icon/index.js";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { type DocsSearchEntry, SEARCH_INDEX } from "../../entities/docs/nav.js";
+import type { SearchEntry } from "../model/types.js";
 
 export interface SearchPaletteProps {
+	/** The search index to query. */
+	index: SearchEntry[];
 	onClose: () => void;
 	onNavigate: (slug: string, heading?: string) => void;
 }
 
-interface ScoredEntry extends DocsSearchEntry {
+interface ScoredEntry extends SearchEntry {
 	score: number;
 }
 
@@ -20,7 +23,11 @@ const KBD =
 	"font-mono text-[10px] bg-bg border border-border rounded-[4px] px-[5px] py-[1px] min-w-[18px] text-center";
 
 /** ⌘K command palette: fuzzy page/heading search with keyboard navigation. */
-export function SearchPalette({ onClose, onNavigate }: SearchPaletteProps) {
+export function SearchPalette({
+	index,
+	onClose,
+	onNavigate,
+}: SearchPaletteProps) {
 	const [q, setQ] = useState("");
 	const [active, setActive] = useState(0);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -32,25 +39,26 @@ export function SearchPalette({ onClose, onNavigate }: SearchPaletteProps) {
 
 	const results = useMemo<ScoredEntry[]>(() => {
 		const term = q.trim().toLowerCase();
-		if (!term) return SEARCH_INDEX.map((r) => ({ ...r, score: 0 }));
-		return SEARCH_INDEX.map((r) => {
-			const hay = `${r.title} ${r.section} ${r.desc}`.toLowerCase();
-			let score = 0;
-			if (r.title.toLowerCase().startsWith(term)) score += 10;
-			if (r.title.toLowerCase().includes(term)) score += 5;
-			if (hay.includes(term)) score += 2;
-			return { ...r, score };
-		})
+		if (!term) return index.map((r) => ({ ...r, score: 0 }));
+		return index
+			.map((r) => {
+				const hay = `${r.title} ${r.section} ${r.desc}`.toLowerCase();
+				let score = 0;
+				if (r.title.toLowerCase().startsWith(term)) score += 10;
+				if (r.title.toLowerCase().includes(term)) score += 5;
+				if (hay.includes(term)) score += 2;
+				return { ...r, score };
+			})
 			.filter((r) => r.score > 0)
 			.sort((a, b) => b.score - a.score);
-	}, [q]);
+	}, [q, index]);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset selection on new query
 	useEffect(() => {
 		setActive(0);
 	}, [q]);
 
-	const choose = (r: DocsSearchEntry) => {
+	const choose = (r: SearchEntry) => {
 		onNavigate(r.slug, r.heading);
 		onClose();
 	};

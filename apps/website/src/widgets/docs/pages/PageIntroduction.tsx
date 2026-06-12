@@ -1,15 +1,15 @@
-import { Icon } from "@dennation/typebook/react";
-import { CodeBlock } from "../../../features/code-block/CodeBlock.js";
 import {
 	A,
 	C,
 	Callout,
 	Cards,
+	CodeBlock,
 	DocCard,
 	H2,
+	Icon,
 	Lead,
 	P,
-} from "../../../shared/ui/md/index.js";
+} from "@dennation/typebook/react";
 import type { DocsGo } from "../go.js";
 
 export function PageIntroduction({ go }: { go: DocsGo }) {

@@ -1,18 +1,10 @@
-import type { IconName } from "@dennation/typebook/react";
+import type {
+	DocsNavItem,
+	DocsNavSection,
+	SearchEntry,
+} from "@dennation/typebook/react";
 
 /* Navigation structure + flat page order + search index for the docs. */
-
-export interface DocsNavItem {
-	slug: string;
-	title: string;
-	badge?: "new";
-}
-
-export interface DocsNavSection {
-	label: string;
-	icon: IconName;
-	items: DocsNavItem[];
-}
 
 export interface DocsFlatPage extends DocsNavItem {
 	section: string;
@@ -22,15 +14,6 @@ export interface DocsPageMeta {
 	page: DocsFlatPage;
 	prev: DocsFlatPage | null;
 	next: DocsFlatPage | null;
-}
-
-export interface DocsSearchEntry {
-	slug: string;
-	title: string;
-	section: string;
-	desc: string;
-	/** Anchor id when the entry points at a heading inside a page. */
-	heading?: string;
 }
 
 export const NAV: DocsNavSection[] = [
@@ -100,7 +83,7 @@ export function pageMeta(slug: string): DocsPageMeta {
 }
 
 /** Search index — pages plus representative section headings. */
-export const SEARCH_INDEX: DocsSearchEntry[] = [
+export const SEARCH_INDEX: SearchEntry[] = [
 	{
 		slug: "introduction",
 		title: "Introduction",

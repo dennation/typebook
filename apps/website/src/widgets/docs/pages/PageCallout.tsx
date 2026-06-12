@@ -1,18 +1,18 @@
-import { Icon } from "@dennation/typebook/react";
-import { CodeBlock } from "../../../features/code-block/CodeBlock.js";
 import {
 	Accordion,
 	C,
 	Callout,
 	Cards,
+	CodeBlock,
 	DocCard,
 	H2,
+	Icon,
 	Lead,
 	P,
 	PropsTable,
 	Step,
 	Steps,
-} from "../../../shared/ui/md/index.js";
+} from "@dennation/typebook/react";
 import type { DocsGo } from "../go.js";
 
 /** The showcase page: every docs component on one page. */

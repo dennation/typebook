@@ -1,2 +1,6 @@
-export type { CodeTheme } from "./lib/highlighter.js";
-export { CodeBlock, type CodeBlockProps } from "./ui/CodeBlock.js";
+export { highlight } from "./lib/highlight.js";
+export {
+	CodeBlock,
+	type CodeBlockProps,
+	type CodeTab,
+} from "./ui/CodeBlock.js";

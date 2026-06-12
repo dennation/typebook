@@ -1,6 +1,7 @@
+import { SearchPalette, useSearchHotkeys } from "@dennation/typebook/react";
 import { Outlet, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { SearchPalette } from "../../features/docs-search/SearchPalette.js";
+import { useCallback, useMemo, useState } from "react";
+import { SEARCH_INDEX } from "../../entities/docs/nav.js";
 import { SiteHeader } from "../SiteHeader.js";
 import { ShellContext, type ShellState } from "./ShellContext.js";
 
@@ -10,25 +11,11 @@ export function RootLayout() {
 	const [searchOpen, setSearchOpen] = useState(false);
 	const [docsMenuOpen, setDocsMenuOpen] = useState(false);
 
-	// keyboard: cmd/ctrl+K or '/' opens search, Escape closes
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => {
-			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-				e.preventDefault();
-				setSearchOpen((v) => !v);
-			} else if (e.key === "Escape") {
-				setSearchOpen(false);
-			} else if (
-				e.key === "/" &&
-				!/input|textarea/i.test((e.target as HTMLElement | null)?.tagName ?? "")
-			) {
-				e.preventDefault();
-				setSearchOpen(true);
-			}
-		};
-		window.addEventListener("keydown", onKey);
-		return () => window.removeEventListener("keydown", onKey);
-	}, []);
+	useSearchHotkeys({
+		toggle: useCallback(() => setSearchOpen((v) => !v), []),
+		open: useCallback(() => setSearchOpen(true), []),
+		close: useCallback(() => setSearchOpen(false), []),
+	});
 
 	const shell = useMemo<ShellState>(
 		() => ({
@@ -49,6 +36,7 @@ export function RootLayout() {
 			<Outlet />
 			{searchOpen && (
 				<SearchPalette
+					index={SEARCH_INDEX}
 					onClose={() => setSearchOpen(false)}
 					onNavigate={goFromSearch}
 				/>

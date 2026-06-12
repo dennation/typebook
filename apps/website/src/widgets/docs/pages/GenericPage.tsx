@@ -1,15 +1,15 @@
-import { Icon } from "@dennation/typebook/react";
-import type { DocsPageMeta } from "../../../entities/docs/nav.js";
-import { CodeBlock } from "../../../features/code-block/CodeBlock.js";
 import {
 	C,
 	Callout,
 	Cards,
+	CodeBlock,
 	DocCard,
 	H2,
+	Icon,
 	Lead,
 	P,
-} from "../../../shared/ui/md/index.js";
+} from "@dennation/typebook/react";
+import type { DocsPageMeta } from "../../../entities/docs/nav.js";
 import type { DocsGo } from "../go.js";
 
 /** Real-but-generic template for slugs without bespoke content. */

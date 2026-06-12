@@ -1,7 +1,7 @@
-import { Icon } from "@dennation/typebook/react";
+import { childText } from "@react/shared/lib/childText.js";
+import { slugify } from "@react/shared/lib/slugify.js";
+import { Icon } from "@react/shared/ui/icon/index.js";
 import type { ReactNode } from "react";
-import { childText } from "./childText.js";
-import { slugify } from "./slugify.js";
 
 const ANCHOR =
 	"opacity-0 group-hover:opacity-100 text-fg-subtle transition-opacity duration-[140ms] font-normal";

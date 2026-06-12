@@ -1,4 +1,5 @@
-import { cx, Icon } from "@dennation/typebook/react";
+import { cx } from "@react/shared/lib/cx.js";
+import { Icon } from "@react/shared/ui/icon/index.js";
 import { useCallback, useState } from "react";
 
 export interface CopyCommandProps {

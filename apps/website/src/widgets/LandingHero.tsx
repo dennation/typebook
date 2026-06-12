@@ -1,5 +1,10 @@
-import { ARROW_CLASS, buttonClass, cx, Icon } from "@dennation/typebook/react";
-import { CopyCommand } from "../features/CopyCommand.js";
+import {
+	ARROW_CLASS,
+	buttonClass,
+	CopyCommand,
+	cx,
+	Icon,
+} from "@dennation/typebook/react";
 import { CONTAINER } from "../shared/lib/landingLayout.js";
 
 const MINI_IT =

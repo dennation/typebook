@@ -1,5 +1,6 @@
-import { cx, Icon } from "@dennation/typebook/react";
-import type { DocsHeading } from "./go.js";
+import { cx } from "@react/shared/lib/cx.js";
+import { Icon } from "@react/shared/ui/icon/index.js";
+import type { DocsHeading } from "../lib/useDocHeadings.js";
 
 export interface DocsTocProps {
 	headings: DocsHeading[];
