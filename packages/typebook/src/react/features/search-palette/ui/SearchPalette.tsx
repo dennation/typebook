@@ -20,7 +20,7 @@ interface ResultGroup {
 }
 
 const KBD =
-	"font-mono text-[10px] bg-bg border border-border rounded-[4px] px-[5px] py-[1px] min-w-[18px] text-center";
+	"font-mono text-[10px] bg-bg border border-border rounded-[4px] px-1.25 py-px min-w-4.5 text-center";
 
 /** ⌘K command palette: fuzzy page/heading search with keyboard navigation. */
 export function SearchPalette({
@@ -100,7 +100,7 @@ export function SearchPalette({
 		return (
 			<>
 				{text.slice(0, i)}
-				<span className="text-accent font-semibold bg-accent-soft rounded-[3px] px-[1px]">
+				<span className="text-accent font-semibold bg-accent-soft rounded-[3px] px-px">
 					{text.slice(i, i + term.length)}
 				</span>
 				{text.slice(i + term.length)}
@@ -111,7 +111,7 @@ export function SearchPalette({
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-close; Escape handles keyboard
 		<div
-			className="fixed inset-0 z-[100] bg-[color-mix(in_oklch,var(--bg)_30%,oklch(0.2_0.02_270/0.5))] backdrop-blur-[3px] flex justify-center items-start pt-[13vh] opacity-0 animate-[cmdkIn_.14s_ease_forwards]"
+			className="fixed inset-0 z-100 bg-[color-mix(in_oklch,var(--bg)_30%,oklch(0.2_0.02_270/0.5))] backdrop-blur-[3px] flex justify-center items-start pt-[13vh] opacity-0 animate-[cmdkIn_.14s_ease_forwards]"
 			onMouseDown={(e) => e.target === e.currentTarget && onClose()}
 		>
 			<div
@@ -120,7 +120,7 @@ export function SearchPalette({
 				role="dialog"
 				aria-label="Search documentation"
 			>
-				<div className="flex items-center gap-[11px] px-[18px] py-[15px] border-b border-border">
+				<div className="flex items-center gap-2.75 px-4.5 py-3.75 border-b border-border">
 					<span className="text-fg-subtle shrink-0 inline-flex">
 						<Icon.search size={19} />
 					</span>
@@ -131,19 +131,19 @@ export function SearchPalette({
 						value={q}
 						onChange={(e) => setQ(e.target.value)}
 					/>
-					<span className="font-mono text-[11px] text-fg-muted border border-border rounded-[5px] px-[6px] py-[2px]">
+					<span className="font-mono text-[11px] text-fg-muted border border-border rounded-[5px] px-1.5 py-0.5">
 						ESC
 					</span>
 				</div>
-				<div className="max-h-[52vh] overflow-y-auto p-[8px]" ref={listRef}>
+				<div className="max-h-[52vh] overflow-y-auto p-2" ref={listRef}>
 					{results.length === 0 && (
-						<div className="px-[20px] py-[44px] text-center text-fg-subtle text-[14px]">
+						<div className="px-5 py-11 text-center text-fg-subtle text-[14px]">
 							No results for <span className="text-fg font-medium">"{q}"</span>
 						</div>
 					)}
 					{groups.map((g) => (
 						<div key={g.section}>
-							<div className="text-[11px] font-semibold tracking-[0.05em] uppercase text-fg-subtle px-[12px] pt-[10px] pb-[5px]">
+							<div className="text-[11px] font-semibold tracking-[0.05em] uppercase text-fg-subtle px-3 pt-2.5 pb-1.25">
 								{g.section}
 							</div>
 							{g.items.map((r) => {
@@ -156,7 +156,7 @@ export function SearchPalette({
 										type="button"
 										data-cmdk-active={isActive ? "" : undefined}
 										className={cx(
-											"flex items-center gap-[12px] w-full px-[12px] py-[10px] rounded-[9px] text-left bg-transparent border-none transition-colors duration-[100ms]",
+											"flex items-center gap-3 w-full px-3 py-2.5 rounded-[9px] text-left bg-transparent border-none transition-colors duration-100",
 											isActive ? "bg-accent-soft text-accent" : "text-fg-muted",
 										)}
 										onMouseEnter={() => setActive(idx)}
@@ -177,14 +177,14 @@ export function SearchPalette({
 										<span className="min-w-0 flex-1">
 											<span
 												className={cx(
-													"text-[14px] font-medium flex items-center gap-[7px]",
+													"text-[14px] font-medium flex items-center gap-1.75",
 													isActive ? "text-accent" : "text-fg",
 												)}
 											>
 												{highlightText(r.title)}
 											</span>
 											{r.desc && (
-												<span className="text-[12px] text-fg-subtle mt-[1px] block">
+												<span className="text-[12px] text-fg-subtle mt-px block">
 													{r.desc}
 												</span>
 											)}
@@ -205,17 +205,17 @@ export function SearchPalette({
 						</div>
 					))}
 				</div>
-				<div className="flex items-center gap-[16px] px-[16px] py-[10px] border-t border-border bg-bg-secondary text-[12px] text-fg-subtle">
-					<span className="flex items-center gap-[6px]">
+				<div className="flex items-center gap-4 px-4 py-2.5 border-t border-border bg-bg-secondary text-[12px] text-fg-subtle">
+					<span className="flex items-center gap-1.5">
 						<kbd className={cx(KBD, "inline-flex justify-center")}>
 							<Icon.arrowUpDown size={11} />
 						</kbd>{" "}
 						navigate
 					</span>
-					<span className="flex items-center gap-[6px]">
+					<span className="flex items-center gap-1.5">
 						<kbd className={cx(KBD, "inline-block")}>↵</kbd> open
 					</span>
-					<span className="flex items-center gap-[6px]">
+					<span className="flex items-center gap-1.5">
 						<kbd className={cx(KBD, "inline-block")}>esc</kbd> close
 					</span>
 					<span className="ml-auto">

@@ -49,7 +49,7 @@ export function DocsPage({ slug, githubHref }: DocsPageProps) {
 
 	return (
 		<div className="min-h-screen">
-			<div className="grid grid-cols-[270px_minmax(0,1fr)_252px] max-w-[1480px] mx-auto max-[1100px]:grid-cols-[270px_minmax(0,1fr)] max-[820px]:grid-cols-[minmax(0,1fr)]">
+			<div className="grid grid-cols-[270px_minmax(0,1fr)_252px] max-w-370 mx-auto max-[1100px]:grid-cols-[270px_minmax(0,1fr)] max-[820px]:grid-cols-[minmax(0,1fr)]">
 				<DocsSidebar
 					sections={NAV}
 					current={slug}
@@ -62,16 +62,16 @@ export function DocsPage({ slug, githubHref }: DocsPageProps) {
 					className="h-[calc(100vh-56px)] overflow-y-auto min-w-0"
 					ref={scrollerRef}
 				>
-					<div className="min-w-0 flex justify-center px-[56px] max-[1100px]:px-[40px] max-[820px]:px-[22px]">
+					<div className="min-w-0 flex justify-center px-14 max-[1100px]:px-10 max-[820px]:px-5.5">
 						<main
-							className="w-full max-w-[var(--content-width)] pt-[40px] pb-[96px] max-[820px]:pt-[28px]"
+							className="w-full max-w-[var(--content-width)] pt-10 pb-24 max-[820px]:pt-7"
 							ref={contentRef}
 							key={slug}
 						>
 							<Breadcrumbs
 								items={["Docs", meta.page.section, meta.page.title]}
 							/>
-							<h1 className="text-[34px] font-[650] tracking-[-0.03em] leading-[1.12] m-0 mb-[14px]">
+							<h1 className="text-[34px] font-[650] tracking-[-0.03em] leading-[1.12] m-0 mb-3.5">
 								{meta.page.title}
 							</h1>
 							<div className="doc-prose text-[15.5px] leading-[calc(1.72*var(--density))] [&>*+*]:mt-[calc(18px*var(--density))]">
@@ -82,11 +82,11 @@ export function DocsPage({ slug, githubHref }: DocsPageProps) {
 								)}
 							</div>
 
-							<footer className="mt-[calc(64px*var(--density))] pt-[28px] border-t border-border">
-								<div className="flex items-center justify-between text-[13px] text-fg-subtle mb-[24px]">
+							<footer className="mt-[calc(64px*var(--density))] pt-7 border-t border-border">
+								<div className="flex items-center justify-between text-[13px] text-fg-subtle mb-6">
 									<a
 										href={githubHref}
-										className="text-fg-muted inline-flex items-center gap-[6px] hover:text-accent"
+										className="text-fg-muted inline-flex items-center gap-1.5 hover:text-accent"
 									>
 										<Icon.edit size={14} /> Edit this page on GitHub
 									</a>

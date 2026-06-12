@@ -72,7 +72,7 @@ export function DemoTree() {
 				<span className={REC_DOT} /> file-based routing
 			</span>
 			<div className="grid grid-cols-2 h-full">
-				<div className="pt-[46px] px-[22px] pb-[22px] border-r border-border bg-code-bg font-mono text-[12px] leading-[1.95] text-fg-muted">
+				<div className="pt-11.5 px-5.5 pb-5.5 border-r border-border bg-code-bg font-mono text-[12px] leading-[1.95] text-fg-muted">
 					{FS.map((r) => (
 						<div
 							className={cx("opacity-0 whitespace-nowrap", ANIM)}
@@ -83,12 +83,12 @@ export function DemoTree() {
 						</div>
 					))}
 				</div>
-				<div className="pt-[46px] px-[18px] pb-[22px] flex flex-col gap-[3px]">
+				<div className="pt-11.5 px-4.5 pb-5.5 flex flex-col gap-0.75">
 					{SB.map((r) =>
 						r.kind === "grp" ? (
 							<div
 								className={cx(
-									"text-[9.5px] font-semibold tracking-[0.07em] uppercase text-fg-subtle px-[8px] py-[4px] opacity-0",
+									"text-[9.5px] font-semibold tracking-[0.07em] uppercase text-fg-subtle px-2 py-1 opacity-0",
 									ANIM,
 								)}
 								key={r.t}
@@ -99,19 +99,19 @@ export function DemoTree() {
 						) : (
 							<div
 								className={cx(
-									"flex items-center gap-[8px] text-[12.5px] text-fg-muted px-[8px] py-[5px] rounded-[6px] opacity-0",
+									"flex items-center gap-2 text-[12.5px] text-fg-muted px-2 py-1.25 rounded-[6px] opacity-0",
 									ANIM,
 								)}
 								key={r.t}
 								style={{ animationDelay: `${r.d}s` }}
 							>
-								<span className="w-[4px] h-[4px] rounded-[99px] bg-current opacity-40" />
+								<span className="w-1 h-1 rounded-[99px] bg-current opacity-40" />
 								{r.t}
 							</div>
 						),
 					)}
 				</div>
-				<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[4] w-[34px] h-[34px] rounded-[99px] bg-bg border border-border grid place-items-center text-accent shadow-sm">
+				<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-4 w-8.5 h-8.5 rounded-[99px] bg-bg border border-border grid place-items-center text-accent shadow-sm">
 					<Icon.chevR size={17} />
 				</div>
 			</div>

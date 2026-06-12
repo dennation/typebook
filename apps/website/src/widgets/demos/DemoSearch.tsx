@@ -15,14 +15,14 @@ export function DemoSearch() {
 		<div
 			className={cx(
 				DEMO_FRAME,
-				"grid place-items-center p-[30px] bg-[radial-gradient(100%_70%_at_50%_0%,color-mix(in_oklch,var(--accent)_7%,transparent),transparent_70%)]",
+				"grid place-items-center p-7.5 bg-[radial-gradient(100%_70%_at_50%_0%,color-mix(in_oklch,var(--accent)_7%,transparent),transparent_70%)]",
 			)}
 		>
 			<span className={DEMO_TAG}>
 				<span className={REC_DOT} /> ⌘K search
 			</span>
-			<div className="w-full max-w-[330px] bg-bg border border-border-strong rounded-[13px] shadow-lg overflow-hidden">
-				<div className="flex items-center gap-[10px] px-[15px] py-[13px] border-b border-border">
+			<div className="w-full max-w-82.5 bg-bg border border-border-strong rounded-[13px] shadow-lg overflow-hidden">
+				<div className="flex items-center gap-2.5 px-3.75 py-3.25 border-b border-border">
 					<span className={DS_RI}>
 						<Icon.search size={16} />
 					</span>
@@ -30,10 +30,10 @@ export function DemoSearch() {
 						<span className="inline-block overflow-hidden whitespace-nowrap align-bottom">
 							callout
 						</span>
-						<span className="inline-block w-[1.5px] h-[16px] bg-accent align-[-3px] ml-px animate-[blink_1s_step-end_infinite] motion-reduce:animate-none" />
+						<span className="inline-block w-[1.5px] h-4 bg-accent align-[-3px] ml-px animate-[blink_1s_step-end_infinite] motion-reduce:animate-none" />
 					</span>
 				</div>
-				<div className="p-[7px] flex flex-col gap-[2px]">
+				<div className="p-1.75 flex flex-col gap-0.5">
 					<div
 						className={cx(
 							DS_ROW,

@@ -36,19 +36,19 @@ const ITEMS: { num: ReactNode; lbl: string }[] = [
 ];
 
 const STAT =
-	"px-[28px] py-[32px] border-r border-border last:border-r-0 " +
+	"px-7 py-8 border-r border-border last:border-r-0 " +
 	"max-[860px]:[&:nth-child(2)]:border-r-0 max-[860px]:[&:nth-child(-n+2)]:border-b max-[860px]:[&:nth-child(-n+2)]:border-b-border " +
 	"max-[620px]:border-r-0 max-[620px]:border-b max-[620px]:border-b-border max-[620px]:last:border-b-0";
 
 /** Landing key-metrics band. */
 export function LandingStats() {
 	return (
-		<section className="pt-0 pb-[120px] max-[860px]:pb-[84px]">
+		<section className="pt-0 pb-30 max-[860px]:pb-21">
 			<div className={CONTAINER}>
 				<div className="grid grid-cols-4 border border-border rounded-[14px] overflow-hidden bg-bg max-[860px]:grid-cols-2 max-[620px]:grid-cols-1 reveal">
 					{ITEMS.map((s) => (
 						<div className={STAT} key={s.lbl}>
-							<div className="text-[40px] font-[680] tracking-[-0.03em] leading-none mb-[8px]">
+							<div className="text-[40px] font-[680] tracking-[-0.03em] leading-none mb-2">
 								{s.num}
 							</div>
 							<div className="text-[13.5px] text-fg-muted leading-[1.5]">

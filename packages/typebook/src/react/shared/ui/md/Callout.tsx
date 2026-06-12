@@ -28,13 +28,13 @@ export function Callout({ type = "info", title, children }: CalloutProps) {
 	const Ic = CALLOUT_ICON[type];
 	return (
 		<div
-			className="flex gap-[13px] p-[15px_17px] rounded-[var(--radius-token)] text-[14.5px] leading-[1.6] border border-[color-mix(in_oklch,var(--c)_35%,var(--border))] bg-[color-mix(in_oklch,var(--c)_8%,var(--bg))] [&_.inline-code]:bg-bg"
+			className="flex gap-3.25 p-[15px_17px] rounded-[var(--radius-token)] text-[14.5px] leading-[1.6] border border-[color-mix(in_oklch,var(--c)_35%,var(--border))] bg-[color-mix(in_oklch,var(--c)_8%,var(--bg))] [&_.inline-code]:bg-bg"
 			style={{ "--c": CALLOUT_C[type] } as CSSProperties}
 		>
-			<span className="shrink-0 mt-[1px] text-[var(--c)] inline-flex">
+			<span className="shrink-0 mt-px text-[var(--c)] inline-flex">
 				<Ic size={19} />
 			</span>
-			<div className="text-fg-muted min-w-0 [&_strong]:text-fg [&_strong]:block [&_strong]:mb-[2px] [&_strong]:font-semibold">
+			<div className="text-fg-muted min-w-0 [&_strong]:text-fg [&_strong]:block [&_strong]:mb-0.5 [&_strong]:font-semibold">
 				{title && <strong>{title}</strong>}
 				{typeof children === "string" ? (
 					<p className="m-0">{children}</p>

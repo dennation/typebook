@@ -45,23 +45,23 @@ function AccItem({
 		<div className="border-b border-border last:border-b-0">
 			<button
 				type="button"
-				className="flex items-center gap-[12px] w-full px-[17px] py-[15px] bg-transparent border-none text-left text-[14.5px] font-medium text-fg transition-colors duration-[130ms] hover:bg-bg-secondary"
+				className="flex items-center gap-3 w-full px-4.25 py-3.75 bg-transparent border-none text-left text-[14.5px] font-medium text-fg transition-colors duration-130 hover:bg-bg-secondary"
 				onClick={onToggle}
 				aria-expanded={open}
 			>
 				{item.q}
 				<span
-					className={`ml-auto text-fg-subtle transition-transform duration-[200ms] ${open ? "rotate-90" : ""}`}
+					className={`ml-auto text-fg-subtle transition-transform duration-200 ${open ? "rotate-90" : ""}`}
 				>
 					<Icon.chevR size={16} />
 				</span>
 			</button>
 			<div
-				className="overflow-hidden transition-[height] duration-[220ms] ease-[ease]"
+				className="overflow-hidden transition-[height] duration-220 ease-[ease]"
 				style={{ height: h }}
 			>
 				<div
-					className="px-[17px] pb-[16px] text-[14.5px] leading-[1.6] text-fg-muted"
+					className="px-4.25 pb-4 text-[14.5px] leading-[1.6] text-fg-muted"
 					ref={ref}
 				>
 					{item.a}

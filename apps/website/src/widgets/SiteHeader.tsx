@@ -12,11 +12,11 @@ import { GITHUB_URL } from "../shared/lib/siteLinks.js";
 import { useShell } from "./layout/ShellContext.js";
 
 const NAV_LINK =
-	"text-[13.5px] text-fg-muted font-[450] px-[11px] py-[6px] rounded-[7px] transition-colors duration-[140ms] hover:text-fg hover:bg-bg-tertiary";
+	"text-[13.5px] text-fg-muted font-[450] px-2.75 py-1.5 rounded-[7px] transition-colors duration-140 hover:text-fg hover:bg-bg-tertiary";
 const NAV_LINK_ACTIVE =
-	"text-[13.5px] text-fg font-medium px-[11px] py-[6px] rounded-[7px] transition-colors duration-[140ms] hover:bg-bg-tertiary";
+	"text-[13.5px] text-fg font-medium px-2.75 py-1.5 rounded-[7px] transition-colors duration-140 hover:bg-bg-tertiary";
 const ICON_BTN =
-	"w-[34px] h-[34px] rounded-[var(--radius-token)] grid place-items-center bg-transparent border border-transparent text-fg-muted transition-colors duration-[140ms] hover:bg-bg-tertiary hover:text-fg hover:border-border";
+	"w-8.5 h-8.5 rounded-[var(--radius-token)] grid place-items-center bg-transparent border border-transparent text-fg-muted transition-colors duration-140 hover:bg-bg-tertiary hover:text-fg hover:border-border";
 
 export interface SiteHeaderProps {
 	/** Version badge label. */
@@ -44,7 +44,7 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 	return (
 		<header
 			className={cx(
-				"sticky top-0 z-50 h-[56px] flex items-center gap-[16px] px-[22px] bg-[color-mix(in_oklch,var(--bg)_82%,transparent)] backdrop-saturate-[1.4] backdrop-blur-[12px] border-b transition-[border-color,background] duration-200",
+				"sticky top-0 z-50 h-14 flex items-center gap-4 px-5.5 bg-[color-mix(in_oklch,var(--bg)_82%,transparent)] backdrop-saturate-[1.4] backdrop-blur-[12px] border-b transition-[border-color,background] duration-200",
 				bordered ? "border-border" : "border-transparent",
 			)}
 		>
@@ -60,17 +60,17 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 			)}
 			<Link
 				to="/"
-				className="flex items-center gap-[10px] font-semibold tracking-[-0.02em] text-[15px]"
+				className="flex items-center gap-2.5 font-semibold tracking-[-0.02em] text-[15px]"
 			>
-				<span className="w-[26px] h-[26px] rounded-[7px] bg-fg text-bg grid place-items-center font-mono font-semibold text-[14px] shrink-0">
+				<span className="w-6.5 h-6.5 rounded-[7px] bg-fg text-bg grid place-items-center font-mono font-semibold text-[14px] shrink-0">
 					T
 				</span>
 				Typebok
-				<span className="text-[11px] font-mono text-fg-muted border border-border rounded-[99px] px-[8px] py-[2px] ml-[2px]">
+				<span className="text-[11px] font-mono text-fg-muted border border-border rounded-[99px] px-2 py-0.5 ml-0.5">
 					{version}
 				</span>
 			</Link>
-			<nav className="flex gap-[2px] ml-[14px] max-[820px]:hidden">
+			<nav className="flex gap-0.5 ml-3.5 max-[820px]:hidden">
 				<Link
 					to="/docs/$slug"
 					params={{ slug: DEFAULT_DOCS_SLUG }}
@@ -86,17 +86,17 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 				</a>
 			</nav>
 			<span className="flex-1" />
-			<div className="flex items-center gap-[6px]">
+			<div className="flex items-center gap-1.5">
 				<button
 					type="button"
-					className="flex items-center gap-[9px] h-[34px] pl-[11px] pr-[8px] min-w-[210px] bg-bg-secondary border border-border rounded-[var(--radius-token)] text-fg-subtle text-[13px] transition-colors duration-[140ms] hover:border-border-strong hover:bg-bg-tertiary max-[820px]:min-w-0"
+					className="flex items-center gap-2.25 h-8.5 pl-2.75 pr-2 min-w-52.5 bg-bg-secondary border border-border rounded-[var(--radius-token)] text-fg-subtle text-[13px] transition-colors duration-140 hover:border-border-strong hover:bg-bg-tertiary max-[820px]:min-w-0"
 					onClick={openSearch}
 				>
 					<Icon.search size={15} />
 					<span className="flex-1 text-left whitespace-nowrap overflow-hidden text-ellipsis max-[820px]:hidden">
 						Search documentation…
 					</span>
-					<kbd className="font-mono text-[11px] bg-bg border border-border rounded-[5px] px-[5px] py-[1px] text-fg-muted shadow-sm max-[820px]:hidden">
+					<kbd className="font-mono text-[11px] bg-bg border border-border rounded-[5px] px-1.25 py-px text-fg-muted shadow-sm max-[820px]:hidden">
 						⌘K
 					</kbd>
 				</button>
@@ -112,7 +112,7 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 				<Link
 					to="/docs/$slug"
 					params={{ slug: DEFAULT_DOCS_SLUG }}
-					className={cx(buttonClass("primary", "sm"), "ml-[4px]")}
+					className={cx(buttonClass("primary", "sm"), "ml-1")}
 				>
 					Get started <Icon.chevR size={15} className={ARROW_CLASS} />
 				</Link>

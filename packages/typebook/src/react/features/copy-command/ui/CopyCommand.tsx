@@ -18,13 +18,13 @@ export function CopyCommand({ cmd }: CopyCommandProps) {
 	}, [cmd]);
 
 	return (
-		<div className="inline-flex items-center gap-[12px] whitespace-nowrap h-[50px] pl-[18px] pr-[8px] bg-code-bg border border-border rounded-[calc(var(--radius-token)+2px)] font-mono text-[14px] text-fg shadow-sm">
+		<div className="inline-flex items-center gap-3 whitespace-nowrap h-12.5 pl-4.5 pr-2 bg-code-bg border border-border rounded-[calc(var(--radius-token)+2px)] font-mono text-[14px] text-fg shadow-sm">
 			<span className="text-accent select-none">$</span>
 			<span>{cmd}</span>
 			<button
 				type="button"
 				className={cx(
-					"w-[34px] h-[34px] rounded-[8px] flex-none ml-[2px] grid place-items-center bg-bg border border-border transition-all duration-[130ms]",
+					"w-8.5 h-8.5 rounded-[8px] flex-none ml-0.5 grid place-items-center bg-bg border border-border transition-all duration-130",
 					copied
 						? "text-[oklch(0.6_0.14_155)]"
 						: "text-fg-subtle hover:text-fg hover:border-border-strong",

@@ -19,7 +19,7 @@ export function PropRow({ prop, value, onChange }: PropRowProps) {
 				{!prop.optional && <span className="text-red-400 ml-0.5">*</span>}
 			</td>
 			<td
-				className="py-2.5 px-4 font-mono text-fg-muted max-w-[200px] truncate"
+				className="py-2.5 px-4 font-mono text-fg-muted max-w-50 truncate"
 				title={typeText}
 			>
 				{typeText}

@@ -54,7 +54,7 @@ const ROWS: { f: string; s: string; v: ReactNode[] }[] = [
 	},
 ];
 
-const CELL = "px-[20px] py-[16px] text-left border-b border-border";
+const CELL = "px-5 py-4 text-left border-b border-border";
 const OWN_CELL =
 	"bg-[color-mix(in_oklch,var(--accent)_6%,var(--bg))] border-l border-r border-l-accent-soft-border border-r-accent-soft-border relative";
 const FEAT_CELL = "text-[14px] font-medium text-fg w-[34%]";
@@ -76,7 +76,7 @@ export function LandingCompare() {
 					sub="Keep the authoring comfort of Markdown and the design control of components — self-hosted, open source, and free."
 				/>
 				<div className="overflow-x-auto reveal">
-					<table className="w-full border-separate border-spacing-0 min-w-[720px] bg-bg border border-border rounded-[14px] overflow-hidden shadow-md">
+					<table className="w-full border-separate border-spacing-0 min-w-180 bg-bg border border-border rounded-[14px] overflow-hidden shadow-md">
 						<thead>
 							<tr>
 								<th
@@ -107,7 +107,7 @@ export function LandingCompare() {
 										>
 											{c.name}
 										</span>
-										<span className="block text-[11px] font-[450] text-fg-subtle mt-[2px]">
+										<span className="block text-[11px] font-[450] text-fg-subtle mt-0.5">
 											{c.tag}
 										</span>
 									</th>
@@ -121,7 +121,7 @@ export function LandingCompare() {
 									<tr key={r.f}>
 										<td className={cx(CELL, FEAT_CELL, last && "border-b-0")}>
 											{r.f}
-											<small className="block font-normal text-[12.5px] text-fg-subtle mt-[2px]">
+											<small className="block font-normal text-[12.5px] text-fg-subtle mt-0.5">
 												{r.s}
 											</small>
 										</td>

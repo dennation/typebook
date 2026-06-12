@@ -133,34 +133,34 @@ export function LandingFeatures() {
 					title="Everything a docs site needs, nothing it doesn't"
 					sub="The polish you'd build by hand — search, navigation, theming and components — working out of the box, on top of files you already understand."
 				/>
-				<div className="flex flex-col gap-[96px]">
+				<div className="flex flex-col gap-24">
 					{FEATURES.map((f) => (
 						<div
-							className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-[64px] items-center max-[860px]:grid-cols-1 max-[860px]:gap-[32px] reveal"
+							className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-16 items-center max-[860px]:grid-cols-1 max-[860px]:gap-8 reveal"
 							key={f.title}
 						>
 							<div
 								className={cx(
-									"max-w-[460px] max-[860px]:max-w-none",
+									"max-w-115 max-[860px]:max-w-none",
 									f.flip && "min-[861px]:order-2",
 								)}
 							>
-								<div className="w-[46px] h-[46px] rounded-[12px] grid place-items-center bg-accent-soft text-accent border border-accent-soft-border mb-[20px]">
+								<div className="w-11.5 h-11.5 rounded-[12px] grid place-items-center bg-accent-soft text-accent border border-accent-soft-border mb-5">
 									{f.icon}
 								</div>
-								<h3 className="text-[26px] font-[640] tracking-[-0.025em] leading-[1.15] m-0 mb-[12px]">
+								<h3 className="text-[26px] font-[640] tracking-[-0.025em] leading-[1.15] m-0 mb-3">
 									{f.title}
 								</h3>
-								<p className="text-[16px] leading-[1.65] text-fg-muted m-0 mb-[18px] [text-wrap:pretty]">
+								<p className="text-[16px] leading-[1.65] text-fg-muted m-0 mb-4.5 [text-wrap:pretty]">
 									{f.body}
 								</p>
-								<ul className="flex flex-col gap-[14px] m-0 p-0 list-none [&_b]:text-fg [&_b]:font-semibold">
+								<ul className="flex flex-col gap-3.5 m-0 p-0 list-none [&_b]:text-fg [&_b]:font-semibold">
 									{f.list.map((li) => (
 										<li
-											className="flex items-start gap-[11px] text-[14.5px] text-fg-muted leading-[1.45]"
+											className="flex items-start gap-2.75 text-[14.5px] text-fg-muted leading-[1.45]"
 											key={li.id}
 										>
-											<span className="flex-none mt-[2px] text-accent">
+											<span className="flex-none mt-0.5 text-accent">
 												<Icon.check size={16} />
 											</span>
 											<span>{li.text}</span>

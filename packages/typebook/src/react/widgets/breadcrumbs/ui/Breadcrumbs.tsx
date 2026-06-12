@@ -9,7 +9,7 @@ export interface BreadcrumbsProps {
 /** Chevron-separated breadcrumb trail above a docs page title. */
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
 	return (
-		<div className="flex items-center gap-[7px] text-[13px] text-fg-subtle mb-[18px]">
+		<div className="flex items-center gap-1.75 text-[13px] text-fg-subtle mb-4.5">
 			{items.map((item, i) => {
 				const last = i === items.length - 1;
 				return (

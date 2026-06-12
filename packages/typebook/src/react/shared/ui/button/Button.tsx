@@ -9,7 +9,7 @@ export type ButtonVariant = "primary" | "ghost";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const BASE =
-	"group inline-flex items-center justify-center gap-[8px] font-sans font-medium rounded-[var(--radius-token)] border border-transparent whitespace-nowrap transition-all duration-[140ms] active:translate-y-px";
+	"group inline-flex items-center justify-center gap-2 font-sans font-medium rounded-[var(--radius-token)] border border-transparent whitespace-nowrap transition-all duration-140 active:translate-y-px";
 
 const VARIANTS: Record<ButtonVariant, string> = {
 	primary:
@@ -18,14 +18,14 @@ const VARIANTS: Record<ButtonVariant, string> = {
 };
 
 const SIZES: Record<ButtonSize, string> = {
-	sm: "h-[36px] text-[13.5px] px-[14px]",
-	md: "h-[42px] text-[14.5px] px-[17px]",
-	lg: "h-[50px] text-[15.5px] px-[24px] rounded-[calc(var(--radius-token)+2px)]",
+	sm: "h-9 text-[13.5px] px-3.5",
+	md: "h-10.5 text-[14.5px] px-4.25",
+	lg: "h-12.5 text-[15.5px] px-6 rounded-[calc(var(--radius-token)+2px)]",
 };
 
 /** Class applied to a trailing chevron so it nudges right on hover. */
 export const ARROW_CLASS =
-	"transition-transform duration-[160ms] group-hover:translate-x-[3px]";
+	"transition-transform duration-160 group-hover:translate-x-[3px]";
 
 /** Compose the button class string for use on a raw element. */
 export function buttonClass(

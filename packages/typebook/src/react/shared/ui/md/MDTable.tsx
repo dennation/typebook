@@ -16,7 +16,7 @@ export function MDTable({ head, rows }: MDTableProps) {
 							<th
 								// biome-ignore lint/suspicious/noArrayIndexKey: static columns
 								key={i}
-								className="text-left font-semibold text-fg px-[16px] py-[11px] bg-bg-secondary border-b border-border"
+								className="text-left font-semibold text-fg px-4 py-2.75 bg-bg-secondary border-b border-border"
 							>
 								{h}
 							</th>
@@ -33,7 +33,7 @@ export function MDTable({ head, rows }: MDTableProps) {
 								<td
 									// biome-ignore lint/suspicious/noArrayIndexKey: static cells
 									key={j}
-									className="px-[16px] py-[11px] border-b border-border text-fg-muted"
+									className="px-4 py-2.75 border-b border-border text-fg-muted"
 								>
 									{c}
 								</td>
