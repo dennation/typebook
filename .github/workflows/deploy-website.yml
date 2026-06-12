@@ -25,6 +25,14 @@ jobs:
         with:
           enablement: true
 
+      # configure-pages only creates the site; if it already exists with the
+      # legacy branch source (Jekyll), force-switch it to GitHub Actions so the
+      # legacy build can't overwrite this deployment.
+      - name: Force Pages source to GitHub Actions
+        run: gh api "repos/${GITHUB_REPOSITORY}/pages" -X PUT -F build_type=workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
