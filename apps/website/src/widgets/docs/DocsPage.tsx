@@ -2,8 +2,7 @@ import { cx, Icon } from "@dennation/typebook/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { pageMeta } from "../../entities/docs/nav.js";
-import { SearchPalette } from "../../features/docs-search/SearchPalette.js";
-import { DocsHeader } from "./DocsHeader.js";
+import { useShell } from "../layout/ShellContext.js";
 import { DocsSidebar } from "./DocsSidebar.js";
 import { DocsToc } from "./DocsToc.js";
 import type { DocsGo, DocsHeading } from "./go.js";
@@ -23,8 +22,7 @@ const PN_TITLE = "text-[15px] font-semibold text-fg group-hover:text-accent";
 /** Full docs screen: header + sidebar + content + TOC + ⌘K palette. */
 export function DocsPage({ slug, githubHref }: DocsPageProps) {
 	const navigate = useNavigate();
-	const [searchOpen, setSearchOpen] = useState(false);
-	const [menuOpen, setMenuOpen] = useState(false);
+	const { docsMenuOpen, setDocsMenuOpen } = useShell();
 	const [headings, setHeadings] = useState<DocsHeading[]>([]);
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const contentRef = useRef<HTMLElement>(null);
@@ -36,35 +34,15 @@ export function DocsPage({ slug, githubHref }: DocsPageProps) {
 
 	const go = useCallback<DocsGo>(
 		(next, heading) => {
-			setMenuOpen(false);
+			setDocsMenuOpen(false);
 			void navigate({
 				to: "/docs/$slug",
 				params: { slug: next },
 				hash: heading,
 			});
 		},
-		[navigate],
+		[navigate, setDocsMenuOpen],
 	);
-
-	// keyboard: cmd/ctrl+K or '/' opens search, Escape closes
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => {
-			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-				e.preventDefault();
-				setSearchOpen((v) => !v);
-			} else if (e.key === "Escape") {
-				setSearchOpen(false);
-			} else if (
-				e.key === "/" &&
-				!/input|textarea/i.test((e.target as HTMLElement | null)?.tagName ?? "")
-			) {
-				e.preventDefault();
-				setSearchOpen(true);
-			}
-		};
-		window.addEventListener("keydown", onKey);
-		return () => window.removeEventListener("keydown", onKey);
-	}, []);
 
 	// collect headings from the rendered DOM after page change,
 	// then scroll to the hash target (or to the top)
@@ -124,17 +102,12 @@ export function DocsPage({ slug, githubHref }: DocsPageProps) {
 
 	return (
 		<div className="min-h-screen">
-			<DocsHeader
-				githubHref={githubHref}
-				onOpenSearch={() => setSearchOpen(true)}
-				onOpenMenu={() => setMenuOpen(true)}
-			/>
 			<div className="grid grid-cols-[270px_minmax(0,1fr)_252px] max-w-[1480px] mx-auto max-[1100px]:grid-cols-[270px_minmax(0,1fr)] max-[820px]:grid-cols-[minmax(0,1fr)]">
 				<DocsSidebar
 					current={slug}
 					go={go}
-					open={menuOpen}
-					onClose={() => setMenuOpen(false)}
+					open={docsMenuOpen}
+					onClose={() => setDocsMenuOpen(false)}
 				/>
 
 				<div
@@ -222,10 +195,6 @@ export function DocsPage({ slug, githubHref }: DocsPageProps) {
 					issueHref={`${githubHref}/issues`}
 				/>
 			</div>
-
-			{searchOpen && (
-				<SearchPalette onClose={() => setSearchOpen(false)} onNavigate={go} />
-			)}
 		</div>
 	);
 }

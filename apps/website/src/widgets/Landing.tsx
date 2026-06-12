@@ -5,27 +5,20 @@ import { LandingFeatures } from "./LandingFeatures.js";
 import { LandingHero } from "./LandingHero.js";
 import { LandingStats } from "./LandingStats.js";
 import { SiteFooter } from "./SiteFooter.js";
-import { SiteHeader } from "./SiteHeader.js";
 
 export interface LandingProps {
 	/** Link target for "Docs"/"Get started" CTAs across the page. */
 	docsHref?: string;
-	/** GitHub repository URL used in the header. */
-	githubHref?: string;
 	/** Install command shown in the copy pills. */
 	command?: string;
 }
 
-/** The full Typebok marketing landing page, composed from its sections. */
-export function Landing({
-	docsHref = "#",
-	githubHref = "#",
-	command,
-}: LandingProps) {
+/** The full Typebok marketing landing page, composed from its sections.
+    The site header is rendered by the root layout. */
+export function Landing({ docsHref = "#", command }: LandingProps) {
 	useReveal();
 	return (
 		<div>
-			<SiteHeader docsHref={docsHref} githubHref={githubHref} />
 			<main>
 				<LandingHero docsHref={docsHref} command={command} />
 				<LandingFeatures />
