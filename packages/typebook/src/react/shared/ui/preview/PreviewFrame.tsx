@@ -1,12 +1,12 @@
-import { memo } from 'react'
-import type { ReactNode } from 'react'
-import { Preview } from './Preview.js'
+import type { ReactNode } from "react";
+import { memo } from "react";
+import { Preview } from "./Preview.js";
 
 export interface PreviewFrameProps {
-	label: string
-	props: Record<string, unknown>
-	render: (props: any) => ReactNode
-	isolate?: boolean
+	label: string;
+	props: Record<string, unknown>;
+	render: (props: any) => ReactNode;
+	isolate?: boolean;
 }
 
 export const PreviewFrame = memo(function PreviewFrame({
@@ -22,5 +22,5 @@ export const PreviewFrame = memo(function PreviewFrame({
 			</span>
 			<Preview props={props} render={render} isolate={isolate} />
 		</div>
-	)
-})
+	);
+});

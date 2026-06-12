@@ -1,27 +1,28 @@
-import { useMemo, useState } from 'react'
-import type { PropInfo } from '@/types.js'
-import { PropRow } from './PropRow.js'
+import { useMemo, useState } from "react";
+import type { PropInfo } from "@/types.js";
+import { PropRow } from "./PropRow.js";
 
 export interface PropsTableProps {
-	props: PropInfo[]
-	values: Record<string, unknown>
-	onChange: (propName: string, value: unknown) => void
+	props: PropInfo[];
+	values: Record<string, unknown>;
+	onChange: (propName: string, value: unknown) => void;
 }
 
 export function PropsTable({ props, values, onChange }: PropsTableProps) {
-	const [search, setSearch] = useState('')
-	const [showInherited, setShowInherited] = useState(false)
+	const [search, setSearch] = useState("");
+	const [showInherited, setShowInherited] = useState(false);
 
-	const hasInherited = useMemo(() => props.some((p) => p.inherited), [props])
+	const hasInherited = useMemo(() => props.some((p) => p.inherited), [props]);
 	const filtered = useMemo(() => {
 		return props
 			.filter((p) => {
-				if (!showInherited && p.inherited) return false
-				if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
-				return true
+				if (!showInherited && p.inherited) return false;
+				if (search && !p.name.toLowerCase().includes(search.toLowerCase()))
+					return false;
+				return true;
 			})
-			.sort((a, b) => a.name.localeCompare(b.name))
-	}, [props, search, showInherited])
+			.sort((a, b) => a.name.localeCompare(b.name));
+	}, [props, search, showInherited]);
 
 	return (
 		<>
@@ -51,7 +52,7 @@ export function PropsTable({ props, values, onChange }: PropsTableProps) {
 			<div className="border-t border-border">
 				{filtered.length === 0 ? (
 					<p className="text-xs text-fg-muted p-3">
-						{props.length === 0 ? 'No props' : 'No matching props'}
+						{props.length === 0 ? "No props" : "No matching props"}
 					</p>
 				) : (
 					<table className="w-full text-xs">
@@ -82,5 +83,5 @@ export function PropsTable({ props, values, onChange }: PropsTableProps) {
 				)}
 			</div>
 		</>
-	)
+	);
 }

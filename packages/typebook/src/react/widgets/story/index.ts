@@ -1,1 +1,1 @@
-export { Story, type StoryProps } from './ui/Story.js'
+export { Story, type StoryProps } from "./ui/Story.js";

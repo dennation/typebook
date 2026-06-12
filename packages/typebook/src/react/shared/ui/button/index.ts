@@ -1,8 +1,8 @@
 export {
-	Button,
-	buttonClass,
 	ARROW_CLASS,
+	Button,
 	type ButtonProps,
-	type ButtonVariant,
 	type ButtonSize,
-} from './Button.js'
+	type ButtonVariant,
+	buttonClass,
+} from "./Button.js";

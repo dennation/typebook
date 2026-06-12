@@ -1,9 +1,9 @@
-import { Layout } from '@dennation/typebook/react'
-import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { Layout } from "@dennation/typebook/react";
+import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 
 export const Route = createRootRoute({
 	component: RootComponent,
-})
+});
 
 function RootComponent() {
 	return (
@@ -21,5 +21,5 @@ function RootComponent() {
 		>
 			<Outlet />
 		</Layout>
-	)
+	);
 }

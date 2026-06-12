@@ -1,18 +1,24 @@
-import { CONTAINER } from '../shared/lib/landingLayout.js'
+import { CONTAINER } from "../shared/lib/landingLayout.js";
 
 export interface SiteFooterProps {
 	/** Link target used for the "Introduction" link. */
-	docsHref?: string
+	docsHref?: string;
 }
 
 const COLS = [
-	{ h: 'Product', links: ['Features', 'Components', 'Showcase', 'Changelog'] },
-	{ h: 'Docs', links: ['Introduction', 'Installation', 'Theming', 'API Reference'] },
-	{ h: 'Community', links: ['GitHub', 'Discord', 'X / Twitter', 'Discussions'] },
-] as const
+	{ h: "Product", links: ["Features", "Components", "Showcase", "Changelog"] },
+	{
+		h: "Docs",
+		links: ["Introduction", "Installation", "Theming", "API Reference"],
+	},
+	{
+		h: "Community",
+		links: ["GitHub", "Discord", "X / Twitter", "Discussions"],
+	},
+] as const;
 
 /** Marketing site footer. */
-export function SiteFooter({ docsHref = '#' }: SiteFooterProps) {
+export function SiteFooter({ docsHref = "#" }: SiteFooterProps) {
 	return (
 		<footer className="border-t border-border pt-[60px] pb-[40px]">
 			<div className={CONTAINER}>
@@ -28,19 +34,20 @@ export function SiteFooter({ docsHref = '#' }: SiteFooterProps) {
 							Typebok
 						</a>
 						<p className="text-[13.5px] text-fg-muted leading-[1.6] max-w-[30ch] m-0">
-							The content-first documentation framework for React. Open source, MIT licensed.
+							The content-first documentation framework for React. Open source,
+							MIT licensed.
 						</p>
 					</div>
-					{COLS.map((c, i) => (
-						<div key={i}>
+					{COLS.map((c) => (
+						<div key={c.h}>
 							<h4 className="text-[12px] font-semibold tracking-[0.05em] uppercase text-fg-subtle m-0 mb-[16px]">
 								{c.h}
 							</h4>
-							{c.links.map((l, k) => (
+							{c.links.map((l) => (
 								<a
 									className="block text-[14px] text-fg-muted py-[5px] transition-colors duration-[130ms] hover:text-accent"
-									href={l === 'Introduction' ? docsHref : '#'}
-									key={k}
+									href={l === "Introduction" ? docsHref : "#top"}
+									key={l}
 								>
 									{l}
 								</a>
@@ -51,18 +58,18 @@ export function SiteFooter({ docsHref = '#' }: SiteFooterProps) {
 				<div className="flex items-center justify-between pt-[28px] border-t border-border text-[13px] text-fg-subtle max-[620px]:flex-col max-[620px]:gap-[16px] max-[620px]:text-center">
 					<span>© 2026 Typebok. Released under the MIT License.</span>
 					<div className="flex gap-[18px]">
-						<a className="hover:text-fg-muted" href="#">
+						<a className="hover:text-fg-muted" href="#top">
 							Privacy
 						</a>
-						<a className="hover:text-fg-muted" href="#">
+						<a className="hover:text-fg-muted" href="#top">
 							Terms
 						</a>
-						<a className="hover:text-fg-muted" href="#">
+						<a className="hover:text-fg-muted" href="#top">
 							Status
 						</a>
 					</div>
 				</div>
 			</div>
 		</footer>
-	)
+	);
 }

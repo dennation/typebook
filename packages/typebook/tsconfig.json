@@ -1,27 +1,27 @@
 {
-  "compilerOptions": {
-    "types": ["vite/client"],
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "jsx": "react-jsx",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "paths": {
-      "@/*": ["./src/*"],
-      "@react/*": ["./src/react/*"]
-    }
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+	"compilerOptions": {
+		"types": ["vite/client"],
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"jsx": "react-jsx",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"paths": {
+			"@/*": ["./src/*"],
+			"@react/*": ["./src/react/*"]
+		}
+	},
+	"include": ["src"],
+	"exclude": ["node_modules", "dist"]
 }

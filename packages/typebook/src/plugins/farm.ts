@@ -1,6 +1,6 @@
-import { unplugin } from './factory.js'
+import { unplugin } from "./factory.js";
 
 /** Typebook plugin for Farm. */
-export const typebook = unplugin.farm
+export const typebook = unplugin.farm;
 
-export default typebook
+export default typebook;

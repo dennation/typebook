@@ -1,12 +1,12 @@
-import type { ReactNode } from 'react'
+import type { ReactNode } from "react";
 
 export interface SectionHeadProps {
 	/** Small monospace eyebrow above the title. */
-	kicker: ReactNode
+	kicker: ReactNode;
 	/** Section title. */
-	title: ReactNode
+	title: ReactNode;
 	/** Supporting paragraph below the title. */
-	sub: ReactNode
+	sub: ReactNode;
 }
 
 /** Centered section heading (eyebrow + title + subtitle) used across landing sections. */
@@ -19,7 +19,9 @@ export function SectionHead({ kicker, title, sub }: SectionHeadProps) {
 			<h2 className="text-[clamp(30px,4vw,42px)] font-[660] tracking-[-0.03em] leading-[1.08] m-0 mb-[16px] [text-wrap:balance]">
 				{title}
 			</h2>
-			<p className="text-[17px] leading-[1.6] text-fg-muted m-0 [text-wrap:pretty]">{sub}</p>
+			<p className="text-[17px] leading-[1.6] text-fg-muted m-0 [text-wrap:pretty]">
+				{sub}
+			</p>
 		</div>
-	)
+	);
 }

@@ -1,1 +1,1 @@
-export { PropInput, type PropInputProps } from './ui/PropInput.js'
+export { PropInput, type PropInputProps } from "./ui/PropInput.js";

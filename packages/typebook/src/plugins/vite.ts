@@ -1,6 +1,6 @@
-import { unplugin } from './factory.js'
+import { unplugin } from "./factory.js";
 
 /** Typebook plugin for Vite. */
-export const typebook = unplugin.vite
+export const typebook = unplugin.vite;
 
-export default typebook
+export default typebook;

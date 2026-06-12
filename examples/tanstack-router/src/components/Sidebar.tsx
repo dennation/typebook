@@ -1,13 +1,13 @@
-import { defineMenu } from '@dennation/menu'
+import { defineMenu } from "@dennation/menu";
 import {
 	Menu,
 	type MenuContainerProps,
 	type MenuItemProps,
-} from '@dennation/menu/react'
-import { menuFromRouteTree } from '@dennation/menu/tanstack-router'
-import { Link, useLocation } from '@tanstack/react-router'
-import { useMemo } from 'react'
-import { routeTree } from '../route-tree.gen'
+} from "@dennation/menu/react";
+import { menuFromRouteTree } from "@dennation/menu/tanstack-router";
+import { Link, useLocation } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { routeTree } from "../route-tree.gen";
 
 /** The single outer shell wrapping the whole menu. */
 function Container({ children }: MenuContainerProps) {
@@ -15,7 +15,7 @@ function Container({ children }: MenuContainerProps) {
 		<nav className="st:p-4 st:border-r st:border-border st:flex st:flex-col st:gap-1 st:overflow-y-auto">
 			{children}
 		</nav>
-	)
+	);
 }
 
 /**
@@ -23,14 +23,14 @@ function Container({ children }: MenuContainerProps) {
  * here — this is where we talk to TanStack Router.
  */
 function Item(props: MenuItemProps) {
-	const { item, level } = props
-	const { pathname } = useLocation()
-	const active = item.href != null && pathname === item.href
+	const { item, level } = props;
+	const { pathname } = useLocation();
+	const active = item.href != null && pathname === item.href;
 
 	return (
 		<>
 			<Link
-				to={item.href ?? '.'}
+				to={item.href ?? "."}
 				className="st:text-sm st:hover:underline st:data-[active=true]:font-semibold"
 				data-active={active}
 				style={{ paddingLeft: `${level * 0.75}rem` }}
@@ -39,7 +39,7 @@ function Item(props: MenuItemProps) {
 			</Link>
 			{props.children}
 		</>
-	)
+	);
 }
 
 export function Sidebar() {
@@ -47,7 +47,7 @@ export function Sidebar() {
 	// come from its `staticData.menu.meta`; `defineMenu` resolves the keyed
 	// input (parent → tree, sorted by order) and lets us tweak entries by key.
 	// Built here (not at module load) to avoid the route-tree ⇄ Sidebar import cycle.
-	const menu = useMemo(() => defineMenu(menuFromRouteTree(routeTree)), [])
+	const menu = useMemo(() => defineMenu(menuFromRouteTree(routeTree)), []);
 
-	return <Menu menu={menu} components={{ Container, Item }} />
+	return <Menu menu={menu} components={{ Container, Item }} />;
 }

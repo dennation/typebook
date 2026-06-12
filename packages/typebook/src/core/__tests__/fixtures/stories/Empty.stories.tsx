@@ -1,5 +1,4 @@
-import { registerComponent } from '@dennation/typebook'
-import { Empty } from '../components/Empty'
+import { registerComponent } from "@dennation/typebook";
+import { Empty } from "../components/Empty";
 
-export const comp = registerComponent('empty', Empty)
-
+export const comp = registerComponent("empty", Empty);

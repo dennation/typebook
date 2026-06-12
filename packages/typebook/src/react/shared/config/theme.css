@@ -15,77 +15,88 @@
    ============================================================ */
 
 :root {
-  /* tweakable knobs */
-  --accent-h: 274;            /* indigo */
-  --accent-c: 0.19;
-  --radius: 10px;
-  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+	/* tweakable knobs */
+	--accent-h: 274; /* indigo */
+	--accent-c: 0.19;
+	--radius: 10px;
+	--font-sans:
+		"Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	--font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+	--font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
 
-  /* light theme */
-  --bg: oklch(1 0 0);
-  --bg-secondary: oklch(0.986 0.002 270);
-  --bg-tertiary: oklch(0.968 0.003 270);
-  --bg-inset: oklch(0.955 0.004 270);
-  --code-bg: oklch(0.982 0.003 270);
-  --fg: oklch(0.205 0.012 270);
-  --fg-muted: oklch(0.52 0.013 270);
-  --fg-subtle: oklch(0.66 0.011 270);
-  --border: oklch(0.922 0.004 270);
-  --border-strong: oklch(0.87 0.006 270);
-  --accent: oklch(0.55 var(--accent-c) var(--accent-h));
-  --accent-hover: oklch(0.5 var(--accent-c) var(--accent-h));
-  --accent-fg: oklch(0.99 0 0);
-  --accent-soft: oklch(0.96 0.03 var(--accent-h));
-  --accent-soft-border: oklch(0.9 0.06 var(--accent-h));
-  --ring: oklch(0.55 var(--accent-c) var(--accent-h) / 0.35);
-  --shadow-color: 270 8% 30%;
-  --shadow-sm: 0 1px 2px hsl(var(--shadow-color) / 0.06), 0 1px 1px hsl(var(--shadow-color) / 0.04);
-  --shadow-md: 0 4px 14px hsl(var(--shadow-color) / 0.08), 0 2px 4px hsl(var(--shadow-color) / 0.05);
-  --shadow-lg: 0 18px 50px -12px hsl(var(--shadow-color) / 0.28), 0 8px 16px -8px hsl(var(--shadow-color) / 0.14);
+	/* light theme */
+	--bg: oklch(1 0 0);
+	--bg-secondary: oklch(0.986 0.002 270);
+	--bg-tertiary: oklch(0.968 0.003 270);
+	--bg-inset: oklch(0.955 0.004 270);
+	--code-bg: oklch(0.982 0.003 270);
+	--fg: oklch(0.205 0.012 270);
+	--fg-muted: oklch(0.52 0.013 270);
+	--fg-subtle: oklch(0.66 0.011 270);
+	--border: oklch(0.922 0.004 270);
+	--border-strong: oklch(0.87 0.006 270);
+	--accent: oklch(0.55 var(--accent-c) var(--accent-h));
+	--accent-hover: oklch(0.5 var(--accent-c) var(--accent-h));
+	--accent-fg: oklch(0.99 0 0);
+	--accent-soft: oklch(0.96 0.03 var(--accent-h));
+	--accent-soft-border: oklch(0.9 0.06 var(--accent-h));
+	--ring: oklch(0.55 var(--accent-c) var(--accent-h) / 0.35);
+	--shadow-color: 270 8% 30%;
+	--shadow-sm:
+		0 1px 2px hsl(var(--shadow-color) / 0.06),
+		0 1px 1px hsl(var(--shadow-color) / 0.04);
+	--shadow-md:
+		0 4px 14px hsl(var(--shadow-color) / 0.08),
+		0 2px 4px hsl(var(--shadow-color) / 0.05);
+	--shadow-lg:
+		0 18px 50px -12px hsl(var(--shadow-color) / 0.28),
+		0 8px 16px -8px hsl(var(--shadow-color) / 0.14);
 
-  /* syntax */
-  --syn-kw: oklch(0.55 0.2 305);
-  --syn-fn: oklch(0.5 0.17 255);
-  --syn-str: oklch(0.5 0.13 150);
-  --syn-num: oklch(0.55 0.15 40);
-  --syn-com: oklch(0.66 0.01 270);
-  --syn-tag: oklch(0.55 0.18 20);
-  --syn-attr: oklch(0.55 0.15 70);
-  --syn-punc: oklch(0.55 0.01 270);
+	/* syntax */
+	--syn-kw: oklch(0.55 0.2 305);
+	--syn-fn: oklch(0.5 0.17 255);
+	--syn-str: oklch(0.5 0.13 150);
+	--syn-num: oklch(0.55 0.15 40);
+	--syn-com: oklch(0.66 0.01 270);
+	--syn-tag: oklch(0.55 0.18 20);
+	--syn-attr: oklch(0.55 0.15 70);
+	--syn-punc: oklch(0.55 0.01 270);
 }
 
 [data-theme="dark"] {
-  --bg: oklch(0.165 0.006 270);
-  --bg-secondary: oklch(0.195 0.007 270);
-  --bg-tertiary: oklch(0.225 0.008 270);
-  --bg-inset: oklch(0.235 0.009 270);
-  --code-bg: oklch(0.185 0.008 270);
-  --fg: oklch(0.955 0.004 270);
-  --fg-muted: oklch(0.68 0.012 270);
-  --fg-subtle: oklch(0.56 0.012 270);
-  --border: oklch(0.28 0.009 270);
-  --border-strong: oklch(0.34 0.011 270);
-  --accent: oklch(0.7 0.16 var(--accent-h));
-  --accent-hover: oklch(0.76 0.15 var(--accent-h));
-  --accent-fg: oklch(0.17 0.02 270);
-  --accent-soft: oklch(0.28 0.06 var(--accent-h));
-  --accent-soft-border: oklch(0.38 0.09 var(--accent-h));
-  --ring: oklch(0.7 0.16 var(--accent-h) / 0.4);
-  --shadow-color: 270 30% 2%;
-  --shadow-sm: 0 1px 2px hsl(var(--shadow-color) / 0.4);
-  --shadow-md: 0 4px 14px hsl(var(--shadow-color) / 0.5), 0 2px 4px hsl(var(--shadow-color) / 0.4);
-  --shadow-lg: 0 18px 50px -12px hsl(var(--shadow-color) / 0.7), 0 8px 16px -8px hsl(var(--shadow-color) / 0.5);
+	--bg: oklch(0.165 0.006 270);
+	--bg-secondary: oklch(0.195 0.007 270);
+	--bg-tertiary: oklch(0.225 0.008 270);
+	--bg-inset: oklch(0.235 0.009 270);
+	--code-bg: oklch(0.185 0.008 270);
+	--fg: oklch(0.955 0.004 270);
+	--fg-muted: oklch(0.68 0.012 270);
+	--fg-subtle: oklch(0.56 0.012 270);
+	--border: oklch(0.28 0.009 270);
+	--border-strong: oklch(0.34 0.011 270);
+	--accent: oklch(0.7 0.16 var(--accent-h));
+	--accent-hover: oklch(0.76 0.15 var(--accent-h));
+	--accent-fg: oklch(0.17 0.02 270);
+	--accent-soft: oklch(0.28 0.06 var(--accent-h));
+	--accent-soft-border: oklch(0.38 0.09 var(--accent-h));
+	--ring: oklch(0.7 0.16 var(--accent-h) / 0.4);
+	--shadow-color: 270 30% 2%;
+	--shadow-sm: 0 1px 2px hsl(var(--shadow-color) / 0.4);
+	--shadow-md:
+		0 4px 14px hsl(var(--shadow-color) / 0.5),
+		0 2px 4px hsl(var(--shadow-color) / 0.4);
+	--shadow-lg:
+		0 18px 50px -12px hsl(var(--shadow-color) / 0.7),
+		0 8px 16px -8px hsl(var(--shadow-color) / 0.5);
 
-  --syn-kw: oklch(0.74 0.16 310);
-  --syn-fn: oklch(0.76 0.13 250);
-  --syn-str: oklch(0.78 0.13 150);
-  --syn-num: oklch(0.8 0.12 55);
-  --syn-com: oklch(0.55 0.012 270);
-  --syn-tag: oklch(0.76 0.14 20);
-  --syn-attr: oklch(0.82 0.12 80);
-  --syn-punc: oklch(0.7 0.01 270);
+	--syn-kw: oklch(0.74 0.16 310);
+	--syn-fn: oklch(0.76 0.13 250);
+	--syn-str: oklch(0.78 0.13 150);
+	--syn-num: oklch(0.8 0.12 55);
+	--syn-com: oklch(0.55 0.012 270);
+	--syn-tag: oklch(0.76 0.14 20);
+	--syn-attr: oklch(0.82 0.12 80);
+	--syn-punc: oklch(0.7 0.01 270);
 }
 
 /* ------------------------------------------------------------
@@ -94,165 +105,346 @@
    (dark mode recomputes through the cascade).
    ------------------------------------------------------------ */
 @theme inline {
-  --color-bg: var(--bg);
-  --color-bg-secondary: var(--bg-secondary);
-  --color-bg-tertiary: var(--bg-tertiary);
-  --color-bg-inset: var(--bg-inset);
-  --color-code-bg: var(--code-bg);
-  --color-fg: var(--fg);
-  --color-fg-muted: var(--fg-muted);
-  --color-fg-subtle: var(--fg-subtle);
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-fg: var(--accent-fg);
-  --color-accent-soft: var(--accent-soft);
-  --color-accent-soft-border: var(--accent-soft-border);
+	--color-bg: var(--bg);
+	--color-bg-secondary: var(--bg-secondary);
+	--color-bg-tertiary: var(--bg-tertiary);
+	--color-bg-inset: var(--bg-inset);
+	--color-code-bg: var(--code-bg);
+	--color-fg: var(--fg);
+	--color-fg-muted: var(--fg-muted);
+	--color-fg-subtle: var(--fg-subtle);
+	--color-border: var(--border);
+	--color-border-strong: var(--border-strong);
+	--color-accent: var(--accent);
+	--color-accent-hover: var(--accent-hover);
+	--color-accent-fg: var(--accent-fg);
+	--color-accent-soft: var(--accent-soft);
+	--color-accent-soft-border: var(--accent-soft-border);
 
-  --color-tok-kw: var(--syn-kw);
-  --color-tok-fn: var(--syn-fn);
-  --color-tok-str: var(--syn-str);
-  --color-tok-num: var(--syn-num);
-  --color-tok-com: var(--syn-com);
-  --color-tok-tag: var(--syn-tag);
-  --color-tok-attr: var(--syn-attr);
-  --color-tok-punc: var(--syn-punc);
+	--color-tok-kw: var(--syn-kw);
+	--color-tok-fn: var(--syn-fn);
+	--color-tok-str: var(--syn-str);
+	--color-tok-num: var(--syn-num);
+	--color-tok-com: var(--syn-com);
+	--color-tok-tag: var(--syn-tag);
+	--color-tok-attr: var(--syn-attr);
+	--color-tok-punc: var(--syn-punc);
 
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-  --font-serif: var(--font-serif);
+	--font-sans: var(--font-sans);
+	--font-mono: var(--font-mono);
+	--font-serif: var(--font-serif);
 
-  --radius-token: var(--radius);
+	--radius-token: var(--radius);
 
-  --shadow-sm: var(--shadow-sm);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
+	--shadow-sm: var(--shadow-sm);
+	--shadow-md: var(--shadow-md);
+	--shadow-lg: var(--shadow-lg);
 
-  --ring-color: var(--ring);
+	--ring-color: var(--ring);
 }
 
 /* ------------------------------------------------------------
    Base / global element styling.
    ------------------------------------------------------------ */
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-
-body {
-  margin: 0;
-  font-family: var(--font-sans);
-  background: var(--bg);
-  color: var(--fg);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  font-feature-settings: "cv01", "cv03", "ss01";
+* {
+	box-sizing: border-box;
+}
+html {
+	scroll-behavior: smooth;
 }
 
-::selection { background: var(--accent-soft); color: var(--fg); }
+body {
+	margin: 0;
+	font-family: var(--font-sans);
+	background: var(--bg);
+	color: var(--fg);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	font-feature-settings: "cv01", "cv03", "ss01";
+}
+
+::selection {
+	background: var(--accent-soft);
+	color: var(--fg);
+}
 
 /* subtle scrollbars */
-* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
-*::-webkit-scrollbar { width: 9px; height: 9px; }
-*::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; border: 2px solid var(--bg); }
-*::-webkit-scrollbar-track { background: transparent; }
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar {
+	width: 9px;
+	height: 9px;
+}
+*::-webkit-scrollbar-thumb {
+	background: var(--border-strong);
+	border-radius: 99px;
+	border: 2px solid var(--bg);
+}
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
 
-a { color: inherit; text-decoration: none; }
-button { font-family: inherit; cursor: pointer; }
+a {
+	color: inherit;
+	text-decoration: none;
+}
+button {
+	font-family: inherit;
+	cursor: pointer;
+}
 
 /* ------------------------------------------------------------
    Component layer — pieces that can't be expressed as inline
    utilities (generated HTML, pseudo-elements, JS-toggled state).
    ------------------------------------------------------------ */
 @layer components {
-  /* Syntax-highlighter tokens, also emitted as HTML strings. */
-  .tok-kw   { color: var(--syn-kw); }
-  .tok-fn   { color: var(--syn-fn); }
-  .tok-str  { color: var(--syn-str); }
-  .tok-num  { color: var(--syn-num); }
-  .tok-com  { color: var(--syn-com); font-style: italic; }
-  .tok-tag  { color: var(--syn-tag); }
-  .tok-attr { color: var(--syn-attr); }
-  .tok-punc { color: var(--syn-punc); }
-  .tok-prop { color: var(--syn-fn); }
+	/* Syntax-highlighter tokens, also emitted as HTML strings. */
+	.tok-kw {
+		color: var(--syn-kw);
+	}
+	.tok-fn {
+		color: var(--syn-fn);
+	}
+	.tok-str {
+		color: var(--syn-str);
+	}
+	.tok-num {
+		color: var(--syn-num);
+	}
+	.tok-com {
+		color: var(--syn-com);
+		font-style: italic;
+	}
+	.tok-tag {
+		color: var(--syn-tag);
+	}
+	.tok-attr {
+		color: var(--syn-attr);
+	}
+	.tok-punc {
+		color: var(--syn-punc);
+	}
+	.tok-prop {
+		color: var(--syn-fn);
+	}
 
-  /* Scroll-reveal — JS toggles `.in` via IntersectionObserver. */
-  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s cubic-bezier(.2,.7,.3,1), transform .6s cubic-bezier(.2,.7,.3,1); }
-  .reveal.in { opacity: 1; transform: none; }
+	/* Scroll-reveal — JS toggles `.in` via IntersectionObserver. */
+	.reveal {
+		opacity: 0;
+		transform: translateY(18px);
+		transition:
+			opacity 0.6s cubic-bezier(0.2, 0.7, 0.3, 1),
+			transform 0.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+	}
+	.reveal.in {
+		opacity: 1;
+		transform: none;
+	}
 
-  /* Checkered preview canvas (used by the storybook <Preview>). */
-  .bg-checkered {
-    background-color: var(--bg-secondary);
-    background-image:
-      linear-gradient(45deg, var(--border) 25%, transparent 25%),
-      linear-gradient(-45deg, var(--border) 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, var(--border) 75%),
-      linear-gradient(-45deg, transparent 75%, var(--border) 75%);
-    background-size: 16px 16px;
-    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
-  }
+	/* Checkered preview canvas (used by the storybook <Preview>). */
+	.bg-checkered {
+		background-color: var(--bg-secondary);
+		background-image:
+			linear-gradient(45deg, var(--border) 25%, transparent 25%),
+			linear-gradient(-45deg, var(--border) 25%, transparent 25%),
+			linear-gradient(45deg, transparent 75%, var(--border) 75%),
+			linear-gradient(-45deg, transparent 75%, var(--border) 75%);
+		background-size: 16px 16px;
+		background-position:
+			0 0,
+			0 8px,
+			8px -8px,
+			-8px 0px;
+	}
 }
 
 /* Shiki dual theme — toggled by [data-theme] on an ancestor. */
 [data-theme="light"] .shiki,
 [data-theme="light"] .shiki span {
-  color: var(--shiki-light) !important;
-  background-color: var(--shiki-light-bg) !important;
+	color: var(--shiki-light) !important;
+	background-color: var(--shiki-light-bg) !important;
 }
 [data-theme="dark"] .shiki,
 [data-theme="dark"] .shiki span {
-  color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
+	color: var(--shiki-dark) !important;
+	background-color: var(--shiki-dark-bg) !important;
 }
 
 /* Shiki line numbers */
-.shiki code { counter-reset: line; }
+.shiki code {
+	counter-reset: line;
+}
 .shiki code .line::before {
-  counter-increment: line;
-  content: counter(line);
-  display: inline-block;
-  width: 1.5em;
-  margin-right: 1em;
-  text-align: right;
-  opacity: 0.35;
+	counter-increment: line;
+	content: counter(line);
+	display: inline-block;
+	width: 1.5em;
+	margin-right: 1em;
+	text-align: right;
+	opacity: 0.35;
 }
 
 /* ------------------------------------------------------------
    Keyframes (referenced by animate-[…] utilities on the landing).
    ------------------------------------------------------------ */
-@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
-@keyframes rec { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
-@keyframes blink { 50% { opacity: 0; } }
+@keyframes floaty {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-9px);
+	}
+}
+@keyframes rec {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.3;
+	}
+}
+@keyframes blink {
+	50% {
+		opacity: 0;
+	}
+}
 @keyframes dsCollapse {
-  0%, 34% { max-height: 40px; opacity: 1; padding-top: 9px; padding-bottom: 9px; margin-bottom: 0; }
-  44%, 92% { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
-  100% { max-height: 40px; opacity: 1; padding-top: 9px; padding-bottom: 9px; }
+	0%,
+	34% {
+		max-height: 40px;
+		opacity: 1;
+		padding-top: 9px;
+		padding-bottom: 9px;
+		margin-bottom: 0;
+	}
+	44%,
+	92% {
+		max-height: 0;
+		opacity: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+	}
+	100% {
+		max-height: 40px;
+		opacity: 1;
+		padding-top: 9px;
+		padding-bottom: 9px;
+	}
 }
 @keyframes dsSel {
-  0%, 48% { background: transparent; }
-  56%, 100% { background: var(--accent-soft); }
+	0%,
+	48% {
+		background: transparent;
+	}
+	56%,
+	100% {
+		background: var(--accent-soft);
+	}
 }
-@keyframes dsEnter { 0%,55% { opacity: 0; } 64%,100% { opacity: 1; } }
+@keyframes dsEnter {
+	0%,
+	55% {
+		opacity: 0;
+	}
+	64%,
+	100% {
+		opacity: 1;
+	}
+}
 @keyframes dtIn {
-  0%, 8% { opacity: 0; transform: translateX(var(--dx, 0)); }
-  20%, 90% { opacity: 1; transform: translateX(0); }
-  100% { opacity: 0; }
+	0%,
+	8% {
+		opacity: 0;
+		transform: translateX(var(--dx, 0));
+	}
+	20%,
+	90% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	100% {
+		opacity: 0;
+	}
 }
-@keyframes thLight { 0%, 42% { opacity: 1; } 50%, 92% { opacity: 0; } 100% { opacity: 1; } }
-@keyframes thDark { 0%, 42% { opacity: 0; } 50%, 92% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes thLight {
+	0%,
+	42% {
+		opacity: 1;
+	}
+	50%,
+	92% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+@keyframes thDark {
+	0%,
+	42% {
+		opacity: 0;
+	}
+	50%,
+	92% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
 @keyframes thHue {
-  0% { background: oklch(0.55 0.19 274); }
-  33% { background: oklch(0.58 0.16 200); }
-  66% { background: oklch(0.6 0.16 150); }
-  100% { background: oklch(0.55 0.19 274); }
+	0% {
+		background: oklch(0.55 0.19 274);
+	}
+	33% {
+		background: oklch(0.58 0.16 200);
+	}
+	66% {
+		background: oklch(0.6 0.16 150);
+	}
+	100% {
+		background: oklch(0.55 0.19 274);
+	}
 }
-@keyframes thKnob { 0%,42% { left: 2px; } 50%,92% { left: 22px; } 100% { left: 2px; } }
+@keyframes thKnob {
+	0%,
+	42% {
+		left: 2px;
+	}
+	50%,
+	92% {
+		left: 22px;
+	}
+	100% {
+		left: 2px;
+	}
+}
 @keyframes dmPop {
-  0%, 30% { opacity: 0; transform: translateY(8px) scale(0.98); }
-  44%, 90% { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(8px) scale(0.98); }
+	0%,
+	30% {
+		opacity: 0;
+		transform: translateY(8px) scale(0.98);
+	}
+	44%,
+	90% {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(8px) scale(0.98);
+	}
 }
 
 /* Reduced motion honors the scroll-reveal */
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+	.reveal {
+		opacity: 1 !important;
+		transform: none !important;
+		transition: none !important;
+	}
 }

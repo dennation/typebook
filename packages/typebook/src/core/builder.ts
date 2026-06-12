@@ -1,37 +1,58 @@
-import { existsSync, readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
-import { DEBOUNCE_MS, DEFAULT_REGISTRY_FILE, DEFAULT_SNIPPETS_FILE, LOG_PREFIX } from '../constants.js'
-import type { PropInfo, TypebookConfig } from '../types.js'
-import { parseProgram } from './ast.js'
-import { writeIfChanged } from './io.js'
-import { generateRegistryFile, type RegistryEntry } from './registry-generator.js'
-import { mayContainRegistration, type RegisterCall, scanRegistrations } from './registry-scanner.js'
-import { generateSnippetsFile, type SnippetEntry } from './snippet-generator.js'
-import { mayContainSnippet, scanSnippets, type SnippetBlock } from './snippet-scanner.js'
-import { getSourceFilesFromTsConfig } from './source-files.js'
-import { TypeScriptClient } from './ts-client.js'
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import {
+	DEBOUNCE_MS,
+	DEFAULT_REGISTRY_FILE,
+	DEFAULT_SNIPPETS_FILE,
+	LOG_PREFIX,
+} from "../constants.js";
+import type { PropInfo, TypebookConfig } from "../types.js";
+import { parseProgram } from "./ast.js";
+import { writeIfChanged } from "./io.js";
+import {
+	generateRegistryFile,
+	type RegistryEntry,
+} from "./registry-generator.js";
+import {
+	mayContainRegistration,
+	type RegisterCall,
+	scanRegistrations,
+} from "./registry-scanner.js";
+import {
+	generateSnippetsFile,
+	type SnippetEntry,
+} from "./snippet-generator.js";
+import {
+	mayContainSnippet,
+	type SnippetBlock,
+	scanSnippets,
+} from "./snippet-scanner.js";
+import { getSourceFilesFromTsConfig } from "./source-files.js";
+import { TypeScriptClient } from "./ts-client.js";
 
 export interface BuilderConfig extends TypebookConfig {
-	cwd: string
+	cwd: string;
 }
 
 /** A scanned `registerComponent()` call paired with the props extracted for it. */
 interface IndexedRegistration {
-	call: RegisterCall
-	props: PropInfo[]
+	call: RegisterCall;
+	props: PropInfo[];
 }
 
 class DuplicateRegistrationError extends Error {
 	constructor(id: string, files: ReadonlyArray<string>) {
-		super(formatDuplicate('Each component may be registered only once.', id, files))
-		this.name = 'DuplicateRegistrationError'
+		super(
+			formatDuplicate("Each component may be registered only once.", id, files),
+		);
+		this.name = "DuplicateRegistrationError";
 	}
 }
 
 class DuplicateSnippetError extends Error {
 	constructor(name: string, files: ReadonlyArray<string>) {
-		super(formatDuplicate('Each <Snippet> name must be unique.', name, files))
-		this.name = 'DuplicateSnippetError'
+		super(formatDuplicate("Each <Snippet> name must be unique.", name, files));
+		this.name = "DuplicateSnippetError";
 	}
 }
 
@@ -46,72 +67,75 @@ class DuplicateSnippetError extends Error {
  * shared, which is what was previously duplicated across two parallel builders.
  */
 export class TypebookBuilder {
-	readonly cwd: string
+	readonly cwd: string;
 
-	private readonly registryFile: string
-	private readonly snippetsFile: string
-	private readonly inheritedProviders: string[] | undefined
+	private readonly registryFile: string;
+	private readonly snippetsFile: string;
+	private readonly inheritedProviders: string[] | undefined;
 
-	private tsClient: TypeScriptClient | null = null
-	private debounceTimer: ReturnType<typeof setTimeout> | null = null
-	private readonly pendingChanges = new Set<string>()
+	private tsClient: TypeScriptClient | null = null;
+	private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+	private readonly pendingChanges = new Set<string>();
 
-	private readonly registrationsByFile = new Map<string, IndexedRegistration[]>()
-	private readonly snippetsByFile = new Map<string, SnippetBlock[]>()
+	private readonly registrationsByFile = new Map<
+		string,
+		IndexedRegistration[]
+	>();
+	private readonly snippetsByFile = new Map<string, SnippetBlock[]>();
 
 	constructor(config: BuilderConfig) {
-		this.cwd = config.cwd
-		this.registryFile = config.registryFile ?? DEFAULT_REGISTRY_FILE
-		this.snippetsFile = config.snippetsFile ?? DEFAULT_SNIPPETS_FILE
-		this.inheritedProviders = config.inheritedProviders
+		this.cwd = config.cwd;
+		this.registryFile = config.registryFile ?? DEFAULT_REGISTRY_FILE;
+		this.snippetsFile = config.snippetsFile ?? DEFAULT_SNIPPETS_FILE;
+		this.inheritedProviders = config.inheritedProviders;
 	}
 
 	get registryFilePath(): string {
-		return resolve(this.cwd, this.registryFile)
+		return resolve(this.cwd, this.registryFile);
 	}
 
 	get snippetsFilePath(): string {
-		return resolve(this.cwd, this.snippetsFile)
+		return resolve(this.cwd, this.snippetsFile);
 	}
 
 	async start(): Promise<void> {
-		const files = getSourceFilesFromTsConfig(this.cwd)
-		await this.startTsClient()
-		await Promise.all(files.map((f) => this.indexFile(f)))
+		const files = getSourceFilesFromTsConfig(this.cwd);
+		await this.startTsClient();
+		await Promise.all(files.map((f) => this.indexFile(f)));
 
-		this.logCounts()
-		this.writeRegistry()
-		this.writeSnippets()
+		this.logCounts();
+		this.writeRegistry();
+		this.writeSnippets();
 	}
 
 	stop(): void {
-		if (this.debounceTimer) clearTimeout(this.debounceTimer)
-		this.debounceTimer = null
-		this.pendingChanges.clear()
-		this.registrationsByFile.clear()
-		this.snippetsByFile.clear()
-		this.tsClient?.stop()
-		this.tsClient = null
+		if (this.debounceTimer) clearTimeout(this.debounceTimer);
+		this.debounceTimer = null;
+		this.pendingChanges.clear();
+		this.registrationsByFile.clear();
+		this.snippetsByFile.clear();
+		this.tsClient?.stop();
+		this.tsClient = null;
 	}
 
 	scheduleFileChange(filePath: string): void {
-		this.pendingChanges.add(filePath)
-		if (this.debounceTimer) clearTimeout(this.debounceTimer)
+		this.pendingChanges.add(filePath);
+		if (this.debounceTimer) clearTimeout(this.debounceTimer);
 		this.debounceTimer = setTimeout(() => {
-			this.debounceTimer = null
-			const changed = Array.from(this.pendingChanges)
-			this.pendingChanges.clear()
+			this.debounceTimer = null;
+			const changed = Array.from(this.pendingChanges);
+			this.pendingChanges.clear();
 			this.flushChanges(changed).catch((err) => {
-				console.error(LOG_PREFIX, 'Failed to regenerate:', err)
-			})
-		}, DEBOUNCE_MS)
+				console.error(LOG_PREFIX, "Failed to regenerate:", err);
+			});
+		}, DEBOUNCE_MS);
 	}
 
 	onFileRemoved(filePath: string): void {
-		const hadRegistrations = this.registrationsByFile.delete(filePath)
-		const hadSnippets = this.snippetsByFile.delete(filePath)
-		if (hadRegistrations) this.writeRegistry()
-		if (hadSnippets) this.writeSnippets()
+		const hadRegistrations = this.registrationsByFile.delete(filePath);
+		const hadSnippets = this.snippetsByFile.delete(filePath);
+		if (hadRegistrations) this.writeRegistry();
+		if (hadSnippets) this.writeSnippets();
 	}
 
 	/**
@@ -120,28 +144,31 @@ export class TypebookBuilder {
 	 * the last path would survive the debounce and the rest would silently go stale.
 	 */
 	private async flushChanges(filePaths: string[]): Promise<void> {
-		if (filePaths.length === 0) return
-		if (this.tsClient) await this.tsClient.notifyChange(filePaths)
+		if (filePaths.length === 0) return;
+		if (this.tsClient) await this.tsClient.notifyChange(filePaths);
 
-		for (const filePath of filePaths) await this.indexFile(filePath)
+		for (const filePath of filePaths) await this.indexFile(filePath);
 
 		// A changed file may define props consumed by registrations *elsewhere*. Re-resolve only
 		// the registrations whose Props type can actually reach the change (TypeScript's reference
 		// graph), rather than re-extracting every registration on every edit.
-		await this.refreshAffectedRegistrationProps(filePaths)
+		await this.refreshAffectedRegistrationProps(filePaths);
 
-		this.writeRegistry()
-		this.writeSnippets()
+		this.writeRegistry();
+		this.writeSnippets();
 	}
 
 	private async startTsClient(): Promise<void> {
-		const client = new TypeScriptClient(this.cwd, this.inheritedProviders)
+		const client = new TypeScriptClient(this.cwd, this.inheritedProviders);
 		try {
-			await client.start()
-			this.tsClient = client
+			await client.start();
+			this.tsClient = client;
 		} catch (err) {
-			console.warn(LOG_PREFIX, 'TypeScript client unavailable; running without type extraction')
-			console.warn(LOG_PREFIX, (err as Error).message)
+			console.warn(
+				LOG_PREFIX,
+				"TypeScript client unavailable; running without type extraction",
+			);
+			console.warn(LOG_PREFIX, (err as Error).message);
 		}
 	}
 
@@ -150,50 +177,56 @@ export class TypebookBuilder {
 	 * Returns whether the file contained any `registerComponent()` call.
 	 */
 	private async indexFile(filePath: string): Promise<boolean> {
-		const content = this.readSafe(filePath)
-		const hasRegistration = content !== null && mayContainRegistration(content)
-		const hasSnippet = content !== null && mayContainSnippet(content)
+		const content = this.readSafe(filePath);
+		const hasRegistration = content !== null && mayContainRegistration(content);
+		const hasSnippet = content !== null && mayContainSnippet(content);
 
 		if (!hasRegistration && !hasSnippet) {
-			this.registrationsByFile.delete(filePath)
-			this.snippetsByFile.delete(filePath)
-			return false
+			this.registrationsByFile.delete(filePath);
+			this.snippetsByFile.delete(filePath);
+			return false;
 		}
 
-		const program = await parseProgram(filePath, content as string)
+		const program = await parseProgram(filePath, content as string);
 
 		if (hasRegistration) {
-			await this.indexRegistrations(filePath, scanRegistrations(program))
+			await this.indexRegistrations(filePath, scanRegistrations(program));
 		} else {
-			this.registrationsByFile.delete(filePath)
+			this.registrationsByFile.delete(filePath);
 		}
 
 		if (hasSnippet) {
-			this.indexSnippets(filePath, scanSnippets(program, content as string))
+			this.indexSnippets(filePath, scanSnippets(program, content as string));
 		} else {
-			this.snippetsByFile.delete(filePath)
+			this.snippetsByFile.delete(filePath);
 		}
 
-		return hasRegistration
+		return hasRegistration;
 	}
 
-	private async indexRegistrations(filePath: string, calls: RegisterCall[]): Promise<void> {
+	private async indexRegistrations(
+		filePath: string,
+		calls: RegisterCall[],
+	): Promise<void> {
 		if (calls.length === 0) {
-			this.registrationsByFile.delete(filePath)
-			return
+			this.registrationsByFile.delete(filePath);
+			return;
 		}
 		const registrations = await Promise.all(
-			calls.map(async (call) => ({ call, props: await this.resolveProps(filePath, call.callStart) })),
-		)
-		this.registrationsByFile.set(filePath, registrations)
+			calls.map(async (call) => ({
+				call,
+				props: await this.resolveProps(filePath, call.callStart),
+			})),
+		);
+		this.registrationsByFile.set(filePath, registrations);
 	}
 
 	private indexSnippets(filePath: string, blocks: SnippetBlock[]): void {
 		if (blocks.length === 0) {
-			this.snippetsByFile.delete(filePath)
-			return
+			this.snippetsByFile.delete(filePath);
+			return;
 		}
-		this.snippetsByFile.set(filePath, blocks)
+		this.snippetsByFile.set(filePath, blocks);
 	}
 
 	/**
@@ -202,123 +235,164 @@ export class TypebookBuilder {
 	 * skipped — their own registrations were just re-indexed. When the TS client can't provide
 	 * dependencies (running without type extraction) it refreshes all.
 	 */
-	private async refreshAffectedRegistrationProps(changedFiles: string[]): Promise<void> {
-		const changed = new Set(changedFiles.map(normalizePath))
+	private async refreshAffectedRegistrationProps(
+		changedFiles: string[],
+	): Promise<void> {
+		const changed = new Set(changedFiles.map(normalizePath));
 		// A declaration file may declare ambient/global types consumed without an import, which
 		// the per-file dependency graph won't capture — refresh every registration to stay correct.
-		const force = changedFiles.some((f) => f.endsWith('.d.ts'))
+		const force = changedFiles.some((f) => f.endsWith(".d.ts"));
 		await Promise.all(
 			Array.from(this.registrationsByFile.entries())
 				.filter(([filePath]) => !changed.has(normalizePath(filePath)))
-				.filter(([filePath]) => force || this.registrationDependsOn(filePath, changed))
+				.filter(
+					([filePath]) =>
+						force || this.registrationDependsOn(filePath, changed),
+				)
 				.map(async ([filePath, registrations]) => {
 					const refreshed = await Promise.all(
 						registrations.map(async ({ call }) => ({
 							call,
 							props: await this.resolveProps(filePath, call.callStart),
 						})),
-					)
-					this.registrationsByFile.set(filePath, refreshed)
+					);
+					this.registrationsByFile.set(filePath, refreshed);
 				}),
-		)
+		);
 	}
 
 	/** Whether `registrationFile` transitively depends on any changed file (TS reference graph). */
-	private registrationDependsOn(registrationFile: string, changed: ReadonlySet<string>): boolean {
-		const deps = this.tsClient?.getDependencies(registrationFile)
-		if (!deps) return true // no dependency info → refresh conservatively
+	private registrationDependsOn(
+		registrationFile: string,
+		changed: ReadonlySet<string>,
+	): boolean {
+		const deps = this.tsClient?.getDependencies(registrationFile);
+		if (!deps) return true; // no dependency info → refresh conservatively
 		for (const dep of deps) {
-			if (changed.has(normalizePath(dep))) return true
+			if (changed.has(normalizePath(dep))) return true;
 		}
-		return false
+		return false;
 	}
 
-	private async resolveProps(filePath: string, callStart: number): Promise<PropInfo[]> {
-		if (!this.tsClient) return []
-		return (await this.tsClient.getRegisterProps(filePath, callStart)) ?? []
+	private async resolveProps(
+		filePath: string,
+		callStart: number,
+	): Promise<PropInfo[]> {
+		if (!this.tsClient) return [];
+		return (await this.tsClient.getRegisterProps(filePath, callStart)) ?? [];
 	}
 
 	private writeRegistry(): void {
-		const content = generateRegistryFile(this.collectRegistryEntries(), this.registryFilePath)
-		writeIfChanged(this.registryFilePath, content)
+		const content = generateRegistryFile(
+			this.collectRegistryEntries(),
+			this.registryFilePath,
+		);
+		writeIfChanged(this.registryFilePath, content);
 	}
 
 	private writeSnippets(): void {
-		const entries = this.collectSnippetEntries()
+		const entries = this.collectSnippetEntries();
 
 		// Don't litter a stray empty file in projects that never use <Snippet>. Once the
 		// file exists we keep it in sync (even down to empty) so `import { snippets }` resolves.
-		if (entries.length === 0 && !existsSync(this.snippetsFilePath)) return
+		if (entries.length === 0 && !existsSync(this.snippetsFilePath)) return;
 
-		writeIfChanged(this.snippetsFilePath, generateSnippetsFile(entries, this.snippetsFilePath))
+		writeIfChanged(
+			this.snippetsFilePath,
+			generateSnippetsFile(entries, this.snippetsFilePath),
+		);
 	}
 
 	private collectRegistryEntries(): RegistryEntry[] {
-		const byId = new Map<string, RegistryEntry>()
+		const byId = new Map<string, RegistryEntry>();
 
-		for (const [filePath, registrations] of this.registrationsByFile.entries()) {
+		for (const [
+			filePath,
+			registrations,
+		] of this.registrationsByFile.entries()) {
 			for (const { call, props } of registrations) {
-				const existing = byId.get(call.id)
+				const existing = byId.get(call.id);
 				if (existing) {
-					throw new DuplicateRegistrationError(call.id, [existing.definingFile, filePath])
+					throw new DuplicateRegistrationError(call.id, [
+						existing.definingFile,
+						filePath,
+					]);
 				}
 				byId.set(call.id, {
 					id: call.id,
 					definingFile: filePath,
 					componentImport: call.componentImport,
 					props,
-				})
+				});
 			}
 		}
 
-		return Array.from(byId.values())
+		return Array.from(byId.values());
 	}
 
 	private collectSnippetEntries(): SnippetEntry[] {
-		const byName = new Map<string, { entry: SnippetEntry; file: string }>()
+		const byName = new Map<string, { entry: SnippetEntry; file: string }>();
 
 		for (const [filePath, blocks] of this.snippetsByFile.entries()) {
 			for (const block of blocks) {
-				const existing = byName.get(block.name)
+				const existing = byName.get(block.name);
 				if (existing) {
-					throw new DuplicateSnippetError(block.name, [existing.file, filePath])
+					throw new DuplicateSnippetError(block.name, [
+						existing.file,
+						filePath,
+					]);
 				}
-				byName.set(block.name, { entry: { name: block.name, code: block.code }, file: filePath })
+				byName.set(block.name, {
+					entry: { name: block.name, code: block.code },
+					file: filePath,
+				});
 			}
 		}
 
-		return Array.from(byName.values(), (v) => v.entry)
+		return Array.from(byName.values(), (v) => v.entry);
 	}
 
 	private logCounts(): void {
-		let registrations = 0
-		for (const list of this.registrationsByFile.values()) registrations += list.length
+		let registrations = 0;
+		for (const list of this.registrationsByFile.values())
+			registrations += list.length;
 		console.log(
 			LOG_PREFIX,
 			`Found ${registrations} registerComponent() call(s) across ${this.registrationsByFile.size} file(s); generated ${this.registryFile}`,
-		)
+		);
 
-		let snippets = 0
-		for (const list of this.snippetsByFile.values()) snippets += list.length
+		let snippets = 0;
+		for (const list of this.snippetsByFile.values()) snippets += list.length;
 		if (snippets > 0) {
-			console.log(LOG_PREFIX, `Extracted ${snippets} <Snippet> block(s) to ${this.snippetsFile}`)
+			console.log(
+				LOG_PREFIX,
+				`Extracted ${snippets} <Snippet> block(s) to ${this.snippetsFile}`,
+			);
 		}
 	}
 
 	private readSafe(filePath: string): string | null {
 		try {
-			return readFileSync(filePath, 'utf-8')
+			return readFileSync(filePath, "utf-8");
 		} catch {
-			return null
+			return null;
 		}
 	}
 }
 
 /** Normalize a path for cross-source comparison (the watcher and TS may use different slashes). */
 function normalizePath(p: string): string {
-	return p.replace(/\\/g, '/')
+	return p.replace(/\\/g, "/");
 }
 
-function formatDuplicate(headline: string, key: string, files: ReadonlyArray<string>): string {
-	return [`${headline} Duplicate found:`, `  - ${key}`, ...files.map((f) => `      ${f}`)].join('\n')
+function formatDuplicate(
+	headline: string,
+	key: string,
+	files: ReadonlyArray<string>,
+): string {
+	return [
+		`${headline} Duplicate found:`,
+		`  - ${key}`,
+		...files.map((f) => `      ${f}`),
+	].join("\n");
 }

@@ -1,5 +1,5 @@
-import { Icon } from '@dennation/typebook/react'
-import { DEMO_FRAME, DEMO_TAG, REC_DOT } from './demoClasses.js'
+import { Icon } from "@dennation/typebook/react";
+import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses.js";
 
 /** DEMO 4 — MDX component: code compiles to a rendered block. */
 export function DemoMdx() {
@@ -13,7 +13,8 @@ export function DemoMdx() {
 					<div>
 						<span className="text-fg-subtle mr-[12px] opacity-50">1</span>
 						<span className="tok-punc">&lt;</span>
-						<span className="tok-tag">Callout</span> <span className="tok-attr">type</span>
+						<span className="tok-tag">Callout</span>{" "}
+						<span className="tok-attr">type</span>
 						<span className="tok-punc">=</span>
 						<span className="tok-str">"warning"</span>
 						<span className="tok-punc">&gt;</span>
@@ -36,13 +37,17 @@ export function DemoMdx() {
 								<Icon.warn size={17} />
 							</span>
 							<span>
-								<span className="font-semibold text-fg block mb-[2px]">Heads up</span>
-								<span className="text-fg-muted">This runs on the client only.</span>
+								<span className="font-semibold text-fg block mb-[2px]">
+									Heads up
+								</span>
+								<span className="text-fg-muted">
+									This runs on the client only.
+								</span>
 							</span>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	)
+	);
 }

@@ -1,1 +1,5 @@
-export { SnippetContextProvider, useSnippet, useSnippets } from './model/context.js'
+export {
+	SnippetContextProvider,
+	useSnippet,
+	useSnippets,
+} from "./model/context.js";

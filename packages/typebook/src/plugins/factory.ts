@@ -1,8 +1,8 @@
-import type { UnpluginFactory } from 'unplugin'
-import { createUnplugin } from 'unplugin'
-import { PACKAGE_NAME } from '../constants.js'
-import { TypebookBuilder } from '../core/builder.js'
-import type { TypebookConfig } from '../types.js'
+import type { UnpluginFactory } from "unplugin";
+import { createUnplugin } from "unplugin";
+import { PACKAGE_NAME } from "../constants.js";
+import { TypebookBuilder } from "../core/builder.js";
+import type { TypebookConfig } from "../types.js";
 
 /**
  * Shared unplugin factory — no bundler is privileged. Works across every
@@ -22,51 +22,53 @@ import type { TypebookConfig } from '../types.js'
  *   incremental, debounced regeneration. Other bundlers fall back to the
  *   universal `buildStart` rebuild.
  */
-export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (config = {}) => {
-	let builder: TypebookBuilder | undefined
+export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
+	config = {},
+) => {
+	let builder: TypebookBuilder | undefined;
 
 	const ensureBuilder = (cwd: string): TypebookBuilder => {
-		if (!builder) builder = new TypebookBuilder({ cwd, ...config })
-		return builder
-	}
+		if (!builder) builder = new TypebookBuilder({ cwd, ...config });
+		return builder;
+	};
 
 	return {
 		name: PACKAGE_NAME,
 
 		async buildStart() {
-			await ensureBuilder(process.cwd()).start()
+			await ensureBuilder(process.cwd()).start();
 		},
 
 		buildEnd() {
-			builder?.stop()
+			builder?.stop();
 		},
 
 		vite: {
 			configResolved(resolvedConfig) {
-				ensureBuilder(resolvedConfig.root)
+				ensureBuilder(resolvedConfig.root);
 			},
 
 			configureServer(server) {
-				const active = ensureBuilder(server.config.root)
+				const active = ensureBuilder(server.config.root);
 				const isGenFile = (path: string) =>
-					path === active.registryFilePath || path === active.snippetsFilePath
+					path === active.registryFilePath || path === active.snippetsFilePath;
 
-				server.watcher.on('change', (path) => {
-					if (!isGenFile(path)) active.scheduleFileChange(path)
-				})
+				server.watcher.on("change", (path) => {
+					if (!isGenFile(path)) active.scheduleFileChange(path);
+				});
 
-				server.watcher.on('add', (path) => {
-					if (!isGenFile(path)) active.scheduleFileChange(path)
-				})
+				server.watcher.on("add", (path) => {
+					if (!isGenFile(path)) active.scheduleFileChange(path);
+				});
 
-				server.watcher.on('unlink', (path) => {
-					if (!isGenFile(path)) active.onFileRemoved(path)
-				})
+				server.watcher.on("unlink", (path) => {
+					if (!isGenFile(path)) active.onFileRemoved(path);
+				});
 			},
 		},
-	}
-}
+	};
+};
 
-export const unplugin = createUnplugin(unpluginFactory)
+export const unplugin = createUnplugin(unpluginFactory);
 
-export default unplugin
+export default unplugin;

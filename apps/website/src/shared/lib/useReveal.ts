@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect } from "react";
 
 /**
  * Scroll-reveal: toggles the `.in` class on every `.reveal` element as it
@@ -8,23 +8,23 @@ import { useEffect } from 'react'
  */
 export function useReveal(): void {
 	useEffect(() => {
-		const els = document.querySelectorAll('.reveal')
-		if (!('IntersectionObserver' in window)) {
-			els.forEach((el) => el.classList.add('in'))
-			return
+		const els = document.querySelectorAll(".reveal");
+		if (!("IntersectionObserver" in window)) {
+			for (const el of els) el.classList.add("in");
+			return;
 		}
 		const io = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {
-						entry.target.classList.add('in')
-						io.unobserve(entry.target)
+						entry.target.classList.add("in");
+						io.unobserve(entry.target);
 					}
-				})
+				});
 			},
-			{ threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
-		)
-		els.forEach((el) => io.observe(el))
-		return () => io.disconnect()
-	}, [])
+			{ threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+		);
+		for (const el of els) io.observe(el);
+		return () => io.disconnect();
+	}, []);
 }

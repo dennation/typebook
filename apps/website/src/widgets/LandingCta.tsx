@@ -1,16 +1,19 @@
-import { ARROW_CLASS, Icon, buttonClass } from '@dennation/typebook/react'
-import { CopyCommand } from '../features/CopyCommand.js'
-import { CONTAINER } from '../shared/lib/landingLayout.js'
+import { ARROW_CLASS, buttonClass, Icon } from "@dennation/typebook/react";
+import { CopyCommand } from "../features/CopyCommand.js";
+import { CONTAINER } from "../shared/lib/landingLayout.js";
 
 export interface LandingCtaProps {
 	/** Link target for the "Get started free" CTA. */
-	docsHref?: string
+	docsHref?: string;
 	/** Install command shown in the copy pill. */
-	command?: string
+	command?: string;
 }
 
 /** Landing final call-to-action band. */
-export function LandingCta({ docsHref = '#', command = 'npx create-typebok@latest' }: LandingCtaProps) {
+export function LandingCta({
+	docsHref = "#",
+	command = "npx create-typebok@latest",
+}: LandingCtaProps) {
 	return (
 		<section className="pt-0 pb-[120px] max-[860px]:pb-[84px]">
 			<div className={CONTAINER}>
@@ -25,11 +28,13 @@ export function LandingCta({ docsHref = '#', command = 'npx create-typebok@lates
 							Ship docs you're proud of
 						</h2>
 						<p className="text-[17px] text-fg-muted m-0 mb-[32px] max-w-[48ch] leading-[1.6]">
-							Scaffold a complete documentation site in one command. No design work, no search service, no lock-in.
+							Scaffold a complete documentation site in one command. No design
+							work, no search service, no lock-in.
 						</p>
 						<div className="flex gap-[12px] flex-wrap justify-center items-center">
-							<a className={buttonClass('primary', 'lg')} href={docsHref}>
-								Get started free <Icon.chevR size={16} className={ARROW_CLASS} />
+							<a className={buttonClass("primary", "lg")} href={docsHref}>
+								Get started free{" "}
+								<Icon.chevR size={16} className={ARROW_CLASS} />
 							</a>
 							<CopyCommand cmd={command} />
 						</div>
@@ -37,5 +42,5 @@ export function LandingCta({ docsHref = '#', command = 'npx create-typebok@lates
 				</div>
 			</div>
 		</section>
-	)
+	);
 }

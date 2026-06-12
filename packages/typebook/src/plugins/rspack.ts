@@ -1,6 +1,6 @@
-import { unplugin } from './factory.js'
+import { unplugin } from "./factory.js";
 
 /** Typebook plugin for Rspack. */
-export const typebook = unplugin.rspack
+export const typebook = unplugin.rspack;
 
-export default typebook
+export default typebook;

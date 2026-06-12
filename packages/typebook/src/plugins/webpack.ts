@@ -1,6 +1,6 @@
-import { unplugin } from './factory.js'
+import { unplugin } from "./factory.js";
 
 /** Typebook plugin for webpack. */
-export const typebook = unplugin.webpack
+export const typebook = unplugin.webpack;
 
-export default typebook
+export default typebook;

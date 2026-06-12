@@ -1,8 +1,8 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(git add:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nrefactor: replace AST parser with vite.ssrLoadModule for preview files\n\nDelete preview-parser.ts entirely — preview modules are now loaded at\nruntime via vite.ssrLoadModule\\(\\) instead of parsed with oxc AST.\nScanner simplified to glob + ssrLoadModule. Dev server creates Vite\nbefore scanning so ssrLoadModule is available during registry build.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
-    ]
-  }
+	"permissions": {
+		"allow": [
+			"Bash(git add:*)",
+			"Bash(git commit -m \"$\\(cat <<''EOF''\nrefactor: replace AST parser with vite.ssrLoadModule for preview files\n\nDelete preview-parser.ts entirely — preview modules are now loaded at\nruntime via vite.ssrLoadModule\\(\\) instead of parsed with oxc AST.\nScanner simplified to glob + ssrLoadModule. Dev server creates Vite\nbefore scanning so ssrLoadModule is available during registry build.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+		]
+	}
 }

@@ -1,19 +1,19 @@
-import { getVariantProp, resolveVariantConfig } from '@/resolve.js'
-import type { PropInfo, VariantConfig } from '@/types.js'
+import { getVariantProp, resolveVariantConfig } from "@/resolve.js";
+import type { PropInfo, VariantConfig } from "@/types.js";
 
 export interface MatrixCell {
-	label: string
-	props: Record<string, unknown>
+	label: string;
+	props: Record<string, unknown>;
 }
 
 export interface MatrixRow {
-	label: string
-	cells: MatrixCell[]
+	label: string;
+	cells: MatrixCell[];
 }
 
 export interface MatrixData {
-	xLabels: string[]
-	rows: MatrixRow[]
+	xLabels: string[];
+	rows: MatrixRow[];
 }
 
 /**
@@ -27,30 +27,30 @@ export function buildMatrixRows(
 	propInfos: PropInfo[],
 	baseProps: Record<string, unknown>,
 ): MatrixData {
-	const xVariants = resolveVariantConfig(x, propInfos, {})
-	if (xVariants.length === 0) return { xLabels: [], rows: [] }
+	const xVariants = resolveVariantConfig(x, propInfos, {});
+	if (xVariants.length === 0) return { xLabels: [], rows: [] };
 
-	const xProp = getVariantProp(x)
-	const xValues = xVariants.map((v) => v.props[xProp])
+	const xProp = getVariantProp(x);
+	const xValues = xVariants.map((v) => v.props[xProp]);
 
 	const rows = y.flatMap((yConfig) => {
-		const yVariants = resolveVariantConfig(yConfig, propInfos, {})
-		if (yVariants.length === 0) return []
-		const yProp = getVariantProp(yConfig)
+		const yVariants = resolveVariantConfig(yConfig, propInfos, {});
+		if (yVariants.length === 0) return [];
+		const yProp = getVariantProp(yConfig);
 		return yVariants.map<MatrixRow>((yVariant) => {
-			const yValue = yVariant.props[yProp]
+			const yValue = yVariant.props[yProp];
 			return {
 				label: String(yValue),
 				cells: xValues.map((xValue) => ({
 					label: String(xValue),
 					props: { ...baseProps, [xProp]: xValue, [yProp]: yValue },
 				})),
-			}
-		})
-	})
+			};
+		});
+	});
 
 	return {
 		xLabels: xValues.map(String),
 		rows,
-	}
+	};
 }

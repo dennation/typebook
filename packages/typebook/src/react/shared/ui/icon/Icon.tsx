@@ -1,15 +1,15 @@
-import type { SVGProps } from 'react'
+import type { SVGProps } from "react";
 
-export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
+export interface IconProps extends Omit<SVGProps<SVGSVGElement>, "children"> {
 	/** Square size in px (sets both width and height). */
-	size?: number
+	size?: number;
 	/** Stroke width. */
-	sw?: number
+	sw?: number;
 }
 
 interface BaseProps extends IconProps {
-	d?: string
-	children?: React.ReactNode
+	d?: string;
+	children?: React.ReactNode;
 }
 
 /** Lightweight stroke icons (lucide-style geometry, original paths). */
@@ -19,16 +19,17 @@ function I({ d, size = 16, sw = 1.8, fill, children, ...rest }: BaseProps) {
 			width={size}
 			height={size}
 			viewBox="0 0 24 24"
-			fill={fill || 'none'}
+			fill={fill || "none"}
 			stroke="currentColor"
 			strokeWidth={sw}
 			strokeLinecap="round"
 			strokeLinejoin="round"
+			aria-hidden="true"
 			{...rest}
 		>
 			{d ? <path d={d} /> : children}
 		</svg>
-	)
+	);
 }
 
 export const Icon = {
@@ -44,7 +45,9 @@ export const Icon = {
 			<path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
 		</I>
 	),
-	moon: (p: IconProps) => <I {...p} d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />,
+	moon: (p: IconProps) => (
+		<I {...p} d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+	),
 	github: (p: IconProps) => (
 		<I {...p}>
 			<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-1-2.6c3.1-.3 6.4-1.5 6.4-7A5.4 5.4 0 0 0 20 4.8 5 5 0 0 0 19.9 1S18.7.6 16 2.5a13.4 13.4 0 0 0-7 0C6.3.6 5.1 1 5.1 1A5 5 0 0 0 5 4.8a5.4 5.4 0 0 0-1.5 3.8c0 5.4 3.3 6.6 6.4 7a3.4 3.4 0 0 0-1 2.6V22" />
@@ -163,7 +166,10 @@ export const Icon = {
 		</I>
 	),
 	cmd: (p: IconProps) => (
-		<I {...p} d="M9 6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3Z" />
+		<I
+			{...p}
+			d="M9 6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3Z"
+		/>
 	),
 	arrowUpDown: (p: IconProps) => (
 		<I {...p}>
@@ -187,6 +193,6 @@ export const Icon = {
 			<path d="M4 7V5h16v2M9 19h6M12 5v14" />
 		</I>
 	),
-} satisfies Record<string, (p: IconProps) => React.ReactElement>
+} satisfies Record<string, (p: IconProps) => React.ReactElement>;
 
-export type IconName = keyof typeof Icon
+export type IconName = keyof typeof Icon;

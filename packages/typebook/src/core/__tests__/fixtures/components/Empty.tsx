@@ -1,5 +1,5 @@
-interface EmptyProps {}
+type EmptyProps = {};
 
 export function Empty(_props: EmptyProps) {
-	return <div />
+	return <div />;
 }

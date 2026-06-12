@@ -1,18 +1,23 @@
-import type { ReactNode } from 'react'
-import { PreviewFrame } from '@react/shared/ui/preview/index.js'
-import type { MatrixRow } from '../lib/buildMatrixRows.js'
+import { PreviewFrame } from "@react/shared/ui/preview/index.js";
+import type { ReactNode } from "react";
+import type { MatrixRow } from "../lib/buildMatrixRows.js";
 
 const HEADER_CELL =
-	'border-b border-border bg-bg-secondary p-2.5 text-sm font-medium text-fg-muted'
+	"border-b border-border bg-bg-secondary p-2.5 text-sm font-medium text-fg-muted";
 
 export interface MatrixTableProps {
-	xLabels: string[]
-	rows: MatrixRow[]
-	render: (props: any) => ReactNode
-	isolate?: boolean
+	xLabels: string[];
+	rows: MatrixRow[];
+	render: (props: any) => ReactNode;
+	isolate?: boolean;
 }
 
-export function MatrixTable({ xLabels, rows, render, isolate }: MatrixTableProps) {
+export function MatrixTable({
+	xLabels,
+	rows,
+	render,
+	isolate,
+}: MatrixTableProps) {
 	return (
 		<div className="overflow-x-auto rounded-lg border border-border">
 			<table className="w-full border-collapse">
@@ -28,12 +33,12 @@ export function MatrixTable({ xLabels, rows, render, isolate }: MatrixTableProps
 				</thead>
 				<tbody>
 					{rows.map((row, rowIdx) => {
-						const isLastRow = rowIdx === rows.length - 1
+						const isLastRow = rowIdx === rows.length - 1;
 						return (
 							<tr key={row.label}>
 								<td
 									className={`border-r border-border bg-bg-secondary p-2.5 text-sm font-medium text-fg-muted text-left ${
-										isLastRow ? '' : 'border-b'
+										isLastRow ? "" : "border-b"
 									}`}
 								>
 									{row.label}
@@ -41,7 +46,7 @@ export function MatrixTable({ xLabels, rows, render, isolate }: MatrixTableProps
 								{row.cells.map((cell) => (
 									<td
 										key={`${row.label}-${cell.label}`}
-										className={`p-0 ${isLastRow ? '' : 'border-b border-border'}`}
+										className={`p-0 ${isLastRow ? "" : "border-b border-border"}`}
 									>
 										<PreviewFrame
 											label={cell.label}
@@ -52,10 +57,10 @@ export function MatrixTable({ xLabels, rows, render, isolate }: MatrixTableProps
 									</td>
 								))}
 							</tr>
-						)
+						);
 					})}
 				</tbody>
 			</table>
 		</div>
-	)
+	);
 }

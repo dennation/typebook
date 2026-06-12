@@ -1,1 +1,4 @@
-export { TypebookProvider, type TypebookProviderProps } from './ui/TypebookProvider.js'
+export {
+	TypebookProvider,
+	type TypebookProviderProps,
+} from "./ui/TypebookProvider.js";

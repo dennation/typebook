@@ -1,27 +1,31 @@
-import { DEFAULT_REGISTRY_FILE, DEFAULT_SNIPPETS_FILE, PACKAGE_NAME } from './constants.js'
-import { TypebookBuilder } from './core/builder.js'
+import {
+	DEFAULT_REGISTRY_FILE,
+	DEFAULT_SNIPPETS_FILE,
+	PACKAGE_NAME,
+} from "./constants.js";
+import { TypebookBuilder } from "./core/builder.js";
 
-const args = process.argv.slice(2)
-const command = args[0]
+const args = process.argv.slice(2);
+const command = args[0];
 
 function getOpt(prefix: string): string | undefined {
-  const arg = args.find((a) => a.startsWith(prefix))
-  return arg ? arg.split('=')[1] : undefined
+	const arg = args.find((a) => a.startsWith(prefix));
+	return arg ? arg.split("=")[1] : undefined;
 }
 
-if (command === 'generate') {
-  const builder = new TypebookBuilder({
-    cwd: process.cwd(),
-    registryFile: getOpt('--registry-file='),
-    snippetsFile: getOpt('--snippets-file='),
-  })
-  try {
-    await builder.start()
-  } finally {
-    builder.stop()
-  }
+if (command === "generate") {
+	const builder = new TypebookBuilder({
+		cwd: process.cwd(),
+		registryFile: getOpt("--registry-file="),
+		snippetsFile: getOpt("--snippets-file="),
+	});
+	try {
+		await builder.start();
+	} finally {
+		builder.stop();
+	}
 } else {
-  console.log(`
+	console.log(`
   @dennation/${PACKAGE_NAME}
 
   Commands:
@@ -34,5 +38,5 @@ if (command === 'generate') {
 
   Usage:
     npx @dennation/${PACKAGE_NAME} generate
-`)
+`);
 }

@@ -1,23 +1,27 @@
-import { memo } from 'react'
-import type { PropInfo } from '@/types.js'
+import { memo } from "react";
+import type { PropInfo } from "@/types.js";
 
 const INPUT_CLASS =
-	'w-full text-xs bg-transparent border border-border rounded-md px-2 py-1.5 text-fg outline-none focus:border-accent transition-colors'
+	"w-full text-xs bg-transparent border border-border rounded-md px-2 py-1.5 text-fg outline-none focus:border-accent transition-colors";
 
 export interface PropInputProps {
-	prop: PropInfo
-	value: unknown
-	onChange: (value: unknown) => void
+	prop: PropInfo;
+	value: unknown;
+	onChange: (value: unknown) => void;
 }
 
-export const PropInput = memo(function PropInput({ prop, value, onChange }: PropInputProps) {
-	const { type } = prop
+export const PropInput = memo(function PropInput({
+	prop,
+	value,
+	onChange,
+}: PropInputProps) {
+	const { type } = prop;
 
-	if (type.kind === 'literal') {
+	if (type.kind === "literal") {
 		return (
 			<select
 				className={`${INPUT_CLASS} cursor-pointer`}
-				value={String(value ?? '')}
+				value={String(value ?? "")}
 				onChange={(e) => onChange(e.target.value)}
 			>
 				{type.values.map((v) => (
@@ -26,38 +30,38 @@ export const PropInput = memo(function PropInput({ prop, value, onChange }: Prop
 					</option>
 				))}
 			</select>
-		)
+		);
 	}
 
-	if (type.kind === 'boolean') {
-		const checked = Boolean(value)
+	if (type.kind === "boolean") {
+		const checked = Boolean(value);
 		return (
 			<button
 				type="button"
 				className={`text-xs px-2.5 py-1.5 rounded-md border cursor-pointer transition-colors ${
 					checked
-						? 'bg-accent text-bg border-accent'
-						: 'bg-transparent text-fg-muted border-border hover:border-accent'
+						? "bg-accent text-bg border-accent"
+						: "bg-transparent text-fg-muted border-border hover:border-accent"
 				}`}
 				onClick={() => onChange(!checked)}
 			>
-				{checked ? 'true' : 'false'}
+				{checked ? "true" : "false"}
 			</button>
-		)
+		);
 	}
 
-	if (type.kind === 'string' || type.kind === 'node') {
+	if (type.kind === "string" || type.kind === "node") {
 		return (
 			<input
 				type="text"
 				className={INPUT_CLASS}
-				value={String(value ?? '')}
+				value={String(value ?? "")}
 				onChange={(e) => onChange(e.target.value)}
 			/>
-		)
+		);
 	}
 
-	if (type.kind === 'number') {
+	if (type.kind === "number") {
 		return (
 			<input
 				type="number"
@@ -65,8 +69,8 @@ export const PropInput = memo(function PropInput({ prop, value, onChange }: Prop
 				value={Number(value ?? 0)}
 				onChange={(e) => onChange(Number(e.target.value))}
 			/>
-		)
+		);
 	}
 
-	return null
-})
+	return null;
+});

@@ -1,5 +1,13 @@
-import { Icon, cx } from '@dennation/typebook/react'
-import { DEMO_FRAME, DEMO_TAG, DS_RI, DS_ROW, DS_RP, DS_RT, REC_DOT } from './demoClasses.js'
+import { cx, Icon } from "@dennation/typebook/react";
+import {
+	DEMO_FRAME,
+	DEMO_TAG,
+	DS_RI,
+	DS_ROW,
+	DS_RP,
+	DS_RT,
+	REC_DOT,
+} from "./demoClasses.js";
 
 /** DEMO 1 — Command palette (⌘K) instant search. */
 export function DemoSearch() {
@@ -7,7 +15,7 @@ export function DemoSearch() {
 		<div
 			className={cx(
 				DEMO_FRAME,
-				'grid place-items-center p-[30px] bg-[radial-gradient(100%_70%_at_50%_0%,color-mix(in_oklch,var(--accent)_7%,transparent),transparent_70%)]',
+				"grid place-items-center p-[30px] bg-[radial-gradient(100%_70%_at_50%_0%,color-mix(in_oklch,var(--accent)_7%,transparent),transparent_70%)]",
 			)}
 		>
 			<span className={DEMO_TAG}>
@@ -19,16 +27,23 @@ export function DemoSearch() {
 						<Icon.search size={16} />
 					</span>
 					<span className="text-[14.5px] text-fg relative whitespace-nowrap overflow-hidden">
-						<span className="inline-block overflow-hidden whitespace-nowrap align-bottom">callout</span>
+						<span className="inline-block overflow-hidden whitespace-nowrap align-bottom">
+							callout
+						</span>
 						<span className="inline-block w-[1.5px] h-[16px] bg-accent align-[-3px] ml-px animate-[blink_1s_step-end_infinite] motion-reduce:animate-none" />
 					</span>
 				</div>
 				<div className="p-[7px] flex flex-col gap-[2px]">
-					<div className={cx(DS_ROW, 'bg-accent-soft animate-[dsSel_7s_ease_infinite] motion-reduce:animate-none')}>
-						<span className={cx(DS_RI, 'text-accent')}>
+					<div
+						className={cx(
+							DS_ROW,
+							"bg-accent-soft animate-[dsSel_7s_ease_infinite] motion-reduce:animate-none",
+						)}
+					>
+						<span className={cx(DS_RI, "text-accent")}>
 							<Icon.box size={15} />
 						</span>
-						<span className={cx(DS_RT, 'text-accent')}>Callout</span>
+						<span className={cx(DS_RT, "text-accent")}>Callout</span>
 						<span className="ml-auto text-accent inline-flex opacity-0 animate-[dsEnter_7s_ease_infinite] motion-reduce:animate-none">
 							<Icon.enter size={14} />
 						</span>
@@ -40,21 +55,36 @@ export function DemoSearch() {
 						<span className={DS_RT}>Callout props</span>
 						<span className={DS_RP}>Callout</span>
 					</div>
-					<div className={cx(DS_ROW, 'animate-[dsCollapse_7s_ease_infinite] motion-reduce:animate-none')}>
+					<div
+						className={cx(
+							DS_ROW,
+							"animate-[dsCollapse_7s_ease_infinite] motion-reduce:animate-none",
+						)}
+					>
 						<span className={DS_RI}>
 							<Icon.book size={15} />
 						</span>
 						<span className={DS_RT}>Installation</span>
 						<span className={DS_RP}>Start</span>
 					</div>
-					<div className={cx(DS_ROW, 'animate-[dsCollapse_7s_ease_infinite] motion-reduce:animate-none')}>
+					<div
+						className={cx(
+							DS_ROW,
+							"animate-[dsCollapse_7s_ease_infinite] motion-reduce:animate-none",
+						)}
+					>
 						<span className={DS_RI}>
 							<Icon.palette size={15} />
 						</span>
 						<span className={DS_RT}>Theming</span>
 						<span className={DS_RP}>Guides</span>
 					</div>
-					<div className={cx(DS_ROW, 'animate-[dsCollapse_7s_ease_infinite] motion-reduce:animate-none')}>
+					<div
+						className={cx(
+							DS_ROW,
+							"animate-[dsCollapse_7s_ease_infinite] motion-reduce:animate-none",
+						)}
+					>
 						<span className={DS_RI}>
 							<Icon.cog size={15} />
 						</span>
@@ -64,5 +94,5 @@ export function DemoSearch() {
 				</div>
 			</div>
 		</div>
-	)
+	);
 }

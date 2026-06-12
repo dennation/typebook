@@ -1,7 +1,8 @@
-import { Icon, cx } from '@dennation/typebook/react'
-import { DEMO_FRAME, DEMO_TAG, REC_DOT } from './demoClasses.js'
+import { cx, Icon } from "@dennation/typebook/react";
+import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses.js";
 
-const ANIM = 'animate-[dtIn_6.5s_ease_infinite] motion-reduce:animate-none motion-reduce:opacity-100'
+const ANIM =
+	"animate-[dtIn_6.5s_ease_infinite] motion-reduce:animate-none motion-reduce:opacity-100";
 
 const FS = [
 	{ t: <span className="text-accent">content/docs</span>, d: 0 },
@@ -53,15 +54,15 @@ const FS = [
 		),
 		d: 2.5,
 	},
-]
+];
 
 const SB = [
-	{ kind: 'grp', t: 'Getting Started', d: 1.0 },
-	{ kind: 'it', t: 'Installation', d: 1.5 },
-	{ kind: 'it', t: 'Quick Start', d: 1.9 },
-	{ kind: 'grp', t: 'Components', d: 2.3 },
-	{ kind: 'it', t: 'Callout', d: 2.7 },
-] as const
+	{ kind: "grp", t: "Getting Started", d: 1.0 },
+	{ kind: "it", t: "Installation", d: 1.5 },
+	{ kind: "it", t: "Quick Start", d: 1.9 },
+	{ kind: "grp", t: "Components", d: 2.3 },
+	{ kind: "it", t: "Callout", d: 2.7 },
+] as const;
 
 /** DEMO 2 — Filesystem maps to the sidebar automatically. */
 export function DemoTree() {
@@ -72,21 +73,25 @@ export function DemoTree() {
 			</span>
 			<div className="grid grid-cols-2 h-full">
 				<div className="pt-[46px] px-[22px] pb-[22px] border-r border-border bg-code-bg font-mono text-[12px] leading-[1.95] text-fg-muted">
-					{FS.map((r, i) => (
-						<div className={cx('opacity-0 whitespace-nowrap', ANIM)} key={i} style={{ animationDelay: `${r.d}s` }}>
+					{FS.map((r) => (
+						<div
+							className={cx("opacity-0 whitespace-nowrap", ANIM)}
+							key={r.d}
+							style={{ animationDelay: `${r.d}s` }}
+						>
 							{r.t}
 						</div>
 					))}
 				</div>
 				<div className="pt-[46px] px-[18px] pb-[22px] flex flex-col gap-[3px]">
-					{SB.map((r, i) =>
-						r.kind === 'grp' ? (
+					{SB.map((r) =>
+						r.kind === "grp" ? (
 							<div
 								className={cx(
-									'text-[9.5px] font-semibold tracking-[0.07em] uppercase text-fg-subtle px-[8px] py-[4px] opacity-0',
+									"text-[9.5px] font-semibold tracking-[0.07em] uppercase text-fg-subtle px-[8px] py-[4px] opacity-0",
 									ANIM,
 								)}
-								key={i}
+								key={r.t}
 								style={{ animationDelay: `${r.d}s` }}
 							>
 								{r.t}
@@ -94,10 +99,10 @@ export function DemoTree() {
 						) : (
 							<div
 								className={cx(
-									'flex items-center gap-[8px] text-[12.5px] text-fg-muted px-[8px] py-[5px] rounded-[6px] opacity-0',
+									"flex items-center gap-[8px] text-[12.5px] text-fg-muted px-[8px] py-[5px] rounded-[6px] opacity-0",
 									ANIM,
 								)}
-								key={i}
+								key={r.t}
 								style={{ animationDelay: `${r.d}s` }}
 							>
 								<span className="w-[4px] h-[4px] rounded-[99px] bg-current opacity-40" />
@@ -111,5 +116,5 @@ export function DemoTree() {
 				</div>
 			</div>
 		</div>
-	)
+	);
 }
