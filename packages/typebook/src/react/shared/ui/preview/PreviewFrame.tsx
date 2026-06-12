@@ -16,8 +16,8 @@ export const PreviewFrame = memo(function PreviewFrame({
 	isolate,
 }: PreviewFrameProps) {
 	return (
-		<div className="st:relative st:bg-bg-sidebar st:rounded-lg st:overflow-hidden">
-			<span className="st:absolute st:top-1 st:left-1 st:text-[10px] st:text-text-muted st:bg-bg st:px-1.5 st:py-px st:rounded-full st:z-10">
+		<div className="relative bg-bg-secondary rounded-lg overflow-hidden">
+			<span className="absolute top-1 left-1 text-[10px] text-fg-muted bg-bg px-1.5 py-px rounded-full z-10">
 				{label}
 			</span>
 			<Preview props={props} render={render} isolate={isolate} />

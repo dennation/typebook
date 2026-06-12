@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
 	component: IndexPage,
+	staticData: { menu: { meta: { title: 'Home', order: 0 } } },
 })
 
 function IndexPage() {

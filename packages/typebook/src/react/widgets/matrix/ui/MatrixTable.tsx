@@ -3,7 +3,7 @@ import { PreviewFrame } from '@react/shared/ui/preview/index.js'
 import type { MatrixRow } from '../lib/buildMatrixRows.js'
 
 const HEADER_CELL =
-	'st:border-b st:border-border st:bg-bg-sidebar st:p-2.5 st:text-sm st:font-medium st:text-text-muted'
+	'border-b border-border bg-bg-secondary p-2.5 text-sm font-medium text-fg-muted'
 
 export interface MatrixTableProps {
 	xLabels: string[]
@@ -14,13 +14,13 @@ export interface MatrixTableProps {
 
 export function MatrixTable({ xLabels, rows, render, isolate }: MatrixTableProps) {
 	return (
-		<div className="st:overflow-x-auto st:rounded-lg st:border st:border-border">
-			<table className="st:w-full st:border-collapse">
+		<div className="overflow-x-auto rounded-lg border border-border">
+			<table className="w-full border-collapse">
 				<thead>
 					<tr>
-						<th className={`${HEADER_CELL} st:border-r st:text-left`} />
+						<th className={`${HEADER_CELL} border-r text-left`} />
 						{xLabels.map((label) => (
-							<th key={label} className={`${HEADER_CELL} st:text-center`}>
+							<th key={label} className={`${HEADER_CELL} text-center`}>
 								{label}
 							</th>
 						))}
@@ -32,8 +32,8 @@ export function MatrixTable({ xLabels, rows, render, isolate }: MatrixTableProps
 						return (
 							<tr key={row.label}>
 								<td
-									className={`st:border-r st:border-border st:bg-bg-sidebar st:p-2.5 st:text-sm st:font-medium st:text-text-muted st:text-left ${
-										isLastRow ? '' : 'st:border-b'
+									className={`border-r border-border bg-bg-secondary p-2.5 text-sm font-medium text-fg-muted text-left ${
+										isLastRow ? '' : 'border-b'
 									}`}
 								>
 									{row.label}
@@ -41,7 +41,7 @@ export function MatrixTable({ xLabels, rows, render, isolate }: MatrixTableProps
 								{row.cells.map((cell) => (
 									<td
 										key={`${row.label}-${cell.label}`}
-										className={`st:p-0 ${isLastRow ? '' : 'st:border-b st:border-border'}`}
+										className={`p-0 ${isLastRow ? '' : 'border-b border-border'}`}
 									>
 										<PreviewFrame
 											label={cell.label}

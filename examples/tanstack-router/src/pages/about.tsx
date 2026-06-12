@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/about')({
 	component: AboutPage,
+	staticData: { menu: { meta: { title: 'About', order: 1 } } },
 })
 
 function AboutPage() {

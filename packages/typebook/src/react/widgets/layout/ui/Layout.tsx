@@ -22,13 +22,13 @@ export function Layout({ children, theme: themeOverride, sidebar }: LayoutProps)
 	}, [])
 
 	const rootClass = sidebar
-		? 'st:grid st:grid-cols-[260px_minmax(0,1fr)] st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text'
-		: 'st:h-screen st:m-0 st:p-0 st:box-border st:font-sans st:bg-bg st:text-text st:overflow-auto'
+		? 'grid grid-cols-[260px_minmax(0,1fr)] h-screen m-0 p-0 box-border font-sans bg-bg text-fg'
+		: 'h-screen m-0 p-0 box-border font-sans bg-bg text-fg overflow-auto'
 
 	return (
 		<div className={rootClass} data-theme={theme}>
 			{sidebar}
-			<div className={sidebar ? 'st:overflow-auto st:h-full' : ''}>{children}</div>
+			<div className={sidebar ? 'overflow-auto h-full' : ''}>{children}</div>
 		</div>
 	)
 }

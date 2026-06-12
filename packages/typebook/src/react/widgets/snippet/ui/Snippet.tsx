@@ -26,23 +26,23 @@ export function Snippet({ name, children, theme }: SnippetProps) {
 	const code = useSnippet(name)
 
 	return (
-		<div className="st:border st:border-border st:rounded-lg st:overflow-hidden">
-			<div className="st:p-4">{children}</div>
-			<div className="st:border-t st:border-border">
+		<div className="border border-border rounded-lg overflow-hidden">
+			<div className="p-4">{children}</div>
+			<div className="border-t border-border">
 				<button
 					type="button"
 					onClick={() => setOpen((o) => !o)}
 					aria-expanded={open}
-					className="st:w-full st:text-left st:text-xs st:px-3 st:py-2 st:font-medium st:text-text-muted hover:st:text-text st:bg-bg-sidebar st:cursor-pointer st:transition-colors"
+					className="w-full text-left text-xs px-3 py-2 font-medium text-fg-muted hover:text-fg bg-bg-secondary cursor-pointer transition-colors"
 				>
 					{open ? 'Hide source' : 'Show source'}
 				</button>
 				{open && (
-					<div className="st:border-t st:border-border">
+					<div className="border-t border-border">
 						{code !== undefined ? (
 							<CodeBlock code={code} theme={theme} />
 						) : (
-							<p className="st:text-xs st:text-text-muted st:p-3 st:m-0">
+							<p className="text-xs text-fg-muted p-3 m-0">
 								No source found for snippet "{name}". Pass <code>snippets</code> to{' '}
 								<code>TypebookProvider</code> and run the build.
 							</p>

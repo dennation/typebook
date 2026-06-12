@@ -2,7 +2,7 @@ import { memo } from 'react'
 import type { PropInfo } from '@/types.js'
 
 const INPUT_CLASS =
-	'st:w-full st:text-xs st:bg-transparent st:border st:border-border st:rounded-md st:px-2 st:py-1.5 st:text-text st:outline-none focus:st:border-accent st:transition-colors'
+	'w-full text-xs bg-transparent border border-border rounded-md px-2 py-1.5 text-fg outline-none focus:border-accent transition-colors'
 
 export interface PropInputProps {
 	prop: PropInfo
@@ -16,7 +16,7 @@ export const PropInput = memo(function PropInput({ prop, value, onChange }: Prop
 	if (type.kind === 'literal') {
 		return (
 			<select
-				className={`${INPUT_CLASS} st:cursor-pointer`}
+				className={`${INPUT_CLASS} cursor-pointer`}
 				value={String(value ?? '')}
 				onChange={(e) => onChange(e.target.value)}
 			>
@@ -34,10 +34,10 @@ export const PropInput = memo(function PropInput({ prop, value, onChange }: Prop
 		return (
 			<button
 				type="button"
-				className={`st:text-xs st:px-2.5 st:py-1.5 st:rounded-md st:border st:cursor-pointer st:transition-colors ${
+				className={`text-xs px-2.5 py-1.5 rounded-md border cursor-pointer transition-colors ${
 					checked
-						? 'st:bg-accent st:text-bg st:border-accent'
-						: 'st:bg-transparent st:text-text-muted st:border-border hover:st:border-accent'
+						? 'bg-accent text-bg border-accent'
+						: 'bg-transparent text-fg-muted border-border hover:border-accent'
 				}`}
 				onClick={() => onChange(!checked)}
 			>

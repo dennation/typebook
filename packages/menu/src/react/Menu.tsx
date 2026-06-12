@@ -1,6 +1,9 @@
 import { Fragment, useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
-import type { Menu as MenuModel, MenuItem } from '@/types.js'
+import type { Menu as MenuModel, MenuItem, MenuItemState } from '../types.js'
+
+/** Expanded state for a section that doesn't set `defaultOpen`. */
+const DEFAULT_OPEN = true
 
 /** The single outer shell wrapping the whole menu (the consumer's `<nav>`/`<ul>`). */
 export interface MenuContainerProps {
@@ -44,10 +47,15 @@ export interface StaticMenuItemProps extends MenuItemPropsBase {
 /** Discriminated on `collapsible`: only the collapsible variant has `open`/`toggle`. */
 export type MenuItemProps = CollapsibleMenuItemProps | StaticMenuItemProps
 
-export interface MenuProps {
-	menu: MenuModel
+/** The consumer-supplied components the menu renders through. */
+export interface MenuComponents {
 	Container: ComponentType<MenuContainerProps>
 	Item: ComponentType<MenuItemProps>
+}
+
+export interface MenuProps {
+	menu: MenuModel
+	components: MenuComponents
 }
 
 /**
@@ -66,37 +74,34 @@ export interface MenuProps {
  * sets `collapsible: false` (an always-open group). The `Item` is handed the
  * matching prop variant, so `open`/`toggle` only exist where they mean something.
  */
-export function Menu({ menu, Container, Item }: MenuProps) {
-	const [overrides, setOverrides] = useState<Record<string, boolean>>({})
+export function Menu({ menu, components: { Container, Item } }: MenuProps) {
+	// Disclosure state of collapsible sections, keyed by position path ("0.2.1").
+	// Kept above the tree so a section remembers its state even while collapsed.
+	const [openByPath, setOpenByPath] = useState<Record<string, boolean>>({})
 
-	function renderItems(items: MenuModel, prefix: string, level: number): ReactNode {
-		return items.map((item, i) => {
-			const key = `${prefix}${i}`
-			const hasItems = !!item.items?.length
-			const collapsible = hasItems && item.collapsible !== false
-			const children = hasItems
-				? renderItems(item.items as MenuModel, `${key}.`, level + 1)
-				: undefined
-			// Slot state: a collapsible section follows its toggle; a static
-			// group is always open; a leaf has nothing to open.
-			const open = collapsible ? (overrides[key] ?? item.defaultOpen ?? true) : hasItems
-			const state = { open, level }
+	const toggle = (path: string, item: MenuItem): void =>
+		setOpenByPath((state) => ({
+			...state,
+			[path]: !(state[path] ?? item.defaultOpen ?? DEFAULT_OPEN),
+		}))
+
+	function renderLevel(items: MenuModel, parentPath: string, level: number): ReactNode {
+		return items.map((item, index) => {
+			const path = parentPath === '' ? String(index) : `${parentPath}.${index}`
+			const childItems = item.items ?? []
+			const hasChildren = childItems.length > 0
+			const isCollapsible = hasChildren && item.collapsible !== false
+			const children = hasChildren ? renderLevel(childItems, path, level + 1) : undefined
+			// A collapsible section follows its toggle; a static group is always
+			// open; a leaf has nothing to open.
+			const open = isCollapsible ? (openByPath[path] ?? item.defaultOpen ?? DEFAULT_OPEN) : hasChildren
+			const slotState: MenuItemState = { open, level }
+
 			return (
-				<Fragment key={key}>
-					{item.before?.(item, state)}
-					{collapsible ? (
-						<Item
-							collapsible
-							item={item}
-							level={level}
-							open={open}
-							toggle={() =>
-								setOverrides((o) => ({
-									...o,
-									[key]: !(o[key] ?? item.defaultOpen ?? true),
-								}))
-							}
-						>
+				<Fragment key={path}>
+					{item.before?.(item, slotState)}
+					{isCollapsible ? (
+						<Item collapsible item={item} level={level} open={open} toggle={() => toggle(path, item)}>
 							{children}
 						</Item>
 					) : (
@@ -104,11 +109,11 @@ export function Menu({ menu, Container, Item }: MenuProps) {
 							{children}
 						</Item>
 					)}
-					{item.after?.(item, state)}
+					{item.after?.(item, slotState)}
 				</Fragment>
 			)
 		})
 	}
 
-	return <Container>{renderItems(menu, '', 0)}</Container>
+	return <Container>{renderLevel(menu, '', 0)}</Container>
 }

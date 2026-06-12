@@ -1,6 +1,6 @@
 import { createRootRoute, createRoute, createRouter } from '@tanstack/react-router'
 import { describe, expect, it } from 'vitest'
-import { defineMenu } from '../../menu.js'
+import { defineMenu } from '../../defineMenu.js'
 import { menuFromRouteTree } from '../index.js'
 
 /** Build an initialized route tree (router init populates `fullPath`). */
@@ -12,7 +12,7 @@ function buildTree() {
   const button = createRoute({
     getParentRoute: () => root,
     path: 'button',
-    staticData: { typebook: { meta: { title: 'Button', order: 1 } } },
+    staticData: { menu: { meta: { title: 'Button', order: 1 } } },
   })
   // Section: a route with a path AND children.
   const components = createRoute({ getParentRoute: () => root, path: 'components' })

@@ -20,7 +20,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 		if (this.state.error) {
 			if (this.props.fallback) return this.props.fallback
 			return (
-				<div className="st:p-4 st:bg-red-50 st:border st:border-red-200 st:rounded-lg st:text-red-600 st:text-[13px] st:font-mono st:whitespace-pre-wrap">
+				<div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-[13px] font-mono whitespace-pre-wrap">
 					{this.state.error.message}
 				</div>
 			)

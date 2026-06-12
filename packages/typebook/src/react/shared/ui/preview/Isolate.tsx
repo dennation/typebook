@@ -72,6 +72,6 @@ function IframeFrame({ children, className }: IframeFrameProps) {
 /** Wraps children in an isolated iframe when `isolate` is true, otherwise a plain div. */
 export function Isolate({ isolate, children }: { isolate?: boolean; children: ReactNode }) {
 	return isolate
-		? <IframeFrame className="st:p-4">{children}</IframeFrame>
-		: <div className="st:p-4">{children}</div>
+		? <IframeFrame className="p-4">{children}</IframeFrame>
+		: <div className="p-4">{children}</div>
 }

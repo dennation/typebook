@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Shared design system (tokens, base styles, keyframes) — single source of
+   truth, lives in the typebook react package. */
+@import "../../../packages/typebook/src/react/shared/config/theme.css";
+
+/* Scan the site source and the typebook react components for class names. */
+@source "./**/*.tsx";
+@source "../../../packages/typebook/src/react/**/*.tsx";

@@ -22,8 +22,8 @@ export function Playground({ of }: PlaygroundProps) {
 	const render = useCallback((p: any) => createElement(Component, p), [Component])
 
 	return (
-		<div className="st:rounded-lg st:border st:border-border st:overflow-hidden st:mb-6">
-			<div className="st:bg-bg-sidebar">
+		<div className="rounded-lg border border-border overflow-hidden mb-6">
+			<div className="bg-bg-secondary">
 				<Preview props={controlProps} render={render} />
 			</div>
 			<PropsTable props={allProps} values={controlProps} onChange={handleChange} />

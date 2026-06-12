@@ -16,9 +16,12 @@ pnpm run typecheck   # Type-check all packages
 ```
 packages/
   typebook/             — @dennation/typebook (library + Vite plugin)
+  menu/                 — @dennation/menu (router-agnostic navigation menu)
 examples/
   tanstack-router/      — @dennation/example-tanstack-router
   tanstack-router-mdx/  — @dennation/example-tanstack-router-mdx
+apps/
+  website/              — @dennation/website (marketing landing site)
 ```
 
 ---
@@ -108,18 +111,22 @@ packages/typebook/
 
 ### Build entry points
 
-- **`index`** — `register`, `allOf`, `values`, `generate`, `defineMenu`, types.
+- **`index`** — `register`, `allOf`, `values`, `generate`, types.
 - **`react/index`** — `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`.
-- **`tanstack-router/index`** — `menuFromRouteTree()` adapter (builds a `Menu` from a TanStack route tree).
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
 - **`cli/index`** — `npx @dennation/typebook generate`.
 
 ### Package exports
 
-- `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, `defineMenu`, types (`TypebookConfig`, `UIRegistry`, `SnippetMap`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, `Menu`, `MenuItem`, `MenuInput`, `MenuItemInput`, `MenuMatch`, `MenuSlot`, `MenuItemState`, …)
-- `@dennation/typebook/react` — `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`
-- `@dennation/typebook/tanstack-router` — `menuFromRouteTree()`, `TypebookRouteMeta` (optional peer: `@tanstack/react-router`)
+- `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `UIRegistry`, `SnippetMap`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, …)
+- `@dennation/typebook/react` — **storybook runtime:** `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `CodeBlock`, `ErrorBoundary`, `useComponentMeta`. **universal primitives** (reusable by any consumer docs site): `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
+
+> **What lives where.** The package exports only what is **universal** — the storybook runtime plus generic primitives (`Icon`, `Button`, `ThemeToggle`, `cx`) and the design system. Anything **specific to one site** (marketing landing sections, copy-command pill, section heading, scroll-reveal hook, layout constants) lives in that app — see `apps/website`, not the package.
+
+> **Design system.** The package ships one OKLCH token system in `src/react/shared/config/theme.css` (`--bg`/`--fg`/`--accent`/… with a `[data-theme="dark"]` block), re-exported into Tailwind utilities via `@theme inline` (`bg-bg`, `text-fg-muted`, `border-border`, `text-accent`, `bg-accent-soft`, `text-tok-*`, …) and including the `.reveal`/`.in` and `.tok-*` helpers + keyframes. The old `st:`-prefixed token set is gone; the storybook UI and any consumer site read these tokens. `shared/config/styles.css` (`@import "tailwindcss"` + theme + `@source`) is injected at runtime by `<Layout>`; a consumer that renders its own page (not via `<Layout>`) supplies the CSS itself by importing the shared `theme.css` and `@source`-scanning its components (see `apps/website`).
+
+> Navigation menus live in a **separate package**, `@dennation/menu` — see its section below. Typebook no longer exports `defineMenu`/`Menu`/`menuFromRouteTree`.
 
 ### register() API
 
@@ -160,32 +167,6 @@ import { Snippet } from '@dennation/typebook/react'
 - The consumer imports `{ snippets }` from `./snippets.gen` and passes it to `TypebookProvider`. At runtime `<Snippet>` renders its children live; the "show source" toggle reads the source **synchronously from React context** (`useSnippet(name)`) — no runtime fetch, no URL/base-path concerns — and renders it through `<CodeBlock>` (Shiki).
 - Extraction runs in the universal unplugin `buildStart`, so it works in every bundler; the Vite dev server additionally watches for incremental, debounced re-extraction. Output file is configurable via `snippetsFile` in `TypebookConfig` (default `./src/snippets.gen.ts`); it's only created once a project actually uses `<Snippet>`.
 
-### Menu API
-
-A `Menu` is a router-agnostic navigation tree (the data behind a sidebar/navbar). It is **authored or adapter-generated, never codegen'd** — there is no `<Menu>.gen` file and the builder pipeline is not involved.
-
-```tsx
-import { defineMenu } from '@dennation/typebook'
-import { menuFromRouteTree } from '@dennation/typebook/tanstack-router'
-import { routeTree } from './route-tree.gen'
-
-const menu = defineMenu({
-  ...menuFromRouteTree(routeTree, { omit: ['/about'] }),
-  // add a custom child into a generated section — `parent` is type-checked against the routes:
-  '/changelog': { title: 'Changelog', parent: '/components' },
-  '/button': { title: 'Button', icon: <Cube /> }, // overrides the generated /button entry
-  'https://github.com/dennation/ui-studio': { title: 'GitHub' },
-})
-```
-
-- **Keyed input, nested output.** The *input* (`MenuInput`) is an **object keyed by identity** — the entry's `href` by default, or an arbitrary id for a non-navigable container (`href: false`). Hierarchy is expressed by `parent` (another key), not by nesting. `defineMenu` resolves `parent` into the nested *output* (`MenuItem`, the renderer's model: a node with `items` is a collapsible section, one with `href` is a link, both → clickable section).
-- **Override and child-injection are native object ops.** Keys are unique, so an override is just re-stating a key on spread (`{ ...generated, '/button': { … } }` — later wins, the key keeps its original position); adding a custom child is one new key pointing `parent` at a generated key. No de-dup pass.
-- **`parent` is type-checked** via `keyof` the input — including route paths flowing in from the adapter *through the spread* (object spread preserves keys in the type, unlike an array, so no phantom brand is needed). It degrades to `string` for a dynamically-typed `Record<string, MenuItemInput>`.
-- **No "group"/"separator" node type.** Custom JSX goes in the `before`/`after` render slots (`(item, { active, open }) => ReactNode`). `match` (`'exact'` | `'prefix'` | `RegExp` | predicate) controls active-state highlighting.
-- **`defineMenu(input)`** resolves `parent` into the tree, sorts siblings by `order` (then insertion order; `order` stripped), resolves `href` (the key by default) onto each node, hoists unknown-parent items to the top level (dev warning), and returns a plain `Menu`.
-- **`menuFromRouteTree(routeTree, options?)`** walks a TanStack route tree into a `MenuInput` keyed by `fullPath`: root and pathless/layout routes are transparent (children attach to the nearest navigable ancestor), a route with a `path` becomes an entry (`parent` = ancestor), and routes in `omit` (typed via `RoutePaths`) are dropped with their subtree. Per-route metadata (`title`/`order`/`icon`) is read by `getMeta` (default: `route.options.staticData?.typebook?.meta`, typed via `TypebookRouteMeta`) and describes how the route presents itself; composition (exclude/override/order) lives in the authoring layer, not in route metadata. Title falls back to a title-cased last path segment.
-- **Router stays the consumer's responsibility.** The adapter only *reads* a route tree; rendering a `Menu` is a separate concern (a `Link` and the active path are injected at the render layer).
-
 ### Data flow
 
 ```
@@ -216,6 +197,80 @@ App.tsx:
 - **Generated file is physical** — `ui-registry.gen.ts` is a real file on disk: `tsc --noEmit` needs it, PR diffs show what changed, clone-and-build works without Vite.
 - **Type extraction via TS Compiler API** — `ts-client.ts` resolves prop types as strings via `ts.TypeChecker`, extracts default values from destructuring patterns, and reads JSDoc via `symbol.getDocumentationComment()`.
 - **`as const satisfies UIRegistry`** — preserves literal types on all registry values so lookup by key returns a precise type, not just `ComponentMeta`.
+
+---
+
+## packages/menu
+
+`@dennation/menu` — a standalone, router-agnostic navigation menu (the data behind a sidebar/navbar) plus a React renderer and a TanStack Router adapter. It has **no dependency on typebook** and is **never codegen'd** — a `Menu` is authored or adapter-generated, not produced by a builder pipeline.
+
+### Commands
+
+```bash
+pnpm --filter @dennation/menu build       # Build with Vite (3 entry points)
+pnpm --filter @dennation/menu dev         # Build in watch mode
+pnpm --filter @dennation/menu typecheck   # Type-check without emit
+pnpm --filter @dennation/menu test        # Run vitest
+```
+
+### Architecture
+
+```
+packages/menu/
+  package.json
+  tsconfig.json
+  vite.config.ts
+  src/
+    index.ts                  — `defineMenu` + menu types
+    types.ts                  — Menu, MenuItem, MenuInput, MenuItemInput, MenuItemBase, MenuSlot, MenuItemState
+    defineMenu.ts             — defineMenu(input) — resolves a keyed MenuInput into a nested Menu
+    react/
+      index.ts                — re-exports the renderer
+      Menu.tsx                — <Menu menu={…} components={{ Container, Item }} /> — router-agnostic renderer
+    tanstack-router/
+      index.ts                — menuFromRouteTree() adapter + RouteMenuMeta
+```
+
+### Build entry points / package exports
+
+- `@dennation/menu` — `defineMenu`, types (`Menu`, `MenuItem`, `MenuInput`, `MenuItemInput`, `MenuItemBase`, `MenuSlot`, `MenuItemState`)
+- `@dennation/menu/react` — `Menu`, `MenuProps`, `MenuComponents`, `MenuContainerProps`, `MenuItemProps`, `CollapsibleMenuItemProps`, `StaticMenuItemProps`
+- `@dennation/menu/tanstack-router` — `menuFromRouteTree()`, `RouteMenuMeta`, `MenuFromRouteTreeOptions`, `RouteMenuInput` (optional peer: `@tanstack/react-router`)
+
+### Menu API
+
+```tsx
+import { defineMenu } from '@dennation/menu'
+import { menuFromRouteTree } from '@dennation/menu/tanstack-router'
+import { routeTree } from './route-tree.gen'
+
+const menu = defineMenu({
+  ...menuFromRouteTree(routeTree, { omit: ['/about'] }),
+  // add a custom child into a generated section — `parent` is type-checked against the routes:
+  '/changelog': { title: 'Changelog', parent: '/components' },
+  '/button': { title: 'Button', icon: <Cube /> }, // overrides the generated /button entry
+  'https://github.com/dennation/ui-studio': { title: 'GitHub' },
+})
+```
+
+- **Keyed input, nested output.** The *input* (`MenuInput`) is an **object keyed by identity** — the entry's `href` by default, or an arbitrary id for a non-navigable container (`href: false`). Hierarchy is expressed by `parent` (another key), not by nesting. `defineMenu` resolves `parent` into the nested *output* (`MenuItem`, the renderer's model: a node with `items` is a collapsible section, one with `href` is a link, both → clickable section).
+- **Override and child-injection are native object ops.** Keys are unique, so an override is just re-stating a key on spread (`{ ...generated, '/button': { … } }` — later wins, the key keeps its original position); adding a custom child is one new key pointing `parent` at a generated key. No de-dup pass.
+- **`parent` is type-checked** via `keyof` the input — including route paths flowing in from the adapter *through the spread* (object spread preserves keys in the type, unlike an array, so no phantom brand is needed). It degrades to `string` for a dynamically-typed `Record<string, MenuItemInput>`.
+- **No "group"/"separator" node type.** Custom JSX goes in the `before`/`after` render slots (`(item, { open, level }) => ReactNode`). Active-state highlighting lives entirely in the consumer's `Item` (the renderer knows nothing about the current path).
+- **`defineMenu(input)`** resolves `parent` into the tree, sorts siblings by `order` (then insertion order; `order` stripped), resolves `href` (the key by default) onto each node, hoists unknown-parent items to the top level (dev warning), and returns a plain `Menu`.
+- **`menuFromRouteTree(routeTree, options?)`** walks a TanStack route tree into a `MenuInput` keyed by `fullPath`: root and pathless/layout routes are transparent (children attach to the nearest navigable ancestor), a route with a `path` becomes an entry (`parent` = ancestor), and routes in `omit` (typed via `RoutePaths`) are dropped with their subtree. Per-route metadata (`title`/`order`/`icon`) is read by `getMeta` (default: `route.options.staticData?.menu?.meta`, typed via `RouteMenuMeta`) and describes how the route presents itself; composition (exclude/override/order) lives in the authoring layer, not in route metadata. Title falls back to a title-cased last path segment.
+- **`<Menu>` is the renderer.** Pass it a `Menu` plus consumer-supplied `Container` and `Item` components. `<Menu>` owns the open/closed state of collapsible sections and the recursion; the `Item` owns the link/icon/active state (it talks to its own router). Router stays the consumer's responsibility — the adapter only *reads* a route tree.
+
+### Per-route metadata augmentation
+
+`@dennation/menu/tanstack-router` augments TanStack's `StaticDataRouteOption` so each route can describe itself:
+
+```tsx
+createFileRoute('/button')({
+  component: ButtonPage,
+  staticData: { menu: { meta: { title: 'Button', order: 2 } } },
+})
+```
 
 ---
 
@@ -263,6 +318,44 @@ pnpm --filter @dennation/example-tanstack-router-mdx dev
 pnpm --filter @dennation/example-tanstack-router-mdx build
 pnpm --filter @dennation/example-tanstack-router-mdx typecheck
 ```
+
+---
+
+## apps/website
+
+`@dennation/website` — the marketing landing site, built from the Typebok design handoff. A Vite + React app. The landing-specific components live **here** (they aren't reusable by other consumers, so they don't belong in the package); they import the **universal** primitives (`Icon`, `Button`, `ThemeToggle`, `cx`) and the design tokens from `@dennation/typebook/react`. Organized FSD-style: `shared/`, `features/`, `widgets/`.
+
+### Commands
+
+```bash
+pnpm --filter @dennation/website dev
+pnpm --filter @dennation/website build
+pnpm --filter @dennation/website typecheck
+```
+
+### Structure
+
+```
+apps/website/
+  index.html              — fonts (Geist/Geist Mono/Source Serif 4) + pre-paint theme bootstrap (data-theme on <html>)
+  vite.config.ts          — react() + tailwindcss()
+  src/
+    main.tsx              — mounts <App /> and imports styles.css
+    App.tsx               — renders <Landing />
+    styles.css            — @import "tailwindcss" + the shared theme.css + @source for the app and the typebook react package
+    shared/
+      lib/{useReveal.ts, landingLayout.ts}   — scroll-reveal hook + CONTAINER/SECTION_PAD class constants
+      ui/SectionHead.tsx                      — section eyebrow + title + subtitle
+    features/CopyCommand.tsx                  — copy-able install-command pill
+    widgets/
+      Landing.tsx                             — composes the whole page (drives useReveal)
+      SiteHeader.tsx, SiteFooter.tsx
+      LandingHero.tsx, LandingFeatures.tsx, LandingCompare.tsx, LandingStats.tsx, LandingCta.tsx
+      demos/{DemoSearch,DemoTree,DemoTheme,DemoMdx}.tsx + demoClasses.ts   — looping feature "gifs"
+```
+
+- **Styling.** `styles.css` imports the package's single source of truth, `packages/typebook/src/react/shared/config/theme.css`, and `@source`-scans both the app and `packages/typebook/src/react/**/*.tsx` (the latter so the universal primitives' utilities are emitted). Theme switching writes `data-theme` on `<html>` (key `typebook-theme`); a small inline script in `index.html` applies it before paint to avoid a flash.
+- **Build order.** The site imports the built `@dennation/typebook` dist, so `pnpm -r run build` builds `typebook` first.
 
 ---
 

@@ -1,8 +1,9 @@
 export {
 	type CollapsibleMenuItemProps,
 	Menu,
+	type MenuComponents,
 	type MenuContainerProps,
 	type MenuItemProps,
 	type MenuProps,
 	type StaticMenuItemProps,
-} from './ui/Menu.js'
+} from './Menu.js'

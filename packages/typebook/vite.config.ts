@@ -16,7 +16,6 @@ export default defineConfig({
 			entry: {
 				'index': resolve(__dirname, 'src/index.ts'),
 				'react/index': resolve(__dirname, 'src/react/index.ts'),
-				'tanstack-router/index': resolve(__dirname, 'src/tanstack-router/index.ts'),
 				'plugins/vite': resolve(__dirname, 'src/plugins/vite.ts'),
 				'plugins/rollup': resolve(__dirname, 'src/plugins/rollup.ts'),
 				'plugins/rolldown': resolve(__dirname, 'src/plugins/rolldown.ts'),
@@ -48,7 +47,6 @@ export default defineConfig({
 				/^unplugin/,
 				/^@oxc-parser/,
 				/^@shikijs/,
-				/^@tanstack\//,
 				/^@rspack\//,
 				/^@farmfe\//,
 			],

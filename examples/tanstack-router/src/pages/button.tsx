@@ -10,6 +10,7 @@ const button = registerComponent('button', Button, {
 
 export const Route = createFileRoute('/button')({
 	component: ButtonPage,
+	staticData: { menu: { meta: { title: 'Button', order: 2 } } },
 })
 
 function ButtonPage() {

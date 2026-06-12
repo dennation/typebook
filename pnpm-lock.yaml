@@ -12,8 +12,45 @@ importers:
         specifier: 2.3.14
         version: 2.3.14
 
+  apps/website:
+    dependencies:
+      '@dennation/typebook':
+        specifier: workspace:*
+        version: link:../../packages/typebook
+      react:
+        specifier: ^19.0.0
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.4(react@19.2.4)
+    devDependencies:
+      '@tailwindcss/vite':
+        specifier: ^4.1.18
+        version: 4.1.18(vite@6.4.1(@types/node@22.19.10)(jiti@2.7.0)(lightningcss@1.30.2)(terser@5.46.0))
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.13
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.13)
+      '@vitejs/plugin-react':
+        specifier: ^4.3.0
+        version: 4.7.0(vite@6.4.1(@types/node@22.19.10)(jiti@2.7.0)(lightningcss@1.30.2)(terser@5.46.0))
+      tailwindcss:
+        specifier: ^4.1.18
+        version: 4.1.18
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.1(@types/node@22.19.10)(jiti@2.7.0)(lightningcss@1.30.2)(terser@5.46.0)
+
   examples/tanstack-router:
     dependencies:
+      '@dennation/menu':
+        specifier: workspace:*
+        version: link:../../packages/menu
       '@dennation/typebook':
         specifier: workspace:*
         version: link:../../packages/typebook
@@ -86,6 +123,37 @@ importers:
         specifier: ^6.0.0
         version: 6.4.1(@types/node@22.19.10)(jiti@2.7.0)(lightningcss@1.30.2)(terser@5.46.0)
 
+  packages/menu:
+    dependencies:
+      typescript:
+        specifier: '>=5.0.0'
+        version: 5.9.3
+    devDependencies:
+      '@tanstack/react-router':
+        specifier: ^1.170.4
+        version: 1.170.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@tanstack/router-core':
+        specifier: 1.171.2
+        version: 1.171.2
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.10
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.13
+      react:
+        specifier: ^19.0.0
+        version: 19.2.4
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.1(@types/node@22.19.10)(jiti@2.7.0)(lightningcss@1.30.2)(terser@5.46.0)
+      vite-plugin-dts:
+        specifier: ^4.5.0
+        version: 4.5.4(@types/node@22.19.10)(rollup@4.57.1)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.10)(jiti@2.7.0)(lightningcss@1.30.2)(terser@5.46.0))
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@22.19.10)(jiti@2.7.0)(lightningcss@1.30.2)(terser@5.46.0)
+
   packages/typebook:
     dependencies:
       oxc-parser:
@@ -107,12 +175,6 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.1.18(vite@6.4.1(@types/node@22.19.10)(jiti@2.7.0)(lightningcss@1.30.2)(terser@5.46.0))
-      '@tanstack/react-router':
-        specifier: ^1.170.4
-        version: 1.170.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@tanstack/router-core':
-        specifier: 1.171.2
-        version: 1.171.2
       '@types/node':
         specifier: ^22.0.0
         version: 22.19.10

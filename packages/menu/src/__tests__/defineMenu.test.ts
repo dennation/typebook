@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { defineMenu } from '../menu.js'
+import { defineMenu } from '../defineMenu.js'
 import type { MenuInput } from '../types.js'
 
 describe('defineMenu', () => {

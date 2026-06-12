@@ -15,10 +15,6 @@
 			"types": "./dist/react/index.d.ts",
 			"import": "./dist/react/index.mjs"
 		},
-		"./tanstack-router": {
-			"types": "./dist/tanstack-router/index.d.ts",
-			"import": "./dist/tanstack-router/index.mjs"
-		},
 		"./vite": {
 			"types": "./dist/plugins/vite.d.ts",
 			"import": "./dist/plugins/vite.mjs"
@@ -68,8 +64,6 @@
 	},
 	"devDependencies": {
 		"@tailwindcss/vite": "^4.1.18",
-		"@tanstack/react-router": "^1.170.4",
-		"@tanstack/router-core": "1.171.2",
 		"@types/node": "^22.0.0",
 		"@types/react": "^19.0.0",
 		"@types/react-dom": "^19.0.0",
@@ -81,15 +75,11 @@
 		"vitest": "^4.0.18"
 	},
 	"peerDependencies": {
-		"@tanstack/react-router": ">=1.168.0",
 		"react": ">=18.0.0",
 		"react-dom": ">=18.0.0",
 		"typescript": ">=5.0.0"
 	},
 	"peerDependenciesMeta": {
-		"@tanstack/react-router": {
-			"optional": true
-		},
 		"typescript": {
 			"optional": true
 		}

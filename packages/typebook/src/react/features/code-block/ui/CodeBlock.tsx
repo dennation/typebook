@@ -38,14 +38,14 @@ export function CodeBlock({ code, theme = DEFAULT_THEME }: CodeBlockProps) {
 	}, [code])
 
 	return (
-		<div className="st:relative st:group/code">
+		<div className="relative group/code">
 			<button
 				type="button"
 				onClick={handleCopy}
-				className={`st:absolute st:top-2 st:right-2 st:z-10 st:transition-opacity st:text-[10px] st:px-1.5 st:py-0.5 st:rounded st:border st:border-border st:bg-bg-sidebar st:cursor-pointer ${
+				className={`absolute top-2 right-2 z-10 transition-opacity text-[10px] px-1.5 py-0.5 rounded border border-border bg-bg-secondary cursor-pointer ${
 					copied
-						? 'st:opacity-100 st:text-accent'
-						: 'st:opacity-0 group-hover/code:st:opacity-100 st:text-text-muted hover:st:text-text'
+						? 'opacity-100 text-accent'
+						: 'opacity-0 group-hover/code:opacity-100 text-fg-muted hover:text-fg'
 				}`}
 				title="Copy code"
 			>
@@ -53,11 +53,11 @@ export function CodeBlock({ code, theme = DEFAULT_THEME }: CodeBlockProps) {
 			</button>
 			{html ? (
 				<div
-					className="st:text-xs st:overflow-x-auto [&_.shiki]:st:m-0 [&_.shiki]:st:p-3 [&_.shiki]:st:bg-transparent!"
+					className="text-xs overflow-x-auto [&_.shiki]:m-0 [&_.shiki]:p-3 [&_.shiki]:bg-transparent!"
 					dangerouslySetInnerHTML={{ __html: html }}
 				/>
 			) : (
-				<pre className="st:text-xs st:p-3 st:m-0 st:overflow-x-auto st:font-mono st:text-text-muted">
+				<pre className="text-xs p-3 m-0 overflow-x-auto font-mono text-fg-muted">
 					<code>{code}</code>
 				</pre>
 			)}

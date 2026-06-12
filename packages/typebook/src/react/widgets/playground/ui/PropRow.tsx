@@ -11,22 +11,22 @@ export interface PropRowProps {
 export function PropRow({ prop, value, onChange }: PropRowProps) {
 	const typeText = formatPropType(prop)
 	return (
-		<tr className="st:border-b st:border-border last:st:border-b-0">
-			<td className={`st:py-2.5 st:px-4 st:font-mono st:whitespace-nowrap ${prop.inherited ? 'st:text-text-muted' : 'st:text-text'}`}>
+		<tr className="border-b border-border last:border-b-0">
+			<td className={`py-2.5 px-4 font-mono whitespace-nowrap ${prop.inherited ? 'text-fg-muted' : 'text-fg'}`}>
 				{prop.name}
-				{!prop.optional && <span className="st:text-red-400 st:ml-0.5">*</span>}
+				{!prop.optional && <span className="text-red-400 ml-0.5">*</span>}
 			</td>
 			<td
-				className="st:py-2.5 st:px-4 st:font-mono st:text-text-muted st:max-w-[200px] st:truncate"
+				className="py-2.5 px-4 font-mono text-fg-muted max-w-[200px] truncate"
 				title={typeText}
 			>
 				{typeText}
 			</td>
-			<td className="st:py-2.5 st:px-4">
+			<td className="py-2.5 px-4">
 				{isControllable(prop) ? (
 					<PropInput prop={prop} value={value} onChange={onChange} />
 				) : (
-					<span className="st:text-text-muted">—</span>
+					<span className="text-fg-muted">—</span>
 				)}
 			</td>
 		</tr>
