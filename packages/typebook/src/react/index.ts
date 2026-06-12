@@ -6,7 +6,6 @@ export {
 	CodeBlock,
 	type CodeBlockProps,
 	type CodeTab,
-	highlight,
 } from "./features/code-block/index.js";
 export {
 	CopyCommand,
@@ -19,11 +18,6 @@ export {
 	type SearchPaletteProps,
 	useSearchHotkeys,
 } from "./features/search-palette/index.js";
-export {
-	type CodeTheme,
-	SourceCode,
-	type SourceCodeProps,
-} from "./features/source-code/index.js";
 export {
 	ThemeToggle,
 	type ThemeToggleProps,

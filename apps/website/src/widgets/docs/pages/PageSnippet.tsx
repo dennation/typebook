@@ -37,7 +37,7 @@ export function PageSnippet() {
 				children's source from the file, dedents it and emits a single generated
 				map — <C>snippets.gen.ts</C>. Pass it to <C>TypebookProvider</C>; at
 				runtime the toggle reads the source synchronously from context (no
-				fetch) and renders it through Shiki.
+				fetch) and renders it through <C>CodeBlock</C>.
 			</P>
 
 			<Callout type="warning" title="name must be static and unique">
@@ -64,16 +64,6 @@ export function PageSnippet() {
 						type: "ReactNode",
 						required: true,
 						desc: "Live content rendered above the toggle.",
-					},
-					{
-						name: "theme",
-						type: "CodeTheme",
-						desc: (
-							<>
-								Shiki light/dark theme override forwarded to the underlying{" "}
-								<C>SourceCode</C>.
-							</>
-						),
 					},
 				]}
 			/>

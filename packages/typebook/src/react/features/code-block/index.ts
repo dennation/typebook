@@ -1,4 +1,3 @@
-export { highlight } from "./lib/highlight.js";
 export {
 	CodeBlock,
 	type CodeBlockProps,

@@ -98,9 +98,8 @@ packages/typebook/
       features/                     — Interactive units
         prop-input/                 — <PropInput> per-prop controls (literal/bool/string/number)
         code-block/                 — <CodeBlock tabs|code file lang showLineNumbers highlightLines/> —
-                                      docs code block; lib/highlight.ts — lightweight tok-* highlighter (tsx/bash/json)
-        source-code/                — <SourceCode code={…}/> — Shiki-highlighted source display (storybook runtime)
-          lib/highlighter.ts        — Shiki singleton
+                                      the one code component; lib/tokenize.ts — lazy Shiki singleton with a
+                                      css-variables theme mapped to --syn-* tokens (any language, theme-aware colors)
         search-palette/             — <SearchPalette index={…}/> — ⌘K palette + useSearchHotkeys() + SearchEntry
         copy-command/               — <CopyCommand cmd="npx …"/> — copy-able install-command pill
       entities/                     — Domain entities
@@ -123,14 +122,14 @@ packages/typebook/
 ### Build entry points
 
 - **`index`** — `register`, `allOf`, `values`, `generate`, types.
-- **`react/index`** — `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `SourceCode`, `ErrorBoundary`, `useComponentMeta` + the docs component kit (md set, `CodeBlock`, `SearchPalette`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`).
+- **`react/index`** — `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`, `useComponentMeta` + the docs component kit (md set, `CodeBlock`, `SearchPalette`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`).
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
 - **`cli/index`** — `npx @dennation/typebook generate`.
 
 ### Package exports
 
 - `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `UIRegistry`, `SnippetMap`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, …)
-- `@dennation/typebook/react` — **storybook runtime:** `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `SourceCode` (Shiki source display, ex-`CodeBlock`), `ErrorBoundary`, `useComponentMeta`. **docs kit** (for consumer documentation sites): md set (`Callout`, `MDTable`, `PropsTable`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines, lightweight tok-* highlighter), `SearchPalette`/`useSearchHotkeys`/`SearchEntry`, `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `slugify`/`childText`. **universal primitives:** `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
+- `@dennation/typebook/react` — **storybook runtime:** `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`, `useComponentMeta`. **docs kit** (for consumer documentation sites): md set (`Callout`, `MDTable`, `PropsTable`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines; Shiki with a css-variables theme bound to the design tokens — any language, theme-aware colors, lazy-loaded grammars), `SearchPalette`/`useSearchHotkeys`/`SearchEntry`, `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `slugify`/`childText`. **universal primitives:** `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
 > **What lives where.** The package exports only what is **universal** — the storybook runtime, the docs component kit (md set, CodeBlock, search palette, sidebar/toc/breadcrumbs/prev-next, CopyCommand), generic primitives (`Icon`, `Button`, `ThemeToggle`, `cx`) and the design system. Anything **specific to one site** (marketing landing sections, demo "gifs", section heading, scroll-reveal hook, layout constants, page content and nav data) lives in that app — see `apps/website`, not the package.
@@ -175,7 +174,7 @@ import { Snippet } from '@dennation/typebook/react'
 
 - At build time the plugin parses each source file with **oxc-parser**, finds every `<Snippet>` JSX element (imported from `@dennation/typebook/react`), reads its children's exact source via `code.slice(openingElement.end, closingElement.start)` — 1:1 text, no regeneration artifacts — dedents it, and emits all blocks as a single generated map file `snippets.gen.ts` (`name → code`, `as const satisfies SnippetMap`). Same physical-file philosophy as `ui-registry.gen.ts`.
 - `name` is a **required, author-chosen string** (not `key` — reserved by React; not `codeId` — by request). It must be unique across the project. Duplicate names throw `DuplicateSnippetError`; only a *static* string `name` is extractable.
-- The consumer imports `{ snippets }` from `./snippets.gen` and passes it to `TypebookProvider`. At runtime `<Snippet>` renders its children live; the "show source" toggle reads the source **synchronously from React context** (`useSnippet(name)`) — no runtime fetch, no URL/base-path concerns — and renders it through `<CodeBlock>` (Shiki).
+- The consumer imports `{ snippets }` from `./snippets.gen` and passes it to `TypebookProvider`. At runtime `<Snippet>` renders its children live; the "show source" toggle reads the source **synchronously from React context** (`useSnippet(name)`) — no runtime fetch, no URL/base-path concerns — and renders it through `<CodeBlock>`.
 - Extraction runs in the universal unplugin `buildStart`, so it works in every bundler; the Vite dev server additionally watches for incremental, debounced re-extraction. Output file is configurable via `snippetsFile` in `TypebookConfig` (default `./src/snippets.gen.ts`); it's only created once a project actually uses `<Snippet>`.
 
 ### Data flow

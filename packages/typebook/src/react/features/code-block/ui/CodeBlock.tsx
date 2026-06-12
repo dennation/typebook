@@ -1,7 +1,7 @@
 import { cx } from "@react/shared/lib/cx.js";
 import { Icon } from "@react/shared/ui/icon/index.js";
-import { type ReactNode, useMemo, useState } from "react";
-import { highlight } from "../lib/highlight.js";
+import { type ReactNode, useEffect, useState } from "react";
+import { type ThemedToken, tokenize } from "../lib/tokenize.js";
 
 export interface CodeTab {
 	label: string;
@@ -16,6 +16,7 @@ export interface CodeBlockProps {
 	tabs?: CodeTab[];
 	/** Single-snippet form. */
 	code?: string;
+	/** Any Shiki language id; grammars load on demand. */
 	lang?: string;
 	/** Filename shown in the header bar. */
 	file?: string;
@@ -24,6 +25,8 @@ export interface CodeBlockProps {
 	/** 1-based line numbers to highlight. */
 	highlightLines?: number[];
 }
+
+const ITALIC = 1; // shiki FontStyle.Italic bit
 
 /** Docs code block — filename header OR tabs, copy button, line numbers. */
 export function CodeBlock({
@@ -41,10 +44,24 @@ export function CodeBlock({
 	const [active, setActive] = useState(0);
 	const [copied, setCopied] = useState(false);
 	const cur = items[active] ?? (items[0] as CodeTab);
-	const lines = useMemo(
-		() => highlight(cur.code, cur.lang || "tsx"),
-		[cur.code, cur.lang],
-	);
+
+	// Shiki is async — render plain lines until the tokens arrive.
+	const [tokens, setTokens] = useState<ThemedToken[][] | null>(null);
+	useEffect(() => {
+		let cancelled = false;
+		setTokens(null);
+		tokenize(cur.code, cur.lang || "tsx")
+			.then((t) => {
+				if (!cancelled) setTokens(t);
+			})
+			.catch(() => {});
+		return () => {
+			cancelled = true;
+		};
+	}, [cur.code, cur.lang]);
+
+	const plainLines = cur.code.replace(/\n+$/, "").split("\n");
+	const lineCount = tokens?.length ?? plainLines.length;
 
 	const doCopy = () => {
 		navigator.clipboard
@@ -72,6 +89,25 @@ export function CodeBlock({
 
 	const hasTabs = !!tabs;
 	const hasHead = !hasTabs && !!file;
+
+	const renderLine = (k: number): ReactNode => {
+		const lineTokens = tokens?.[k];
+		if (!lineTokens || lineTokens.length === 0) {
+			return plainLines[k] || " ";
+		}
+		return lineTokens.map((t, i) => (
+			<span
+				// biome-ignore lint/suspicious/noArrayIndexKey: tokens are positional
+				key={i}
+				style={{
+					color: t.color,
+					fontStyle: t.fontStyle && t.fontStyle & ITALIC ? "italic" : undefined,
+				}}
+			>
+				{t.content}
+			</span>
+		));
+	};
 
 	return (
 		<div
@@ -129,7 +165,7 @@ export function CodeBlock({
 			<div className="overflow-x-auto">
 				<pre className="m-0 px-4.5 py-4 font-mono text-[13px] leading-[1.65]">
 					<code className="font-mono">
-						{lines.map((html, k) => {
+						{Array.from({ length: lineCount }, (_, k) => {
 							const hl = highlightLines.includes(k + 1);
 							return (
 								<span
@@ -146,10 +182,7 @@ export function CodeBlock({
 											{k + 1}
 										</span>
 									)}
-									<span
-										// biome-ignore lint/security/noDangerouslySetInnerHtml: highlighter escapes its input
-										dangerouslySetInnerHTML={{ __html: html || "&nbsp;" }}
-									/>
+									{renderLine(k)}
 								</span>
 							);
 						})}

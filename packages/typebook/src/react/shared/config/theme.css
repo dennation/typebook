@@ -356,30 +356,21 @@ button {
 	}
 }
 
-/* Shiki dual theme — toggled by [data-theme] on an ancestor. */
-[data-theme="light"] .shiki,
-[data-theme="light"] .shiki span {
-	color: var(--shiki-light) !important;
-	background-color: var(--shiki-light-bg) !important;
-}
-[data-theme="dark"] .shiki,
-[data-theme="dark"] .shiki span {
-	color: var(--shiki-dark) !important;
-	background-color: var(--shiki-dark-bg) !important;
-}
-
-/* Shiki line numbers */
-.shiki code {
-	counter-reset: line;
-}
-.shiki code .line::before {
-	counter-increment: line;
-	content: counter(line);
-	display: inline-block;
-	width: 1.5em;
-	margin-right: 1em;
-	text-align: right;
-	opacity: 0.35;
+/* Shiki css-variables theme → design tokens. CodeBlock tokenizes through
+   Shiki with createCssVariablesTheme, so every token color is a var()
+   reference that follows dark mode and the accent via the cascade. */
+:root {
+	--shiki-foreground: var(--fg);
+	--shiki-background: transparent;
+	--shiki-token-keyword: var(--syn-kw);
+	--shiki-token-string: var(--syn-str);
+	--shiki-token-string-expression: var(--syn-str);
+	--shiki-token-comment: var(--syn-com);
+	--shiki-token-constant: var(--syn-num);
+	--shiki-token-function: var(--syn-fn);
+	--shiki-token-parameter: var(--syn-attr);
+	--shiki-token-punctuation: var(--syn-punc);
+	--shiki-token-link: var(--syn-tag);
 }
 
 /* ------------------------------------------------------------

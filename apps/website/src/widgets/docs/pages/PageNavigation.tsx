@@ -40,8 +40,8 @@ export function PageNavigation() {
 
 			<H2>DocsToc</H2>
 			<P>
-				The "On this page" outline. Feed it headings from <C>useDocHeadings</C> —
-				the active item follows the scroll (scrollspy).
+				The "On this page" outline. Feed it headings from <C>useDocHeadings</C>{" "}
+				— the active item follows the scroll (scrollspy).
 			</P>
 			<CodeBlock
 				file="DocsPage.tsx"

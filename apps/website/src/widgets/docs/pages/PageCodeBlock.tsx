@@ -16,9 +16,9 @@ export function PageCodeBlock() {
 			<Lead>
 				<C>CodeBlock</C> renders highlighted, copyable code: a single snippet
 				with an optional filename header, or several variants as tabs.
-				Highlighting is a lightweight built-in tokenizer (tsx/bash/json) driven
-				by the theme's <C>--syn-*</C> tokens — it follows dark mode and the
-				accent automatically.
+				Highlighting is Shiki with a CSS-variables theme mapped onto the design
+				tokens (<C>--syn-*</C>) — full TextMate grammars for any language, and
+				the colors still follow dark mode and the accent automatically.
 			</Lead>
 
 			<H2>Single snippet</H2>
@@ -75,9 +75,9 @@ export function PageCodeBlock() {
 					},
 					{
 						name: "lang",
-						type: '"tsx" | "bash" | "json" | string',
+						type: "string",
 						default: '"tsx"',
-						desc: "Highlighting language. Unknown values fall back to the tsx tokenizer.",
+						desc: "Any Shiki language id (tsx, css, yaml, python, …). Grammars load on demand; unknown ids fall back to plain text.",
 					},
 					{
 						name: "file",
@@ -113,10 +113,10 @@ export function PageCodeBlock() {
 				]}
 			/>
 
-			<Callout type="info" title="Need full-grammar highlighting?">
-				The storybook runtime ships <C>SourceCode</C> — a Shiki-based display
-				used by <C>Snippet</C> for extracted sources. <C>CodeBlock</C> trades
-				grammar coverage for zero async loading and token-driven colors.
+			<Callout type="info" title="Async by design">
+				Shiki and its grammars load lazily on the first render; until then the
+				code shows as plain text. Common languages (tsx, bash, json) are
+				preloaded with the engine, others fetch their grammar on demand.
 			</Callout>
 		</>
 	);

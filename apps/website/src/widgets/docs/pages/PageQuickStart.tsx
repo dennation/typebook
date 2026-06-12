@@ -22,9 +22,9 @@ export function PageQuickStart({ go }: { go: DocsGo }) {
 
 			<H2>Register a component</H2>
 			<P>
-				<C>register()</C> calls can live anywhere in <C>{"src/**/*.tsx"}</C> — no
-				special filename required. The first argument is a unique string id, the
-				key in the generated registry. Duplicate ids throw at build time.
+				<C>register()</C> calls can live anywhere in <C>{"src/**/*.tsx"}</C> —
+				no special filename required. The first argument is a unique string id,
+				the key in the generated registry. Duplicate ids throw at build time.
 			</P>
 			<CodeBlock
 				file="src/pages/button.tsx"
