@@ -2,10 +2,10 @@ import {
 	C,
 	CodeBlock,
 	H2,
-	Icon,
 	Lead,
 	P,
 	PropsTable,
+	Snippet,
 	Step,
 	Steps,
 } from "@dennation/typebook/react";
@@ -20,32 +20,22 @@ export function PageSteps() {
 			</Lead>
 
 			<H2>Example</H2>
-			<Steps>
-				<Step title="Install the package">
-					<P>
-						Any content works inside a step — paragraphs, code blocks, callouts.
-					</P>
-				</Step>
-				<Step title="Wire the plugin">
-					<CodeBlock lang="bash" code={`pnpm add @dennation/typebook`} />
-				</Step>
-				<Step title="Render a story">
-					<P>The connector line stops automatically at the last step.</P>
-				</Step>
-			</Steps>
-
-			<H2>Usage</H2>
-			<CodeBlock
-				file="page.tsx"
-				icon={<Icon.react size={14} />}
-				lang="tsx"
-				code={`import { Step, Steps } from "@dennation/typebook/react";
-
-<Steps>
-  <Step title="Install">…</Step>
-  <Step title="Configure">…</Step>
-</Steps>`}
-			/>
+			<Snippet name="steps-example">
+				<Steps>
+					<Step title="Install the package">
+						<P>
+							Any content works inside a step — paragraphs, code blocks,
+							callouts.
+						</P>
+					</Step>
+					<Step title="Wire the plugin">
+						<CodeBlock lang="bash" code={`pnpm add @dennation/typebook`} />
+					</Step>
+					<Step title="Render a story">
+						<P>The connector line stops automatically at the last step.</P>
+					</Step>
+				</Steps>
+			</Snippet>
 
 			<H2>Props</H2>
 			<P>
