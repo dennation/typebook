@@ -1,12 +1,11 @@
 import {
 	C,
-	CodeBlock,
 	H2,
-	Icon,
 	Lead,
 	MDTable,
 	P,
 	PropsTable,
+	Snippet,
 } from "@dennation/typebook/react";
 
 export function PageTables() {
@@ -19,25 +18,18 @@ export function PageTables() {
 			</Lead>
 
 			<H2>MDTable</H2>
-			<MDTable
-				head={["Bundler", "Entry", "Status"]}
-				rows={[
-					["Vite", <C key="e">@dennation/typebook/vite</C>, "Stable"],
-					["webpack", <C key="e">@dennation/typebook/webpack</C>, "Stable"],
-					["esbuild", <C key="e">@dennation/typebook/esbuild</C>, "Stable"],
-				]}
-			/>
-			<CodeBlock
-				file="page.tsx"
-				icon={<Icon.react size={14} />}
-				lang="tsx"
-				code={`import { MDTable } from "@dennation/typebook/react";
-
-<MDTable
-  head={["Bundler", "Entry", "Status"]}
-  rows={[["Vite", "@dennation/typebook/vite", "Stable"]]}
-/>`}
-			/>
+			<Snippet name="mdtable-example">
+				{() => (
+					<MDTable
+						head={["Bundler", "Entry", "Status"]}
+						rows={[
+							["Vite", <C key="e">@dennation/typebook/vite</C>, "Stable"],
+							["webpack", <C key="e">@dennation/typebook/webpack</C>, "Stable"],
+							["esbuild", <C key="e">@dennation/typebook/esbuild</C>, "Stable"],
+						]}
+					/>
+				)}
+			</Snippet>
 			<PropsTable
 				props={[
 					{
@@ -60,24 +52,26 @@ export function PageTables() {
 				One striped row per prop with the name, type badge, required marker,
 				default value and description:
 			</P>
-			<CodeBlock
-				file="page.tsx"
-				icon={<Icon.react size={14} />}
-				lang="tsx"
-				code={`import { PropsTable } from "@dennation/typebook/react";
-
-<PropsTable
-  props={[
-    {
-      name: "type",
-      type: '"info" | "warning"',
-      default: '"info"',
-      desc: "Visual intent.",
-    },
-    { name: "children", type: "ReactNode", required: true, desc: "Body." },
-  ]}
-/>`}
-			/>
+			<Snippet name="props-table-example">
+				{() => (
+					<PropsTable
+						props={[
+							{
+								name: "type",
+								type: '"info" | "warning"',
+								default: '"info"',
+								desc: "Visual intent.",
+							},
+							{
+								name: "children",
+								type: "ReactNode",
+								required: true,
+								desc: "Body.",
+							},
+						]}
+					/>
+				)}
+			</Snippet>
 			<PropsTable
 				props={[
 					{

@@ -1,4 +1,7 @@
 import type {
+	ArrowFunctionExpression,
+	Expression,
+	Function as FunctionNode,
 	JSXAttributeValue,
 	JSXElement,
 	JSXOpeningElement,
@@ -6,14 +9,17 @@ import type {
 import { NPM_REACT_PACKAGE_NAME } from "../constants.js";
 import { moduleExportName, type Program, walk } from "./ast.js";
 
-/** A single `<Snippet name="…">…</Snippet>` element found in a file */
+/**
+ * A single `<Snippet name="…">{fn}</Snippet>` element found in a file. Its child must be an inline
+ * function component (`{() => …}` or `{function Counter() { … }}`), whose body we slice as the
+ * shown source. `code` is `null` when the child is *not* an inline function (a bare reference, raw
+ * JSX, or nothing) — the builder turns that into a clear build error rather than a silent drop.
+ */
 export interface SnippetBlock {
-	/** Value of the required `name` prop — becomes the output file name */
+	/** Value of the required `name` prop — becomes the output map key */
 	name: string;
-	/** Exact source text of the element's children, sliced 1:1 then dedented */
-	code: string;
-	/** Character offset of the JSXElement in source — used for stable ordering / diagnostics */
-	start: number;
+	/** The function body, sliced 1:1 then dedented — or `null` when the child isn't an inline function */
+	code: string | null;
 }
 
 const SNIPPET_COMPONENT_NAME = "Snippet";
@@ -26,13 +32,10 @@ export function mayContainSnippet(content: string): boolean {
 }
 
 /**
- * Extract every `<Snippet name="…">…</Snippet>` element (whose `Snippet` was imported
- * from `@dennation/typebook/react`) from an already-parsed program.
- *
- * The children are read straight from the original `content` via `code.slice(start, end)`,
- * so the captured text is exactly what the author wrote — no AST re-generation, no
- * formatting drift. Only elements with a static string `name` are kept; anything
- * dynamic can't be resolved at build time.
+ * Extract every `<Snippet name="…">{fn}</Snippet>` element (whose `Snippet` was imported from
+ * `@dennation/typebook/react`) from an already-parsed program. The child must be an inline function
+ * component; its body is read straight from the original `content` via `code.slice` — exactly what
+ * the author wrote, no AST re-generation. Only elements with a static string `name` are kept.
  */
 export function scanSnippets(
 	program: Program,
@@ -49,11 +52,7 @@ export function scanSnippets(
 		const name = nameAttribute(node.openingElement);
 		if (name === null) return;
 
-		blocks.push({
-			name,
-			code: extractChildrenSource(node, content),
-			start: node.start,
-		});
+		blocks.push({ name, code: childBodySource(node, content) });
 	});
 
 	return blocks;
@@ -113,24 +112,68 @@ function staticStringValue(value: JSXAttributeValue | null): string | null {
 }
 
 /**
- * Slice the children source between the opening tag's end and the closing tag's
- * start, then strip common indentation and surrounding blank lines. Self-closing
- * `<Snippet name="…" />` has no children and yields an empty string.
+ * The child must be a single `{…}` expression container holding an inline function. Returns its
+ * body source, or `null` for any other child (a bare identifier reference, raw JSX, or nothing) —
+ * the builder reports that as a build error.
  */
-function extractChildrenSource(element: JSXElement, content: string): string {
-	const closing = element.closingElement;
-	if (!closing) return "";
-
-	const start = element.openingElement.end;
-	const end = closing.start;
-	if (end <= start) return "";
-
-	return dedent(content.slice(start, end));
+function childBodySource(element: JSXElement, content: string): string | null {
+	for (const child of element.children) {
+		if (child.type !== "JSXExpressionContainer") continue;
+		const expr = child.expression;
+		if (
+			expr.type === "ArrowFunctionExpression" ||
+			expr.type === "FunctionExpression"
+		) {
+			return functionBodySource(expr, content);
+		}
+	}
+	return null;
 }
 
 /**
- * Remove surrounding blank lines and the common leading-whitespace shared by all
- * non-blank lines, so extracted JSX reads as if it were authored at column zero.
+ * Slice a function literal's body. A block body (`{ … }`) yields its statements (braces stripped);
+ * an expression body (`() => <JSX/>`) yields the expression (parens unwrapped). Dedented so it
+ * reads as if authored at column zero.
+ */
+function functionBodySource(
+	fn: ArrowFunctionExpression | FunctionNode,
+	content: string,
+): string {
+	const body = fn.body;
+	if (!body) return "";
+
+	if (body.type === "BlockStatement") {
+		// Strip the wrapping braces, keep the statements (incl. `return`).
+		return dedent(content.slice(body.start + 1, body.end - 1));
+	}
+
+	// Expression body: unwrap `() => ( … )` parens so the shown source is just the expression.
+	let expr: Expression = body;
+	while (expr.type === "ParenthesizedExpression") {
+		expr = expr.expression;
+	}
+	return dedent(sliceWithLeadingIndent(content, expr.start, expr.end));
+}
+
+/**
+ * Slice `[start, end)` but, when the slice begins at the first non-whitespace token of its line,
+ * extend the start back to the line's indentation. This gives {@link dedent} a uniform block: an
+ * expression body like `() => (\n  <div/>\n)` otherwise starts mid-line with the first line at
+ * column zero and the rest indented, defeating the common-indent calculation.
+ */
+function sliceWithLeadingIndent(
+	text: string,
+	start: number,
+	end: number,
+): string {
+	const lineStart = text.lastIndexOf("\n", start - 1) + 1;
+	const from = text.slice(lineStart, start).trim() === "" ? lineStart : start;
+	return text.slice(from, end);
+}
+
+/**
+ * Remove surrounding blank lines and the common leading-whitespace shared by all non-blank lines,
+ * so extracted source reads as if it were authored at column zero.
  */
 function dedent(source: string): string {
 	const lines = source.replace(/\t/g, "  ").split("\n");

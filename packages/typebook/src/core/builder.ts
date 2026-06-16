@@ -56,6 +56,20 @@ class DuplicateSnippetError extends Error {
 	}
 }
 
+class SnippetNotInlineError extends Error {
+	constructor(name: string, file: string) {
+		super(
+			[
+				"<Snippet> children must be an inline function component.",
+				`  - snippet "${name}"`,
+				`      ${file}`,
+				"  Write the example inline: {() => <Component/>} (or {function Demo() { … }} for hooks).",
+			].join("\n"),
+		);
+		this.name = "SnippetNotInlineError";
+	}
+}
+
 /**
  * Single source-scan pipeline. Reads and oxc-parses each project file **once**, then
  * feeds the one AST to both collectors:
@@ -151,7 +165,8 @@ export class TypebookBuilder {
 
 		// A changed file may define props consumed by registrations *elsewhere*. Re-resolve only
 		// the registrations whose Props type can actually reach the change (TypeScript's reference
-		// graph), rather than re-extracting every registration on every edit.
+		// graph), rather than re-extracting every registration on every edit. (Snippets are always
+		// inline, so a snippet only changes when its own file does — already re-indexed above.)
 		await this.refreshAffectedRegistrationProps(filePaths);
 
 		this.writeRegistry();
@@ -330,6 +345,9 @@ export class TypebookBuilder {
 
 		for (const [filePath, blocks] of this.snippetsByFile.entries()) {
 			for (const block of blocks) {
+				if (block.code === null) {
+					throw new SnippetNotInlineError(block.name, filePath);
+				}
 				const existing = byName.get(block.name);
 				if (existing) {
 					throw new DuplicateSnippetError(block.name, [

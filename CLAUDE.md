@@ -59,7 +59,8 @@ packages/typebook/
                                 scanners on the one AST → type extraction → writes both .gen files + Vite watcher
       registry-scanner.ts     — oxc AST: scanRegistrations(program) finds registerComponent('id', Component) calls
       registry-generator.ts   — generateRegistryFile(): builds ui-registry.gen.ts content
-      snippet-scanner.ts      — oxc AST: scanSnippets(program, src) finds <Snippet name="…"> + slices their source
+      snippet-scanner.ts      — oxc AST: scanSnippets(program, src) finds <Snippet name="…">{fn}</Snippet>
+                                and slices the inline function's body (non-inline child → null → build error)
       snippet-generator.ts    — generateSnippetsFile(): builds snippets.gen.ts content
       ts-client.ts            — TypeScript Compiler API: extracts PropInfo[], defaultValues, JSDoc descriptions
       ast.ts                  — Shared oxc-parser helpers (parseProgram → Program, walk) used by both scanners
@@ -164,17 +165,29 @@ const button = register('button', Button, {
 ```tsx
 import { Snippet } from '@dennation/typebook/react'
 
+// inline arrow (stateless)
 <Snippet name="button-group">
-  <div className="flex gap-2">
-    <Button size="sm">Small</Button>
-    <Button size="lg">Large</Button>
-  </div>
+  {() => (
+    <div className="flex gap-2">
+      <Button size="sm">Small</Button>
+      <Button size="lg">Large</Button>
+    </div>
+  )}
+</Snippet>
+
+// inline named function (hooks) — capitalized so rules-of-hooks recognises a component
+<Snippet name="counter">
+  {function Counter() {
+    const [n, setN] = useState(0)
+    return <Button onClick={() => setN(n + 1)}>Count: {n}</Button>
+  }}
 </Snippet>
 ```
 
-- At build time the plugin parses each source file with **oxc-parser**, finds every `<Snippet>` JSX element (imported from `@dennation/typebook/react`), reads its children's exact source via `code.slice(openingElement.end, closingElement.start)` — 1:1 text, no regeneration artifacts — dedents it, and emits all blocks as a single generated map file `snippets.gen.ts` (`name → code`, `as const satisfies SnippetMap`). Same physical-file philosophy as `ui-registry.gen.ts`.
+- **The child is an inline function component, not raw JSX** — `children: () => ReactNode`. At runtime `<Snippet>` renders it as `<Demo/>` (so hooks work); the shown source is the **function body**.
+- At build time the plugin parses each source file with **oxc-parser** and finds every `<Snippet>` element (imported from `@dennation/typebook/react`), then slices the inline function's body 1:1 from the file (block body → between the braces; expression body → the expression, parens unwrapped), dedents it, and emits all into a single generated map `snippets.gen.ts` (`name → code`, `as const satisfies SnippetMap`). The child must be an **inline** function literal — a bare reference (`{Component}`) or raw JSX can't be sliced from the call site and raises a build error (`SnippetNotInlineError`). This keeps extraction pure-oxc and same-file: a snippet only changes when its own file does, so no cross-file resolution or watcher dependency graph is needed.
 - `name` is a **required, author-chosen string** (not `key` — reserved by React; not `codeId` — by request). It must be unique across the project. Duplicate names throw `DuplicateSnippetError`; only a *static* string `name` is extractable.
-- The consumer imports `{ snippets }` from `./snippets.gen` and passes it to `TypebookProvider`. At runtime `<Snippet>` renders its children live; the "show source" toggle reads the source **synchronously from React context** (`useSnippet(name)`) — no runtime fetch, no URL/base-path concerns — and renders it through `<CodeBlock>`.
+- The consumer imports `{ snippets }` from `./snippets.gen` and passes it to `TypebookProvider`. At runtime the "show source" toggle reads the source **synchronously from React context** (`useSnippet(name)`) — no runtime fetch, no URL/base-path concerns — and renders it through `<CodeBlock>`.
 - Extraction runs in the universal unplugin `buildStart`, so it works in every bundler; the Vite dev server additionally watches for incremental, debounced re-extraction. Output file is configurable via `snippetsFile` in `TypebookConfig` (default `./src/snippets.gen.ts`); it's only created once a project actually uses `<Snippet>`.
 
 ### Data flow

@@ -53,11 +53,13 @@ function ButtonPage() {
 					Live example with source
 				</h2>
 				<Snippet name="button-group">
-					<div className="st:flex st:gap-2">
-						<Button size="sm">Small</Button>
-						<Button size="md">Medium</Button>
-						<Button size="lg">Large</Button>
-					</div>
+					{() => (
+						<div className="st:flex st:gap-2">
+							<Button size="sm">Small</Button>
+							<Button size="md">Medium</Button>
+							<Button size="lg">Large</Button>
+						</div>
+					)}
 				</Snippet>
 			</section>
 		</div>
