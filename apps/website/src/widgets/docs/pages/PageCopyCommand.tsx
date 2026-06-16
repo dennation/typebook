@@ -18,7 +18,7 @@ export function PageCopyCommand() {
 
 			<H2>Example</H2>
 			<Snippet name="copy-command-example">
-				<CopyCommand cmd="pnpm add @dennation/typebook" />
+				{() => <CopyCommand cmd="pnpm add @dennation/typebook" />}
 			</Snippet>
 
 			<H2>Props</H2>

@@ -513,6 +513,65 @@ describe("edge cases", () => {
 		}
 	});
 
+	test("getComponentBodySource: resolves a referenced function component's body (cross-file)", async () => {
+		const fnFile = resolve(FIXTURES, "components/_SnippetFn.tsx");
+		const refFile = resolve(FIXTURES, "stories/_SnippetRef.tsx");
+		const fresh = new TypeScriptClient(FIXTURES);
+		try {
+			writeFileSync(
+				fnFile,
+				"export function SnippetFn() {\n\treturn <button>hi</button>\n}\n",
+			);
+			const refSource =
+				"import { SnippetFn } from '../components/_SnippetFn'\n" +
+				"export const fnRef = SnippetFn\n";
+			writeFileSync(refFile, refSource);
+			await fresh.start();
+			await fresh.notifyChange([fnFile, refFile]);
+
+			const offset = refSource.indexOf("SnippetFn", refSource.indexOf("fnRef"));
+			const result = fresh.getComponentBodySource(refFile, offset);
+			expect(result).toEqual({
+				kind: "ok",
+				code: "return <button>hi</button>",
+			});
+		} finally {
+			rmSync(fnFile, { force: true });
+			rmSync(refFile, { force: true });
+			fresh.stop();
+		}
+	});
+
+	test("getComponentBodySource: a class component reference → { kind: 'class' }", async () => {
+		const classFile = resolve(FIXTURES, "components/_SnippetClass.tsx");
+		const refFile = resolve(FIXTURES, "stories/_SnippetClassRef.tsx");
+		const fresh = new TypeScriptClient(FIXTURES);
+		try {
+			writeFileSync(
+				classFile,
+				"import { Component } from 'react'\n" +
+					"export class SnippetClass extends Component {\n\trender() {\n\t\treturn null\n\t}\n}\n",
+			);
+			const refSource =
+				"import { SnippetClass } from '../components/_SnippetClass'\n" +
+				"export const classRef = SnippetClass\n";
+			writeFileSync(refFile, refSource);
+			await fresh.start();
+			await fresh.notifyChange([classFile, refFile]);
+
+			const offset = refSource.indexOf(
+				"SnippetClass",
+				refSource.indexOf("classRef"),
+			);
+			const result = fresh.getComponentBodySource(refFile, offset);
+			expect(result).toEqual({ kind: "class" });
+		} finally {
+			rmSync(classFile, { force: true });
+			rmSync(refFile, { force: true });
+			fresh.stop();
+		}
+	});
+
 	test("file created after start → props extracted once notifyChange adds it as a root", async () => {
 		// A brand-new file that nothing imports isn't in the program's root set captured
 		// at start; notifyChange([file]) must add it so getSourceFile resolves.

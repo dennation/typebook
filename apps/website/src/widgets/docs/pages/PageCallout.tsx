@@ -23,9 +23,11 @@ export function PageCallout({ go }: { go: DocsGo }) {
 
 			<H2>Usage</H2>
 			<Snippet name="callout-usage">
-				<Callout type="warning" title="Heads up">
-					This runs on the client only.
-				</Callout>
+				{() => (
+					<Callout type="warning" title="Heads up">
+						This runs on the client only.
+					</Callout>
+				)}
 			</Snippet>
 
 			<H2>Intents</H2>

@@ -18,23 +18,25 @@ export function PageAccordion() {
 
 			<H2>Example</H2>
 			<Snippet name="accordion-example">
-				<Accordion
-					items={[
-						{
-							q: "Is only one item open at a time?",
-							a: "Yes — opening an item closes the previous one; clicking the open item closes it.",
-						},
-						{
-							q: "Can answers hold rich content?",
-							a: (
-								<>
-									Yes, <C>a</C> is a <C>ReactNode</C> — code, links and lists
-									all work.
-								</>
-							),
-						},
-					]}
-				/>
+				{() => (
+					<Accordion
+						items={[
+							{
+								q: "Is only one item open at a time?",
+								a: "Yes — opening an item closes the previous one; clicking the open item closes it.",
+							},
+							{
+								q: "Can answers hold rich content?",
+								a: (
+									<>
+										Yes, <C>a</C> is a <C>ReactNode</C> — code, links and lists
+										all work.
+									</>
+								),
+							},
+						]}
+					/>
+				)}
 			</Snippet>
 
 			<H2>Props</H2>

@@ -21,20 +21,22 @@ export function PageSteps() {
 
 			<H2>Example</H2>
 			<Snippet name="steps-example">
-				<Steps>
-					<Step title="Install the package">
-						<P>
-							Any content works inside a step — paragraphs, code blocks,
-							callouts.
-						</P>
-					</Step>
-					<Step title="Wire the plugin">
-						<CodeBlock lang="bash" code={`pnpm add @dennation/typebook`} />
-					</Step>
-					<Step title="Render a story">
-						<P>The connector line stops automatically at the last step.</P>
-					</Step>
-				</Steps>
+				{() => (
+					<Steps>
+						<Step title="Install the package">
+							<P>
+								Any content works inside a step — paragraphs, code blocks,
+								callouts.
+							</P>
+						</Step>
+						<Step title="Wire the plugin">
+							<CodeBlock lang="bash" code={`pnpm add @dennation/typebook`} />
+						</Step>
+						<Step title="Render a story">
+							<P>The connector line stops automatically at the last step.</P>
+						</Step>
+					</Steps>
+				)}
 			</Snippet>
 
 			<H2>Props</H2>

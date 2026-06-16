@@ -22,20 +22,22 @@ export function PageCards({ go }: { go: DocsGo }) {
 
 			<H2>Example</H2>
 			<Snippet name="cards-example">
-				<Cards>
-					<DocCard
-						icon={<Icon.zap size={20} />}
-						title="Quick Start"
-						desc="From zero to a documented component."
-						onClick={() => go("quick-start")}
-					/>
-					<DocCard
-						icon={<Icon.search size={20} />}
-						title="Search"
-						desc="Jump to the SearchPalette docs."
-						onClick={() => go("search")}
-					/>
-				</Cards>
+				{() => (
+					<Cards>
+						<DocCard
+							icon={<Icon.zap size={20} />}
+							title="Quick Start"
+							desc="From zero to a documented component."
+							onClick={() => go("quick-start")}
+						/>
+						<DocCard
+							icon={<Icon.search size={20} />}
+							title="Search"
+							desc="Jump to the SearchPalette docs."
+							onClick={() => go("search")}
+						/>
+					</Cards>
+				)}
 			</Snippet>
 
 			<H2>DocCard props</H2>

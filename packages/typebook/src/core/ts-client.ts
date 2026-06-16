@@ -2,6 +2,18 @@ import { resolve } from "node:path";
 import ts from "typescript";
 import { DEFAULT_INHERITED_PROVIDERS, LOG_PREFIX } from "../constants.js";
 import type { PropInfo, PropType } from "../types.js";
+import { dedent, sliceWithLeadingIndent } from "./dedent.js";
+
+/**
+ * Result of resolving a `<Snippet>{Component}</Snippet>` reference to source:
+ * - `ok`        → the component's function body, sliced from its (possibly cross-file) declaration
+ * - `class`     → the reference is a class component; the library only supports function components
+ * - `unresolved`→ the identifier couldn't be resolved to a function declaration
+ */
+export type SnippetSource =
+	| { kind: "ok"; code: string }
+	| { kind: "class" }
+	| { kind: "unresolved" };
 
 export class TypeScriptClient {
 	private service: ts.LanguageService | null = null;
@@ -152,6 +164,66 @@ export class TypeScriptClient {
 		}
 
 		return this.extractPropsFromRegisterCall(callExpr);
+	}
+
+	/**
+	 * Resolve a `<Snippet>{Component}</Snippet>` reference (the `Component` identifier at
+	 * `identOffset`) to the source of its function body. Uses the checker to follow imports and
+	 * aliases, so the component may live in another file — TypeScript already knows where it is.
+	 * Returns a `class` result for class components (unsupported) and `unresolved` when the
+	 * identifier doesn't resolve to a function declaration.
+	 */
+	getComponentBodySource(filePath: string, identOffset: number): SnippetSource {
+		if (!this.program || !this.checker) return { kind: "unresolved" };
+
+		const absPath = resolve(this.cwd, filePath);
+		const sourceFile = this.program.getSourceFile(absPath);
+		if (!sourceFile) return { kind: "unresolved" };
+
+		const ident = findIdentifierAt(sourceFile, identOffset);
+		if (!ident) return { kind: "unresolved" };
+
+		let symbol = this.checker.getSymbolAtLocation(ident);
+		if (!symbol) return { kind: "unresolved" };
+		if (symbol.flags & ts.SymbolFlags.Alias) {
+			symbol = this.checker.getAliasedSymbol(symbol);
+		}
+
+		const declarations = symbol.getDeclarations();
+		if (!declarations || declarations.length === 0)
+			return { kind: "unresolved" };
+
+		// Class components aren't supported — surface that explicitly rather than emitting garbage.
+		for (const decl of declarations) {
+			if (isClassComponentDeclaration(decl)) return { kind: "class" };
+		}
+
+		for (const decl of declarations) {
+			const fn = resolveFunctionLikeFromDeclaration(
+				decl,
+			) as ts.FunctionLikeDeclaration | null;
+			if (!fn?.body) continue;
+
+			const sf = fn.getSourceFile();
+			const body = fn.body;
+			let code: string;
+			if (ts.isBlock(body)) {
+				// Strip the wrapping braces, keep the statements (incl. `return`).
+				code = sf.text.slice(body.getStart(sf) + 1, body.getEnd() - 1);
+			} else {
+				// Expression body: unwrap `() => ( … )` parens so the shown source is just the expression.
+				let expr: ts.Expression = body;
+				while (ts.isParenthesizedExpression(expr)) expr = expr.expression;
+				code = sliceWithLeadingIndent(
+					sf.text,
+					expr.getStart(sf),
+					expr.getEnd(),
+				);
+			}
+			return { kind: "ok", code: dedent(code) };
+		}
+
+		return { kind: "unresolved" };
 	}
 
 	/**
@@ -437,6 +509,34 @@ export class TypeScriptClient {
 
 /** Extensions TypeScript will accept as program root files. */
 const TS_SOURCE_EXT = /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/;
+
+/** Find the `Identifier` node that starts at the given character offset (matches oxc's offset). */
+function findIdentifierAt(
+	sourceFile: ts.SourceFile,
+	offset: number,
+): ts.Identifier | null {
+	let found: ts.Identifier | null = null;
+	const visit = (node: ts.Node): void => {
+		if (found) return;
+		if (ts.isIdentifier(node) && node.getStart(sourceFile) === offset) {
+			found = node;
+			return;
+		}
+		ts.forEachChild(node, visit);
+	};
+	visit(sourceFile);
+	return found;
+}
+
+/** Whether a declaration is a class component (class declaration, or `const X = class …`). */
+function isClassComponentDeclaration(decl: ts.Declaration): boolean {
+	if (ts.isClassDeclaration(decl) || ts.isClassExpression(decl)) return true;
+	return (
+		ts.isVariableDeclaration(decl) &&
+		!!decl.initializer &&
+		ts.isClassExpression(decl.initializer)
+	);
+}
 
 /**
  * Pull the JSDoc description (the prose before any `@tag` lines) for a symbol.

@@ -19,14 +19,16 @@ export function PageTables() {
 
 			<H2>MDTable</H2>
 			<Snippet name="mdtable-example">
-				<MDTable
-					head={["Bundler", "Entry", "Status"]}
-					rows={[
-						["Vite", <C key="e">@dennation/typebook/vite</C>, "Stable"],
-						["webpack", <C key="e">@dennation/typebook/webpack</C>, "Stable"],
-						["esbuild", <C key="e">@dennation/typebook/esbuild</C>, "Stable"],
-					]}
-				/>
+				{() => (
+					<MDTable
+						head={["Bundler", "Entry", "Status"]}
+						rows={[
+							["Vite", <C key="e">@dennation/typebook/vite</C>, "Stable"],
+							["webpack", <C key="e">@dennation/typebook/webpack</C>, "Stable"],
+							["esbuild", <C key="e">@dennation/typebook/esbuild</C>, "Stable"],
+						]}
+					/>
+				)}
 			</Snippet>
 			<PropsTable
 				props={[
@@ -51,22 +53,24 @@ export function PageTables() {
 				default value and description:
 			</P>
 			<Snippet name="props-table-example">
-				<PropsTable
-					props={[
-						{
-							name: "type",
-							type: '"info" | "warning"',
-							default: '"info"',
-							desc: "Visual intent.",
-						},
-						{
-							name: "children",
-							type: "ReactNode",
-							required: true,
-							desc: "Body.",
-						},
-					]}
-				/>
+				{() => (
+					<PropsTable
+						props={[
+							{
+								name: "type",
+								type: '"info" | "warning"',
+								default: '"info"',
+								desc: "Visual intent.",
+							},
+							{
+								name: "children",
+								type: "ReactNode",
+								required: true,
+								desc: "Body.",
+							},
+						]}
+					/>
+				)}
 			</Snippet>
 			<PropsTable
 				props={[

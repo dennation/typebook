@@ -9,7 +9,9 @@ async function scan(filename: string, content: string) {
 
 describe("mayContainSnippet", () => {
 	test("detects Snippet substring", () => {
-		expect(mayContainSnippet('<Snippet name="x">hi</Snippet>')).toBe(true);
+		expect(mayContainSnippet('<Snippet name="x">{() => <i/>}</Snippet>')).toBe(
+			true,
+		);
 	});
 
 	test("returns false when Snippet absent", () => {
@@ -17,8 +19,8 @@ describe("mayContainSnippet", () => {
 	});
 });
 
-describe("scanSnippets — <Snippet> discovery", () => {
-	test("extracts children source 1:1 (dedented) and the name", async () => {
+describe("scanSnippets — inline function child", () => {
+	test("arrow with expression body → the returned JSX (dedented)", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
@@ -26,7 +28,7 @@ describe("scanSnippets — <Snippet> discovery", () => {
 				function Page() {
 					return (
 						<Snippet name="hello">
-							<Button>Click</Button>
+							{() => <Button>Click</Button>}
 						</Snippet>
 					)
 				}
@@ -35,26 +37,58 @@ describe("scanSnippets — <Snippet> discovery", () => {
 
 		expect(result).toHaveLength(1);
 		expect(result[0].name).toBe("hello");
-		expect(result[0].code).toBe("<Button>Click</Button>");
+		expect(result[0].kind).toBe("inline");
+		if (result[0].kind === "inline") {
+			expect(result[0].code).toBe("<Button>Click</Button>");
+		}
 		expect(typeof result[0].start).toBe("number");
 	});
 
-	test("preserves multi-line structure and relative indentation", async () => {
+	test("parenthesised multi-line expression body keeps relative indentation", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
 				import { Snippet } from '@dennation/typebook/react'
 				const x = (
 					<Snippet name="multi">
-						<div>
-							<span>nested</span>
-						</div>
+						{() => (
+							<div>
+								<span>nested</span>
+							</div>
+						)}
 					</Snippet>
 				)
 			`,
 		);
 
-		expect(result[0].code).toBe("<div>\n  <span>nested</span>\n</div>");
+		expect(result[0].kind).toBe("inline");
+		if (result[0].kind === "inline") {
+			expect(result[0].code).toBe("<div>\n  <span>nested</span>\n</div>");
+		}
+	});
+
+	test("block body → statements with braces stripped (hooks example)", async () => {
+		const result = await scan(
+			"file.tsx",
+			`
+				import { Snippet } from '@dennation/typebook/react'
+				const x = (
+					<Snippet name="counter">
+						{function Counter() {
+							const [n, setN] = useState(0)
+							return <Button onClick={() => setN(n + 1)}>{n}</Button>
+						}}
+					</Snippet>
+				)
+			`,
+		);
+
+		expect(result[0].kind).toBe("inline");
+		if (result[0].kind === "inline") {
+			expect(result[0].code).toBe(
+				"const [n, setN] = useState(0)\nreturn <Button onClick={() => setN(n + 1)}>{n}</Button>",
+			);
+		}
 	});
 
 	test("captures name from an expression container", async () => {
@@ -62,16 +96,50 @@ describe("scanSnippets — <Snippet> discovery", () => {
 			"file.tsx",
 			`
 				import { Snippet } from '@dennation/typebook/react'
-				const x = <Snippet name={'expr'}>hi</Snippet>
+				const x = <Snippet name={'expr'}>{() => <i/>}</Snippet>
 			`,
 		);
 
 		expect(result).toHaveLength(1);
 		expect(result[0].name).toBe("expr");
-		expect(result[0].code).toBe("hi");
+	});
+});
+
+describe("scanSnippets — component reference child", () => {
+	test("bare identifier → ref with name and offset (for the TS client)", async () => {
+		const content = `
+			import { Snippet } from '@dennation/typebook/react'
+			import { Counter } from './Counter'
+			const x = <Snippet name="counter">{Counter}</Snippet>
+		`;
+		const result = await scan("file.tsx", content);
+
+		expect(result).toHaveLength(1);
+		expect(result[0].kind).toBe("ref");
+		if (result[0].kind === "ref") {
+			expect(result[0].ref).toBe("Counter");
+			// The recorded offset points at the identifier in the source.
+			expect(content.slice(result[0].refOffset, result[0].refOffset + 7)).toBe(
+				"Counter",
+			);
+		}
+	});
+});
+
+describe("scanSnippets — discovery rules", () => {
+	test("raw JSX child (no function) is dropped under the function-only API", async () => {
+		const result = await scan(
+			"file.tsx",
+			`
+				import { Snippet } from '@dennation/typebook/react'
+				const x = <Snippet name="raw"><Button/></Snippet>
+			`,
+		);
+
+		expect(result).toEqual([]);
 	});
 
-	test("self-closing Snippet yields empty code", async () => {
+	test("self-closing Snippet is dropped (no function child)", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
@@ -80,8 +148,7 @@ describe("scanSnippets — <Snippet> discovery", () => {
 			`,
 		);
 
-		expect(result).toHaveLength(1);
-		expect(result[0].code).toBe("");
+		expect(result).toEqual([]);
 	});
 
 	test("aliased import is still captured", async () => {
@@ -89,7 +156,7 @@ describe("scanSnippets — <Snippet> discovery", () => {
 			"file.tsx",
 			`
 				import { Snippet as Code } from '@dennation/typebook/react'
-				const x = <Code name="aliased">hi</Code>
+				const x = <Code name="aliased">{() => <i/>}</Code>
 			`,
 		);
 
@@ -102,8 +169,8 @@ describe("scanSnippets — <Snippet> discovery", () => {
 			"file.tsx",
 			`
 				import { Snippet } from '@dennation/typebook/react'
-				const a = <Snippet name="one">1</Snippet>
-				const b = <Snippet name="two">2</Snippet>
+				const a = <Snippet name="one">{() => <i/>}</Snippet>
+				const b = <Snippet name="two">{() => <i/>}</Snippet>
 			`,
 		);
 
@@ -115,7 +182,7 @@ describe("scanSnippets — <Snippet> discovery", () => {
 			"file.tsx",
 			`
 				import { Snippet } from '@dennation/typebook/react'
-				const x = <Snippet>hi</Snippet>
+				const x = <Snippet>{() => <i/>}</Snippet>
 			`,
 		);
 
@@ -128,7 +195,7 @@ describe("scanSnippets — <Snippet> discovery", () => {
 			`
 				import { Snippet } from '@dennation/typebook/react'
 				const id = 'x'
-				const node = <Snippet name={id}>hi</Snippet>
+				const node = <Snippet name={id}>{() => <i/>}</Snippet>
 			`,
 		);
 
@@ -140,7 +207,7 @@ describe("scanSnippets — <Snippet> discovery", () => {
 			"file.tsx",
 			`
 				import { Snippet } from 'some-other-lib'
-				const x = <Snippet name="nope">hi</Snippet>
+				const x = <Snippet name="nope">{() => <i/>}</Snippet>
 			`,
 		);
 
@@ -151,7 +218,7 @@ describe("scanSnippets — <Snippet> discovery", () => {
 		const result = await scan(
 			"file.tsx",
 			`
-				const x = <Snippet name="nope">hi</Snippet>
+				const x = <Snippet name="nope">{() => <i/>}</Snippet>
 			`,
 		);
 

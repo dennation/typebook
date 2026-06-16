@@ -5,27 +5,36 @@ import { type ReactNode, useState } from "react";
 export interface SnippetProps {
 	/**
 	 * Author-chosen identifier for this block. At build time the plugin extracts
-	 * the children's source into the generated `snippets.gen.ts` under this key;
+	 * the example's source into the generated `snippets.gen.ts` under this key;
 	 * at runtime the component reads it back from context. Must be unique across
 	 * the project. (Not `key` — reserved by React; not `codeId` — by request.)
 	 */
 	name: string;
-	/** Live content rendered above the "show source" toggle. */
-	children: ReactNode;
+	/**
+	 * The example, as a component function — either inline (`{() => <…/>}`, or a
+	 * named `{function Counter() { … }}` when it uses hooks) or a reference to a
+	 * component declared elsewhere (`{Counter}`). It is rendered live; its body is
+	 * what the build step extracts as the shown source. Function components only —
+	 * class components aren't supported.
+	 */
+	children: () => ReactNode;
 }
 
 /**
- * Renders its children live, plus a toggle that reveals the original source the
- * build step extracted for `name`. The source is read synchronously from the
- * `TypebookProvider` context — no runtime fetch — and rendered via `CodeBlock`.
+ * Renders the example component live, plus a toggle that reveals the original
+ * source the build step extracted for `name`. The source is read synchronously
+ * from the `TypebookProvider` context — no runtime fetch — and rendered via
+ * `CodeBlock`.
  */
-export function Snippet({ name, children }: SnippetProps) {
+export function Snippet({ name, children: Demo }: SnippetProps) {
 	const [open, setOpen] = useState(false);
 	const code = useSnippet(name);
 
 	return (
 		<div className="border border-border rounded-lg overflow-hidden">
-			<div className="p-4">{children}</div>
+			<div className="p-4">
+				<Demo />
+			</div>
 			<div className="border-t border-border">
 				<button
 					type="button"

@@ -1,15 +1,33 @@
 import { NPM_REACT_PACKAGE_NAME } from "../constants.js";
 import { type Program, walk } from "./ast.js";
+import { dedent, sliceWithLeadingIndent } from "./dedent.js";
 
-/** A single `<Snippet name="…">…</Snippet>` element found in a file */
-export interface SnippetBlock {
-	/** Value of the required `name` prop — becomes the output file name */
+/**
+ * A single `<Snippet name="…">{…}</Snippet>` element found in a file. Its child must be a
+ * component function — either an inline function/arrow literal (whose body we slice here) or
+ * a reference to a component declared elsewhere (whose definition the TypeScript client
+ * resolves; the scanner only records where to look).
+ */
+export type SnippetBlock = {
+	/** Value of the required `name` prop — becomes the output map key */
 	name: string;
-	/** Exact source text of the element's children, sliced 1:1 then dedented */
-	code: string;
 	/** Character offset of the JSXElement in source — used for stable ordering / diagnostics */
 	start: number;
-}
+} & (
+	| {
+			/** Inline `{() => …}` / `{function …}`: the function body, sliced 1:1 then dedented */
+			kind: "inline";
+			code: string;
+	  }
+	| {
+			/** `{SomeComponent}`: a reference the TS client resolves to the component's body */
+			kind: "ref";
+			/** The referenced identifier's name — diagnostics only */
+			ref: string;
+			/** Character offset of the identifier — the TS client re-finds the node by offset */
+			refOffset: number;
+	  }
+);
 
 const SNIPPET_COMPONENT_NAME = "Snippet";
 
@@ -21,13 +39,14 @@ export function mayContainSnippet(content: string): boolean {
 }
 
 /**
- * Extract every `<Snippet name="…">…</Snippet>` element (whose `Snippet` was imported
+ * Extract every `<Snippet name="…">{…}</Snippet>` element (whose `Snippet` was imported
  * from `@dennation/typebook/react`) from an already-parsed program.
  *
- * The children are read straight from the original `content` via `code.slice(start, end)`,
- * so the captured text is exactly what the author wrote — no AST re-generation, no
- * formatting drift. Only elements with a static string `name` are kept; anything
- * dynamic can't be resolved at build time.
+ * The child must be a component function. For an inline function literal the body is read
+ * straight from the original `content` via `code.slice` — exactly what the author wrote, no
+ * AST re-generation. For a bare identifier the source lives in another declaration (possibly
+ * another file), so only its name/offset is recorded for the TypeScript client to resolve.
+ * Only elements with a static string `name` and a recognised function child are kept.
  */
 export function scanSnippets(
 	program: Program,
@@ -50,8 +69,9 @@ export function scanSnippets(
 		const name = nameAttribute(opening);
 		if (name === null) return;
 
-		const code = extractChildrenSource(node, opening, content);
-		blocks.push({ name, code, start: (node.start as number) ?? 0 });
+		const start = (node.start as number) ?? 0;
+		const block = childToBlock(node, name, start, content);
+		if (block) blocks.push(block);
 	});
 
 	return blocks;
@@ -129,47 +149,79 @@ function staticStringValue(
 }
 
 /**
- * Slice the children source between the opening tag's end and the closing tag's
- * start, then strip common indentation and surrounding blank lines. Self-closing
- * `<Snippet name="…" />` has no children and yields an empty string.
+ * Turn the `<Snippet>`'s child into a block. The child must be a single
+ * `{…}` expression container holding a function literal (inline) or an identifier
+ * (a component reference). Anything else (raw JSX children, no child) is unsupported
+ * under the function-only API and dropped.
  */
-function extractChildrenSource(
+function childToBlock(
 	element: Record<string, unknown>,
-	opening: Record<string, unknown>,
+	name: string,
+	start: number,
 	content: string,
-): string {
-	const closing = element.closingElement as
-		| Record<string, unknown>
-		| null
-		| undefined;
-	if (!closing) return "";
+): SnippetBlock | null {
+	const children = (element.children as Array<Record<string, unknown>>) ?? [];
+	for (const child of children) {
+		if (child.type !== "JSXExpressionContainer") continue;
+		const expr = child.expression as Record<string, unknown> | undefined;
+		if (!expr) continue;
 
-	const start = opening.end as number;
-	const end = closing.start as number;
-	if (typeof start !== "number" || typeof end !== "number" || end <= start)
-		return "";
+		if (
+			expr.type === "ArrowFunctionExpression" ||
+			expr.type === "FunctionExpression"
+		) {
+			return {
+				name,
+				start,
+				kind: "inline",
+				code: functionBodySource(expr, content),
+			};
+		}
 
-	return dedent(content.slice(start, end));
+		if (expr.type === "Identifier") {
+			return {
+				name,
+				start,
+				kind: "ref",
+				ref: (expr.name as string) ?? "",
+				refOffset: (expr.start as number) ?? 0,
+			};
+		}
+	}
+	return null;
 }
 
 /**
- * Remove surrounding blank lines and the common leading-whitespace shared by all
- * non-blank lines, so extracted JSX reads as if it were authored at column zero.
+ * Slice a function literal's body. A block body (`{ … }`) yields its statements (braces
+ * stripped); an expression body (`() => <JSX/>`) yields the expression. Dedented so it reads
+ * as if authored at column zero.
  */
-function dedent(source: string): string {
-	const lines = source.replace(/\t/g, "  ").split("\n");
+function functionBodySource(
+	fn: Record<string, unknown>,
+	content: string,
+): string {
+	const body = fn.body as Record<string, unknown> | undefined;
+	if (!body) return "";
 
-	while (lines.length > 0 && lines[0].trim() === "") lines.shift();
-	while (lines.length > 0 && lines[lines.length - 1].trim() === "") lines.pop();
-	if (lines.length === 0) return "";
+	const bodyStart = body.start as number;
+	const bodyEnd = body.end as number;
+	if (typeof bodyStart !== "number" || typeof bodyEnd !== "number") return "";
 
-	let min = Infinity;
-	for (const line of lines) {
-		if (line.trim() === "") continue;
-		const indent = line.length - line.trimStart().length;
-		if (indent < min) min = indent;
+	if (body.type === "BlockStatement") {
+		// Strip the wrapping braces, keep the statements (incl. `return`).
+		return dedent(content.slice(bodyStart + 1, bodyEnd - 1));
 	}
-	if (!Number.isFinite(min) || min === 0) return lines.join("\n");
 
-	return lines.map((line) => line.slice(min)).join("\n");
+	// Expression body: unwrap `() => ( … )` parens so the shown source is just the expression.
+	let expr = body;
+	while (
+		expr.type === "ParenthesizedExpression" &&
+		expr.expression &&
+		typeof expr.expression === "object"
+	) {
+		expr = expr.expression as Record<string, unknown>;
+	}
+	return dedent(
+		sliceWithLeadingIndent(content, expr.start as number, expr.end as number),
+	);
 }

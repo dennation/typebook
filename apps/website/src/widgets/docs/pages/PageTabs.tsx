@@ -20,20 +20,22 @@ export function PageTabs() {
 
 			<H2>Example</H2>
 			<Snippet name="tabs-example">
-				<Tabs
-					tabs={[
-						{
-							label: "First",
-							content: <P>Content of the first panel.</P>,
-						},
-						{
-							label: "Second",
-							content: (
-								<P>Content of the second panel — any ReactNode works.</P>
-							),
-						},
-					]}
-				/>
+				{() => (
+					<Tabs
+						tabs={[
+							{
+								label: "First",
+								content: <P>Content of the first panel.</P>,
+							},
+							{
+								label: "Second",
+								content: (
+									<P>Content of the second panel — any ReactNode works.</P>
+								),
+							},
+						]}
+					/>
+				)}
 			</Snippet>
 
 			<H2>Props</H2>

@@ -40,6 +40,12 @@ interface IndexedRegistration {
 	props: PropInfo[];
 }
 
+/** A scanned `<Snippet>` block paired with its resolved source (inline body or referenced component). */
+interface IndexedSnippet {
+	block: SnippetBlock;
+	code: string;
+}
+
 class DuplicateRegistrationError extends Error {
 	constructor(id: string, files: ReadonlyArray<string>) {
 		super(
@@ -53,6 +59,20 @@ class DuplicateSnippetError extends Error {
 	constructor(name: string, files: ReadonlyArray<string>) {
 		super(formatDuplicate("Each <Snippet> name must be unique.", name, files));
 		this.name = "DuplicateSnippetError";
+	}
+}
+
+class UnsupportedClassComponentError extends Error {
+	constructor(name: string, file: string) {
+		super(
+			[
+				"<Snippet> only supports function components — class components aren't supported.",
+				`  - snippet "${name}"`,
+				`      ${file}`,
+				"  Rewrite the referenced component as a function component.",
+			].join("\n"),
+		);
+		this.name = "UnsupportedClassComponentError";
 	}
 }
 
@@ -81,7 +101,7 @@ export class TypebookBuilder {
 		string,
 		IndexedRegistration[]
 	>();
-	private readonly snippetsByFile = new Map<string, SnippetBlock[]>();
+	private readonly snippetsByFile = new Map<string, IndexedSnippet[]>();
 
 	constructor(config: BuilderConfig) {
 		this.cwd = config.cwd;
@@ -149,10 +169,12 @@ export class TypebookBuilder {
 
 		for (const filePath of filePaths) await this.indexFile(filePath);
 
-		// A changed file may define props consumed by registrations *elsewhere*. Re-resolve only
-		// the registrations whose Props type can actually reach the change (TypeScript's reference
-		// graph), rather than re-extracting every registration on every edit.
+		// A changed file may define props consumed by registrations *elsewhere*, or a component
+		// referenced by a `<Snippet>{Component}</Snippet>` in another file. Re-resolve only the
+		// entries whose dependency closure can actually reach the change (TypeScript's reference
+		// graph), rather than re-extracting everything on every edit.
 		await this.refreshAffectedRegistrationProps(filePaths);
+		await this.refreshAffectedSnippets(filePaths);
 
 		this.writeRegistry();
 		this.writeSnippets();
@@ -196,7 +218,10 @@ export class TypebookBuilder {
 		}
 
 		if (hasSnippet) {
-			this.indexSnippets(filePath, scanSnippets(program, content as string));
+			await this.indexSnippets(
+				filePath,
+				scanSnippets(program, content as string),
+			);
 		} else {
 			this.snippetsByFile.delete(filePath);
 		}
@@ -221,12 +246,58 @@ export class TypebookBuilder {
 		this.registrationsByFile.set(filePath, registrations);
 	}
 
-	private indexSnippets(filePath: string, blocks: SnippetBlock[]): void {
+	private async indexSnippets(
+		filePath: string,
+		blocks: SnippetBlock[],
+	): Promise<void> {
 		if (blocks.length === 0) {
 			this.snippetsByFile.delete(filePath);
 			return;
 		}
-		this.snippetsByFile.set(filePath, blocks);
+		const indexed = await Promise.all(
+			blocks.map(async (block) => ({
+				block,
+				code: await this.resolveSnippetCode(filePath, block),
+			})),
+		);
+		this.snippetsByFile.set(filePath, indexed);
+	}
+
+	/**
+	 * Resolve a block's displayed source. Inline blocks carry their body already (sliced by the
+	 * oxc scanner); reference blocks (`{Component}`) are resolved via the TypeScript client, which
+	 * follows imports/aliases across files. A class component is a hard build error; an
+	 * unresolvable reference degrades to an empty string with a warning.
+	 */
+	private async resolveSnippetCode(
+		filePath: string,
+		block: SnippetBlock,
+	): Promise<string> {
+		if (block.kind === "inline") return block.code;
+
+		if (!this.tsClient) {
+			console.warn(
+				LOG_PREFIX,
+				`Snippet "${block.name}" references ${block.ref} but type extraction is unavailable; source omitted.`,
+			);
+			return "";
+		}
+
+		const result = this.tsClient.getComponentBodySource(
+			filePath,
+			block.refOffset,
+		);
+		if (result.kind === "class") {
+			throw new UnsupportedClassComponentError(block.name, filePath);
+		}
+		if (result.kind === "unresolved") {
+			console.warn(
+				LOG_PREFIX,
+				`Snippet "${block.name}" could not resolve component ${block.ref} in ${filePath}; source omitted.`,
+			);
+			return "";
+		}
+		return result.code;
 	}
 
 	/**
@@ -245,10 +316,7 @@ export class TypebookBuilder {
 		await Promise.all(
 			Array.from(this.registrationsByFile.entries())
 				.filter(([filePath]) => !changed.has(normalizePath(filePath)))
-				.filter(
-					([filePath]) =>
-						force || this.registrationDependsOn(filePath, changed),
-				)
+				.filter(([filePath]) => force || this.fileDependsOn(filePath, changed))
 				.map(async ([filePath, registrations]) => {
 					const refreshed = await Promise.all(
 						registrations.map(async ({ call }) => ({
@@ -261,12 +329,34 @@ export class TypebookBuilder {
 		);
 	}
 
-	/** Whether `registrationFile` transitively depends on any changed file (TS reference graph). */
-	private registrationDependsOn(
-		registrationFile: string,
-		changed: ReadonlySet<string>,
-	): boolean {
-		const deps = this.tsClient?.getDependencies(registrationFile);
+	/**
+	 * Re-resolve reference snippets (`{Component}`) whose referenced component lives in a changed
+	 * file. Inline snippets carry their own body, so files with only inline snippets are skipped.
+	 * Mirrors {@link refreshAffectedRegistrationProps}.
+	 */
+	private async refreshAffectedSnippets(changedFiles: string[]): Promise<void> {
+		const changed = new Set(changedFiles.map(normalizePath));
+		const force = changedFiles.some((f) => f.endsWith(".d.ts"));
+		await Promise.all(
+			Array.from(this.snippetsByFile.entries())
+				.filter(([filePath]) => !changed.has(normalizePath(filePath)))
+				.filter(([, snippets]) => snippets.some((s) => s.block.kind === "ref"))
+				.filter(([filePath]) => force || this.fileDependsOn(filePath, changed))
+				.map(async ([filePath, snippets]) => {
+					const refreshed = await Promise.all(
+						snippets.map(async ({ block }) => ({
+							block,
+							code: await this.resolveSnippetCode(filePath, block),
+						})),
+					);
+					this.snippetsByFile.set(filePath, refreshed);
+				}),
+		);
+	}
+
+	/** Whether `file` transitively depends on any changed file (TS reference graph). */
+	private fileDependsOn(file: string, changed: ReadonlySet<string>): boolean {
+		const deps = this.tsClient?.getDependencies(file);
 		if (!deps) return true; // no dependency info → refresh conservatively
 		for (const dep of deps) {
 			if (changed.has(normalizePath(dep))) return true;
@@ -333,8 +423,8 @@ export class TypebookBuilder {
 	private collectSnippetEntries(): SnippetEntry[] {
 		const byName = new Map<string, { entry: SnippetEntry; file: string }>();
 
-		for (const [filePath, blocks] of this.snippetsByFile.entries()) {
-			for (const block of blocks) {
+		for (const [filePath, snippets] of this.snippetsByFile.entries()) {
+			for (const { block, code } of snippets) {
 				const existing = byName.get(block.name);
 				if (existing) {
 					throw new DuplicateSnippetError(block.name, [
@@ -343,7 +433,7 @@ export class TypebookBuilder {
 					]);
 				}
 				byName.set(block.name, {
-					entry: { name: block.name, code: block.code },
+					entry: { name: block.name, code },
 					file: filePath,
 				});
 			}
