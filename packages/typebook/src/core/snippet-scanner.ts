@@ -1,5 +1,10 @@
+import type {
+	JSXAttributeValue,
+	JSXElement,
+	JSXOpeningElement,
+} from "oxc-parser";
 import { NPM_REACT_PACKAGE_NAME } from "../constants.js";
-import { type Program, walk } from "./ast.js";
+import { moduleExportName, type Program, walk } from "./ast.js";
 
 /** A single `<Snippet name="…">…</Snippet>` element found in a file */
 export interface SnippetBlock {
@@ -33,25 +38,22 @@ export function scanSnippets(
 	program: Program,
 	content: string,
 ): SnippetBlock[] {
-	const body = (program as { body: unknown[] }).body;
-
-	const snippetLocalNames = collectSnippetNames(
-		body as Array<Record<string, unknown>>,
-	);
+	const snippetLocalNames = collectSnippetNames(program);
 	if (snippetLocalNames.size === 0) return [];
 
 	const blocks: SnippetBlock[] = [];
 	walk(program, (node) => {
 		if (node.type !== "JSXElement") return;
+		if (!isSnippetTag(node.openingElement, snippetLocalNames)) return;
 
-		const opening = node.openingElement as Record<string, unknown> | undefined;
-		if (!opening || !isSnippetTag(opening, snippetLocalNames)) return;
-
-		const name = nameAttribute(opening);
+		const name = nameAttribute(node.openingElement);
 		if (name === null) return;
 
-		const code = extractChildrenSource(node, opening, content);
-		blocks.push({ name, code, start: (node.start as number) ?? 0 });
+		blocks.push({
+			name,
+			code: extractChildrenSource(node, content),
+			start: node.start,
+		});
 	});
 
 	return blocks;
@@ -61,69 +63,51 @@ export function scanSnippets(
  * Collect local names bound to `Snippet` from `@dennation/typebook/react`.
  * Handles aliasing: `import { Snippet as Code } from '…/react'` adds 'Code'.
  */
-function collectSnippetNames(
-	body: Array<Record<string, unknown>>,
-): Set<string> {
+function collectSnippetNames(program: Program): Set<string> {
 	const names = new Set<string>();
-	for (const node of body) {
+	for (const node of program.body) {
 		if (node.type !== "ImportDeclaration") continue;
-		if (
-			(node.source as { value?: string } | undefined)?.value !==
-			NPM_REACT_PACKAGE_NAME
-		)
-			continue;
-
-		const specifiers =
-			(node.specifiers as Array<Record<string, unknown>>) ?? [];
-		for (const spec of specifiers) {
+		if (node.source.value !== NPM_REACT_PACKAGE_NAME) continue;
+		for (const spec of node.specifiers) {
 			if (spec.type !== "ImportSpecifier") continue;
-			if (
-				(spec.imported as { name?: string } | undefined)?.name !==
-				SNIPPET_COMPONENT_NAME
-			)
-				continue;
-			const localName = (spec.local as { name?: string } | undefined)?.name;
-			if (localName) names.add(localName);
+			if (moduleExportName(spec.imported) === SNIPPET_COMPONENT_NAME) {
+				names.add(spec.local.name);
+			}
 		}
 	}
 	return names;
 }
 
 function isSnippetTag(
-	opening: Record<string, unknown>,
+	opening: JSXOpeningElement,
 	snippetLocalNames: Set<string>,
 ): boolean {
-	const name = opening.name as { type?: string; name?: string } | undefined;
 	return (
-		name?.type === "JSXIdentifier" &&
-		!!name.name &&
-		snippetLocalNames.has(name.name)
+		opening.name.type === "JSXIdentifier" &&
+		snippetLocalNames.has(opening.name.name)
 	);
 }
 
 /** Read the static string value of the `name` attribute, or null if absent/dynamic. */
-function nameAttribute(opening: Record<string, unknown>): string | null {
-	const attributes =
-		(opening.attributes as Array<Record<string, unknown>>) ?? [];
-	for (const attr of attributes) {
+function nameAttribute(opening: JSXOpeningElement): string | null {
+	for (const attr of opening.attributes) {
 		if (attr.type !== "JSXAttribute") continue;
-		if ((attr.name as { name?: string } | undefined)?.name !== "name") continue;
-		return staticStringValue(
-			attr.value as Record<string, unknown> | null | undefined,
-		);
+		if (attr.name.type !== "JSXIdentifier" || attr.name.name !== "name")
+			continue;
+		return staticStringValue(attr.value);
 	}
 	return null;
 }
 
 /** Resolve `name="x"` (Literal) and `name={'x'}` (JSXExpressionContainer → Literal). */
-function staticStringValue(
-	value: Record<string, unknown> | null | undefined,
-): string | null {
+function staticStringValue(value: JSXAttributeValue | null): string | null {
 	if (!value) return null;
 	if (value.type === "Literal" && typeof value.value === "string")
 		return value.value;
 	if (value.type === "JSXExpressionContainer") {
-		return staticStringValue(value.expression as Record<string, unknown>);
+		const expr = value.expression;
+		if (expr.type === "Literal" && typeof expr.value === "string")
+			return expr.value;
 	}
 	return null;
 }
@@ -133,21 +117,13 @@ function staticStringValue(
  * start, then strip common indentation and surrounding blank lines. Self-closing
  * `<Snippet name="…" />` has no children and yields an empty string.
  */
-function extractChildrenSource(
-	element: Record<string, unknown>,
-	opening: Record<string, unknown>,
-	content: string,
-): string {
-	const closing = element.closingElement as
-		| Record<string, unknown>
-		| null
-		| undefined;
+function extractChildrenSource(element: JSXElement, content: string): string {
+	const closing = element.closingElement;
 	if (!closing) return "";
 
-	const start = opening.end as number;
-	const end = closing.start as number;
-	if (typeof start !== "number" || typeof end !== "number" || end <= start)
-		return "";
+	const start = element.openingElement.end;
+	const end = closing.start;
+	if (end <= start) return "";
 
 	return dedent(content.slice(start, end));
 }

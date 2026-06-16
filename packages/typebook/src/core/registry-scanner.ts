@@ -1,5 +1,6 @@
+import type { Argument, CallExpression, ImportDeclaration } from "oxc-parser";
 import { NPM_PACKAGE_NAME } from "../constants.js";
-import { type Program, walk } from "./ast.js";
+import { moduleExportName, type Program, walk } from "./ast.js";
 
 /** Resolved component import: the component argument of `registerComponent(id, Component, ...)` */
 export interface ComponentImport {
@@ -38,36 +39,31 @@ export function mayContainRegistration(content: string): boolean {
  * the generated registry.
  */
 export function scanRegistrations(program: Program): RegisterCall[] {
-	const body = (program as { body: unknown[] }).body;
-
 	const componentImports = new Map<string, ComponentImport>();
 	const registerLocalNames = new Set<string>();
 
-	for (const node of body as Array<Record<string, unknown>>) {
+	for (const node of program.body) {
 		if (node.type !== "ImportDeclaration") continue;
-		const source = (node.source as { value?: string } | undefined)?.value ?? "";
-		const specifiers =
-			(node.specifiers as Array<Record<string, unknown>>) ?? [];
-
-		if (source === NPM_PACKAGE_NAME) {
-			collectRegisterNames(specifiers, registerLocalNames);
+		if (node.source.value === NPM_PACKAGE_NAME) {
+			collectRegisterNames(node, registerLocalNames);
 		} else {
-			collectComponentImports(specifiers, source, componentImports);
+			collectComponentImports(node, node.source.value, componentImports);
 		}
 	}
 
 	const registers: RegisterCall[] = [];
 	walk(program, (node) => {
+		if (node.type !== "CallExpression") return;
 		const match = matchRegisterCall(node, registerLocalNames);
 		if (match === null) return;
 
-		const componentImport = componentImports.get(match.componentLocal) ?? null;
-		if (componentImport === null) return;
+		const componentImport = componentImports.get(match.componentLocal);
+		if (!componentImport) return;
 
 		registers.push({
 			id: match.id,
 			componentImport,
-			callStart: (node.start as number) ?? 0,
+			callStart: node.start,
 		});
 	});
 
@@ -79,66 +75,51 @@ export function scanRegistrations(program: Program): RegisterCall[] {
  * Handles aliasing: `import { registerComponent as reg } from '@dennation/typebook'`
  * adds 'reg' to the set.
  */
-function collectRegisterNames(
-	specifiers: Array<Record<string, unknown>>,
-	out: Set<string>,
-): void {
-	for (const spec of specifiers) {
+function collectRegisterNames(decl: ImportDeclaration, out: Set<string>): void {
+	for (const spec of decl.specifiers) {
 		if (spec.type !== "ImportSpecifier") continue;
-		const imported = (spec.imported as { name?: string } | undefined)?.name;
-		if (imported !== REGISTER_FN_NAME) continue;
-		const localName = (spec.local as { name?: string } | undefined)?.name;
-		if (localName) out.add(localName);
+		if (moduleExportName(spec.imported) === REGISTER_FN_NAME) {
+			out.add(spec.local.name);
+		}
 	}
 }
 
 function collectComponentImports(
-	specifiers: Array<Record<string, unknown>>,
+	decl: ImportDeclaration,
 	source: string,
 	out: Map<string, ComponentImport>,
 ): void {
-	for (const spec of specifiers) {
-		const localName = (spec.local as { name?: string } | undefined)?.name;
-		if (!localName) continue;
-
+	for (const spec of decl.specifiers) {
 		if (spec.type === "ImportDefaultSpecifier") {
-			out.set(localName, { name: localName, path: source });
+			out.set(spec.local.name, { name: spec.local.name, path: source });
 		} else if (spec.type === "ImportSpecifier") {
-			const imported = (spec.imported as { name?: string } | undefined)?.name;
-			out.set(localName, { name: imported ?? localName, path: source });
+			out.set(spec.local.name, {
+				name: moduleExportName(spec.imported),
+				path: source,
+			});
 		}
 	}
 }
 
 function matchRegisterCall(
-	node: Record<string, unknown>,
+	node: CallExpression,
 	registerLocalNames: Set<string>,
 ): { id: string; componentLocal: string } | null {
-	if (node.type !== "CallExpression") return null;
-	const callee = node.callee as { type?: string; name?: string } | undefined;
-	if (
-		callee?.type !== "Identifier" ||
-		!callee.name ||
-		!registerLocalNames.has(callee.name)
-	)
-		return null;
+	if (node.callee.type !== "Identifier") return null;
+	if (!registerLocalNames.has(node.callee.name)) return null;
 
-	const args = (node.arguments as Array<Record<string, unknown>>) ?? [];
-	const id = stringLiteralValue(args[0]);
+	const id = stringLiteralValue(node.arguments[0]);
 	if (id === null) return null;
 
-	const componentLocal = identifierName(args[1]);
+	const componentLocal = identifierName(node.arguments[1]);
 	if (componentLocal === null) return null;
 
 	return { id, componentLocal };
 }
 
-function stringLiteralValue(
-	node: Record<string, unknown> | undefined,
-): string | null {
-	if (!node) return null;
-	if (node.type === "Literal" && typeof node.value === "string")
-		return node.value;
+function stringLiteralValue(arg: Argument | undefined): string | null {
+	if (arg?.type === "Literal" && typeof arg.value === "string")
+		return arg.value;
 	return null;
 }
 
@@ -146,13 +127,11 @@ function stringLiteralValue(
  * Unwrap `TSInstantiationExpression` (e.g. `Select<T>`) down to the underlying
  * Identifier. Returns null for anything else.
  */
-function identifierName(
-	node: Record<string, unknown> | undefined,
-): string | null {
-	if (!node) return null;
-	if (node.type === "Identifier") return (node.name as string) ?? null;
-	if (node.type === "TSInstantiationExpression") {
-		return identifierName(node.expression as Record<string, unknown>);
+function identifierName(arg: Argument | undefined): string | null {
+	if (!arg) return null;
+	if (arg.type === "Identifier") return arg.name;
+	if (arg.type === "TSInstantiationExpression") {
+		return identifierName(arg.expression);
 	}
 	return null;
 }
