@@ -37,11 +37,7 @@ describe("scanSnippets — inline function child", () => {
 
 		expect(result).toHaveLength(1);
 		expect(result[0].name).toBe("hello");
-		expect(result[0].kind).toBe("inline");
-		if (result[0].kind === "inline") {
-			expect(result[0].code).toBe("<Button>Click</Button>");
-		}
-		expect(typeof result[0].start).toBe("number");
+		expect(result[0].code).toBe("<Button>Click</Button>");
 	});
 
 	test("parenthesised multi-line expression body keeps relative indentation", async () => {
@@ -61,10 +57,7 @@ describe("scanSnippets — inline function child", () => {
 			`,
 		);
 
-		expect(result[0].kind).toBe("inline");
-		if (result[0].kind === "inline") {
-			expect(result[0].code).toBe("<div>\n  <span>nested</span>\n</div>");
-		}
+		expect(result[0].code).toBe("<div>\n  <span>nested</span>\n</div>");
 	});
 
 	test("block body → statements with braces stripped (hooks example)", async () => {
@@ -83,12 +76,9 @@ describe("scanSnippets — inline function child", () => {
 			`,
 		);
 
-		expect(result[0].kind).toBe("inline");
-		if (result[0].kind === "inline") {
-			expect(result[0].code).toBe(
-				"const [n, setN] = useState(0)\nreturn <Button onClick={() => setN(n + 1)}>{n}</Button>",
-			);
-		}
+		expect(result[0].code).toBe(
+			"const [n, setN] = useState(0)\nreturn <Button onClick={() => setN(n + 1)}>{n}</Button>",
+		);
 	});
 
 	test("captures name from an expression container", async () => {
@@ -105,29 +95,23 @@ describe("scanSnippets — inline function child", () => {
 	});
 });
 
-describe("scanSnippets — component reference child", () => {
-	test("bare identifier → ref with name and offset (for the TS client)", async () => {
-		const content = `
-			import { Snippet } from '@dennation/typebook/react'
-			import { Counter } from './Counter'
-			const x = <Snippet name="counter">{Counter}</Snippet>
-		`;
-		const result = await scan("file.tsx", content);
+describe("scanSnippets — non-inline child → code null (a build error)", () => {
+	test("bare component reference is rejected", async () => {
+		const result = await scan(
+			"file.tsx",
+			`
+				import { Snippet } from '@dennation/typebook/react'
+				import { Counter } from './Counter'
+				const x = <Snippet name="ref">{Counter}</Snippet>
+			`,
+		);
 
 		expect(result).toHaveLength(1);
-		expect(result[0].kind).toBe("ref");
-		if (result[0].kind === "ref") {
-			expect(result[0].ref).toBe("Counter");
-			// The recorded offset points at the identifier in the source.
-			expect(content.slice(result[0].refOffset, result[0].refOffset + 7)).toBe(
-				"Counter",
-			);
-		}
+		expect(result[0].name).toBe("ref");
+		expect(result[0].code).toBeNull();
 	});
-});
 
-describe("scanSnippets — discovery rules", () => {
-	test("raw JSX child (no function) is dropped under the function-only API", async () => {
+	test("raw JSX child is rejected", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
@@ -136,10 +120,10 @@ describe("scanSnippets — discovery rules", () => {
 			`,
 		);
 
-		expect(result).toEqual([]);
+		expect(result[0].code).toBeNull();
 	});
 
-	test("self-closing Snippet is dropped (no function child)", async () => {
+	test("self-closing Snippet is rejected (no function child)", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
@@ -148,9 +132,11 @@ describe("scanSnippets — discovery rules", () => {
 			`,
 		);
 
-		expect(result).toEqual([]);
+		expect(result[0].code).toBeNull();
 	});
+});
 
+describe("scanSnippets — discovery rules", () => {
 	test("aliased import is still captured", async () => {
 		const result = await scan(
 			"file.tsx",

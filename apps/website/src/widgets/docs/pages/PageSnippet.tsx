@@ -52,25 +52,22 @@ export function PageSnippet() {
     const [n, setN] = useState(0);
     return <Button onClick={() => setN(n + 1)}>Count: {n}</Button>;
   }}
-</Snippet>
-
-// or reference a component declared anywhere (resolved across files):
-<Snippet name="theme-demo">{ThemeDemo}</Snippet>`}
+</Snippet>`}
 			/>
 			<P>
-				At build time the plugin finds every <C>{"<Snippet>"}</C>, takes the
-				example's <C>function body</C> (inline literals are sliced from the
-				file; references are resolved via the TypeScript checker, even across
-				files), dedents it and emits a single generated map —{" "}
-				<C>snippets.gen.ts</C>. Pass it to <C>TypebookProvider</C>; at runtime
-				the toggle reads the source synchronously from context (no fetch) and
-				renders it through <C>CodeBlock</C>.
+				At build time the plugin finds every <C>{"<Snippet>"}</C>, slices the
+				inline function's <C>body</C> straight from the file, dedents it and
+				emits a single generated map — <C>snippets.gen.ts</C>. Pass it to{" "}
+				<C>TypebookProvider</C>; at runtime the toggle reads the source
+				synchronously from context (no fetch) and renders it through{" "}
+				<C>CodeBlock</C>.
 			</P>
 
-			<Callout type="warning" title="Function components only">
-				The example must be a function component — class components aren't
-				supported and raise a build error. <C>name</C> must be a static string
-				and unique; duplicates throw <C>DuplicateSnippetError</C> at build time.
+			<Callout type="warning" title="Inline functions only">
+				The child must be an <strong>inline</strong> function — a bare component
+				reference (<C>{"{Counter}"}</C>) or raw JSX raises a build error, since
+				its source can't be sliced from this call site. <C>name</C> must be a
+				static string and unique; duplicates throw <C>DuplicateSnippetError</C>.
 			</Callout>
 
 			<H2>Props</H2>
@@ -91,7 +88,7 @@ export function PageSnippet() {
 						name: "children",
 						type: "() => ReactNode",
 						required: true,
-						desc: "The example as a component function — inline or a reference. Rendered live; its body is the shown source.",
+						desc: "The example as an inline function component. Rendered live; its body is the shown source.",
 					},
 				]}
 			/>

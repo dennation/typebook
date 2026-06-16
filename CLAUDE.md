@@ -59,9 +59,8 @@ packages/typebook/
                                 scanners on the one AST → type extraction → writes both .gen files + Vite watcher
       registry-scanner.ts     — oxc AST: scanRegistrations(program) finds registerComponent('id', Component) calls
       registry-generator.ts   — generateRegistryFile(): builds ui-registry.gen.ts content
-      snippet-scanner.ts      — oxc AST: scanSnippets(program, src) finds <Snippet name="…">{fn}</Snippet>;
-                                inline fn → slice body; {Component} ref → record offset for ts-client to resolve
-      dedent.ts               — shared dedent used by the snippet scanner (inline) and ts-client (references)
+      snippet-scanner.ts      — oxc AST: scanSnippets(program, src) finds <Snippet name="…">{fn}</Snippet>
+                                and slices the inline function's body (non-inline child → null → build error)
       snippet-generator.ts    — generateSnippetsFile(): builds snippets.gen.ts content
       ts-client.ts            — TypeScript Compiler API: extracts PropInfo[], defaultValues, JSDoc descriptions
       ast.ts                  — Shared oxc-parser helpers (parseProgram → Program, walk) used by both scanners
@@ -183,13 +182,10 @@ import { Snippet } from '@dennation/typebook/react'
     return <Button onClick={() => setN(n + 1)}>Count: {n}</Button>
   }}
 </Snippet>
-
-// reference a component declared anywhere (resolved across files by the TS checker)
-<Snippet name="theme-demo">{ThemeDemo}</Snippet>
 ```
 
-- **The child is a component function, not raw JSX** — `children: () => ReactNode`. At runtime `<Snippet>` renders it as `<Demo/>` (so hooks work); the shown source is the **function body**. Class components aren't supported (build error `UnsupportedClassComponentError`).
-- At build time the plugin parses each source file with **oxc-parser** and finds every `<Snippet>` element (imported from `@dennation/typebook/react`). For an **inline** function literal it slices the body 1:1 from the file (block body → between the braces; expression body → the expression), dedents it. For a **reference** (`{Component}`) the oxc scanner records the identifier offset and the **TypeScript client** (`ts-client.ts`, the same checker used for prop extraction) resolves it to the component's declaration — following imports/aliases across files — and slices its body. Both emit into a single generated map `snippets.gen.ts` (`name → code`, `as const satisfies SnippetMap`).
+- **The child is an inline function component, not raw JSX** — `children: () => ReactNode`. At runtime `<Snippet>` renders it as `<Demo/>` (so hooks work); the shown source is the **function body**.
+- At build time the plugin parses each source file with **oxc-parser** and finds every `<Snippet>` element (imported from `@dennation/typebook/react`), then slices the inline function's body 1:1 from the file (block body → between the braces; expression body → the expression, parens unwrapped), dedents it, and emits all into a single generated map `snippets.gen.ts` (`name → code`, `as const satisfies SnippetMap`). The child must be an **inline** function literal — a bare reference (`{Component}`) or raw JSX can't be sliced from the call site and raises a build error (`SnippetNotInlineError`). This keeps extraction pure-oxc and same-file: a snippet only changes when its own file does, so no cross-file resolution or watcher dependency graph is needed.
 - `name` is a **required, author-chosen string** (not `key` — reserved by React; not `codeId` — by request). It must be unique across the project. Duplicate names throw `DuplicateSnippetError`; only a *static* string `name` is extractable.
 - The consumer imports `{ snippets }` from `./snippets.gen` and passes it to `TypebookProvider`. At runtime the "show source" toggle reads the source **synchronously from React context** (`useSnippet(name)`) — no runtime fetch, no URL/base-path concerns — and renders it through `<CodeBlock>`.
 - Extraction runs in the universal unplugin `buildStart`, so it works in every bundler; the Vite dev server additionally watches for incremental, debounced re-extraction. Output file is configurable via `snippetsFile` in `TypebookConfig` (default `./src/snippets.gen.ts`); it's only created once a project actually uses `<Snippet>`.

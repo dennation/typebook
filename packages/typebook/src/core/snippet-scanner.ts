@@ -1,33 +1,18 @@
 import { NPM_REACT_PACKAGE_NAME } from "../constants.js";
 import { type Program, walk } from "./ast.js";
-import { dedent, sliceWithLeadingIndent } from "./dedent.js";
 
 /**
- * A single `<Snippet name="…">{…}</Snippet>` element found in a file. Its child must be a
- * component function — either an inline function/arrow literal (whose body we slice here) or
- * a reference to a component declared elsewhere (whose definition the TypeScript client
- * resolves; the scanner only records where to look).
+ * A single `<Snippet name="…">{fn}</Snippet>` element found in a file. Its child must be an inline
+ * function component (`{() => …}` or `{function Counter() { … }}`), whose body we slice as the
+ * shown source. `code` is `null` when the child is *not* an inline function (a bare reference, raw
+ * JSX, or nothing) — the builder turns that into a clear build error rather than a silent drop.
  */
-export type SnippetBlock = {
+export interface SnippetBlock {
 	/** Value of the required `name` prop — becomes the output map key */
 	name: string;
-	/** Character offset of the JSXElement in source — used for stable ordering / diagnostics */
-	start: number;
-} & (
-	| {
-			/** Inline `{() => …}` / `{function …}`: the function body, sliced 1:1 then dedented */
-			kind: "inline";
-			code: string;
-	  }
-	| {
-			/** `{SomeComponent}`: a reference the TS client resolves to the component's body */
-			kind: "ref";
-			/** The referenced identifier's name — diagnostics only */
-			ref: string;
-			/** Character offset of the identifier — the TS client re-finds the node by offset */
-			refOffset: number;
-	  }
-);
+	/** The function body, sliced 1:1 then dedented — or `null` when the child isn't an inline function */
+	code: string | null;
+}
 
 const SNIPPET_COMPONENT_NAME = "Snippet";
 
@@ -39,14 +24,10 @@ export function mayContainSnippet(content: string): boolean {
 }
 
 /**
- * Extract every `<Snippet name="…">{…}</Snippet>` element (whose `Snippet` was imported
- * from `@dennation/typebook/react`) from an already-parsed program.
- *
- * The child must be a component function. For an inline function literal the body is read
- * straight from the original `content` via `code.slice` — exactly what the author wrote, no
- * AST re-generation. For a bare identifier the source lives in another declaration (possibly
- * another file), so only its name/offset is recorded for the TypeScript client to resolve.
- * Only elements with a static string `name` and a recognised function child are kept.
+ * Extract every `<Snippet name="…">{fn}</Snippet>` element (whose `Snippet` was imported from
+ * `@dennation/typebook/react`) from an already-parsed program. The child must be an inline function
+ * component; its body is read straight from the original `content` via `code.slice` — exactly what
+ * the author wrote, no AST re-generation. Only elements with a static string `name` are kept.
  */
 export function scanSnippets(
 	program: Program,
@@ -69,9 +50,7 @@ export function scanSnippets(
 		const name = nameAttribute(opening);
 		if (name === null) return;
 
-		const start = (node.start as number) ?? 0;
-		const block = childToBlock(node, name, start, content);
-		if (block) blocks.push(block);
+		blocks.push({ name, code: childBodySource(node, content) });
 	});
 
 	return blocks;
@@ -149,52 +128,32 @@ function staticStringValue(
 }
 
 /**
- * Turn the `<Snippet>`'s child into a block. The child must be a single
- * `{…}` expression container holding a function literal (inline) or an identifier
- * (a component reference). Anything else (raw JSX children, no child) is unsupported
- * under the function-only API and dropped.
+ * The child must be a single `{…}` expression container holding an inline function. Returns its
+ * body source, or `null` for any other child (a bare identifier reference, raw JSX, or nothing) —
+ * the builder reports that as a build error.
  */
-function childToBlock(
+function childBodySource(
 	element: Record<string, unknown>,
-	name: string,
-	start: number,
 	content: string,
-): SnippetBlock | null {
+): string | null {
 	const children = (element.children as Array<Record<string, unknown>>) ?? [];
 	for (const child of children) {
 		if (child.type !== "JSXExpressionContainer") continue;
 		const expr = child.expression as Record<string, unknown> | undefined;
-		if (!expr) continue;
-
 		if (
-			expr.type === "ArrowFunctionExpression" ||
-			expr.type === "FunctionExpression"
+			expr?.type === "ArrowFunctionExpression" ||
+			expr?.type === "FunctionExpression"
 		) {
-			return {
-				name,
-				start,
-				kind: "inline",
-				code: functionBodySource(expr, content),
-			};
-		}
-
-		if (expr.type === "Identifier") {
-			return {
-				name,
-				start,
-				kind: "ref",
-				ref: (expr.name as string) ?? "",
-				refOffset: (expr.start as number) ?? 0,
-			};
+			return functionBodySource(expr, content);
 		}
 	}
 	return null;
 }
 
 /**
- * Slice a function literal's body. A block body (`{ … }`) yields its statements (braces
- * stripped); an expression body (`() => <JSX/>`) yields the expression. Dedented so it reads
- * as if authored at column zero.
+ * Slice a function literal's body. A block body (`{ … }`) yields its statements (braces stripped);
+ * an expression body (`() => <JSX/>`) yields the expression (parens unwrapped). Dedented so it
+ * reads as if authored at column zero.
  */
 function functionBodySource(
 	fn: Record<string, unknown>,
@@ -214,14 +173,48 @@ function functionBodySource(
 
 	// Expression body: unwrap `() => ( … )` parens so the shown source is just the expression.
 	let expr = body;
-	while (
-		expr.type === "ParenthesizedExpression" &&
-		expr.expression &&
-		typeof expr.expression === "object"
-	) {
+	while (expr.type === "ParenthesizedExpression") {
 		expr = expr.expression as Record<string, unknown>;
 	}
 	return dedent(
 		sliceWithLeadingIndent(content, expr.start as number, expr.end as number),
 	);
+}
+
+/**
+ * Slice `[start, end)` but, when the slice begins at the first non-whitespace token of its line,
+ * extend the start back to the line's indentation. This gives {@link dedent} a uniform block: an
+ * expression body like `() => (\n  <div/>\n)` otherwise starts mid-line with the first line at
+ * column zero and the rest indented, defeating the common-indent calculation.
+ */
+function sliceWithLeadingIndent(
+	text: string,
+	start: number,
+	end: number,
+): string {
+	const lineStart = text.lastIndexOf("\n", start - 1) + 1;
+	const from = text.slice(lineStart, start).trim() === "" ? lineStart : start;
+	return text.slice(from, end);
+}
+
+/**
+ * Remove surrounding blank lines and the common leading-whitespace shared by all non-blank lines,
+ * so extracted source reads as if it were authored at column zero.
+ */
+function dedent(source: string): string {
+	const lines = source.replace(/\t/g, "  ").split("\n");
+
+	while (lines.length > 0 && lines[0].trim() === "") lines.shift();
+	while (lines.length > 0 && lines[lines.length - 1].trim() === "") lines.pop();
+	if (lines.length === 0) return "";
+
+	let min = Infinity;
+	for (const line of lines) {
+		if (line.trim() === "") continue;
+		const indent = line.length - line.trimStart().length;
+		if (indent < min) min = indent;
+	}
+	if (!Number.isFinite(min) || min === 0) return lines.join("\n");
+
+	return lines.map((line) => line.slice(min)).join("\n");
 }
