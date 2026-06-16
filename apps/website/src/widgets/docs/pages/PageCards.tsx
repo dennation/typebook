@@ -1,13 +1,13 @@
 import {
 	C,
 	Cards,
-	CodeBlock,
 	DocCard,
 	H2,
 	Icon,
 	Lead,
 	P,
 	PropsTable,
+	Snippet,
 } from "@dennation/typebook/react";
 import type { DocsGo } from "../go.js";
 
@@ -21,37 +21,24 @@ export function PageCards({ go }: { go: DocsGo }) {
 			</Lead>
 
 			<H2>Example</H2>
-			<Cards>
-				<DocCard
-					icon={<Icon.zap size={20} />}
-					title="Quick Start"
-					desc="These two cards are live DocCards."
-					onClick={() => go("quick-start")}
-				/>
-				<DocCard
-					icon={<Icon.search size={20} />}
-					title="Search"
-					desc="Jump to the SearchPalette docs."
-					onClick={() => go("search")}
-				/>
-			</Cards>
-
-			<H2>Usage</H2>
-			<CodeBlock
-				file="page.tsx"
-				icon={<Icon.react size={14} />}
-				lang="tsx"
-				code={`import { Cards, DocCard, Icon } from "@dennation/typebook/react";
-
-<Cards>
-  <DocCard
-    icon={<Icon.zap size={20} />}
-    title="Quick Start"
-    desc="From zero to a documented component."
-    onClick={() => navigate("/docs/quick-start")}
-  />
-</Cards>`}
-			/>
+			<Snippet name="cards-example">
+				{() => (
+					<Cards>
+						<DocCard
+							icon={<Icon.zap size={20} />}
+							title="Quick Start"
+							desc="From zero to a documented component."
+							onClick={() => go("quick-start")}
+						/>
+						<DocCard
+							icon={<Icon.search size={20} />}
+							title="Search"
+							desc="Jump to the SearchPalette docs."
+							onClick={() => go("search")}
+						/>
+					</Cards>
+				)}
+			</Snippet>
 
 			<H2>DocCard props</H2>
 			<PropsTable

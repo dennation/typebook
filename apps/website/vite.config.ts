@@ -1,3 +1,4 @@
+import { typebook } from "@dennation/typebook/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
@@ -13,6 +14,9 @@ export default defineConfig({
 			generatedRouteTree: "./src/route-tree.gen.ts",
 			autoCodeSplitting: true,
 		}),
+		// Scans the docs pages for <Snippet> blocks and writes src/snippets.gen.ts,
+		// the source map that the "show source" toggle reads from at runtime.
+		typebook(),
 		react(),
 		tailwindcss(),
 	],

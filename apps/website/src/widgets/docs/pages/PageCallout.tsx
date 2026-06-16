@@ -2,13 +2,13 @@ import {
 	C,
 	Callout,
 	Cards,
-	CodeBlock,
 	DocCard,
 	H2,
 	Icon,
 	Lead,
 	P,
 	PropsTable,
+	Snippet,
 } from "@dennation/typebook/react";
 import type { DocsGo } from "../go.js";
 
@@ -22,16 +22,13 @@ export function PageCallout({ go }: { go: DocsGo }) {
 			</Lead>
 
 			<H2>Usage</H2>
-			<CodeBlock
-				file="page.tsx"
-				icon={<Icon.react size={14} />}
-				lang="tsx"
-				code={`import { Callout } from "@dennation/typebook/react";
-
-<Callout type="warning" title="Heads up">
-  This runs on the client only.
-</Callout>`}
-			/>
+			<Snippet name="callout-usage">
+				{() => (
+					<Callout type="warning" title="Heads up">
+						This runs on the client only.
+					</Callout>
+				)}
+			</Snippet>
 
 			<H2>Intents</H2>
 			<P>

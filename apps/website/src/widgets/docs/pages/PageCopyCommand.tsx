@@ -1,11 +1,10 @@
 import {
 	C,
-	CodeBlock,
 	CopyCommand,
 	H2,
-	Icon,
 	Lead,
 	PropsTable,
+	Snippet,
 } from "@dennation/typebook/react";
 
 export function PageCopyCommand() {
@@ -18,17 +17,9 @@ export function PageCopyCommand() {
 			</Lead>
 
 			<H2>Example</H2>
-			<CopyCommand cmd="pnpm add @dennation/typebook" />
-
-			<H2>Usage</H2>
-			<CodeBlock
-				file="page.tsx"
-				icon={<Icon.react size={14} />}
-				lang="tsx"
-				code={`import { CopyCommand } from "@dennation/typebook/react";
-
-<CopyCommand cmd="pnpm add @dennation/typebook" />`}
-			/>
+			<Snippet name="copy-command-example">
+				{() => <CopyCommand cmd="pnpm add @dennation/typebook" />}
+			</Snippet>
 
 			<H2>Props</H2>
 			<PropsTable
