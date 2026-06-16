@@ -187,11 +187,8 @@ export class TypebookBuilder {
 		}
 	}
 
-	/**
-	 * Read and parse a file once, updating both the registration and snippet indexes.
-	 * Returns whether the file contained any `registerComponent()` call.
-	 */
-	private async indexFile(filePath: string): Promise<boolean> {
+	/** Read and parse a file once, updating both the registration and snippet indexes. */
+	private async indexFile(filePath: string): Promise<void> {
 		const content = this.readSafe(filePath);
 		const hasRegistration = content !== null && mayContainRegistration(content);
 		const hasSnippet = content !== null && mayContainSnippet(content);
@@ -199,7 +196,7 @@ export class TypebookBuilder {
 		if (!hasRegistration && !hasSnippet) {
 			this.registrationsByFile.delete(filePath);
 			this.snippetsByFile.delete(filePath);
-			return false;
+			return;
 		}
 
 		const program = await parseProgram(filePath, content as string);
@@ -215,8 +212,6 @@ export class TypebookBuilder {
 		} else {
 			this.snippetsByFile.delete(filePath);
 		}
-
-		return hasRegistration;
 	}
 
 	private async indexRegistrations(
