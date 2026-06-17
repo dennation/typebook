@@ -10,16 +10,18 @@ import { NPM_REACT_PACKAGE_NAME } from "../constants.js";
 import { moduleExportName, type Program, walk } from "./ast.js";
 
 /**
- * A single `<Snippet name="…">{fn}</Snippet>` element found in a file. Its child must be an inline
+ * A single `<Snippet>{fn}</Snippet>` element found in a file. Its child must be an inline
  * function component (`{() => …}` or `{function Counter() { … }}`), whose body we slice as the
  * shown source. `code` is `null` when the child is *not* an inline function (a bare reference, raw
- * JSX, or nothing) — the builder turns that into a clear build error rather than a silent drop.
+ * JSX, or nothing) — the build turns that into a clear error rather than a silent drop.
  */
 export interface SnippetBlock {
-	/** Value of the required `name` prop — becomes the output map key */
-	name: string;
-	/** The function body, sliced 1:1 then dedented — or `null` when the child isn't an inline function */
+	/** The function body, sliced 1:1 then dedented — or `null` when the child isn't an inline function. */
 	code: string | null;
+	/** Character offset just after the opening tag name, where `__snippetSource` is injected. */
+	injectAt: number;
+	/** Value of the optional `name` prop, used only for build-error messages. */
+	name: string | null;
 }
 
 const SNIPPET_COMPONENT_NAME = "Snippet";
@@ -32,10 +34,11 @@ export function mayContainSnippet(content: string): boolean {
 }
 
 /**
- * Extract every `<Snippet name="…">{fn}</Snippet>` element (whose `Snippet` was imported from
+ * Extract every `<Snippet>{fn}</Snippet>` element (whose `Snippet` was imported from
  * `@dennation/typebook/react`) from an already-parsed program. The child must be an inline function
  * component; its body is read straight from the original `content` via `code.slice` — exactly what
- * the author wrote, no AST re-generation. Only elements with a static string `name` are kept.
+ * the author wrote, no AST re-generation. Each block also carries the position at which the build
+ * step injects the sliced source as a `__snippetSource` prop.
  */
 export function scanSnippets(
 	program: Program,
@@ -49,10 +52,11 @@ export function scanSnippets(
 		if (node.type !== "JSXElement") return;
 		if (!isSnippetTag(node.openingElement, snippetLocalNames)) return;
 
-		const name = nameAttribute(node.openingElement);
-		if (name === null) return;
-
-		blocks.push({ name, code: childBodySource(node, content) });
+		blocks.push({
+			code: childBodySource(node, content),
+			injectAt: node.openingElement.name.end,
+			name: nameAttribute(node.openingElement),
+		});
 	});
 
 	return blocks;
@@ -114,7 +118,7 @@ function staticStringValue(value: JSXAttributeValue | null): string | null {
 /**
  * The child must be a single `{…}` expression container holding an inline function. Returns its
  * body source, or `null` for any other child (a bare identifier reference, raw JSX, or nothing) —
- * the builder reports that as a build error.
+ * the build reports that as an error.
  */
 function childBodySource(element: JSXElement, content: string): string | null {
 	for (const child of element.children) {

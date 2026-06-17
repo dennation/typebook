@@ -13,10 +13,11 @@ export function PageRegister() {
 	return (
 		<>
 			<Lead>
-				<C>register(id, Component, config?)</C> registers a component for
-				documentation and returns a typed <C>ComponentHandle</C> that the story
-				components consume. The bundler plugin finds these calls statically and
-				extracts prop metadata at build time.
+				<C>registerComponent(Component, config?)</C> registers a component for
+				documentation and returns a typed, self-contained <C>ComponentHandle</C>{" "}
+				that the story components consume. The bundler plugin finds these calls
+				statically and injects the extracted prop metadata into the handle's{" "}
+				<C>props</C> at build time.
 			</Lead>
 
 			<H2>Usage</H2>
@@ -24,10 +25,10 @@ export function PageRegister() {
 				file="src/pages/button.tsx"
 				icon={<Icon.react size={14} />}
 				lang="tsx"
-				code={`import { register } from "@dennation/typebook";
+				code={`import { registerComponent } from "@dennation/typebook";
 import { Button } from "../components/Button";
 
-const button = register("button", Button, {
+const button = registerComponent(Button, {
   defaultProps: { children: "Click me" },
 });`}
 			/>
@@ -35,12 +36,6 @@ const button = register("button", Button, {
 			<H2>Arguments</H2>
 			<PropsTable
 				props={[
-					{
-						name: "id",
-						type: "string",
-						required: true,
-						desc: "Unique, human-readable key in the generated registry. Duplicates throw DuplicateRegistrationError at build time.",
-					},
 					{
 						name: "component",
 						type: "ComponentType",
@@ -61,8 +56,9 @@ const button = register("button", Button, {
 			/>
 
 			<Callout type="info" title="Type-level bookkeeping">
-				The returned handle tracks which required props are already covered by{" "}
-				<C>defaultProps</C> — that's how <C>{"<Story>"}</C> can demand the
+				No id, no registry — the handle is consumed by importing it where it's
+				used. It also tracks which required props are already covered by{" "}
+				<C>defaultProps</C>, which is how <C>{"<Story>"}</C> can demand the
 				missing ones via its <C>props</C> at compile time.
 			</Callout>
 

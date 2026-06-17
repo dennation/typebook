@@ -14,8 +14,8 @@ export default defineConfig({
 			generatedRouteTree: "./src/route-tree.gen.ts",
 			autoCodeSplitting: true,
 		}),
-		// Scans the docs pages for <Snippet> blocks and writes src/snippets.gen.ts,
-		// the source map that the "show source" toggle reads from at runtime.
+		// Scans the docs pages for <Snippet> blocks and injects each block's source
+		// as a __snippetSource prop the "show source" toggle reads at runtime.
 		typebook(),
 		react(),
 		tailwindcss(),

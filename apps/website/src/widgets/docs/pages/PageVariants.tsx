@@ -38,8 +38,8 @@ import { Variants } from "@dennation/typebook/react";
 
 			<Callout type="success" title="Variants come from types">
 				<C>allOf()</C> reads the prop's literal-union (or boolean) type from the
-				generated registry — add a value to the union and the grid grows by
-				itself.
+				handle's injected <C>props</C> — add a value to the union and the grid
+				grows by itself.
 			</Callout>
 
 			<H2>Props</H2>

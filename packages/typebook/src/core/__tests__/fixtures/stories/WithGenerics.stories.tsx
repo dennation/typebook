@@ -1,9 +1,7 @@
 import { registerComponent } from "@dennation/typebook";
 import { Select } from "../components/WithGenerics";
 
-export const select = registerComponent(
-	"with-generics",
-	Select<"alpha" | "beta" | "gamma">,
+export const select = registerComponent(Select<"alpha" | "beta" | "gamma">,
 	{
 		defaultProps: {
 			value: "alpha",

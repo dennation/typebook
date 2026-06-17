@@ -443,28 +443,6 @@ describe("edge cases", () => {
 		expect(findProp(props!, "label")).toBeDefined();
 	});
 
-	test("getDependencies reflects the import graph and excludes unrelated files", () => {
-		// Drives the affected-only refresh: a registration is re-extracted on change only when
-		// the changed file is in its dependency closure (TypeScript's reference graph).
-		const deps = client.getDependencies(
-			resolve(FIXTURES, "stories/Basic.stories.tsx"),
-		);
-		expect(deps).not.toBeNull();
-		const norm = deps!.map((d) => d.replace(/\\/g, "/"));
-		// Basic.stories imports ../components/Basic → that file is a dependency …
-		expect(norm.some((d) => d.endsWith("/components/Basic.tsx"))).toBe(true);
-		// … but a component it never imports is not, so editing it won't re-extract this one.
-		expect(norm.some((d) => d.endsWith("/components/WithGenerics.tsx"))).toBe(
-			false,
-		);
-	});
-
-	test("getDependencies for an unknown file → null (caller falls back to a full refresh)", () => {
-		expect(
-			client.getDependencies(resolve(FIXTURES, "stories/DoesNotExist.tsx")),
-		).toBeNull();
-	});
-
 	test("edit to a dependency after start → re-extraction sees new content (no stale host cache)", async () => {
 		// Guards the BuilderProgram switch: an incremental compiler host must not serve an
 		// edited dependency from a stale cache across rebuilds.
@@ -480,7 +458,7 @@ describe("edge cases", () => {
 				storyFile,
 				"import { registerComponent } from '@dennation/typebook'\n" +
 					"import { EditProbe } from '../components/_EditProbe'\n" +
-					"export const probe = registerComponent('edit-probe', EditProbe)\n",
+					"export const probe = registerComponent(EditProbe)\n",
 			);
 			await fresh.start();
 			const calls = scanRegistrations(
@@ -524,7 +502,7 @@ describe("edge cases", () => {
 				newFile,
 				"import { registerComponent } from '@dennation/typebook'\n" +
 					"import { Basic } from '../components/Basic'\n" +
-					"export const added = registerComponent('dynamically-added', Basic, { defaultProps: { label: 'h' } })\n",
+					"export const added = registerComponent(Basic, { defaultProps: { label: 'h' } })\n",
 			);
 			const calls = scanRegistrations(
 				await parseProgram(newFile, readFileSync(newFile, "utf-8")),

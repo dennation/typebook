@@ -56,39 +56,34 @@ export function PageSnippet() {
 			/>
 			<P>
 				At build time the plugin finds every <C>{"<Snippet>"}</C>, slices the
-				inline function's <C>body</C> straight from the file, dedents it and
-				emits a single generated map — <C>snippets.gen.ts</C>. Pass it to{" "}
-				<C>TypebookProvider</C>; at runtime the toggle reads the source
-				synchronously from context (no fetch) and renders it through{" "}
+				inline function's <C>body</C> straight from the file, dedents it and{" "}
+				<strong>injects it back onto the element</strong> as a{" "}
+				<C>__snippetSource</C> prop. At runtime the toggle reads that prop
+				directly (no context, no generated file, no fetch) and renders it through{" "}
 				<C>CodeBlock</C>.
 			</P>
 
 			<Callout type="warning" title="Inline functions only">
 				The child must be an <strong>inline</strong> function — a bare component
 				reference (<C>{"{Counter}"}</C>) or raw JSX raises a build error, since
-				its source can't be sliced from this call site. <C>name</C> must be a
-				static string and unique; duplicates throw <C>DuplicateSnippetError</C>.
+				its source can't be sliced from this call site. <C>name</C> is optional;
+				it's just a label shown above the source.
 			</Callout>
 
 			<H2>Props</H2>
 			<PropsTable
 				props={[
 					{
-						name: "name",
-						type: "string",
-						required: true,
-						desc: (
-							<>
-								Author-chosen key in the generated <C>snippets.gen.ts</C>.
-								Unique across the project.
-							</>
-						),
-					},
-					{
 						name: "children",
 						type: "() => ReactNode",
 						required: true,
 						desc: "The example as an inline function component. Rendered live; its body is the shown source.",
+					},
+					{
+						name: "name",
+						type: "string",
+						required: false,
+						desc: "Optional label shown as the filename above the revealed source.",
 					},
 				]}
 			/>

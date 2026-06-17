@@ -2,17 +2,8 @@ import type { ComponentType } from "react";
 import type { RequiredKeysOf } from "type-fest";
 
 export interface TypebookConfig {
-	/** Path to the generated registry file (default: './src/ui-registry.gen.ts') */
-	registryFile?: string;
 	/** Additional packages whose type declarations mark props as inherited (e.g. ['@heroui/theme']) */
 	inheritedProviders?: string[];
-	/**
-	 * Output file for the generated snippet source map (default:
-	 * './src/snippets.gen.ts'). Source extracted from each `<Snippet name="…">`
-	 * element is emitted as a `name → code` entry the runtime `<Snippet>` reads
-	 * from React context.
-	 */
-	snippetsFile?: string;
 }
 
 export type PropType =
@@ -41,14 +32,6 @@ export interface PropInfo {
 	 * type alias (the prose written above the field, before any `@tag` lines).
 	 */
 	description?: string;
-}
-
-export interface ComponentMeta {
-	/** The original component reference (used by `<Story>`-style components to render). */
-	component: ComponentType<any>;
-	/** Imported export name in the source file (e.g. `"Button"`). */
-	componentName: string;
-	props: PropInfo[];
 }
 
 /** Props the caller must provide (required keys not covered by defaultProps) */
@@ -112,26 +95,22 @@ export interface GenerateConfig {
 export type VariantConfig = AllOfConfig | ValuesConfig | GenerateConfig;
 
 /**
- * Returned by `registerComponent(id, Component, config)`. Holds the registry key,
- * the component reference, and default props. Variant configs are built via the
- * standalone `allOf` / `values` / `generate` utilities, which take a
- * `ComponentHandle` as their first argument for prop-name autocomplete and value
- * typing.
+ * Returned by `registerComponent(Component, config)`. Self-contained: holds the
+ * component reference, default props, and the extracted prop metadata. `props` is
+ * empty as authored — the bundler plugin injects the real `PropInfo[]` into the
+ * call at build time (see `core/transform.ts`). `<Story>`/`<Variants>`/`<Matrix>`/
+ * `<Playground>` read everything they need from the handle; there is no registry.
+ *
+ * Variant configs are built via the standalone `allOf` / `values` / `generate`
+ * utilities, which take a `ComponentHandle` as their first argument for prop-name
+ * autocomplete and value typing.
  */
 export interface ComponentHandle<Props, Defaulted extends keyof Props = never> {
-	id: string;
 	component: ComponentType<Props>;
 	defaultProps: Record<string, unknown>;
+	/** Prop metadata, injected at build time by the bundler plugin (empty without it). */
+	props: PropInfo[];
 
 	/** Phantom — keeps Defaulted reachable for `<Story>`/`<Variants>`/`<Matrix>` typing */
 	readonly __defaulted?: (k: Defaulted) => void;
 }
-
-/** Object keyed by registration id → ComponentMeta. Built from the generated registry. */
-export type UIRegistry = Record<string, ComponentMeta>;
-
-/**
- * Object keyed by `<Snippet>` name → its extracted source text. Built from the
- * generated `snippets.gen.ts` and passed to `TypebookProvider`.
- */
-export type SnippetMap = Record<string, string>;

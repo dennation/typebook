@@ -1,7 +1,7 @@
 import { registerComponent } from "@dennation/typebook";
 import { ComplexUnion } from "../components/WithComplexUnions";
 
-export const comp = registerComponent("with-complex-unions", ComplexUnion, {
+export const comp = registerComponent(ComplexUnion, {
 	defaultProps: {
 		mixed: "hello",
 		numLiteral: 1,

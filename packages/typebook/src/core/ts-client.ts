@@ -5,8 +5,6 @@ import type { PropInfo, PropType } from "../types.js";
 
 export class TypeScriptClient {
 	private service: ts.LanguageService | null = null;
-	/** Thin builder over the warm program, only for the dependency graph (rebuilt on change). */
-	private depBuilder: ts.SemanticDiagnosticsBuilderProgram | null = null;
 	private program: ts.Program | null = null;
 	private checker: ts.TypeChecker | null = null;
 
@@ -16,6 +14,11 @@ export class TypeScriptClient {
 	// the LanguageServiceHost: the keys are the root file set, and bumping a file's version tells
 	// the service its snapshot changed, so it re-reads and reparses only that file.
 	private readonly fileVersions = new Map<string, number>();
+	// In-memory content overrides keyed by absolute path. The bundler `transform` hook may hand us
+	// code already rewritten by an earlier plugin (e.g. TanStack Router's code-splitting), whose
+	// character offsets differ from disk. Extracting against the same text the scanner parsed keeps
+	// oxc and TypeScript offsets in lockstep; the file's imports still resolve through the program.
+	private readonly overrides = new Map<string, string>();
 
 	private readonly inheritedPaths: string[];
 
@@ -67,7 +70,6 @@ export class TypeScriptClient {
 	stop(): void {
 		this.service?.dispose();
 		this.service = null;
-		this.depBuilder = null;
 		this.program = null;
 		this.checker = null;
 		this.options = null;
@@ -79,6 +81,8 @@ export class TypeScriptClient {
 			getScriptFileNames: () => [...this.fileVersions.keys()],
 			getScriptVersion: (f) => String(this.fileVersions.get(f) ?? 0),
 			getScriptSnapshot: (f) => {
+				const override = this.overrides.get(f);
+				if (override !== undefined) return ts.ScriptSnapshot.fromString(override);
 				const text = ts.sys.readFile(f);
 				return text === undefined
 					? undefined
@@ -95,47 +99,28 @@ export class TypeScriptClient {
 		};
 	}
 
-	/** Pull the latest warm program from the service and drop the now-stale dependency builder. */
+	/** Pull the latest warm program from the service. */
 	private refreshProgram(): void {
 		this.program = this.service?.getProgram() ?? null;
 		this.checker = this.program?.getTypeChecker() ?? null;
-		this.depBuilder = null;
 	}
 
 	/**
-	 * Files the given file transitively depends on, per TypeScript's own file reference graph.
-	 * Lets the caller re-resolve only the registrations a change can actually reach, instead of
-	 * re-extracting every registration on every edit. Returns null when the program isn't
-	 * available or the file isn't part of it (caller falls back to a full refresh).
-	 */
-	getDependencies(filePath: string): readonly string[] | null {
-		if (!this.program) return null;
-		const sourceFile = this.program.getSourceFile(resolve(this.cwd, filePath));
-		if (!sourceFile) return null;
-		if (!this.depBuilder) {
-			// Thin builder *over the existing warm program* — builds only the reference graph, with no
-			// re-parse or re-check. Rebuilt lazily whenever the program changes (see refreshProgram).
-			this.depBuilder = ts.createSemanticDiagnosticsBuilderProgram(
-				this.program,
-				{},
-			);
-		}
-		return this.depBuilder.getAllDependencies(sourceFile);
-	}
-
-	/**
-	 * Extract props for a single `define(Component, ...)` call located at `callStart`
+	 * Extract props for a single `registerComponent(Component, ...)` call located at `callStart`
 	 * (character offset in the source).
 	 */
 	async getRegisterProps(
 		filePath: string,
 		callStart: number,
+		content?: string,
 	): Promise<PropInfo[] | null> {
 		if (!this.program || !this.checker) {
 			await this.start();
 		}
 
 		const absPath = resolve(this.cwd, filePath);
+		if (content !== undefined) this.setOverride(absPath, content);
+
 		const sourceFile = this.program?.getSourceFile(absPath);
 		if (!sourceFile) {
 			console.warn(LOG_PREFIX, "Could not get source file:", absPath);
@@ -152,6 +137,18 @@ export class TypeScriptClient {
 		}
 
 		return this.extractPropsFromRegisterCall(callExpr);
+	}
+
+	/**
+	 * Overlay `content` as the in-memory snapshot for `absPath` and refresh the warm program so the
+	 * file is reparsed from it. A no-op when the content is unchanged, so repeated extraction of an
+	 * untouched file doesn't churn the program.
+	 */
+	private setOverride(absPath: string, content: string): void {
+		if (this.overrides.get(absPath) === content) return;
+		this.overrides.set(absPath, content);
+		this.fileVersions.set(absPath, (this.fileVersions.get(absPath) ?? 0) + 1);
+		this.refreshProgram();
 	}
 
 	/**
@@ -205,7 +202,7 @@ export class TypeScriptClient {
 			return null;
 		}
 
-		const componentArg = callExpr.arguments[1];
+		const componentArg = callExpr.arguments[0];
 		if (!componentArg) return props;
 
 		const inheritedNames = this.getInheritedPropNames(checker, componentArg);

@@ -241,6 +241,6 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		slug: "hooks",
 		title: "Hooks",
 		section: "API Reference",
-		desc: "useDocHeadings, useSearchHotkeys, useComponentMeta",
+		desc: "useDocHeadings, useSearchHotkeys",
 	},
 ];

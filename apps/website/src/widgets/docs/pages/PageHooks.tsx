@@ -14,10 +14,11 @@ export function PageHooks({ go }: { go: DocsGo }) {
 	return (
 		<>
 			<Lead>
-				Three hooks ship with the package: <C>useDocHeadings</C> powers the
-				table of contents, <C>useSearchHotkeys</C> binds the palette shortcuts,
-				and <C>useComponentMeta</C> looks up extracted component metadata from
-				the registry.
+				Two hooks ship with the package: <C>useDocHeadings</C> powers the table
+				of contents, and <C>useSearchHotkeys</C> binds the palette shortcuts.
+				(Component metadata is no longer looked up at runtime — it's injected
+				into each <C>registerComponent()</C> call at build time, so the handle
+				carries it directly.)
 			</Lead>
 
 			<H2>useDocHeadings</H2>
@@ -76,19 +77,6 @@ const { headings, activeId, jump } = useDocHeadings({
   open: () => setOpen(true),
   close: () => setOpen(false),
 });`}
-			/>
-
-			<H2>useComponentMeta</H2>
-			<P>
-				Looks up a registered component's extracted metadata — <C>PropInfo[]</C>{" "}
-				with types, optionality, defaults and JSDoc — from the{" "}
-				<C>TypebookProvider</C> context. This is what <C>Playground</C> and{" "}
-				<C>Variants</C> use internally.
-			</P>
-			<CodeBlock
-				lang="tsx"
-				code={`const meta = useComponentMeta("button");
-// meta?.props → PropInfo[], meta?.componentName, …`}
 			/>
 		</>
 	);

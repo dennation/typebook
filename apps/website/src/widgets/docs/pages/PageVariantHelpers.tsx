@@ -68,10 +68,10 @@ allOf(button, "disabled")  // boolean → two variants`}
 				]}
 			/>
 
-			<Callout type="success" title="Resolved against the registry">
-				<C>allOf</C> reads the union members from the generated registry at
-				render time — when the component's type gains a value, the grid updates
-				on the next build with no code change.
+			<Callout type="success" title="Resolved from the handle">
+				<C>allOf</C> reads the union members from the handle's injected{" "}
+				<C>props</C> at render time — when the component's type gains a value, the
+				grid updates on the next build with no code change.
 			</Callout>
 		</>
 	);

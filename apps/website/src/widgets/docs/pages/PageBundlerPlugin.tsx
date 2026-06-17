@@ -14,10 +14,10 @@ export function PageBundlerPlugin() {
 		<>
 			<Lead>
 				<C>typebook(config?)</C> is built on unplugin, so the same factory is
-				published for every bundler. It reads and oxc-parses each source file
-				once, scans for <C>register()</C> calls and <C>{"<Snippet>"}</C> blocks,
-				extracts types through the TypeScript Compiler API, and writes the
-				generated files.
+				published for every bundler. In its <C>transform</C> hook it oxc-parses
+				each module, scans for <C>registerComponent()</C> calls and{" "}
+				<C>{"<Snippet>"}</C> blocks, extracts types through the TypeScript
+				Compiler API, and injects the results back into the module.
 			</Lead>
 
 			<H2>Per-bundler entries</H2>
@@ -44,22 +44,23 @@ export function PageBundlerPlugin() {
 				icon={<Icon.ts size={14} />}
 				lang="tsx"
 				code={`typebook({
-  // registryFile: "./src/ui-registry.gen.ts",  // default
-  // snippetsFile: "./src/snippets.gen.ts",     // default; created on first <Snippet>
+  // inheritedProviders: ["@heroui/theme"],  // mark props from these packages as inherited
 })`}
 			/>
 
-			<H2>When generation runs</H2>
+			<H2>When injection runs</H2>
 			<P>
-				The registry is generated in the universal <C>buildStart</C> hook —
-				idempotent, re-runs on each rebuild in every bundler. The Vite entry
-				additionally watches the dev server for incremental, debounced
-				regeneration, since Vite doesn't re-run <C>buildStart</C> per change.
+				Injection happens per module in the universal <C>transform</C> hook
+				(<C>enforce: "pre"</C>), so it works in every bundler and re-runs through
+				normal module invalidation. A single warm TypeScript program does the
+				extraction; the Vite entry keeps it fresh by notifying it of dev-server
+				file changes.
 			</P>
 
-			<Callout type="info" title="No bundler at all?">
-				<C>npx @dennation/typebook generate</C> runs the same pipeline once from
-				the CLI.
+			<Callout type="info" title="Type-checks without a build">
+				Because the data is injected (not required as an import), plain{" "}
+				<C>tsc</C> and tests pass without running the plugin — handles just carry
+				an empty <C>props</C> until a build runs.
 			</Callout>
 		</>
 	);
