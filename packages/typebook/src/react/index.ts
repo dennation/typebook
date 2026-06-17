@@ -21,6 +21,7 @@ export {
 } from "./features/theme-toggle/index.js";
 export { childText } from "./shared/lib/childText.js";
 export { cx } from "./shared/lib/cx.js";
+export { propsToRows } from "./shared/lib/propsToRows.js";
 export { slugify } from "./shared/lib/slugify.js";
 export {
 	ARROW_CLASS,
@@ -56,8 +57,8 @@ export {
 	Ol,
 	P,
 	type PropRowData,
-	PropsTable,
-	type PropsTableProps,
+	PropsReference,
+	type PropsReferenceProps,
 	Quote,
 	Step,
 	type StepProps,

@@ -6,7 +6,9 @@ export const Steps = ({ children }: { children: ReactNode }) => (
 );
 
 export interface StepProps {
+	/** Optional bold heading next to the step number. */
 	title?: string;
+	/** Step body; consecutive blocks get vertical rhythm automatically. */
 	children?: ReactNode;
 }
 

@@ -6,7 +6,7 @@ import {
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
 } from "@dennation/typebook/react";
 import type { DocsGo } from "../go.js";
 
@@ -41,7 +41,7 @@ const { headings, activeId, jump } = useDocHeadings({
   pageKey: slug, // re-collect when this changes
 });`}
 			/>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "contentRef",

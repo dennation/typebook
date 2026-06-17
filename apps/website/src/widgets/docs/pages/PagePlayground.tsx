@@ -7,7 +7,7 @@ import {
 	Lead,
 	Li,
 	P,
-	PropsTable,
+	PropsReference,
 	Ul,
 } from "@dennation/typebook/react";
 
@@ -50,7 +50,7 @@ export function PagePlayground() {
 			</Callout>
 
 			<H2>Props</H2>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "of",

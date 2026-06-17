@@ -6,7 +6,7 @@ import {
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
 } from "@dennation/typebook/react";
 
 export function PageRegister() {
@@ -34,7 +34,7 @@ const button = registerComponent(Button, {
 			/>
 
 			<H2>Arguments</H2>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "component",

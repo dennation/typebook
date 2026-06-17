@@ -6,7 +6,7 @@ import {
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
 } from "@dennation/typebook/react";
 
 export function PageSnippet() {
@@ -71,7 +71,7 @@ export function PageSnippet() {
 			</Callout>
 
 			<H2>Props</H2>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "children",

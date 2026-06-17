@@ -1,12 +1,16 @@
+import { registerComponent } from "@dennation/typebook";
 import {
 	C,
 	H2,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
+	propsToRows,
 	Snippet,
 	Tabs,
 } from "@dennation/typebook/react";
+
+const tabs = registerComponent(Tabs);
 
 export function PageTabs() {
 	return (
@@ -39,22 +43,7 @@ export function PageTabs() {
 			</Snippet>
 
 			<H2>Props</H2>
-			<PropsTable
-				props={[
-					{
-						name: "tabs",
-						type: "TabItem[]",
-						required: true,
-						desc: (
-							<>
-								Panels to switch between:{" "}
-								<C>{"{ label: string, content: ReactNode }"}</C>. Labels double
-								as keys, so keep them unique.
-							</>
-						),
-					},
-				]}
-			/>
+			<PropsReference props={propsToRows(tabs.props)} />
 		</>
 	);
 }

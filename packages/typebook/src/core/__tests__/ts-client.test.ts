@@ -125,13 +125,13 @@ describe("React types", () => {
 
 	test("event handler → function kind", () => {
 		const onClick = findProp(props, "onClick")!;
-		expect(onClick.type).toEqual({ kind: "function" });
+		expect(onClick.type.kind).toBe("function");
 		expect(onClick.optional).toBe(true);
 	});
 
 	test("render prop → function kind", () => {
 		const renderFooter = findProp(props, "renderFooter")!;
-		expect(renderFooter.type).toEqual({ kind: "function" });
+		expect(renderFooter.type.kind).toBe("function");
 		expect(renderFooter.optional).toBe(true);
 	});
 });
@@ -163,7 +163,7 @@ describe("generics", () => {
 
 	test("generic function prop → function", () => {
 		const onChange = findProp(props, "onChange")!;
-		expect(onChange.type).toEqual({ kind: "function" });
+		expect(onChange.type.kind).toBe("function");
 	});
 
 	test("non-generic prop on generic component → string", () => {

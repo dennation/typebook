@@ -4,7 +4,7 @@ import {
 	Lead,
 	MDTable,
 	P,
-	PropsTable,
+	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
 
@@ -13,8 +13,8 @@ export function PageTables() {
 		<>
 			<Lead>
 				Two table components: <C>MDTable</C> for plain data (the equivalent of a
-				markdown pipe table) and <C>PropsTable</C> for documenting a component
-				API — every props list on this site is a <C>PropsTable</C>.
+				markdown pipe table) and <C>PropsReference</C> for documenting a component
+				API — every props list on this site is a <C>PropsReference</C>.
 			</Lead>
 
 			<H2>MDTable</H2>
@@ -30,7 +30,7 @@ export function PageTables() {
 					/>
 				)}
 			</Snippet>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "head",
@@ -47,14 +47,14 @@ export function PageTables() {
 				]}
 			/>
 
-			<H2>PropsTable</H2>
+			<H2>PropsReference</H2>
 			<P>
 				One striped row per prop with the name, type badge, required marker,
 				default value and description:
 			</P>
 			<Snippet name="props-table-example">
 				{() => (
-					<PropsTable
+					<PropsReference
 						props={[
 							{
 								name: "type",
@@ -72,7 +72,7 @@ export function PageTables() {
 					/>
 				)}
 			</Snippet>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "props",

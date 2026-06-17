@@ -7,7 +7,7 @@ import {
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
 } from "@dennation/typebook/react";
 import type { DocsGo } from "../go.js";
 
@@ -43,7 +43,7 @@ import { Variants } from "@dennation/typebook/react";
 			</Callout>
 
 			<H2>Props</H2>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "of",

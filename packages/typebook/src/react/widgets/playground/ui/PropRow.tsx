@@ -1,6 +1,7 @@
 import { PropInput } from "@react/features/prop-input/index.js";
+import { formatPropType } from "@react/shared/lib/formatPropType.js";
 import type { PropInfo } from "@/types.js";
-import { formatPropType, isControllable } from "../lib/formatPropType.js";
+import { isControllable } from "../lib/isControllable.js";
 
 export interface PropRowProps {
 	prop: PropInfo;

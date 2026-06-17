@@ -12,17 +12,26 @@ export interface CodeTab {
 }
 
 export interface CodeBlockProps {
-	/** Multiple variants rendered as tabs (npm/pnpm/yarn, …). */
+	/** Tabbed variants: { label, code, lang?, file?, icon? }. */
 	tabs?: CodeTab[];
-	/** Single-snippet form. */
+	/** The snippet source (single-snippet form; ignored when tabs is set). */
 	code?: string;
-	/** Any Shiki language id; grammars load on demand. */
+	/**
+	 * Any Shiki language id (tsx, css, yaml, python, …). Grammars load on demand;
+	 * unknown ids fall back to plain text.
+	 * @default "tsx"
+	 */
 	lang?: string;
-	/** Filename shown in the header bar. */
+	/** Filename shown in the header bar (single-snippet form). */
 	file?: string;
+	/** Small icon rendered next to the filename. */
 	icon?: ReactNode;
+	/** Render a line-number gutter. */
 	showLineNumbers?: boolean;
-	/** 1-based line numbers to highlight. */
+	/**
+	 * 1-based line numbers to tint with the accent color.
+	 * @default []
+	 */
 	highlightLines?: number[];
 }
 

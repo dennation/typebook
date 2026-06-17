@@ -12,7 +12,7 @@ export type PropType =
 	| { kind: "string" }
 	| { kind: "number" }
 	| { kind: "node" }
-	| { kind: "function" }
+	| { kind: "function"; raw?: string }
 	| { kind: "unknown"; raw: string };
 
 export interface PropInfo {

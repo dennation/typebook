@@ -7,7 +7,7 @@ import {
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
 } from "@dennation/typebook/react";
 import type { DocsGo } from "../go.js";
 
@@ -38,7 +38,7 @@ export function PageStory({ go }: { go: DocsGo }) {
 			</Callout>
 
 			<H2>Props</H2>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "of",

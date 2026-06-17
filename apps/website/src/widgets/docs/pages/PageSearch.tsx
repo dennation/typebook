@@ -1,3 +1,4 @@
+import { registerComponent } from "@dennation/typebook";
 import {
 	C,
 	Callout,
@@ -6,8 +7,12 @@ import {
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
+	propsToRows,
+	SearchPalette,
 } from "@dennation/typebook/react";
+
+const searchPalette = registerComponent(SearchPalette);
 
 export function PageSearch() {
 	return (
@@ -72,28 +77,7 @@ const SEARCH_INDEX: SearchEntry[] = [
 			</Callout>
 
 			<H2>SearchPalette props</H2>
-			<PropsTable
-				props={[
-					{
-						name: "index",
-						type: "SearchEntry[]",
-						required: true,
-						desc: "The search index to query.",
-					},
-					{
-						name: "onClose",
-						type: "() => void",
-						required: true,
-						desc: "Called on Escape, backdrop click or after choosing a result.",
-					},
-					{
-						name: "onNavigate",
-						type: "(slug, heading?) => void",
-						required: true,
-						desc: "Navigation callback — the palette knows nothing about your router.",
-					},
-				]}
-			/>
+			<PropsReference props={propsToRows(searchPalette.props)} />
 		</>
 	);
 }

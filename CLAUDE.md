@@ -88,7 +88,7 @@ packages/typebook/
         Playground/                 — <Playground of={reg} /> — interactive props editor
           ui/PropsTable.tsx         — Search + filter + rows
           ui/PropRow.tsx            — Single prop row
-          lib/formatPropType.ts     — Type formatter / controllability check
+          lib/isControllable.ts     — whether the Playground can render a control for a prop
         Snippet/                    — <Snippet>{children}</Snippet> — live render + "show source" toggle
           ui/Snippet.tsx            — Renders children; toggle reveals the injected __snippetSource prop (no fetch, no context)
         docs-sidebar/               — <DocsSidebar sections={…} current onNavigate/> — collapsible docs nav + mobile drawer
@@ -107,9 +107,11 @@ packages/typebook/
         (no component-meta / snippets entities — handles and snippets carry their own data, injected at build time)
       shared/                       — Reusable primitives
         ui/Preview/                 — <Preview>, <PreviewFrame>, <Isolate>, <ErrorBoundary>
-        ui/md/                      — Markdown/MDX content set: Callout, MDTable, PropsTable, Tabs,
+        ui/md/                      — Markdown/MDX content set: Callout, MDTable, PropsReference, Tabs,
                                       Steps, Accordion, Cards/DocCard, H2/H3, P/Lead/C/A/Ul/Ol/Li/Hr/Quote, ImgPlaceholder
         lib/getGridStyle.ts         — CSS grid layout for variant grids
+        lib/formatPropType.ts       — render a PropInfo's type as a string ("sm" | "md", …)
+        lib/propsToRows.ts          — map a handle's extracted props → PropsReference rows (auto props table)
         lib/slugify.ts, childText.ts — heading anchor helpers used by the md set
         config/styles.css           — Typebook UI styles (Tailwind)
         config/cssConstants.ts      — CSS constants (CENTERED_CONTENT_STYLE, IFRAME_STYLE)
@@ -118,14 +120,14 @@ packages/typebook/
 ### Build entry points
 
 - **`index`** — `registerComponent`, `allOf`, `values`, `generate`, types.
-- **`react/index`** — `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary` + the docs component kit (md set, `CodeBlock`, `SearchPalette`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`).
+- **`react/index`** — `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary` + the docs component kit (md set, `CodeBlock`, `SearchPalette`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `PropsReference`).
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
 - **`cli/index`** — `npx @dennation/typebook` (prints plugin usage; there is no codegen step).
 
 ### Package exports
 
 - `@dennation/typebook` — `registerComponent`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `ComponentHandle`, `RegisterConfigPick`, `RegisterConfigOmit`, `RegisterConfigBase`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `DefaultedOf`, `VariantConfig`, …)
-- `@dennation/typebook/react` — **storybook runtime:** `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`. **docs kit** (for consumer documentation sites): md set (`Callout`, `MDTable`, `PropsTable`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines; Shiki with a css-variables theme bound to the design tokens — any language, theme-aware colors, lazy-loaded grammars), `SearchPalette`/`useSearchHotkeys`/`SearchEntry`, `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `slugify`/`childText`. **universal primitives:** `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
+- `@dennation/typebook/react` — **storybook runtime:** `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`. **docs kit** (for consumer documentation sites): md set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines; Shiki with a css-variables theme bound to the design tokens — any language, theme-aware colors, lazy-loaded grammars), `SearchPalette`/`useSearchHotkeys`/`SearchEntry`, `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
 > **What lives where.** The package exports only what is **universal** — the storybook runtime, the docs component kit (md set, CodeBlock, search palette, sidebar/toc/breadcrumbs/prev-next, CopyCommand), generic primitives (`Icon`, `Button`, `ThemeToggle`, `cx`) and the design system. Anything **specific to one site** (marketing landing sections, demo "gifs", section heading, scroll-reveal hook, layout constants, page content and nav data) lives in that app — see `apps/website`, not the package.

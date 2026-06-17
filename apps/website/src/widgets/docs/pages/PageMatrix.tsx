@@ -5,7 +5,7 @@ import {
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
 } from "@dennation/typebook/react";
 
 export function PageMatrix() {
@@ -37,7 +37,7 @@ import { Matrix } from "@dennation/typebook/react";
 			</P>
 
 			<H2>Props</H2>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "of",

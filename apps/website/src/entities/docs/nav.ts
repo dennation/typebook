@@ -193,7 +193,7 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		slug: "tables",
 		title: "Tables",
 		section: "Components",
-		desc: "MDTable for data, PropsTable for component APIs",
+		desc: "MDTable for data, PropsReference for component APIs",
 	},
 	{
 		slug: "prose",
