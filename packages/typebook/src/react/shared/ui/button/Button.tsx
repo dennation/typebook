@@ -3,25 +3,27 @@ import type {
 	ButtonHTMLAttributes,
 	ReactNode,
 } from "react";
-import { cx } from "../../lib/cx.js";
+import { tv } from "tailwind-variants";
 
 export type ButtonVariant = "primary" | "ghost";
 export type ButtonSize = "sm" | "md" | "lg";
 
-const BASE =
-	"group inline-flex items-center justify-center gap-2 font-sans font-medium rounded-(--radius-token) border border-transparent whitespace-nowrap transition-all duration-140 active:translate-y-px";
-
-const VARIANTS: Record<ButtonVariant, string> = {
-	primary:
-		"bg-accent text-accent-fg shadow-sm hover:bg-accent-hover hover:shadow-md",
-	ghost: "text-fg-muted hover:text-fg hover:bg-bg-tertiary",
-};
-
-const SIZES: Record<ButtonSize, string> = {
-	sm: "h-9 text-[13.5px] px-3.5",
-	md: "h-10.5 text-[14.5px] px-4.25",
-	lg: "h-12.5 text-[15.5px] px-6 rounded-[calc(var(--radius-token)+2px)]",
-};
+const button = tv({
+	base: "group inline-flex items-center justify-center gap-2 font-sans font-medium rounded-(--radius-token) border border-transparent whitespace-nowrap transition-all duration-140 active:translate-y-px",
+	variants: {
+		variant: {
+			primary:
+				"bg-accent text-accent-fg shadow-sm hover:bg-accent-hover hover:shadow-md",
+			ghost: "text-fg-muted hover:text-fg hover:bg-bg-tertiary",
+		},
+		size: {
+			sm: "h-9 text-[13.5px] px-3.5",
+			md: "h-10.5 text-[14.5px] px-4.25",
+			lg: "h-12.5 text-[15.5px] px-6 rounded-[calc(var(--radius-token)+2px)]",
+		},
+	},
+	defaultVariants: { variant: "primary", size: "md" },
+});
 
 /** Class applied to a trailing chevron so it nudges right on hover. */
 export const ARROW_CLASS =
@@ -33,7 +35,7 @@ export function buttonClass(
 	size: ButtonSize = "md",
 	extra?: string,
 ): string {
-	return cx(BASE, VARIANTS[variant], SIZES[size], extra);
+	return button({ variant, size, className: extra });
 }
 
 type CommonProps = {

@@ -1,7 +1,16 @@
 import { PropInput } from "@react/features/prop-input/index.js";
 import { formatPropType } from "@react/shared/lib/formatPropType.js";
+import { tv } from "tailwind-variants";
 import type { PropInfo } from "@/types.js";
 import { isControllable } from "../lib/isControllable.js";
+
+const nameCell = tv({
+	base: "py-2.5 px-4 font-mono whitespace-nowrap",
+	variants: {
+		inherited: { true: "text-fg-muted", false: "text-fg" },
+	},
+	defaultVariants: { inherited: false },
+});
 
 export interface PropRowProps {
 	prop: PropInfo;
@@ -13,9 +22,7 @@ export function PropRow({ prop, value, onChange }: PropRowProps) {
 	const typeText = formatPropType(prop);
 	return (
 		<tr className="border-b border-border last:border-b-0">
-			<td
-				className={`py-2.5 px-4 font-mono whitespace-nowrap ${prop.inherited ? "text-fg-muted" : "text-fg"}`}
-			>
+			<td className={nameCell({ inherited: prop.inherited })}>
 				{prop.name}
 				{!prop.optional && <span className="text-red-400 ml-0.5">*</span>}
 			</td>

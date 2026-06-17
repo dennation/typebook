@@ -1,4 +1,15 @@
 import { type ReactNode, useState } from "react";
+import { tv } from "tailwind-variants";
+
+const tab = tv({
+	base: "text-[13.5px] font-medium px-1 py-2 -mb-px bg-transparent border-0 border-b-2 transition-colors duration-130",
+	variants: {
+		active: {
+			true: "text-fg border-accent",
+			false: "text-fg-muted border-transparent hover:text-fg",
+		},
+	},
+});
 
 export interface TabItem {
 	label: string;
@@ -24,7 +35,7 @@ export function Tabs({ tabs }: TabsProps) {
 							type="button"
 							role="tab"
 							aria-selected={on}
-							className={`text-[13.5px] font-medium px-1 py-2 -mb-px bg-transparent border-0 border-b-2 transition-colors duration-130 ${on ? "text-fg border-accent" : "text-fg-muted border-transparent hover:text-fg"}`}
+							className={tab({ active: on })}
 							onClick={() => setActive(i)}
 						>
 							{t.label}

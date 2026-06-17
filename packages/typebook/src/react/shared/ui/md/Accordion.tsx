@@ -1,5 +1,13 @@
 import { Icon } from "@react/shared/ui/icon/index.js";
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import { tv } from "tailwind-variants";
+
+const chevron = tv({
+	base: "ml-auto text-fg-subtle transition-transform duration-200",
+	variants: {
+		open: { true: "rotate-90" },
+	},
+});
 
 export interface AccordionItem {
 	q: string;
@@ -51,9 +59,7 @@ function AccItem({
 				aria-expanded={open}
 			>
 				{item.q}
-				<span
-					className={`ml-auto text-fg-subtle transition-transform duration-200 ${open ? "rotate-90" : ""}`}
-				>
+				<span className={chevron({ open })}>
 					<Icon.chevR size={16} />
 				</span>
 			</button>

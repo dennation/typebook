@@ -1,8 +1,24 @@
 import { memo } from "react";
+import { tv } from "tailwind-variants";
 import type { PropInfo } from "@/types.js";
 
-const INPUT_CLASS =
-	"w-full text-xs bg-transparent border border-border rounded-md px-2 py-1.5 text-fg outline-none focus:border-accent transition-colors";
+const field = tv({
+	base: "w-full text-xs bg-transparent border border-border rounded-md px-2 py-1.5 text-fg outline-none focus:border-accent transition-colors",
+	variants: {
+		select: { true: "cursor-pointer" },
+	},
+});
+
+const toggle = tv({
+	base: "text-xs px-2.5 py-1.5 rounded-md border cursor-pointer transition-colors",
+	variants: {
+		checked: {
+			true: "bg-accent text-bg border-accent",
+			false:
+				"bg-transparent text-fg-muted border-border hover:border-accent",
+		},
+	},
+});
 
 export interface PropInputProps {
 	prop: PropInfo;
@@ -20,7 +36,7 @@ export const PropInput = memo(function PropInput({
 	if (type.kind === "literal") {
 		return (
 			<select
-				className={`${INPUT_CLASS} cursor-pointer`}
+				className={field({ select: true })}
 				value={String(value ?? "")}
 				onChange={(e) => onChange(e.target.value)}
 			>
@@ -38,11 +54,7 @@ export const PropInput = memo(function PropInput({
 		return (
 			<button
 				type="button"
-				className={`text-xs px-2.5 py-1.5 rounded-md border cursor-pointer transition-colors ${
-					checked
-						? "bg-accent text-bg border-accent"
-						: "bg-transparent text-fg-muted border-border hover:border-accent"
-				}`}
+				className={toggle({ checked })}
 				onClick={() => onChange(!checked)}
 			>
 				{checked ? "true" : "false"}
@@ -54,7 +66,7 @@ export const PropInput = memo(function PropInput({
 		return (
 			<input
 				type="text"
-				className={INPUT_CLASS}
+				className={field()}
 				value={String(value ?? "")}
 				onChange={(e) => onChange(e.target.value)}
 			/>
@@ -65,7 +77,7 @@ export const PropInput = memo(function PropInput({
 		return (
 			<input
 				type="number"
-				className={INPUT_CLASS}
+				className={field()}
 				value={Number(value ?? 0)}
 				onChange={(e) => onChange(Number(e.target.value))}
 			/>
