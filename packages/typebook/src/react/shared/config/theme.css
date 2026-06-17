@@ -53,16 +53,6 @@
 	--shadow-lg:
 		0 18px 50px -12px hsl(var(--shadow-color) / 0.28),
 		0 8px 16px -8px hsl(var(--shadow-color) / 0.14);
-
-	/* syntax */
-	--syn-kw: oklch(0.55 0.2 305);
-	--syn-fn: oklch(0.5 0.17 255);
-	--syn-str: oklch(0.5 0.13 150);
-	--syn-num: oklch(0.55 0.15 40);
-	--syn-com: oklch(0.66 0.01 270);
-	--syn-tag: oklch(0.55 0.18 20);
-	--syn-attr: oklch(0.55 0.15 70);
-	--syn-punc: oklch(0.55 0.01 270);
 }
 
 [data-theme="dark"] {
@@ -90,15 +80,6 @@
 	--shadow-lg:
 		0 18px 50px -12px hsl(var(--shadow-color) / 0.7),
 		0 8px 16px -8px hsl(var(--shadow-color) / 0.5);
-
-	--syn-kw: oklch(0.74 0.16 310);
-	--syn-fn: oklch(0.76 0.13 250);
-	--syn-str: oklch(0.78 0.13 150);
-	--syn-num: oklch(0.8 0.12 55);
-	--syn-com: oklch(0.55 0.012 270);
-	--syn-tag: oklch(0.76 0.14 20);
-	--syn-attr: oklch(0.82 0.12 80);
-	--syn-punc: oklch(0.7 0.01 270);
 }
 
 /* ------------------------------------------------------------
@@ -122,15 +103,6 @@
 	--color-accent-fg: var(--accent-fg);
 	--color-accent-soft: var(--accent-soft);
 	--color-accent-soft-border: var(--accent-soft-border);
-
-	--color-tok-kw: var(--syn-kw);
-	--color-tok-fn: var(--syn-fn);
-	--color-tok-str: var(--syn-str);
-	--color-tok-num: var(--syn-num);
-	--color-tok-com: var(--syn-com);
-	--color-tok-tag: var(--syn-tag);
-	--color-tok-attr: var(--syn-attr);
-	--color-tok-punc: var(--syn-punc);
 
 	--font-sans: var(--font-sans);
 	--font-mono: var(--font-mono);
@@ -202,34 +174,15 @@ button {
    utilities (generated HTML, pseudo-elements, JS-toggled state).
    ------------------------------------------------------------ */
 @layer components {
-	/* Syntax-highlighter tokens, also emitted as HTML strings. */
-	.tok-kw {
-		color: var(--syn-kw);
+	/* Live code highlighting — CodeBlock tokenizes through Shiki's One
+	   Light / One Dark Pro pair and renders each token with both colors as
+	   custom properties (--tk-l / --tk-d). Pick the active one per theme so
+	   highlighting follows dark mode through the cascade. */
+	.tb-tok {
+		color: var(--tk-l);
 	}
-	.tok-fn {
-		color: var(--syn-fn);
-	}
-	.tok-str {
-		color: var(--syn-str);
-	}
-	.tok-num {
-		color: var(--syn-num);
-	}
-	.tok-com {
-		color: var(--syn-com);
-		font-style: italic;
-	}
-	.tok-tag {
-		color: var(--syn-tag);
-	}
-	.tok-attr {
-		color: var(--syn-attr);
-	}
-	.tok-punc {
-		color: var(--syn-punc);
-	}
-	.tok-prop {
-		color: var(--syn-fn);
+	[data-theme="dark"] .tb-tok {
+		color: var(--tk-d);
 	}
 
 	/* Inline code — used across generated contexts (prose, tables,
@@ -354,23 +307,6 @@ button {
 			8px -8px,
 			-8px 0px;
 	}
-}
-
-/* Shiki css-variables theme → design tokens. CodeBlock tokenizes through
-   Shiki with createCssVariablesTheme, so every token color is a var()
-   reference that follows dark mode and the accent via the cascade. */
-:root {
-	--shiki-foreground: var(--fg);
-	--shiki-background: transparent;
-	--shiki-token-keyword: var(--syn-kw);
-	--shiki-token-string: var(--syn-str);
-	--shiki-token-string-expression: var(--syn-str);
-	--shiki-token-comment: var(--syn-com);
-	--shiki-token-constant: var(--syn-num);
-	--shiki-token-function: var(--syn-fn);
-	--shiki-token-parameter: var(--syn-attr);
-	--shiki-token-punctuation: var(--syn-punc);
-	--shiki-token-link: var(--syn-tag);
 }
 
 /* ------------------------------------------------------------

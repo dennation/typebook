@@ -1,7 +1,7 @@
 import { cx } from "@react/shared/lib/cx.js";
 import { Icon } from "@react/shared/ui/icon/index.js";
-import { type ReactNode, useEffect, useState } from "react";
-import { type ThemedToken, tokenize } from "../lib/tokenize.js";
+import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
+import { type ThemedTokenWithVariants, tokenize } from "../lib/tokenize.js";
 
 export interface CodeTab {
 	label: string;
@@ -55,7 +55,9 @@ export function CodeBlock({
 	const cur = items[active] ?? (items[0] as CodeTab);
 
 	// Shiki is async — render plain lines until the tokens arrive.
-	const [tokens, setTokens] = useState<ThemedToken[][] | null>(null);
+	const [tokens, setTokens] = useState<ThemedTokenWithVariants[][] | null>(
+		null,
+	);
 	useEffect(() => {
 		let cancelled = false;
 		setTokens(null);
@@ -104,18 +106,25 @@ export function CodeBlock({
 		if (!lineTokens || lineTokens.length === 0) {
 			return plainLines[k] || " ";
 		}
-		return lineTokens.map((t, i) => (
-			<span
-				// biome-ignore lint/suspicious/noArrayIndexKey: tokens are positional
-				key={i}
-				style={{
-					color: t.color,
-					fontStyle: t.fontStyle && t.fontStyle & ITALIC ? "italic" : undefined,
-				}}
-			>
-				{t.content}
-			</span>
-		));
+		return lineTokens.map((t, i) => {
+			const fontStyle = t.variants.light?.fontStyle ?? 0;
+			return (
+				<span
+					// biome-ignore lint/suspicious/noArrayIndexKey: tokens are positional
+					key={i}
+					className="tb-tok"
+					style={
+						{
+							"--tk-l": t.variants.light?.color,
+							"--tk-d": t.variants.dark?.color,
+							fontStyle: fontStyle & ITALIC ? "italic" : undefined,
+						} as CSSProperties
+					}
+				>
+					{t.content}
+				</span>
+			);
+		});
 	};
 
 	return (
