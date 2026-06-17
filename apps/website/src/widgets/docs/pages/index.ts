@@ -2,25 +2,30 @@ import type { ComponentType } from "react";
 import type { DocsGo } from "../go.js";
 import { PageAccordion } from "./PageAccordion.js";
 import { PageBundlerPlugin } from "./PageBundlerPlugin.js";
+import { PageButton } from "./PageButton.js";
 import { PageCallout } from "./PageCallout.js";
 import { PageCards } from "./PageCards.js";
 import { PageCodeBlock } from "./PageCodeBlock.js";
 import { PageCopyCommand } from "./PageCopyCommand.js";
+import { PageErrorBoundary } from "./PageErrorBoundary.js";
+import { PageGetComponentMeta } from "./PageGetComponentMeta.js";
 import { PageHooks } from "./PageHooks.js";
+import { PageIcon } from "./PageIcon.js";
 import { PageInstallation } from "./PageInstallation.js";
 import { PageIntroduction } from "./PageIntroduction.js";
+import { PageLayout } from "./PageLayout.js";
 import { PageMatrix } from "./PageMatrix.js";
 import { PageNavigation } from "./PageNavigation.js";
 import { PagePlayground } from "./PagePlayground.js";
 import { PageProse } from "./PageProse.js";
 import { PageQuickStart } from "./PageQuickStart.js";
-import { PageGetComponentMeta } from "./PageGetComponentMeta.js";
 import { PageSearch } from "./PageSearch.js";
 import { PageSnippet } from "./PageSnippet.js";
 import { PageSteps } from "./PageSteps.js";
 import { PageStory } from "./PageStory.js";
 import { PageTables } from "./PageTables.js";
 import { PageTabs } from "./PageTabs.js";
+import { PageThemeToggle } from "./PageThemeToggle.js";
 import { PageTheming } from "./PageTheming.js";
 import { PageVariantHelpers } from "./PageVariantHelpers.js";
 import { PageVariants } from "./PageVariants.js";
@@ -51,6 +56,11 @@ export const PAGES: Record<string, ComponentType<{ go: DocsGo }>> = {
 	"copy-command": PageCopyCommand,
 	"get-component-meta": PageGetComponentMeta,
 	"variant-helpers": PageVariantHelpers,
+	layout: PageLayout,
+	button: PageButton,
+	icon: PageIcon,
+	"theme-toggle": PageThemeToggle,
+	"error-boundary": PageErrorBoundary,
 	"bundler-plugin": PageBundlerPlugin,
 	hooks: PageHooks,
 };
