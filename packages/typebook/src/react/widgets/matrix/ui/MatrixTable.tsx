@@ -1,7 +1,7 @@
-import { PreviewFrame } from "@react/shared/ui/preview/index.js";
+import { PreviewFrame } from "@react/shared/ui/preview/index";
 import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";
-import type { MatrixRow } from "../lib/buildMatrixRows.js";
+import type { MatrixRow } from "../lib/buildMatrixRows";
 
 const matrixTable = tv({
 	slots: {

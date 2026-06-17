@@ -1,6 +1,6 @@
-import type { PropRowData } from "@react/shared/ui/props-reference/index.js";
-import type { PropInfo } from "@/types.js";
-import { formatPropType } from "./formatPropType.js";
+import type { PropRowData } from "@react/shared/ui/props-reference/index";
+import type { PropInfo } from "@/types";
+import { formatPropType } from "./formatPropType";
 
 /**
  * Map a registered component's extracted `PropInfo[]` (from `handle.props`) into

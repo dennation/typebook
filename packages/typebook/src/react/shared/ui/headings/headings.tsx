@@ -1,6 +1,6 @@
-import { childText } from "@react/shared/lib/childText.js";
-import { slugify } from "@react/shared/lib/slugify.js";
-import { Icon } from "@react/shared/ui/icon/index.js";
+import { childText } from "@react/shared/lib/childText";
+import { slugify } from "@react/shared/lib/slugify";
+import { Icon } from "@react/shared/ui/icon/index";
 import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";
 

@@ -1,9 +1,9 @@
-import { getGridStyle } from "@react/shared/lib/getGridStyle.js";
-import { PreviewFrame } from "@react/shared/ui/preview/index.js";
-import type { ComponentMeta } from "@react/types.js";
+import { getGridStyle } from "@react/shared/lib/getGridStyle";
+import { PreviewFrame } from "@react/shared/ui/preview/index";
+import type { ComponentMeta } from "@react/types";
 import { createElement, useCallback } from "react";
-import { resolveVariantConfig } from "@/resolve.js";
-import type { MissingProps, VariantConfig } from "@/types.js";
+import { resolveVariantConfig } from "@/resolve";
+import type { MissingProps, VariantConfig } from "@/types";
 
 export type VariantsProps<
 	Props extends object,

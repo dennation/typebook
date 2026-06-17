@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { getComponentMeta } from "../../react/getComponentMeta.js";
-import { allOf, generate, values } from "../../react/variants.js";
+import { getComponentMeta } from "../../react/getComponentMeta";
+import { allOf, generate, values } from "../../react/variants";
 
 const MockComponent = () => null;
 MockComponent.displayName = "MockComponent";

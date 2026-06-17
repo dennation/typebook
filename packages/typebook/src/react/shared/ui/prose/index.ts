@@ -10,4 +10,4 @@ export {
 	P,
 	Quote,
 	Ul,
-} from "./prose.js";
+} from "./prose";

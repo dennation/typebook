@@ -1,8 +1,8 @@
-import { PropInput } from "@react/features/prop-input/index.js";
-import { formatPropType } from "@react/shared/lib/formatPropType.js";
+import { PropInput } from "@react/features/prop-input/index";
+import { formatPropType } from "@react/shared/lib/formatPropType";
 import { tv } from "tailwind-variants";
-import type { PropInfo } from "@/types.js";
-import { isControllable } from "../lib/isControllable.js";
+import type { PropInfo } from "@/types";
+import { isControllable } from "../lib/isControllable";
 
 const nameCell = tv({
 	base: "py-2.5 px-4 font-mono whitespace-nowrap",

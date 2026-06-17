@@ -1,1 +1,1 @@
-export { type Theme, useTheme } from "./model/useTheme.js";
+export { type Theme, useTheme } from "./model/useTheme";

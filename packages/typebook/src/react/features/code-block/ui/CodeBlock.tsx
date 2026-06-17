@@ -1,7 +1,7 @@
-import { Icon } from "@react/shared/ui/icon/index.js";
+import { Icon } from "@react/shared/ui/icon/index";
 import { type ReactNode, useEffect, useState } from "react";
 import { tv } from "tailwind-variants";
-import { type ThemedToken, tokenize } from "../lib/tokenize.js";
+import { type ThemedToken, tokenize } from "../lib/tokenize";
 
 export interface CodeTab {
 	label: string;

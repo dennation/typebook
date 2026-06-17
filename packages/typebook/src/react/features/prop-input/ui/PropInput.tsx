@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { tv } from "tailwind-variants";
-import type { PropInfo } from "@/types.js";
+import type { PropInfo } from "@/types";
 
 const field = tv({
 	base: "w-full text-xs bg-transparent border border-border rounded-md px-2 py-1.5 text-fg outline-none focus:border-accent transition-colors",

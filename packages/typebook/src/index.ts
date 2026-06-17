@@ -14,4 +14,4 @@ export type {
 	TypebookConfig,
 	ValuesConfig,
 	VariantConfig,
-} from "./types.js";
+} from "./types";

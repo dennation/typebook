@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import ts from "typescript";
-import { DEFAULT_INHERITED_PROVIDERS, LOG_PREFIX } from "../constants.js";
-import type { PropInfo, PropType } from "../types.js";
+import { DEFAULT_INHERITED_PROVIDERS, LOG_PREFIX } from "../constants";
+import type { PropInfo, PropType } from "../types";
 
 export class TypeScriptClient {
 	private service: ts.LanguageService | null = null;

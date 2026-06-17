@@ -5,4 +5,4 @@ export {
 	type ButtonSize,
 	type ButtonVariant,
 	buttonClass,
-} from "./Button.js";
+} from "./Button";

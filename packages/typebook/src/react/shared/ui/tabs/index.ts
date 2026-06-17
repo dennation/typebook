@@ -1,1 +1,1 @@
-export { type TabItem, Tabs, type TabsProps } from "./Tabs.js";
+export { type TabItem, Tabs, type TabsProps } from "./Tabs";

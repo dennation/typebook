@@ -1,8 +1,8 @@
-import { CENTERED_CONTENT_STYLE } from "@react/shared/config/cssConstants.js";
+import { CENTERED_CONTENT_STYLE } from "@react/shared/config/cssConstants";
 import type { ReactNode } from "react";
 import { memo } from "react";
-import { ErrorBoundary } from "./ErrorBoundary.js";
-import { Isolate } from "./Isolate.js";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { Isolate } from "./Isolate";
 
 export interface PreviewProps {
 	props: Record<string, unknown>;

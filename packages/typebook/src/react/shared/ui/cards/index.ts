@@ -1,1 +1,1 @@
-export { Cards, DocCard, type DocCardProps } from "./Cards.js";
+export { Cards, DocCard, type DocCardProps } from "./Cards";

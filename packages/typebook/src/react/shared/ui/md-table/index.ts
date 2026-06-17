@@ -1,1 +1,1 @@
-export { MDTable, type MDTableProps } from "./MDTable.js";
+export { MDTable, type MDTableProps } from "./MDTable";

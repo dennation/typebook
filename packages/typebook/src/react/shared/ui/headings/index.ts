@@ -1,1 +1,1 @@
-export { H2, H3 } from "./headings.js";
+export { H2, H3 } from "./headings";

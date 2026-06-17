@@ -1,1 +1,1 @@
-export { Snippet, type SnippetProps } from "./ui/Snippet.js";
+export { Snippet, type SnippetProps } from "./ui/Snippet";

@@ -1,6 +1,6 @@
 import type { CallExpression, ImportDeclaration } from "oxc-parser";
-import { NPM_REACT_PACKAGE_NAME } from "../constants.js";
-import { moduleExportName, type Program, walk } from "./ast.js";
+import { NPM_REACT_PACKAGE_NAME } from "../constants";
+import { moduleExportName, type Program, walk } from "./ast";
 
 /**
  * Where to inject the generated `__props` into a `getComponentMeta(...)` call:

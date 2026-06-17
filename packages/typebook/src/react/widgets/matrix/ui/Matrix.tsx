@@ -1,8 +1,8 @@
-import type { ComponentMeta } from "@react/types.js";
+import type { ComponentMeta } from "@react/types";
 import { createElement, useCallback } from "react";
-import type { MissingProps, VariantConfig } from "@/types.js";
-import { buildMatrixRows } from "../lib/buildMatrixRows.js";
-import { MatrixTable } from "./MatrixTable.js";
+import type { MissingProps, VariantConfig } from "@/types";
+import { buildMatrixRows } from "../lib/buildMatrixRows";
+import { MatrixTable } from "./MatrixTable";
 
 export type MatrixProps<Props extends object, Defaulted extends keyof Props> = {
 	of: ComponentMeta<Props, Defaulted>;
