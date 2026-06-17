@@ -1,17 +1,14 @@
 import {
-	A,
 	C,
 	Callout,
 	CodeBlock,
 	H2,
 	Icon,
 	Lead,
-	P,
 	PropsReference,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go.js";
 
-export function PageVariants({ go }: { go: DocsGo }) {
+export function PageVariants() {
 	return (
 		<>
 			<Lead>
@@ -83,12 +80,6 @@ import { Variants } from "@dennation/typebook/react";
 					},
 				]}
 			/>
-
-			<H2>Related</H2>
-			<P>
-				The config helpers are documented in{" "}
-				<A onClick={() => go("variant-helpers")}>Variant helpers</A>.
-			</P>
 		</>
 	);
 }
