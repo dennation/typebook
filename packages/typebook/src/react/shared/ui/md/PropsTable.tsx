@@ -15,7 +15,7 @@ export interface PropsTableProps {
 /** Component API table — one striped row per prop. */
 export function PropsTable({ props }: PropsTableProps) {
 	return (
-		<div className="flex flex-col border border-border rounded-[var(--radius-token)] overflow-hidden">
+		<div className="flex flex-col border border-border rounded-(--radius-token) overflow-hidden">
 			{props.map((p) => (
 				<div
 					className="grid grid-cols-1 px-4.5 py-4 border-b border-border last:border-b-0 even:bg-bg-secondary"

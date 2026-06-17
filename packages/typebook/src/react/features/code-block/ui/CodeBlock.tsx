@@ -112,7 +112,7 @@ export function CodeBlock({
 	return (
 		<div
 			className={cx(
-				"border border-border rounded-[var(--radius-token)] overflow-hidden bg-code-bg",
+				"border border-border rounded-(--radius-token) overflow-hidden bg-code-bg",
 				!hasTabs && !hasHead && "relative",
 			)}
 		>

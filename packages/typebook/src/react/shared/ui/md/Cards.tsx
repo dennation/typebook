@@ -20,7 +20,7 @@ export function DocCard({ icon, title, desc, onClick }: DocCardProps) {
 	return (
 		<button
 			type="button"
-			className="block w-full text-left px-4.5 py-4.25 border border-border rounded-[var(--radius-token)] bg-bg-secondary transition-all duration-150 hover:border-accent-soft-border hover:bg-bg hover:shadow-md hover:-translate-y-px"
+			className="block w-full text-left px-4.5 py-4.25 border border-border rounded-(--radius-token) bg-bg-secondary transition-all duration-150 hover:border-accent-soft-border hover:bg-bg hover:shadow-md hover:-translate-y-px"
 			onClick={onClick}
 		>
 			{icon && <span className="text-accent mb-2.5 inline-flex">{icon}</span>}
