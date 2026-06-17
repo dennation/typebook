@@ -64,7 +64,7 @@ export function DocsPage({ slug, githubHref }: DocsPageProps) {
 				>
 					<div className="min-w-0 flex justify-center px-14 max-[1100px]:px-10 max-[820px]:px-5.5">
 						<main
-							className="w-full max-w-[var(--content-width)] pt-10 pb-24 max-[820px]:pt-7"
+							className="w-full max-w-(--content-width) pt-10 pb-24 max-[820px]:pt-7"
 							ref={contentRef}
 							key={slug}
 						>

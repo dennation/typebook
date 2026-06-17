@@ -13,7 +13,7 @@ export interface PrevNextNavProps {
 }
 
 const CARD =
-	"group border border-border rounded-[var(--radius-token)] px-4.25 py-3.75 transition-all duration-150 bg-bg hover:border-accent-soft-border hover:shadow-sm text-left w-full";
+	"group border border-border rounded-(--radius-token) px-4.25 py-3.75 transition-all duration-150 bg-bg hover:border-accent-soft-border hover:shadow-sm text-left w-full";
 const LABEL = "text-[12px] text-fg-subtle mb-1.5 flex items-center gap-1.5";
 const TITLE = "text-[15px] font-semibold text-fg group-hover:text-accent";
 

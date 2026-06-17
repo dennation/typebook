@@ -14,7 +14,7 @@ export interface AccordionProps {
 export function Accordion({ items }: AccordionProps) {
 	const [open, setOpen] = useState<number | null>(null);
 	return (
-		<div className="border border-border rounded-[var(--radius-token)] overflow-hidden">
+		<div className="border border-border rounded-(--radius-token) overflow-hidden">
 			{items.map((it, i) => (
 				<AccItem
 					key={it.q}

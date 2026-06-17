@@ -16,7 +16,7 @@ const NAV_LINK =
 const NAV_LINK_ACTIVE =
 	"text-[13.5px] text-fg font-medium px-2.75 py-1.5 rounded-[7px] transition-colors duration-140 hover:bg-bg-tertiary";
 const ICON_BTN =
-	"w-8.5 h-8.5 rounded-[var(--radius-token)] grid place-items-center bg-transparent border border-transparent text-fg-muted transition-colors duration-140 hover:bg-bg-tertiary hover:text-fg hover:border-border";
+	"w-8.5 h-8.5 rounded-(--radius-token) grid place-items-center bg-transparent border border-transparent text-fg-muted transition-colors duration-140 hover:bg-bg-tertiary hover:text-fg hover:border-border";
 
 export interface SiteHeaderProps {
 	/** Version badge label. */
@@ -44,7 +44,7 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 	return (
 		<header
 			className={cx(
-				"sticky top-0 z-50 h-14 flex items-center gap-4 px-5.5 bg-[color-mix(in_oklch,var(--bg)_82%,transparent)] backdrop-saturate-[1.4] backdrop-blur-[12px] border-b transition-[border-color,background] duration-200",
+				"sticky top-0 z-50 h-14 flex items-center gap-4 px-5.5 bg-[color-mix(in_oklch,var(--bg)_82%,transparent)] backdrop-saturate-[1.4] backdrop-blur-md border-b transition-[border-color,background] duration-200",
 				bordered ? "border-border" : "border-transparent",
 			)}
 		>
@@ -89,7 +89,7 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 			<div className="flex items-center gap-1.5">
 				<button
 					type="button"
-					className="flex items-center gap-2.25 h-8.5 pl-2.75 pr-2 min-w-52.5 bg-bg-secondary border border-border rounded-[var(--radius-token)] text-fg-subtle text-[13px] transition-colors duration-140 hover:border-border-strong hover:bg-bg-tertiary max-[820px]:min-w-0"
+					className="flex items-center gap-2.25 h-8.5 pl-2.75 pr-2 min-w-52.5 bg-bg-secondary border border-border rounded-(--radius-token) text-fg-subtle text-[13px] transition-colors duration-140 hover:border-border-strong hover:bg-bg-tertiary max-[820px]:min-w-0"
 					onClick={openSearch}
 				>
 					<Icon.search size={15} />

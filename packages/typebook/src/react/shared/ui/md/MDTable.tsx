@@ -8,7 +8,7 @@ export interface MDTableProps {
 /** Responsive bordered table for markdown pipe tables. */
 export function MDTable({ head, rows }: MDTableProps) {
 	return (
-		<div className="overflow-x-auto border border-border rounded-[var(--radius-token)]">
+		<div className="overflow-x-auto border border-border rounded-(--radius-token)">
 			<table className="w-full border-collapse text-[14px] [&_tbody_tr:last-child_td]:border-b-0 [&_tbody_tr:hover]:bg-bg-secondary">
 				<thead>
 					<tr>

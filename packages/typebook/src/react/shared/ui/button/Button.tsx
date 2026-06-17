@@ -9,7 +9,7 @@ export type ButtonVariant = "primary" | "ghost";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const BASE =
-	"group inline-flex items-center justify-center gap-2 font-sans font-medium rounded-[var(--radius-token)] border border-transparent whitespace-nowrap transition-all duration-140 active:translate-y-px";
+	"group inline-flex items-center justify-center gap-2 font-sans font-medium rounded-(--radius-token) border border-transparent whitespace-nowrap transition-all duration-140 active:translate-y-px";
 
 const VARIANTS: Record<ButtonVariant, string> = {
 	primary:
