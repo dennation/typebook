@@ -1,4 +1,4 @@
-import type { PropRowData } from "@react/shared/ui/md/index";
+import type { PropRowData } from "@react/shared/ui/props-reference/index";
 import type { PropInfo } from "@/types";
 import { formatPropType } from "./formatPropType";
 
