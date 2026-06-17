@@ -1,6 +1,6 @@
-import { cx } from "@react/shared/lib/cx.js";
 import { Icon } from "@react/shared/ui/icon/index.js";
 import { type ReactNode, useEffect, useState } from "react";
+import { tv } from "tailwind-variants";
 import { type ThemedToken, tokenize } from "../lib/tokenize.js";
 
 export interface CodeTab {
@@ -36,6 +36,42 @@ export interface CodeBlockProps {
 }
 
 const ITALIC = 1; // shiki FontStyle.Italic bit
+
+const container = tv({
+	base: "border border-border rounded-(--radius-token) overflow-hidden bg-code-bg",
+	variants: {
+		bare: { true: "relative" },
+	},
+});
+
+const copyButton = tv({
+	base: "w-7 h-7 rounded-[7px] shrink-0 grid place-items-center bg-transparent border border-transparent transition-all duration-130 hover:text-fg hover:bg-bg-tertiary hover:border-border",
+	variants: {
+		copied: {
+			true: "text-[oklch(0.6_0.14_155)]",
+			false: "text-fg-subtle",
+		},
+	},
+});
+
+const tab = tv({
+	base: "relative font-mono text-[12.5px] pt-1.75 px-3 pb-2.25 border-none bg-transparent rounded-t-[6px] transition-colors duration-130",
+	variants: {
+		on: {
+			true: "text-fg",
+			false: "text-fg-subtle hover:text-fg-muted",
+		},
+	},
+});
+
+const line = tv({
+	base: "block px-1",
+	variants: {
+		highlighted: {
+			true: "bg-[color-mix(in_oklch,var(--accent)_12%,transparent)] shadow-[inset_2px_0_0_var(--accent)] -mx-4.5 px-4.5",
+		},
+	},
+});
 
 /** Docs code block — filename header OR tabs, copy button, line numbers. */
 export function CodeBlock({
@@ -80,14 +116,10 @@ export function CodeBlock({
 		setTimeout(() => setCopied(false), 1600);
 	};
 
-	const copyBtnClass = cx(
-		"w-7 h-7 rounded-[7px] shrink-0 grid place-items-center bg-transparent border border-transparent transition-all duration-130 hover:text-fg hover:bg-bg-tertiary hover:border-border",
-		copied ? "text-[oklch(0.6_0.14_155)]" : "text-fg-subtle",
-	);
 	const CopyBtn = ({ extra = "" }: { extra?: string }) => (
 		<button
 			type="button"
-			className={cx(copyBtnClass, extra)}
+			className={copyButton({ copied, className: extra })}
 			onClick={doCopy}
 			aria-label="Copy code"
 			title="Copy"
@@ -119,12 +151,8 @@ export function CodeBlock({
 	};
 
 	return (
-		<div
-			className={cx(
-				"border border-border rounded-(--radius-token) overflow-hidden bg-code-bg",
-				!hasTabs && !hasHead && "relative",
-			)}
-		>
+		<div className={container({ bare: !hasTabs && !hasHead })}>
+
 			{hasTabs && (
 				<div className="flex items-center gap-0.5 pt-1.5 px-2 bg-bg-secondary border-b border-border">
 					{items.map((t, k) => {
@@ -133,10 +161,7 @@ export function CodeBlock({
 							<button
 								key={t.label}
 								type="button"
-								className={cx(
-									"relative font-mono text-[12.5px] pt-1.75 px-3 pb-2.25 border-none bg-transparent rounded-t-[6px] transition-colors duration-130",
-									on ? "text-fg" : "text-fg-subtle hover:text-fg-muted",
-								)}
+								className={tab({ on })}
 								onClick={() => setActive(k)}
 							>
 								{t.icon && (
@@ -180,11 +205,7 @@ export function CodeBlock({
 								<span
 									// biome-ignore lint/suspicious/noArrayIndexKey: lines are positional
 									key={k}
-									className={cx(
-										"block px-1",
-										hl &&
-											"bg-[color-mix(in_oklch,var(--accent)_12%,transparent)] shadow-[inset_2px_0_0_var(--accent)] -mx-4.5 px-4.5",
-									)}
+									className={line({ highlighted: hl })}
 								>
 									{showLineNumbers && (
 										<span className="inline-block w-[1.6em] mr-4 text-right text-fg-subtle opacity-55 select-none">

@@ -1,11 +1,21 @@
-import { cx } from "@react/shared/lib/cx.js";
 import { Icon } from "@react/shared/ui/icon/index.js";
 import { useCallback, useState } from "react";
+import { tv } from "tailwind-variants";
 
 export interface CopyCommandProps {
 	/** The shell command to display and copy. */
 	cmd: string;
 }
+
+const copyButton = tv({
+	base: "w-8.5 h-8.5 rounded-[8px] flex-none ml-0.5 grid place-items-center bg-bg border border-border transition-all duration-130",
+	variants: {
+		copied: {
+			true: "text-[oklch(0.6_0.14_155)]",
+			false: "text-fg-subtle hover:text-fg hover:border-border-strong",
+		},
+	},
+});
 
 /** A copy-able command pill (e.g. `npx create-typebok@latest`). */
 export function CopyCommand({ cmd }: CopyCommandProps) {
@@ -23,12 +33,7 @@ export function CopyCommand({ cmd }: CopyCommandProps) {
 			<span>{cmd}</span>
 			<button
 				type="button"
-				className={cx(
-					"w-8.5 h-8.5 rounded-[8px] flex-none ml-0.5 grid place-items-center bg-bg border border-border transition-all duration-130",
-					copied
-						? "text-[oklch(0.6_0.14_155)]"
-						: "text-fg-subtle hover:text-fg hover:border-border-strong",
-				)}
+				className={copyButton({ copied })}
 				onClick={copy}
 				aria-label="Copy command"
 			>

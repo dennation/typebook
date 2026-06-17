@@ -1,6 +1,6 @@
-import { cx } from "@react/shared/lib/cx.js";
 import { Icon } from "@react/shared/ui/icon/index.js";
 import { useState } from "react";
+import { tv } from "tailwind-variants";
 import type { DocsNavSection } from "../model/types.js";
 
 export interface DocsSidebarProps {
@@ -14,6 +14,26 @@ export interface DocsSidebarProps {
 	onClose: () => void;
 }
 
+const docsSidebar = tv({
+	slots: {
+		overlay: "hidden",
+		aside:
+			"sticky top-14 h-[calc(100vh-56px)] overflow-y-auto pt-6 pr-3.5 pb-15 pl-5.5 border-r border-border max-[820px]:fixed max-[820px]:top-14 max-[820px]:left-0 max-[820px]:z-45 max-[820px]:w-72.5 max-[820px]:bg-bg max-[820px]:border-r-0 max-[820px]:shadow-lg max-[820px]:transition-transform max-[820px]:duration-240",
+	},
+	variants: {
+		open: {
+			true: {
+				overlay:
+					"max-[820px]:block fixed inset-[56px_0_0] z-44 bg-[oklch(0.2_0.02_270/0.4)]",
+				aside: "max-[820px]:translate-x-0",
+			},
+			false: {
+				aside: "max-[820px]:-translate-x-[102%]",
+			},
+		},
+	},
+});
+
 /** Left navigation: collapsible sections, active page highlight, mobile drawer. */
 export function DocsSidebar({
 	sections,
@@ -22,26 +42,15 @@ export function DocsSidebar({
 	open,
 	onClose,
 }: DocsSidebarProps) {
+	const { overlay, aside } = docsSidebar({ open });
 	return (
 		<>
 			<div
-				className={cx(
-					"hidden",
-					open &&
-						"max-[820px]:block fixed inset-[56px_0_0] z-44 bg-[oklch(0.2_0.02_270/0.4)]",
-				)}
+				className={overlay()}
 				onClick={onClose}
 				aria-hidden="true"
 			/>
-			<aside
-				className={cx(
-					"sticky top-14 h-[calc(100vh-56px)] overflow-y-auto pt-6 pr-3.5 pb-15 pl-5.5 border-r border-border",
-					"max-[820px]:fixed max-[820px]:top-14 max-[820px]:left-0 max-[820px]:z-45 max-[820px]:w-72.5 max-[820px]:bg-bg max-[820px]:border-r-0 max-[820px]:shadow-lg max-[820px]:transition-transform max-[820px]:duration-240",
-					open
-						? "max-[820px]:translate-x-0"
-						: "max-[820px]:-translate-x-[102%]",
-				)}
-			>
+			<aside className={aside()}>
 				{sections.map((sec) => (
 					<SidebarSection
 						key={sec.label}
@@ -55,6 +64,29 @@ export function DocsSidebar({
 	);
 }
 
+const sidebarSection = tv({
+	slots: {
+		chev: "ml-auto transition-transform duration-180 opacity-70",
+		item: "relative flex items-center gap-2.25 text-[13.5px] px-2.5 py-1.5 rounded-[7px] w-full text-left bg-transparent border-none transition-colors duration-130",
+		dot: "w-1.25 h-1.25 rounded-[99px] bg-current shrink-0 ml-1",
+	},
+	variants: {
+		collapsed: {
+			true: { chev: "-rotate-90" },
+		},
+		active: {
+			true: {
+				item: "text-accent bg-accent-soft font-medium",
+				dot: "opacity-100",
+			},
+			false: {
+				item: "text-fg-muted font-[450] hover:text-fg hover:bg-bg-tertiary",
+				dot: "opacity-30",
+			},
+		},
+	},
+});
+
 function SidebarSection({
 	sec,
 	current,
@@ -65,6 +97,7 @@ function SidebarSection({
 	onNavigate: (slug: string) => void;
 }) {
 	const [collapsed, setCollapsed] = useState(false);
+	const { chev, item, dot } = sidebarSection();
 	const Ic = Icon[sec.icon];
 	return (
 		<div className="mb-5.5">
@@ -77,12 +110,7 @@ function SidebarSection({
 					<Ic size={14} />
 				</span>
 				{sec.label}
-				<span
-					className={cx(
-						"ml-auto transition-transform duration-180 opacity-70",
-						collapsed && "-rotate-90",
-					)}
-				>
+				<span className={chev({ collapsed })}>
 					<Icon.chevD size={14} />
 				</span>
 			</button>
@@ -94,20 +122,10 @@ function SidebarSection({
 							<button
 								key={it.slug}
 								type="button"
-								className={cx(
-									"relative flex items-center gap-2.25 text-[13.5px] px-2.5 py-1.5 rounded-[7px] w-full text-left bg-transparent border-none transition-colors duration-130",
-									active
-										? "text-accent bg-accent-soft font-medium"
-										: "text-fg-muted font-[450] hover:text-fg hover:bg-bg-tertiary",
-								)}
+								className={item({ active })}
 								onClick={() => onNavigate(it.slug)}
 							>
-								<span
-									className={cx(
-										"w-1.25 h-1.25 rounded-[99px] bg-current shrink-0 ml-1",
-										active ? "opacity-100" : "opacity-30",
-									)}
-								/>
+								<span className={dot({ active })} />
 								{it.title}
 								{it.badge === "new" && (
 									<span className="ml-auto text-[10px] font-mono px-1.5 py-px rounded-[99px] font-medium bg-accent-soft text-accent border border-accent-soft-border">
