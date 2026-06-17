@@ -61,6 +61,11 @@ export const NAV: DocsNavSection[] = [
 		items: [
 			{ slug: "get-component-meta", title: "getComponentMeta()" },
 			{ slug: "variant-helpers", title: "Variant helpers" },
+			{ slug: "layout", title: "Layout" },
+			{ slug: "button", title: "Button" },
+			{ slug: "icon", title: "Icon" },
+			{ slug: "theme-toggle", title: "ThemeToggle" },
+			{ slug: "error-boundary", title: "ErrorBoundary" },
 			{ slug: "bundler-plugin", title: "Bundler plugin" },
 			{ slug: "hooks", title: "Hooks" },
 		],
@@ -230,6 +235,36 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		title: "Variant helpers",
 		section: "API Reference",
 		desc: "allOf(), values(), generate()",
+	},
+	{
+		slug: "layout",
+		title: "Layout",
+		section: "API Reference",
+		desc: "Runtime page shell with sidebar, theme and injected styles",
+	},
+	{
+		slug: "button",
+		title: "Button",
+		section: "API Reference",
+		desc: 'Call-to-action primitive with variants, sizes and as="a"',
+	},
+	{
+		slug: "icon",
+		title: "Icon",
+		section: "API Reference",
+		desc: "Namespace of lightweight stroke icons (currentColor)",
+	},
+	{
+		slug: "theme-toggle",
+		title: "ThemeToggle",
+		section: "API Reference",
+		desc: "Toggle light/dark data-theme, persisted to localStorage",
+	},
+	{
+		slug: "error-boundary",
+		title: "ErrorBoundary",
+		section: "API Reference",
+		desc: "Catch render errors in a subtree and show a fallback",
 	},
 	{
 		slug: "bundler-plugin",
