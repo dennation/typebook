@@ -20,9 +20,9 @@ export function PageCodeBlock() {
 			<Lead>
 				<C>CodeBlock</C> renders highlighted, copyable code: a single snippet
 				with an optional filename header, or several variants as tabs.
-				Highlighting is Shiki with a CSS-variables theme mapped onto the design
-				tokens (<C>--syn-*</C>) — full TextMate grammars for any language, and
-				the colors still follow dark mode and the accent automatically.
+				Highlighting is Shiki with the One Light / One Dark Pro theme pair —
+				full TextMate grammars for any language, and each token ships both
+				colors so they follow dark mode automatically.
 			</Lead>
 
 			<H2>Single snippet</H2>

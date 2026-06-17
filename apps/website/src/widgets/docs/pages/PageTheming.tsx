@@ -51,9 +51,9 @@ export function PageTheming() {
 						"Buttons, links, highlights, focus ring",
 					],
 					[
-						"Syntax",
-						<C key="v">--syn-kw --syn-str --syn-fn …</C>,
-						"Code highlighting (.tok-* classes)",
+						"Shadows",
+						<C key="v">--shadow-sm --shadow-md --shadow-lg</C>,
+						"Elevation; code highlighting uses Shiki's One theme",
 					],
 				]}
 			/>
