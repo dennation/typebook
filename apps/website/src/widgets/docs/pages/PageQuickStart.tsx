@@ -22,18 +22,19 @@ export function PageQuickStart({ go }: { go: DocsGo }) {
 
 			<H2>Register a component</H2>
 			<P>
-				<C>register()</C> calls can live anywhere in <C>{"src/**/*.tsx"}</C> —
-				no special filename required. The first argument is a unique string id,
-				the key in the generated registry. Duplicate ids throw at build time.
+				<C>registerComponent()</C> calls can live anywhere in{" "}
+				<C>{"src/**/*.tsx"}</C> — no special filename required and no id to
+				assign. It returns a self-contained handle; the plugin injects the
+				extracted props into it at build time.
 			</P>
 			<CodeBlock
 				file="src/pages/button.tsx"
 				icon={<Icon.react size={14} />}
 				lang="tsx"
-				code={`import { register } from "@dennation/typebook";
+				code={`import { registerComponent } from "@dennation/typebook";
 import { Button } from "../components/Button";
 
-const button = register("button", Button, {
+const button = registerComponent(Button, {
   defaultProps: { children: "Click me" },
 });`}
 			/>
@@ -58,9 +59,9 @@ import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 <Playground of={button} />`}
 			/>
 
-			<Callout type="success" title="Hot regeneration">
-				In Vite dev mode the registry re-generates incrementally (debounced) as
-				you edit sources — no restart needed. Other bundlers regenerate on each
+			<Callout type="success" title="Hot reload">
+				In Vite dev mode editing a component re-injects its props through normal
+				module invalidation — no restart needed. Other bundlers re-inject on each
 				rebuild.
 			</Callout>
 

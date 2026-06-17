@@ -1,6 +1,3 @@
-// Storybook runtime
-export { TypebookProvider, type TypebookProviderProps } from "./app/index.js";
-export { useComponentMeta } from "./entities/component-meta/index.js";
 // Docs components (for consumer documentation sites)
 export {
 	CodeBlock,

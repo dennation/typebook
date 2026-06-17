@@ -2,7 +2,6 @@ export { registerComponent } from "./registerComponent.js";
 export type {
 	AllOfConfig,
 	ComponentHandle,
-	ComponentMeta,
 	DefaultedOf,
 	GenerateConfig,
 	MissingProps,
@@ -12,9 +11,7 @@ export type {
 	RegisterConfigBase,
 	RegisterConfigOmit,
 	RegisterConfigPick,
-	SnippetMap,
 	TypebookConfig,
-	UIRegistry,
 	ValuesConfig,
 	VariantConfig,
 } from "./types.js";

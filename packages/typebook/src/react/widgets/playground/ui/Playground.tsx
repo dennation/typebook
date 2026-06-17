@@ -1,4 +1,3 @@
-import { useComponentMeta } from "@react/entities/component-meta/index.js";
 import { Preview } from "@react/shared/ui/preview/index.js";
 import { createElement, useCallback, useState } from "react";
 import type { ComponentHandle } from "@/types.js";
@@ -10,8 +9,7 @@ export interface PlaygroundProps {
 
 export function Playground({ of }: PlaygroundProps) {
 	const Component = of.component;
-	const meta = useComponentMeta(of.id);
-	const allProps = meta?.props ?? [];
+	const allProps = of.props;
 
 	const [controlProps, setControlProps] = useState<Record<string, unknown>>(
 		of.defaultProps,

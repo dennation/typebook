@@ -1,4 +1,3 @@
-import { useComponentMeta } from "@react/entities/component-meta/index.js";
 import { getGridStyle } from "@react/shared/lib/getGridStyle.js";
 import { PreviewFrame } from "@react/shared/ui/preview/index.js";
 import { createElement, useCallback } from "react";
@@ -22,14 +21,13 @@ export function Variants<
 	Defaulted extends keyof Props = never,
 >({ of, items, props, columns, isolate }: VariantsProps<Props, Defaulted>) {
 	const Component = of.component;
-	const meta = useComponentMeta(of.id);
 
 	const baseProps: Record<string, unknown> = {
 		...of.defaultProps,
 		...(props as Record<string, unknown> | undefined),
 	};
 
-	const variants = resolveVariantConfig(items, meta?.props ?? [], baseProps);
+	const variants = resolveVariantConfig(items, of.props, baseProps);
 	const render = useCallback(
 		(p: any) => createElement(Component, p),
 		[Component],

@@ -1,4 +1,3 @@
-import { TypebookProvider } from "@dennation/typebook/react";
 import {
 	createHashHistory,
 	createRouter,
@@ -13,9 +12,5 @@ const router = createRouter({
 });
 
 export default function App() {
-	return (
-		<TypebookProvider>
-			<RouterProvider router={router} />
-		</TypebookProvider>
-	);
+	return <RouterProvider router={router} />;
 }

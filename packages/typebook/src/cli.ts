@@ -1,42 +1,18 @@
-import {
-	DEFAULT_REGISTRY_FILE,
-	DEFAULT_SNIPPETS_FILE,
-	PACKAGE_NAME,
-} from "./constants.js";
-import { TypebookBuilder } from "./core/builder.js";
+import { PACKAGE_NAME } from "./constants.js";
 
-const args = process.argv.slice(2);
-const command = args[0];
-
-function getOpt(prefix: string): string | undefined {
-	const arg = args.find((a) => a.startsWith(prefix));
-	return arg ? arg.split("=")[1] : undefined;
-}
-
-if (command === "generate") {
-	const builder = new TypebookBuilder({
-		cwd: process.cwd(),
-		registryFile: getOpt("--registry-file="),
-		snippetsFile: getOpt("--snippets-file="),
-	});
-	try {
-		await builder.start();
-	} finally {
-		builder.stop();
-	}
-} else {
-	console.log(`
+/**
+ * Typebook no longer generates files. Component prop metadata and snippet sources
+ * are injected directly into each `registerComponent()` / `<Snippet>` call by the
+ * bundler plugin at build time, so there is nothing to pre-generate from a CLI.
+ */
+console.log(`
   @dennation/${PACKAGE_NAME}
 
-  Commands:
-    generate    Scan source files for registerComponent() calls and <Snippet> blocks,
-                then write the generated registry and snippet files
+  This tool runs as a bundler plugin — there is no separate codegen step.
+  Add the plugin for your bundler and prop metadata is injected at build time:
 
-  Options:
-    --registry-file=PATH      Output path for registry file (default: ${DEFAULT_REGISTRY_FILE})
-    --snippets-file=PATH      Output path for snippet map (default: ${DEFAULT_SNIPPETS_FILE})
+    import { typebook } from '@dennation/${PACKAGE_NAME}/vite'
+    // also: /rollup, /rolldown, /webpack, /rspack, /esbuild, /farm
 
-  Usage:
-    npx @dennation/${PACKAGE_NAME} generate
+    export default defineConfig({ plugins: [typebook()] })
 `);
-}

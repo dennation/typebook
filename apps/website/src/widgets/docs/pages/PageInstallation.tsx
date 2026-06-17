@@ -16,9 +16,10 @@ export function PageInstallation({ go }: { go: DocsGo }) {
 	return (
 		<>
 			<Lead>
-				Install the package, add the <C>typebook()</C> plugin to your bundler,
-				and wrap the app in <C>TypebookProvider</C>. The plugin generates the
-				component registry; the provider serves it to the story components.
+				Install the package and add the <C>typebook()</C> plugin to your bundler.
+				That's the whole setup — the plugin injects each component's prop
+				metadata directly into your <C>registerComponent()</C> calls at build
+				time, so there's no registry file and no provider to wire.
 			</Lead>
 
 			<Callout type="warning" title="Requirements">
@@ -72,26 +73,27 @@ export default defineConfig({
 });`}
 					/>
 				</Step>
-				<Step title="Provide the generated registry">
+				<Step title="Register a component">
 					<P>
-						The plugin writes <C>src/ui-registry.gen.ts</C> on every build. Pass
-						it to <C>TypebookProvider</C> at the root; <C>snippets</C> is
-						optional and only needed once you use <C>{"<Snippet>"}</C>.
+						Call <C>registerComponent</C> with your component, then render its
+						stories anywhere. The plugin injects the extracted prop metadata into
+						this call at build time — no registry, no provider, no imports to
+						manage.
 					</P>
 					<CodeBlock
-						file="src/App.tsx"
+						file="src/pages/button.tsx"
 						icon={<Icon.react size={14} />}
 						lang="tsx"
-						code={`import { TypebookProvider } from "@dennation/typebook/react";
-import { uiRegistry } from "./ui-registry.gen";
+						code={`import { allOf, registerComponent } from "@dennation/typebook";
+import { Story, Variants } from "@dennation/typebook/react";
+import { Button } from "../components/Button";
 
-export default function App() {
-  return (
-    <TypebookProvider registry={uiRegistry}>
-      {/* your router / pages */}
-    </TypebookProvider>
-  );
-}`}
+const button = registerComponent(Button, {
+  defaultProps: { children: "Click me" },
+});
+
+<Story of={button} />
+<Variants of={button} items={allOf(button, "size")} />`}
 					/>
 				</Step>
 				<Step title="Load the styles">
@@ -105,8 +107,9 @@ export default function App() {
 			</Steps>
 
 			<Callout type="info">
-				A registry can also be generated without a bundler:{" "}
-				<C>npx @dennation/typebook generate</C>.
+				Injection happens in the plugin's <C>transform</C> hook, so plain{" "}
+				<C>tsc</C> and tests still type-check without it — the handle's{" "}
+				<C>props</C> is simply empty until a build runs.
 			</Callout>
 		</>
 	);

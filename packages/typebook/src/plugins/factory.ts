@@ -1,69 +1,87 @@
 import type { UnpluginFactory } from "unplugin";
 import { createUnplugin } from "unplugin";
-import { PACKAGE_NAME } from "../constants.js";
-import { TypebookBuilder } from "../core/builder.js";
+import { LOG_PREFIX, PACKAGE_NAME } from "../constants.js";
+import { transformTypebook } from "../core/transform.js";
+import { TypeScriptClient } from "../core/ts-client.js";
 import type { TypebookConfig } from "../types.js";
 
+/** Source files the plugin will consider rewriting (registrations + snippets live in TS/JS). */
+const TRANSFORM_ID = /\.(tsx|ts|jsx|js|mts|cts|mjs|cjs)(\?.*)?$/;
+
 /**
- * Shared unplugin factory — no bundler is privileged. Works across every
- * bundler unplugin supports (Vite, Rollup, Rolldown, webpack, Rspack, esbuild,
- * Farm).
+ * Shared unplugin factory — no bundler is privileged. Works across every bundler
+ * unplugin supports (Vite, Rollup, Rolldown, webpack, Rspack, esbuild, Farm).
  *
- * A single {@link TypebookBuilder} scans each source file once and emits both
- * generated artifacts:
- * - `ui-registry.gen.ts` from `registerComponent()` calls
- * - `snippets.gen.ts` from `<Snippet name="…">` source
+ * Instead of generating files, the plugin rewrites each source module in its
+ * `transform` hook (see {@link transformTypebook}):
+ * - `registerComponent(Component, …)` calls get a `__props` literal injected;
+ * - `<Snippet>{fn}</Snippet>` elements get a `__snippetSource` prop injected.
  *
- * - `buildStart` (universal) performs a full scan + generation. It is idempotent
- *   and re-fires on each rebuild, so watch mode in any bundler keeps the generated
- *   artifacts fresh.
- * - The `vite` namespace is an optional optimization: Vite's dev server does not
- *   re-run `buildStart` per file change, so it wires the server watcher for
- *   incremental, debounced regeneration. Other bundlers fall back to the
- *   universal `buildStart` rebuild.
+ * A single warm {@link TypeScriptClient} (lazily started on the first transform)
+ * extracts prop metadata. In Vite's dev server the file watcher notifies the client
+ * of changes so the warm program stays fresh; re-transformation (and thus prop
+ * re-extraction) then happens through Vite's own module invalidation.
  */
 export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 	config = {},
 ) => {
-	let builder: TypebookBuilder | undefined;
+	let cwd = process.cwd();
+	let client: TypeScriptClient | null = null;
+	let starting: Promise<void> | null = null;
 
-	const ensureBuilder = (cwd: string): TypebookBuilder => {
-		if (!builder) builder = new TypebookBuilder({ cwd, ...config });
-		return builder;
+	const ensureClient = async (): Promise<TypeScriptClient | null> => {
+		if (!client && !starting) {
+			const candidate = new TypeScriptClient(cwd, config.inheritedProviders);
+			starting = candidate
+				.start()
+				.then(() => {
+					client = candidate;
+				})
+				.catch((err: Error) => {
+					console.warn(
+						LOG_PREFIX,
+						"TypeScript client unavailable; props won't be extracted",
+					);
+					console.warn(LOG_PREFIX, err.message);
+				});
+		}
+		if (starting) await starting;
+		return client;
 	};
 
 	return {
 		name: PACKAGE_NAME,
+		enforce: "pre",
 
-		async buildStart() {
-			await ensureBuilder(process.cwd()).start();
+		transformInclude(id) {
+			return !id.includes("/node_modules/") && TRANSFORM_ID.test(id);
+		},
+
+		async transform(code, id) {
+			const filePath = id.split("?")[0];
+			const tsClient = await ensureClient();
+			const out = await transformTypebook(code, filePath, tsClient);
+			return out === undefined ? undefined : { code: out, map: null };
 		},
 
 		buildEnd() {
-			builder?.stop();
+			client?.stop();
+			client = null;
+			starting = null;
 		},
 
 		vite: {
-			configResolved(resolvedConfig) {
-				ensureBuilder(resolvedConfig.root);
+			configResolved(resolved) {
+				cwd = resolved.root;
 			},
 
 			configureServer(server) {
-				const active = ensureBuilder(server.config.root);
-				const isGenFile = (path: string) =>
-					path === active.registryFilePath || path === active.snippetsFilePath;
-
-				server.watcher.on("change", (path) => {
-					if (!isGenFile(path)) active.scheduleFileChange(path);
-				});
-
-				server.watcher.on("add", (path) => {
-					if (!isGenFile(path)) active.scheduleFileChange(path);
-				});
-
-				server.watcher.on("unlink", (path) => {
-					if (!isGenFile(path)) active.onFileRemoved(path);
-				});
+				const notify = (path: string): void => {
+					void ensureClient().then((c) => c?.notifyChange([path]));
+				};
+				server.watcher.on("change", notify);
+				server.watcher.on("add", notify);
+				server.watcher.on("unlink", notify);
 			},
 		},
 	};

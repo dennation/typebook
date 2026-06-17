@@ -28,7 +28,7 @@ apps/
 
 ## packages/typebook
 
-React component documentation library. Scans source files for `register()` calls, extracts prop types via the TypeScript Compiler API, and generates `ui-registry.gen.ts`. Consumers embed `<Story>`, `<VariantsStory>`, `<MatrixStory>`, `<Playground>` on any page to render component variants.
+React component documentation library. In its bundler-plugin `transform` hook it scans each source module for `registerComponent()` calls and `<Snippet>` elements, extracts prop types via the TypeScript Compiler API, and **injects** the results back into the same module — `__props` into the `registerComponent()` config, `__snippetSource` onto the `<Snippet>` element. No files are generated; the handle returned by `registerComponent()` is self-contained. Consumers embed `<Story>`, `<Variants>`, `<Matrix>`, `<Playground>`, `<Snippet>` on any page to render component variants.
 
 ### Commands
 
@@ -48,24 +48,24 @@ packages/typebook/
   vite.config.ts
   src/
     index.ts                  — Public package exports (registerComponent, variants, types)
-    types.ts                  — Shared types (TypebookConfig, ComponentHandle, PropInfo, ComponentMeta, UIRegistry, SnippetMap, …)
-    registerComponent.ts      — registerComponent(id, Component, config?) → ComponentHandle
+    types.ts                  — Shared types (TypebookConfig, ComponentHandle, PropInfo, PropType, …)
+    registerComponent.ts      — registerComponent(Component, config?) → ComponentHandle (carries component, defaultProps, props)
     variants.ts               — allOf(of, prop), values(of, prop, vs), generate(of, prop, fn, n)
     resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into arrays
-    constants.ts              — PACKAGE_NAME, DEFAULT_REGISTRY_FILE, DEFAULT_SNIPPETS_FILE, …
-    cli.ts                    — CLI entry: `npx @dennation/typebook generate`
-    core/                     — Single-pass build pipeline feeding two generators
-      builder.ts              — TypebookBuilder: reads + oxc-parses each file ONCE, then runs both
-                                scanners on the one AST → type extraction → writes both .gen files + Vite watcher
-      registry-scanner.ts     — oxc AST: scanRegistrations(program) finds registerComponent('id', Component) calls
-      registry-generator.ts   — generateRegistryFile(): builds ui-registry.gen.ts content
-      snippet-scanner.ts      — oxc AST: scanSnippets(program, src) finds <Snippet name="…">{fn}</Snippet>
-                                and slices the inline function's body (non-inline child → null → build error)
-      snippet-generator.ts    — generateSnippetsFile(): builds snippets.gen.ts content
-      ts-client.ts            — TypeScript Compiler API: extracts PropInfo[], defaultValues, JSDoc descriptions
+    constants.ts              — PACKAGE_NAME, NPM_PACKAGE_NAME, LOG_PREFIX, …
+    cli.ts                    — CLI entry: prints that codegen runs as a bundler plugin (no generate step)
+    core/                     — Single-pass per-module transform pipeline
+      transform.ts            — transformTypebook(code, filePath, tsClient): parses once, runs both scanners,
+                                injects __props / __snippetSource back into the source text (no file emitted).
+                                SnippetNotInlineError lives here.
+      registry-scanner.ts     — oxc AST: scanRegistrations(program) finds registerComponent(Component, …) calls
+                                and the position to inject __props (into config object, or as a new config arg)
+      snippet-scanner.ts      — oxc AST: scanSnippets(program, src) finds every <Snippet>{fn}</Snippet>, slices the
+                                inline function's body (non-inline child → null → build error) + the inject position
+      ts-client.ts            — TypeScript Compiler API: extracts PropInfo[], defaultValues, JSDoc descriptions.
+                                Extracts against the transform's `code` via an in-memory snapshot override so oxc
+                                and TS offsets stay in lockstep even when an earlier plugin rewrote the module.
       ast.ts                  — Shared oxc-parser helpers (parseProgram → Program, walk) used by both scanners
-      source-files.ts         — getSourceFilesFromTsConfig(): the files the builder scans
-      io.ts                   — File I/O helpers (writeIfChanged)
     plugins/                  — unplugin-based bundler integration
       factory.ts              — unpluginFactory + createUnplugin (shared across all bundlers)
       vite.ts                 — typebook() Vite plugin
@@ -77,8 +77,7 @@ packages/typebook/
       farm.ts                 — typebook() Farm plugin
     react/                          — Runtime, organized by Feature-Sliced Design
       index.ts                      — Public exports
-      app/                          — Root provider composing the entities below
-        ui/TypebookProvider.tsx     — <TypebookProvider registry={…} snippets={…}>
+      (no root provider — handles and snippets carry their own data, injected at build time)
       widgets/                      — Large public blocks
         Layout/                     — <Layout sidebar={…}>{children}</Layout>
         Story/                      — <Story of={reg} props={…} /> — single variant
@@ -90,8 +89,8 @@ packages/typebook/
           ui/PropsTable.tsx         — Search + filter + rows
           ui/PropRow.tsx            — Single prop row
           lib/formatPropType.ts     — Type formatter / controllability check
-        Snippet/                    — <Snippet name="…">{children}</Snippet> — live render + "show source" toggle
-          ui/Snippet.tsx            — Renders children; toggle reveals source read from context (no fetch)
+        Snippet/                    — <Snippet>{children}</Snippet> — live render + "show source" toggle
+          ui/Snippet.tsx            — Renders children; toggle reveals the injected __snippetSource prop (no fetch, no context)
         docs-sidebar/               — <DocsSidebar sections={…} current onNavigate/> — collapsible docs nav + mobile drawer
         docs-toc/                   — <DocsToc/> "On this page" + useDocHeadings() (collect + scrollspy + jump)
         breadcrumbs/                — <Breadcrumbs items={[…]}/> — chevron trail above a docs title
@@ -104,12 +103,8 @@ packages/typebook/
         search-palette/             — <SearchPalette index={…}/> — ⌘K palette + useSearchHotkeys() + SearchEntry
         copy-command/               — <CopyCommand cmd="npx …"/> — copy-able install-command pill
       entities/                     — Domain entities
-        component-meta/             — Registry lookup
-          model/context.ts          — Registry React Context
-          model/useComponentMeta.ts — (id) → ComponentMeta | undefined
-        snippets/                   — Snippet source lookup
-          model/context.ts          — Snippet React Context + useSnippet(name)
         theme/                      — Light/dark theme with localStorage + system preference
+        (no component-meta / snippets entities — handles and snippets carry their own data, injected at build time)
       shared/                       — Reusable primitives
         ui/Preview/                 — <Preview>, <PreviewFrame>, <Isolate>, <ErrorBoundary>
         ui/md/                      — Markdown/MDX content set: Callout, MDTable, PropsTable, Tabs,
@@ -122,15 +117,15 @@ packages/typebook/
 
 ### Build entry points
 
-- **`index`** — `register`, `allOf`, `values`, `generate`, types.
-- **`react/index`** — `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`, `useComponentMeta` + the docs component kit (md set, `CodeBlock`, `SearchPalette`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`).
+- **`index`** — `registerComponent`, `allOf`, `values`, `generate`, types.
+- **`react/index`** — `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary` + the docs component kit (md set, `CodeBlock`, `SearchPalette`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`).
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
-- **`cli/index`** — `npx @dennation/typebook generate`.
+- **`cli/index`** — `npx @dennation/typebook` (prints plugin usage; there is no codegen step).
 
 ### Package exports
 
-- `@dennation/typebook` — `register`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `UIRegistry`, `SnippetMap`, `ComponentMeta`, `Registration`, `RegisterConfig`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `CoveredOf`, …)
-- `@dennation/typebook/react` — **storybook runtime:** `TypebookProvider`, `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`, `useComponentMeta`. **docs kit** (for consumer documentation sites): md set (`Callout`, `MDTable`, `PropsTable`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines; Shiki with a css-variables theme bound to the design tokens — any language, theme-aware colors, lazy-loaded grammars), `SearchPalette`/`useSearchHotkeys`/`SearchEntry`, `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `slugify`/`childText`. **universal primitives:** `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
+- `@dennation/typebook` — `registerComponent`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `ComponentHandle`, `RegisterConfigPick`, `RegisterConfigOmit`, `RegisterConfigBase`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `DefaultedOf`, `VariantConfig`, …)
+- `@dennation/typebook/react` — **storybook runtime:** `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`. **docs kit** (for consumer documentation sites): md set (`Callout`, `MDTable`, `PropsTable`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines; Shiki with a css-variables theme bound to the design tokens — any language, theme-aware colors, lazy-loaded grammars), `SearchPalette`/`useSearchHotkeys`/`SearchEntry`, `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `slugify`/`childText`. **universal primitives:** `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
 > **What lives where.** The package exports only what is **universal** — the storybook runtime, the docs component kit (md set, CodeBlock, search palette, sidebar/toc/breadcrumbs/prev-next, CopyCommand), generic primitives (`Icon`, `Button`, `ThemeToggle`, `cx`) and the design system. Anything **specific to one site** (marketing landing sections, demo "gifs", section heading, scroll-reveal hook, layout constants, page content and nav data) lives in that app — see `apps/website`, not the package.
@@ -139,14 +134,14 @@ packages/typebook/
 
 > Navigation menus live in a **separate package**, `@dennation/menu` — see its section below. Typebook no longer exports `defineMenu`/`Menu`/`menuFromRouteTree`.
 
-### register() API
+### registerComponent() API
 
 ```ts
-import { allOf, register } from '@dennation/typebook'
+import { allOf, registerComponent } from '@dennation/typebook'
 import { Matrix, Story, Variants } from '@dennation/typebook/react'
 import { Button } from '../components/Button'
 
-const button = register('button', Button, {
+const button = registerComponent(Button, {
   defaultProps: { children: 'Click me' },
 })
 
@@ -155,17 +150,17 @@ const button = register('button', Button, {
 <Matrix of={button} x={allOf(button, 'color')} y={[allOf(button, 'variant')]} />
 ```
 
-- First argument is a **unique string id** — the key in the generated `uiRegistry` object.
-- `register()` calls can live anywhere in `./src/**/*.{ts,tsx}` — no special filename required.
-- Duplicate ids throw `DuplicateRegistrationError` at build time.
-- `<Story>` / `<Variants>` / `<Matrix>` are **type-safe**: required props not covered by `defaultProps` must be passed via `props={…}` at the call site (`MissingProps` phantom type).
+- **No id.** `registerComponent(Component, config?)` returns a self-contained `ComponentHandle` (`component`, `defaultProps`, `props`). `<Story>`/`<Variants>`/`<Matrix>`/`<Playground>` read everything from the handle — there is no registry, no context, no lookup by key.
+- `registerComponent()` calls can live anywhere in `./src/**/*.{ts,tsx}` — no special filename required. They're **local**: import the handle to use it elsewhere; uniqueness isn't required, so there's no `DuplicateRegistrationError`.
+- **`props` is injected at build time.** As authored, the handle's `props` is `[]`; the plugin's `transform` hook extracts `PropInfo[]` via the TS Compiler API and injects it as `__props` into the `registerComponent()` config (or as a new config argument when none was passed). Without the plugin (e.g. plain `tsc`/tests) the handle still type-checks — `props` is just empty, so `<Variants>`/`<Matrix>`/`<Playground>` degrade gracefully.
+- `<Story>` / `<Variants>` / `<Matrix>` are **type-safe**: required props not covered by `defaultProps` must be passed via `props={…}` at the call site (`MissingProps` phantom type), inferred from `registerComponent`'s generics (not from the injected data).
 
 ### Snippet API
 
 ```tsx
 import { Snippet } from '@dennation/typebook/react'
 
-// inline arrow (stateless)
+// inline arrow (stateless) — `name` is an optional label for the shown source
 <Snippet name="button-group">
   {() => (
     <div className="flex gap-2">
@@ -176,7 +171,7 @@ import { Snippet } from '@dennation/typebook/react'
 </Snippet>
 
 // inline named function (hooks) — capitalized so rules-of-hooks recognises a component
-<Snippet name="counter">
+<Snippet>
   {function Counter() {
     const [n, setN] = useState(0)
     return <Button onClick={() => setN(n + 1)}>Count: {n}</Button>
@@ -185,41 +180,38 @@ import { Snippet } from '@dennation/typebook/react'
 ```
 
 - **The child is an inline function component, not raw JSX** — `children: () => ReactNode`. At runtime `<Snippet>` renders it as `<Demo/>` (so hooks work); the shown source is the **function body**.
-- At build time the plugin parses each source file with **oxc-parser** and finds every `<Snippet>` element (imported from `@dennation/typebook/react`), then slices the inline function's body 1:1 from the file (block body → between the braces; expression body → the expression, parens unwrapped), dedents it, and emits all into a single generated map `snippets.gen.ts` (`name → code`, `as const satisfies SnippetMap`). The child must be an **inline** function literal — a bare reference (`{Component}`) or raw JSX can't be sliced from the call site and raises a build error (`SnippetNotInlineError`). This keeps extraction pure-oxc and same-file: a snippet only changes when its own file does, so no cross-file resolution or watcher dependency graph is needed.
-- `name` is a **required, author-chosen string** (not `key` — reserved by React; not `codeId` — by request). It must be unique across the project. Duplicate names throw `DuplicateSnippetError`; only a *static* string `name` is extractable.
-- The consumer imports `{ snippets }` from `./snippets.gen` and passes it to `TypebookProvider`. At runtime the "show source" toggle reads the source **synchronously from React context** (`useSnippet(name)`) — no runtime fetch, no URL/base-path concerns — and renders it through `<CodeBlock>`.
-- Extraction runs in the universal unplugin `buildStart`, so it works in every bundler; the Vite dev server additionally watches for incremental, debounced re-extraction. Output file is configurable via `snippetsFile` in `TypebookConfig` (default `./src/snippets.gen.ts`); it's only created once a project actually uses `<Snippet>`.
+- At build time the plugin's `transform` hook parses each module with **oxc-parser** and finds every `<Snippet>` element (imported from `@dennation/typebook/react`), slices the inline function's body 1:1 from the source (block body → between the braces; expression body → the expression, parens unwrapped), dedents it, and **injects it as a `__snippetSource` prop** on that same element. The child must be an **inline** function literal — a bare reference (`{Component}`) or raw JSX can't be sliced and raises a build error (`SnippetNotInlineError`, thrown from `core/transform.ts`).
+- `name` is **optional** — a display label shown as the filename above the revealed source. It is no longer an identity key (there's no map), so it needn't be unique and there's no `DuplicateSnippetError`.
+- At runtime the "show source" toggle reads the **injected `__snippetSource` prop** (no context, no `snippets.gen.ts`, no runtime fetch, no base-path concerns) and renders it through `<CodeBlock>`.
+- Injection runs in the universal unplugin `transform` hook, so it works in every bundler. A snippet re-injects whenever its own module is re-transformed.
 
 ### Data flow
 
 ```
-vite.config.ts: typebook()
-  └── TypebookBuilder  (reads + oxc-parses each file once, feeds both scanners)
-        ├── scanRegistrations: finds registerComponent('id', Component, …)
-        │     └── extracts PropInfo[] via TypeScript Compiler API (defaultValues + JSDoc)
-        │           └── writes ui-registry.gen.ts
-        └── scanSnippets: finds <Snippet name="…"> + slices source
-              └── writes snippets.gen.ts
+vite.config.ts: typebook()  → transform hook, per module (enforce: 'pre')
+  └── transformTypebook(code, filePath, tsClient)   (oxc-parse once, run both scanners)
+        ├── scanRegistrations: finds registerComponent(Component, …) + inject position
+        │     └── ts-client.getRegisterProps(code) → PropInfo[] (defaultValues + JSDoc)
+        │           └── injects `__props: [...]` into the registerComponent() config
+        └── scanSnippets: finds <Snippet>{fn}</Snippet> + slices source
+              └── injects `__snippetSource={"…"}` onto the element
 
 App.tsx:
-  import { uiRegistry } from './ui-registry.gen'
-  <TypebookProvider registry={uiRegistry}>     ← puts uiRegistry into React Context
-    <RouterProvider router={router} />         ← TanStack Router (consumer's responsibility)
-  </TypebookProvider>
+  <RouterProvider router={router} />           ← TanStack Router (consumer's responsibility)
         ↓
   __root.tsx → Layout → <Outlet /> → page component
         ↓
-  <Story of={button} />
-    └── useComponentMeta(button.id) → looks up uiRegistry[button.id] → ComponentMeta
+  const button = registerComponent(Button, { /* __props injected here */ })
+  <Story of={button} />        ← reads of.component / of.defaultProps
+  <Variants of={button} …/>    ← reads of.props (the injected PropInfo[])
 ```
 
 ### Key design decisions
 
-- **Router is consumer's responsibility** — `TypebookProvider` is a pure context provider. Routing, history strategy, and route tree generation belong in the consumer's `vite.config.ts` and `App.tsx`. This removes the TanStack Router hard dependency from the library.
-- **String id as registry key** — `register('button', Button)` gives a stable, human-readable key. `uiRegistry` is a plain `Record<string, ComponentMeta>` (`as const satisfies UIRegistry`), so `uiRegistry["button"]` gives the precise inferred type.
-- **Generated file is physical** — `ui-registry.gen.ts` is a real file on disk: `tsc --noEmit` needs it, PR diffs show what changed, clone-and-build works without Vite.
-- **Type extraction via TS Compiler API** — `ts-client.ts` resolves prop types as strings via `ts.TypeChecker`, extracts default values from destructuring patterns, and reads JSDoc via `symbol.getDocumentationComment()`.
-- **`as const satisfies UIRegistry`** — preserves literal types on all registry values so lookup by key returns a precise type, not just `ComponentMeta`.
+- **Injection over a generated file** — the plugin rewrites each module in its `transform` hook (injecting `__props` / `__snippetSource`) instead of emitting `ui-registry.gen.ts` / `snippets.gen.ts`. Data lives at the call site, so there's no central registry, no string-id indirection, no uniqueness errors, and no dev-server watcher graph — re-transformation is Vite's own module invalidation. Trade-off vs. a physical file: no on-disk artifact and no diff of extracted props (acceptable here — the registry was only ever consumed locally, not as a global catalog).
+- **Self-contained handle** — `registerComponent(Component, config?)` returns `{ component, defaultProps, props }`. Type-safety of `<Story of={…}>` comes from `registerComponent`'s generics, not the injected data, so plain `tsc` works without the plugin.
+- **No runtime provider** — handles and snippets carry their own data (injected at build time), so there is nothing to provide via context; the package exposes no `TypebookProvider`. Routing, history strategy, and route tree generation are the consumer's (`vite.config.ts` + `App.tsx`), which keeps any TanStack Router dependency out of the library.
+- **Type extraction via TS Compiler API** — `ts-client.ts` resolves prop types as strings via `ts.TypeChecker`, extracts default values from destructuring patterns, and reads JSDoc via `symbol.getDocumentationComment()`. It extracts against the transform's `code` (via an in-memory snapshot override) so oxc and TS character offsets agree even when an earlier plugin already rewrote the module.
 
 ---
 
@@ -316,14 +308,13 @@ examples/tanstack-router/
   vite.config.ts          — tanstackRouter() + typebook() + react()
   src/
     main.tsx
-    App.tsx               — TypebookProvider + RouterProvider
-    ui-registry.gen.ts    — Auto-generated by typebook()
+    App.tsx               — RouterProvider
     route-tree.gen.ts     — Auto-generated by @tanstack/router-plugin
     pages/
       __root.tsx          — TypebookLayout + sidebar nav + <Outlet />
       index.tsx
       about.tsx
-      button.tsx          — register('button', Button, …) + Story/VariantsStory/MatrixStory
+      button.tsx          — registerComponent(Button, …) + Story/Variants/Matrix/Snippet
     components/
       Button.tsx
 ```
@@ -400,11 +391,13 @@ apps/website/
 
 The plugin is built on [unplugin](https://unplugin.unjs.io), so the **same**
 `typebook(config?)` factory is published per bundler — no bundler is privileged.
-The registry is generated during the universal `buildStart` hook (idempotent,
-re-runs on each rebuild). The Vite entry additionally wires the dev-server
-watcher for incremental, debounced regeneration (Vite's dev server doesn't
-re-run `buildStart` per change); every other bundler relies on the `buildStart`
-rebuild.
+Work happens in the universal `transform` hook (`enforce: 'pre'`): each module
+matching `*.{ts,tsx,js,jsx,…}` is scanned and rewritten in place, injecting
+`__props` / `__snippetSource`. A single warm `TypeScriptClient` (lazily started on
+the first transform) does the type extraction. The Vite entry additionally wires
+the dev-server watcher to `notifyChange` the client so its warm program stays
+fresh; a module re-injects through Vite's normal module invalidation. Other
+bundlers re-run `transform` on each rebuild.
 
 ```ts
 // vite      → @dennation/typebook/vite
@@ -447,7 +440,7 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     typebook({
-      // registryFile: './src/ui-registry.gen.ts', // default
+      // inheritedProviders: ['@heroui/theme'], // optional
     }),
     react(),
   ],
@@ -464,24 +457,17 @@ plugins: [tanstackRouter(…), mdx(), typebook(), react()]
 ### src/App.tsx
 
 ```tsx
-import { TypebookProvider } from '@dennation/typebook/react'
 import { createHashHistory, createRouter, RouterProvider } from '@tanstack/react-router'
 import { routeTree } from './route-tree.gen'
-import { snippets } from './snippets.gen'
-import { uiRegistry } from './ui-registry.gen'
 
 const router = createRouter({ routeTree, history: createHashHistory(), defaultPreload: 'intent' })
 
 export default function App() {
-  return (
-    <TypebookProvider registry={uiRegistry} snippets={snippets}>
-      <RouterProvider router={router} />
-    </TypebookProvider>
-  )
+  return <RouterProvider router={router} />
 }
 ```
 
-> `snippets` is optional — omit it (and the import) if the project doesn't use `<Snippet>`.
+> No `TypebookProvider`, no `ui-registry.gen.ts` / `snippets.gen.ts` imports — prop metadata and snippet sources are injected into the call sites at build time, so `App.tsx` is just the router.
 
 ### src/pages/__root.tsx
 
@@ -503,12 +489,12 @@ function RootComponent() {
 ### src/pages/button.tsx
 
 ```tsx
-import { allOf, register } from '@dennation/typebook'
-import { MatrixStory, Story, VariantsStory } from '@dennation/typebook/react'
+import { allOf, registerComponent } from '@dennation/typebook'
+import { Matrix, Story, Variants } from '@dennation/typebook/react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '../components/Button'
 
-const button = register('button', Button, { defaultProps: { children: 'Click me' } })
+const button = registerComponent(Button, { defaultProps: { children: 'Click me' } })
 
 export const Route = createFileRoute('/button')({ component: ButtonPage })
 
@@ -516,8 +502,8 @@ function ButtonPage() {
   return (
     <>
       <Story of={button} />
-      <VariantsStory of={button} items={allOf(button, 'size')} />
-      <MatrixStory of={button} x={allOf(button, 'color')} y={[allOf(button, 'variant')]} />
+      <Variants of={button} items={allOf(button, 'size')} />
+      <Matrix of={button} x={allOf(button, 'color')} y={[allOf(button, 'variant')]} />
     </>
   )
 }

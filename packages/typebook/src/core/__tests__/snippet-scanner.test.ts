@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { parseProgram } from "../ast.js";
 import { mayContainSnippet, scanSnippets } from "../snippet-scanner.js";
 
-/** Parse then scan, mirroring how the builder feeds a pre-parsed program + source. */
+/** Parse then scan, mirroring how the plugin feeds a pre-parsed program + source. */
 async function scan(filename: string, content: string) {
 	return scanSnippets(await parseProgram(filename, content), content);
 }
@@ -38,6 +38,18 @@ describe("scanSnippets — inline function child", () => {
 		expect(result).toHaveLength(1);
 		expect(result[0].name).toBe("hello");
 		expect(result[0].code).toBe("<Button>Click</Button>");
+	});
+
+	test("records injectAt just after the opening tag name", async () => {
+		const content = `
+			import { Snippet } from '@dennation/typebook/react'
+			const x = <Snippet name="x">{() => <i/>}</Snippet>
+		`;
+		const [block] = await scan("file.tsx", content);
+
+		expect(typeof block.injectAt).toBe("number");
+		// the 7 characters ending at injectAt spell "Snippet"
+		expect(content.slice(block.injectAt - 7, block.injectAt)).toBe("Snippet");
 	});
 
 	test("parenthesised multi-line expression body keeps relative indentation", async () => {
@@ -163,7 +175,7 @@ describe("scanSnippets — discovery rules", () => {
 		expect(result.map((b) => b.name).sort()).toEqual(["one", "two"]);
 	});
 
-	test("Snippet without a name is dropped", async () => {
+	test("Snippet without a name is still captured (name now optional)", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
@@ -172,10 +184,12 @@ describe("scanSnippets — discovery rules", () => {
 			`,
 		);
 
-		expect(result).toEqual([]);
+		expect(result).toHaveLength(1);
+		expect(result[0].name).toBeNull();
+		expect(result[0].code).toBe("<i/>");
 	});
 
-	test("dynamic (non-static) name is dropped", async () => {
+	test("dynamic (non-static) name is captured with name null", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
@@ -185,7 +199,8 @@ describe("scanSnippets — discovery rules", () => {
 			`,
 		);
 
-		expect(result).toEqual([]);
+		expect(result).toHaveLength(1);
+		expect(result[0].name).toBeNull();
 	});
 
 	test("Snippet imported from another package is ignored", async () => {

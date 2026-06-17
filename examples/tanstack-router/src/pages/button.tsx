@@ -3,7 +3,7 @@ import { Matrix, Snippet, Story, Variants } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "../components/Button";
 
-const button = registerComponent("button", Button, {
+const button = registerComponent(Button, {
 	// defaultProps: { children: 'Click me' },
 });
 

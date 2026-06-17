@@ -1,23 +1,25 @@
-import type { Argument, CallExpression, ImportDeclaration } from "oxc-parser";
+import type { CallExpression, ImportDeclaration } from "oxc-parser";
 import { NPM_PACKAGE_NAME } from "../constants.js";
 import { moduleExportName, type Program, walk } from "./ast.js";
 
-/** Resolved component import: the component argument of `registerComponent(id, Component, ...)` */
-export interface ComponentImport {
-	/** Original exported name in the source module (e.g. `Button`) */
-	name: string;
-	/** Module specifier the component was imported from (e.g. `./components/Button`) */
-	path: string;
-}
+/**
+ * Where to inject the generated `__props` into a `registerComponent(...)` call:
+ * - `object`  — config is an object literal; insert right after its `{`.
+ * - `newArg`  — only the component was passed; insert `, { __props: … }` after it.
+ * - `unsupported` — a config was passed but isn't an object literal (e.g. a variable);
+ *   props can't be injected, so the handle keeps its empty `props` (with a build warning).
+ */
+export type InjectTarget =
+	| { kind: "object"; at: number }
+	| { kind: "newArg"; at: number }
+	| { kind: "unsupported" };
 
-/** A single `registerComponent(id, Component, ...)` call found in a file */
+/** A single `registerComponent(Component, config?)` call found in a file. */
 export interface RegisterCall {
-	/** String literal id (first argument) */
-	id: string;
-	/** Resolved component import for the second argument */
-	componentImport: ComponentImport;
-	/** Character offset of the CallExpression in source — used by ts-client to find this exact call */
+	/** Character offset of the CallExpression start — used by ts-client to find this exact call. */
 	callStart: number;
+	/** Where the generated `__props` literal should be injected. */
+	inject: InjectTarget;
 }
 
 const REGISTER_FN_NAME = "registerComponent";
@@ -30,41 +32,29 @@ export function mayContainRegistration(content: string): boolean {
 }
 
 /**
- * Extract every `registerComponent(id, Component, ...)` call (imported from
- * `@dennation/typebook`) from an already-parsed program. Imports are resolved so each
- * call carries the originating module path for its component argument.
- *
- * Only calls whose first argument is a string literal AND whose second argument is an
- * imported Identifier are kept — locally-declared components can't be referenced from
- * the generated registry.
+ * Extract every `registerComponent(Component, config?)` call (imported from
+ * `@dennation/typebook`) from an already-parsed program, along with the position at
+ * which the build-time plugin should inject the extracted `__props`. Only the call
+ * identity matters — the component reference and any config are resolved later by the
+ * TypeScript client; the component no longer needs to be an imported identifier.
  */
 export function scanRegistrations(program: Program): RegisterCall[] {
-	const componentImports = new Map<string, ComponentImport>();
 	const registerLocalNames = new Set<string>();
 
 	for (const node of program.body) {
 		if (node.type !== "ImportDeclaration") continue;
-		if (node.source.value === NPM_PACKAGE_NAME) {
-			collectRegisterNames(node, registerLocalNames);
-		} else {
-			collectComponentImports(node, node.source.value, componentImports);
-		}
+		if (node.source.value !== NPM_PACKAGE_NAME) continue;
+		collectRegisterNames(node, registerLocalNames);
 	}
+
+	if (registerLocalNames.size === 0) return [];
 
 	const registers: RegisterCall[] = [];
 	walk(program, (node) => {
 		if (node.type !== "CallExpression") return;
-		const match = matchRegisterCall(node, registerLocalNames);
-		if (match === null) return;
-
-		const componentImport = componentImports.get(match.componentLocal);
-		if (!componentImport) return;
-
-		registers.push({
-			id: match.id,
-			componentImport,
-			callStart: node.start,
-		});
+		const inject = matchRegisterCall(node, registerLocalNames);
+		if (inject === null) return;
+		registers.push({ callStart: node.start, inject });
 	});
 
 	return registers;
@@ -84,54 +74,28 @@ function collectRegisterNames(decl: ImportDeclaration, out: Set<string>): void {
 	}
 }
 
-function collectComponentImports(
-	decl: ImportDeclaration,
-	source: string,
-	out: Map<string, ComponentImport>,
-): void {
-	for (const spec of decl.specifiers) {
-		if (spec.type === "ImportDefaultSpecifier") {
-			out.set(spec.local.name, { name: spec.local.name, path: source });
-		} else if (spec.type === "ImportSpecifier") {
-			out.set(spec.local.name, {
-				name: moduleExportName(spec.imported),
-				path: source,
-			});
-		}
-	}
-}
-
+/**
+ * If `node` is a `registerComponent(Component, config?)` call, return where to inject
+ * `__props`; otherwise null. The call must have at least the component argument.
+ */
 function matchRegisterCall(
 	node: CallExpression,
 	registerLocalNames: Set<string>,
-): { id: string; componentLocal: string } | null {
+): InjectTarget | null {
 	if (node.callee.type !== "Identifier") return null;
 	if (!registerLocalNames.has(node.callee.name)) return null;
 
-	const id = stringLiteralValue(node.arguments[0]);
-	if (id === null) return null;
+	const component = node.arguments[0];
+	if (!component) return null;
 
-	const componentLocal = identifierName(node.arguments[1]);
-	if (componentLocal === null) return null;
-
-	return { id, componentLocal };
-}
-
-function stringLiteralValue(arg: Argument | undefined): string | null {
-	if (arg?.type === "Literal" && typeof arg.value === "string")
-		return arg.value;
-	return null;
-}
-
-/**
- * Unwrap `TSInstantiationExpression` (e.g. `Select<T>`) down to the underlying
- * Identifier. Returns null for anything else.
- */
-function identifierName(arg: Argument | undefined): string | null {
-	if (!arg) return null;
-	if (arg.type === "Identifier") return arg.name;
-	if (arg.type === "TSInstantiationExpression") {
-		return identifierName(arg.expression);
+	const config = node.arguments[1];
+	if (!config) {
+		// `registerComponent(Component)` → add a config object after the component arg.
+		return { kind: "newArg", at: component.end };
 	}
-	return null;
+	if (config.type === "ObjectExpression") {
+		// `registerComponent(Component, { … })` → insert just inside the `{`.
+		return { kind: "object", at: config.start + 1 };
+	}
+	return { kind: "unsupported" };
 }

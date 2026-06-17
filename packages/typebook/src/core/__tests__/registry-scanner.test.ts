@@ -5,7 +5,7 @@ import {
 	scanRegistrations,
 } from "../registry-scanner.js";
 
-/** Parse then scan, mirroring how the builder feeds a pre-parsed program. */
+/** Parse then scan, mirroring how the plugin feeds a pre-parsed program. */
 async function scan(filename: string, content: string) {
 	return scanRegistrations(await parseProgram(filename, content));
 }
@@ -22,23 +22,18 @@ describe("mayContainRegistration", () => {
 	});
 });
 
-describe("scanRegistrations — register() discovery", () => {
+describe("scanRegistrations — call discovery", () => {
 	test("local (non-exported) register is captured", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from '@heroui/button'
-			const button = registerComponent('button', Button)
+			const button = registerComponent(Button)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
-		expect(result[0].id).toBe("button");
-		expect(result[0].componentImport).toEqual({
-			name: "Button",
-			path: "@heroui/button",
-		});
 	});
 
 	test("exported register is also captured", async () => {
@@ -47,16 +42,11 @@ describe("scanRegistrations — register() discovery", () => {
 			`
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from './Button'
-			export const button = registerComponent('button', Button)
+			export const button = registerComponent(Button)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
-		expect(result[0].id).toBe("button");
-		expect(result[0].componentImport).toEqual({
-			name: "Button",
-			path: "./Button",
-		});
 	});
 
 	test("default-exported register is captured", async () => {
@@ -65,12 +55,11 @@ describe("scanRegistrations — register() discovery", () => {
 			`
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from './Button'
-			export default registerComponent('button', Button)
+			export default registerComponent(Button)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
-		expect(result[0].componentImport.name).toBe("Button");
 	});
 
 	test("multiple registers in one file", async () => {
@@ -80,84 +69,30 @@ describe("scanRegistrations — register() discovery", () => {
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from './Button'
 			import { Input } from './Input'
-			const a = registerComponent('button', Button)
-			const b = registerComponent('input', Input)
+			const a = registerComponent(Button)
+			const b = registerComponent(Input)
 		`,
 		);
 
 		expect(result).toHaveLength(2);
-		const names = result.map((d) => d.componentImport.name).sort();
-		expect(names).toEqual(["Button", "Input"]);
 	});
 
-	test("default-imported component is resolved", async () => {
-		const result = await scan(
-			"file.tsx",
-			`
-			import { registerComponent } from '@dennation/typebook'
-			import MyButton from './MyButton'
-			const button = registerComponent('my-button', MyButton)
-		`,
-		);
-
-		expect(result[0].componentImport).toEqual({
-			name: "MyButton",
-			path: "./MyButton",
-		});
-	});
-
-	test("renamed import resolves to original name", async () => {
-		const result = await scan(
-			"file.tsx",
-			`
-			import { registerComponent } from '@dennation/typebook'
-			import { Button as Btn } from './components'
-			const comp = registerComponent('button', Btn)
-		`,
-		);
-
-		expect(result[0].componentImport).toEqual({
-			name: "Button",
-			path: "./components",
-		});
-	});
-
-	test("file without register() returns empty", async () => {
-		const result = await scan(
-			"file.tsx",
-			`
-			export const foo = 1
-		`,
-		);
-
-		expect(result).toEqual([]);
-	});
-
-	test("locally-declared component → register is dropped (cannot import)", async () => {
+	test("locally-declared component is now captured (no import requirement)", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
 			import { registerComponent } from '@dennation/typebook'
 			const MyComp = () => null
-			const comp = registerComponent('my-comp', MyComp)
+			const comp = registerComponent(MyComp)
 		`,
 		);
 
-		expect(result).toEqual([]);
+		expect(result).toHaveLength(1);
 	});
 
-	test("records callStart for each register()", async () => {
-		const result = await scan(
-			"file.tsx",
-			`
-			import { registerComponent } from '@dennation/typebook'
-			import { Button } from './Button'
-			const button = registerComponent('button', Button)
-		`,
-		);
-
-		expect(typeof result[0].callStart).toBe("number");
-		expect(result[0].callStart).toBeGreaterThan(0);
+	test("file without register() returns empty", async () => {
+		const result = await scan("file.tsx", `export const foo = 1`);
+		expect(result).toEqual([]);
 	});
 
 	test("register() nested inside a function body is still found", async () => {
@@ -167,27 +102,13 @@ describe("scanRegistrations — register() discovery", () => {
 			import { registerComponent } from '@dennation/typebook'
 			import { Button } from './Button'
 			function Page() {
-				const b = registerComponent('button', Button)
+				const b = registerComponent(Button)
 				return null
 			}
 		`,
 		);
 
 		expect(result).toHaveLength(1);
-		expect(result[0].componentImport.name).toBe("Button");
-	});
-
-	test("non-string first arg → register is dropped", async () => {
-		const result = await scan(
-			"file.tsx",
-			`
-			import { registerComponent } from '@dennation/typebook'
-			import { Button } from './Button'
-			const button = registerComponent(Button)
-		`,
-		);
-
-		expect(result).toEqual([]);
 	});
 
 	test("empty file → empty registers", async () => {
@@ -201,12 +122,11 @@ describe("scanRegistrations — register() discovery", () => {
 			`
 			import { registerComponent as reg } from '@dennation/typebook'
 			import { Button } from './Button'
-			const button = reg('button', Button)
+			const button = reg(Button)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
-		expect(result[0].id).toBe("button");
 	});
 
 	test("registerComponent from a different package is ignored", async () => {
@@ -215,10 +135,70 @@ describe("scanRegistrations — register() discovery", () => {
 			`
 			import { registerComponent } from 'some-other-lib'
 			import { Button } from './Button'
-			const button = registerComponent('button', Button)
+			const button = registerComponent(Button)
 		`,
 		);
 
 		expect(result).toEqual([]);
+	});
+});
+
+describe("scanRegistrations — injection target", () => {
+	test("records callStart for each register()", async () => {
+		const result = await scan(
+			"file.tsx",
+			`
+			import { registerComponent } from '@dennation/typebook'
+			import { Button } from './Button'
+			const button = registerComponent(Button)
+		`,
+		);
+
+		expect(typeof result[0].callStart).toBe("number");
+		expect(result[0].callStart).toBeGreaterThan(0);
+	});
+
+	test("no config → newArg insertion after the component argument", async () => {
+		const content = `
+			import { registerComponent } from '@dennation/typebook'
+			import { Button } from './Button'
+			const button = registerComponent(Button)
+		`;
+		const [call] = await scan("file.tsx", content);
+
+		expect(call.inject.kind).toBe("newArg");
+		if (call.inject.kind === "newArg") {
+			// the insertion point sits right after `Button`
+			expect(content.slice(call.inject.at - 6, call.inject.at)).toBe("Button");
+		}
+	});
+
+	test("object-literal config → insertion just inside the brace", async () => {
+		const content = `
+			import { registerComponent } from '@dennation/typebook'
+			import { Button } from './Button'
+			const button = registerComponent(Button, { defaultProps: {} })
+		`;
+		const [call] = await scan("file.tsx", content);
+
+		expect(call.inject.kind).toBe("object");
+		if (call.inject.kind === "object") {
+			// the character just before the insertion point is the opening brace
+			expect(content[call.inject.at - 1]).toBe("{");
+		}
+	});
+
+	test("non-literal config → unsupported (props left empty)", async () => {
+		const [call] = await scan(
+			"file.tsx",
+			`
+			import { registerComponent } from '@dennation/typebook'
+			import { Button } from './Button'
+			const cfg = { defaultProps: {} }
+			const button = registerComponent(Button, cfg)
+		`,
+		);
+
+		expect(call.inject.kind).toBe("unsupported");
 	});
 });
