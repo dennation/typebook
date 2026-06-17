@@ -1,9 +1,9 @@
-import { registerComponent } from "@dennation/typebook";
 import {
 	Breadcrumbs,
 	C,
 	Callout,
 	CodeBlock,
+	getComponentMeta,
 	H2,
 	Icon,
 	Lead,
@@ -13,8 +13,8 @@ import {
 	propsToRows,
 } from "@dennation/typebook/react";
 
-const breadcrumbs = registerComponent(Breadcrumbs);
-const prevNextNav = registerComponent(PrevNextNav);
+const breadcrumbs = getComponentMeta(Breadcrumbs);
+const prevNextNav = getComponentMeta(PrevNextNav);
 
 export function PageNavigation() {
 	return (

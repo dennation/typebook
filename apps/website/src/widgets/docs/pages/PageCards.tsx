@@ -1,8 +1,8 @@
-import { registerComponent } from "@dennation/typebook";
 import {
 	C,
 	Cards,
 	DocCard,
+	getComponentMeta,
 	H2,
 	Icon,
 	Lead,
@@ -13,7 +13,7 @@ import {
 } from "@dennation/typebook/react";
 import type { DocsGo } from "../go.js";
 
-const docCard = registerComponent(DocCard);
+const docCard = getComponentMeta(DocCard);
 
 export function PageCards({ go }: { go: DocsGo }) {
 	return (

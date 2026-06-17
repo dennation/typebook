@@ -22,7 +22,7 @@ export function PageQuickStart({ go }: { go: DocsGo }) {
 
 			<H2>Register a component</H2>
 			<P>
-				<C>registerComponent()</C> calls can live anywhere in{" "}
+				<C>getComponentMeta()</C> calls can live anywhere in{" "}
 				<C>{"src/**/*.tsx"}</C> — no special filename required and no id to
 				assign. It returns a self-contained handle; the plugin injects the
 				extracted props into it at build time.
@@ -31,10 +31,10 @@ export function PageQuickStart({ go }: { go: DocsGo }) {
 				file="src/pages/button.tsx"
 				icon={<Icon.react size={14} />}
 				lang="tsx"
-				code={`import { registerComponent } from "@dennation/typebook";
+				code={`import { getComponentMeta } from "@dennation/typebook/react";
 import { Button } from "../components/Button";
 
-const button = registerComponent(Button, {
+const button = getComponentMeta(Button, {
   defaultProps: { children: "Click me" },
 });`}
 			/>
@@ -50,7 +50,7 @@ const button = registerComponent(Button, {
 				icon={<Icon.react size={14} />}
 				lang="tsx"
 				showLineNumbers
-				code={`import { allOf } from "@dennation/typebook";
+				code={`import { allOf } from "@dennation/typebook/react";
 import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 
 <Story of={button} />
@@ -61,8 +61,8 @@ import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 
 			<Callout type="success" title="Hot reload">
 				In Vite dev mode editing a component re-injects its props through normal
-				module invalidation — no restart needed. Other bundlers re-inject on each
-				rebuild.
+				module invalidation — no restart needed. Other bundlers re-inject on
+				each rebuild.
 			</Callout>
 
 			<H2>What each story does</H2>

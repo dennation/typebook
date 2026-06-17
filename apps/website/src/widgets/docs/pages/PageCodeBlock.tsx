@@ -1,8 +1,8 @@
-import { registerComponent } from "@dennation/typebook";
 import {
 	C,
 	Callout,
 	CodeBlock,
+	getComponentMeta,
 	H2,
 	H3,
 	Icon,
@@ -12,7 +12,7 @@ import {
 	propsToRows,
 } from "@dennation/typebook/react";
 
-const codeBlock = registerComponent(CodeBlock);
+const codeBlock = getComponentMeta(CodeBlock);
 
 export function PageCodeBlock() {
 	return (

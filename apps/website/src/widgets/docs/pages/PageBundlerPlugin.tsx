@@ -15,7 +15,7 @@ export function PageBundlerPlugin() {
 			<Lead>
 				<C>typebook(config?)</C> is built on unplugin, so the same factory is
 				published for every bundler. In its <C>transform</C> hook it oxc-parses
-				each module, scans for <C>registerComponent()</C> calls and{" "}
+				each module, scans for <C>getComponentMeta()</C> calls and{" "}
 				<C>{"<Snippet>"}</C> blocks, extracts types through the TypeScript
 				Compiler API, and injects the results back into the module.
 			</Lead>
@@ -50,8 +50,8 @@ export function PageBundlerPlugin() {
 
 			<H2>When injection runs</H2>
 			<P>
-				Injection happens per module in the universal <C>transform</C> hook
-				(<C>enforce: "pre"</C>), so it works in every bundler and re-runs through
+				Injection happens per module in the universal <C>transform</C> hook (
+				<C>enforce: "pre"</C>), so it works in every bundler and re-runs through
 				normal module invalidation. A single warm TypeScript program does the
 				extraction; the Vite entry keeps it fresh by notifying it of dev-server
 				file changes.
@@ -59,8 +59,8 @@ export function PageBundlerPlugin() {
 
 			<Callout type="info" title="Type-checks without a build">
 				Because the data is injected (not required as an import), plain{" "}
-				<C>tsc</C> and tests pass without running the plugin — handles just carry
-				an empty <C>props</C> until a build runs.
+				<C>tsc</C> and tests pass without running the plugin — handles just
+				carry an empty <C>props</C> until a build runs.
 			</Callout>
 		</>
 	);

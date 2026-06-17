@@ -1,4 +1,3 @@
-import type { ComponentType } from "react";
 import type { RequiredKeysOf } from "type-fest";
 
 export interface TypebookConfig {
@@ -40,32 +39,25 @@ export type MissingProps<
 	Defaulted extends keyof Props,
 > = Pick<Props, Exclude<RequiredKeysOf<Props>, Defaulted>>;
 
-/** Extract `Props` type from a ComponentHandle */
-export type PropsOf<R> = R extends ComponentHandle<infer P, any> ? P : never;
-
-/** Extract the keys covered by `defaultProps` from a ComponentHandle */
-export type DefaultedOf<R> =
-	R extends ComponentHandle<any, infer K> ? K : never;
-
-export interface RegisterConfigBase<Defaults> {
+export interface MetaConfigBase<Defaults> {
 	/** Default props applied to every render of this component */
 	defaultProps?: Defaults;
 }
 
-export interface RegisterConfigPick<
+export interface MetaConfigPick<
 	Props,
 	Picked extends keyof Props = keyof Props,
 	Defaults extends Partial<Props> = Partial<Props>,
-> extends RegisterConfigBase<Defaults> {
+> extends MetaConfigBase<Defaults> {
 	/** Props to include in documentation. If not specified, all props are included. */
 	pick?: ReadonlyArray<Picked>;
 }
 
-export interface RegisterConfigOmit<
+export interface MetaConfigOmit<
 	Props,
 	Omitted extends keyof Props = never,
 	Defaults extends Partial<Props> = Partial<Props>,
-> extends RegisterConfigBase<Defaults> {
+> extends MetaConfigBase<Defaults> {
 	/** Props to omit from documentation. */
 	omit?: ReadonlyArray<Omitted>;
 }
@@ -93,24 +85,3 @@ export interface GenerateConfig {
 
 /** Variant configuration — either auto (allOf), manual (values), or generated */
 export type VariantConfig = AllOfConfig | ValuesConfig | GenerateConfig;
-
-/**
- * Returned by `registerComponent(Component, config)`. Self-contained: holds the
- * component reference, default props, and the extracted prop metadata. `props` is
- * empty as authored — the bundler plugin injects the real `PropInfo[]` into the
- * call at build time (see `core/transform.ts`). `<Story>`/`<Variants>`/`<Matrix>`/
- * `<Playground>` read everything they need from the handle; there is no registry.
- *
- * Variant configs are built via the standalone `allOf` / `values` / `generate`
- * utilities, which take a `ComponentHandle` as their first argument for prop-name
- * autocomplete and value typing.
- */
-export interface ComponentHandle<Props, Defaulted extends keyof Props = never> {
-	component: ComponentType<Props>;
-	defaultProps: Record<string, unknown>;
-	/** Prop metadata, injected at build time by the bundler plugin (empty without it). */
-	props: PropInfo[];
-
-	/** Phantom — keeps Defaulted reachable for `<Story>`/`<Variants>`/`<Matrix>` typing */
-	readonly __defaulted?: (k: Defaulted) => void;
-}

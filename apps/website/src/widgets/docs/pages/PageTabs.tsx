@@ -1,6 +1,6 @@
-import { registerComponent } from "@dennation/typebook";
 import {
 	C,
+	getComponentMeta,
 	H2,
 	Lead,
 	P,
@@ -10,7 +10,7 @@ import {
 	Tabs,
 } from "@dennation/typebook/react";
 
-const tabs = registerComponent(Tabs);
+const tabs = getComponentMeta(Tabs);
 
 export function PageTabs() {
 	return (

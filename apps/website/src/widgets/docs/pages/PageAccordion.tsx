@@ -1,7 +1,7 @@
-import { registerComponent } from "@dennation/typebook";
 import {
 	Accordion,
 	C,
+	getComponentMeta,
 	H2,
 	Lead,
 	PropsReference,
@@ -9,7 +9,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 
-const accordion = registerComponent(Accordion);
+const accordion = getComponentMeta(Accordion);
 
 export function PageAccordion() {
 	return (

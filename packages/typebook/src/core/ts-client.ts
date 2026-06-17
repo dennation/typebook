@@ -82,7 +82,8 @@ export class TypeScriptClient {
 			getScriptVersion: (f) => String(this.fileVersions.get(f) ?? 0),
 			getScriptSnapshot: (f) => {
 				const override = this.overrides.get(f);
-				if (override !== undefined) return ts.ScriptSnapshot.fromString(override);
+				if (override !== undefined)
+					return ts.ScriptSnapshot.fromString(override);
 				const text = ts.sys.readFile(f);
 				return text === undefined
 					? undefined
@@ -106,10 +107,10 @@ export class TypeScriptClient {
 	}
 
 	/**
-	 * Extract props for a single `registerComponent(Component, ...)` call located at `callStart`
+	 * Extract props for a single `getComponentMeta(Component, ...)` call located at `callStart`
 	 * (character offset in the source).
 	 */
-	async getRegisterProps(
+	async getProps(
 		filePath: string,
 		callStart: number,
 		content?: string,
@@ -127,16 +128,16 @@ export class TypeScriptClient {
 			return null;
 		}
 
-		const callExpr = this.findRegisterCallAt(sourceFile, callStart);
+		const callExpr = this.findMetaCallAt(sourceFile, callStart);
 		if (!callExpr) {
 			console.warn(
 				LOG_PREFIX,
-				`No registerComponent() call at offset ${callStart} in ${filePath}`,
+				`No getComponentMeta() call at offset ${callStart} in ${filePath}`,
 			);
 			return null;
 		}
 
-		return this.extractPropsFromRegisterCall(callExpr);
+		return this.extractPropsFromCall(callExpr);
 	}
 
 	/**
@@ -152,17 +153,17 @@ export class TypeScriptClient {
 	}
 
 	/**
-	 * Locate the `register(...)` CallExpression that starts at the given character offset.
+	 * Locate the `getComponentMeta(...)` CallExpression that starts at the given character offset.
 	 */
-	private findRegisterCallAt(
+	private findMetaCallAt(
 		sourceFile: ts.SourceFile,
 		callStart: number,
 	): ts.CallExpression | null {
 		let found: ts.CallExpression | null = null;
 		const visit = (node: ts.Node): void => {
 			if (found) return;
-			// The scanner already validated this is a registerComponent() call (resolving any
-			// import alias such as `import { registerComponent as reg }`). `callStart` uniquely
+			// The scanner already validated this is a getComponentMeta() call (resolving any
+			// import alias such as `import { getComponentMeta as reg }`). `callStart` uniquely
 			// pins the exact CallExpression, so match on the offset rather than re-checking the
 			// callee name — a name check here would silently reject aliased calls and drop their props.
 			if (
@@ -178,9 +179,7 @@ export class TypeScriptClient {
 		return found;
 	}
 
-	private extractPropsFromRegisterCall(
-		callExpr: ts.CallExpression,
-	): PropInfo[] | null {
+	private extractPropsFromCall(callExpr: ts.CallExpression): PropInfo[] | null {
 		const checker = this.checker;
 		if (!checker) return null;
 

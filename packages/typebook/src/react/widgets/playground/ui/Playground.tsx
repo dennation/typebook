@@ -1,10 +1,10 @@
 import { Preview } from "@react/shared/ui/preview/index.js";
+import type { ComponentMeta } from "@react/types.js";
 import { createElement, useCallback, useState } from "react";
-import type { ComponentHandle } from "@/types.js";
 import { PropsTable } from "./PropsTable.js";
 
 export interface PlaygroundProps {
-	of: ComponentHandle<any>;
+	of: ComponentMeta<any>;
 }
 
 export function Playground({ of }: PlaygroundProps) {

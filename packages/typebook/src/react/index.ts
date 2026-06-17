@@ -1,3 +1,4 @@
+// Domain types live in the base entry (`@dennation/typebook`); not re-exported here.
 // Docs components (for consumer documentation sites)
 export {
 	CodeBlock,
@@ -19,6 +20,7 @@ export {
 	ThemeToggle,
 	type ThemeToggleProps,
 } from "./features/theme-toggle/index.js";
+export { getComponentMeta } from "./getComponentMeta.js";
 export { childText } from "./shared/lib/childText.js";
 export { cx } from "./shared/lib/cx.js";
 export { propsToRows } from "./shared/lib/propsToRows.js";
@@ -69,6 +71,8 @@ export {
 	Ul,
 } from "./shared/ui/md/index.js";
 export { ErrorBoundary } from "./shared/ui/preview/index.js";
+export type { ComponentMeta, DefaultedOf, PropsOf } from "./types.js";
+export { allOf, generate, values } from "./variants.js";
 export {
 	Breadcrumbs,
 	type BreadcrumbsProps,

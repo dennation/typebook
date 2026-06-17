@@ -14,7 +14,7 @@ const TRANSFORM_ID = /\.(tsx|ts|jsx|js|mts|cts|mjs|cjs)(\?.*)?$/;
  *
  * Instead of generating files, the plugin rewrites each source module in its
  * `transform` hook (see {@link transformTypebook}):
- * - `registerComponent(Component, …)` calls get a `__props` literal injected;
+ * - `getComponentMeta(Component, …)` calls get a `__props` literal injected;
  * - `<Snippet>{fn}</Snippet>` elements get a `__snippetSource` prop injected.
  *
  * A single warm {@link TypeScriptClient} (lazily started on the first transform)

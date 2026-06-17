@@ -16,10 +16,10 @@ export function PageInstallation({ go }: { go: DocsGo }) {
 	return (
 		<>
 			<Lead>
-				Install the package and add the <C>typebook()</C> plugin to your bundler.
-				That's the whole setup — the plugin injects each component's prop
-				metadata directly into your <C>registerComponent()</C> calls at build
-				time, so there's no registry file and no provider to wire.
+				Install the package and add the <C>typebook()</C> plugin to your
+				bundler. That's the whole setup — the plugin injects each component's
+				prop metadata directly into your <C>getComponentMeta()</C> calls at
+				build time, so there's no registry file and no provider to wire.
 			</Lead>
 
 			<Callout type="warning" title="Requirements">
@@ -75,20 +75,20 @@ export default defineConfig({
 				</Step>
 				<Step title="Register a component">
 					<P>
-						Call <C>registerComponent</C> with your component, then render its
-						stories anywhere. The plugin injects the extracted prop metadata into
-						this call at build time — no registry, no provider, no imports to
-						manage.
+						Call <C>getComponentMeta</C> with your component, then render its
+						stories anywhere. The plugin injects the extracted prop metadata
+						into this call at build time — no registry, no provider, no imports
+						to manage.
 					</P>
 					<CodeBlock
 						file="src/pages/button.tsx"
 						icon={<Icon.react size={14} />}
 						lang="tsx"
-						code={`import { allOf, registerComponent } from "@dennation/typebook";
+						code={`import { allOf, getComponentMeta } from "@dennation/typebook/react";
 import { Story, Variants } from "@dennation/typebook/react";
 import { Button } from "../components/Button";
 
-const button = registerComponent(Button, {
+const button = getComponentMeta(Button, {
   defaultProps: { children: "Click me" },
 });
 

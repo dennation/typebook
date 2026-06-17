@@ -17,7 +17,7 @@ export function PageHooks({ go }: { go: DocsGo }) {
 				Two hooks ship with the package: <C>useDocHeadings</C> powers the table
 				of contents, and <C>useSearchHotkeys</C> binds the palette shortcuts.
 				(Component metadata is no longer looked up at runtime — it's injected
-				into each <C>registerComponent()</C> call at build time, so the handle
+				into each <C>getComponentMeta()</C> call at build time, so the handle
 				carries it directly.)
 			</Lead>
 

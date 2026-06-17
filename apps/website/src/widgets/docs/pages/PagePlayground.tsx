@@ -54,11 +54,11 @@ export function PagePlayground() {
 				props={[
 					{
 						name: "of",
-						type: "ComponentHandle",
+						type: "ComponentMeta",
 						required: true,
 						desc: (
 							<>
-								The handle returned by <C>register()</C>. Initial control values
+								The handle returned by <C>getComponentMeta()</C>. Initial control values
 								come from its <C>defaultProps</C>.
 							</>
 						),

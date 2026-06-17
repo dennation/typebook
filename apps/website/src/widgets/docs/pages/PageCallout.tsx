@@ -1,9 +1,9 @@
-import { registerComponent } from "@dennation/typebook";
 import {
 	C,
 	Callout,
 	Cards,
 	DocCard,
+	getComponentMeta,
 	H2,
 	Icon,
 	Lead,
@@ -14,7 +14,7 @@ import {
 } from "@dennation/typebook/react";
 import type { DocsGo } from "../go.js";
 
-const callout = registerComponent(Callout);
+const callout = getComponentMeta(Callout);
 
 export function PageCallout({ go }: { go: DocsGo }) {
 	return (

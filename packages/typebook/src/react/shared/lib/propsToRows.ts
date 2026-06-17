@@ -1,5 +1,5 @@
-import type { PropInfo } from "@/types.js";
 import type { PropRowData } from "@react/shared/ui/md/index.js";
+import type { PropInfo } from "@/types.js";
 import { formatPropType } from "./formatPropType.js";
 
 /**

@@ -26,7 +26,7 @@ export function PageVariants({ go }: { go: DocsGo }) {
 				icon={<Icon.react size={14} />}
 				lang="tsx"
 				showLineNumbers
-				code={`import { allOf, values } from "@dennation/typebook";
+				code={`import { allOf, values } from "@dennation/typebook/react";
 import { Variants } from "@dennation/typebook/react";
 
 // every value of a literal-union prop, straight from its TS type
@@ -47,11 +47,11 @@ import { Variants } from "@dennation/typebook/react";
 				props={[
 					{
 						name: "of",
-						type: "ComponentHandle",
+						type: "ComponentMeta",
 						required: true,
 						desc: (
 							<>
-								The handle returned by <C>register()</C>.
+								The handle returned by <C>getComponentMeta()</C>.
 							</>
 						),
 					},

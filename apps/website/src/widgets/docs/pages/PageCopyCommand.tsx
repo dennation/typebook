@@ -1,7 +1,7 @@
-import { registerComponent } from "@dennation/typebook";
 import {
 	C,
 	CopyCommand,
+	getComponentMeta,
 	H2,
 	Lead,
 	PropsReference,
@@ -9,7 +9,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 
-const copyCommand = registerComponent(CopyCommand);
+const copyCommand = getComponentMeta(CopyCommand);
 
 export function PageCopyCommand() {
 	return (

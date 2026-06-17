@@ -59,7 +59,7 @@ export const NAV: DocsNavSection[] = [
 		label: "API Reference",
 		icon: "cog",
 		items: [
-			{ slug: "register", title: "register()" },
+			{ slug: "register", title: "getComponentMeta()" },
 			{ slug: "variant-helpers", title: "Variant helpers" },
 			{ slug: "bundler-plugin", title: "Bundler plugin" },
 			{ slug: "hooks", title: "Hooks" },
@@ -108,7 +108,7 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		slug: "quick-start",
 		title: "Quick Start",
 		section: "Getting Started",
-		desc: "register() a component and render its stories",
+		desc: "getComponentMeta() to register a component and render its stories",
 	},
 	{
 		slug: "theming",
@@ -221,7 +221,7 @@ export const SEARCH_INDEX: SearchEntry[] = [
 	},
 	{
 		slug: "register",
-		title: "register()",
+		title: "getComponentMeta()",
 		section: "API Reference",
 		desc: "Register a component for documentation",
 	},

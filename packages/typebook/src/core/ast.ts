@@ -1,5 +1,5 @@
 /**
- * Shared oxc-parser helpers used by both the registerComponent() scanner and
+ * Shared oxc-parser helpers used by both the getComponentMeta() scanner and
  * the <Snippet> scanner. oxc returns an ESTree-compatible AST (typed via
  * `@oxc-project/types`, re-exported from `oxc-parser`) with `start` / `end`
  * character offsets on every node, which is what makes 1:1 source slicing

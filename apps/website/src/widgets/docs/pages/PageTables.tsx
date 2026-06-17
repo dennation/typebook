@@ -13,8 +13,9 @@ export function PageTables() {
 		<>
 			<Lead>
 				Two table components: <C>MDTable</C> for plain data (the equivalent of a
-				markdown pipe table) and <C>PropsReference</C> for documenting a component
-				API — every props list on this site is a <C>PropsReference</C>.
+				markdown pipe table) and <C>PropsReference</C> for documenting a
+				component API — every props list on this site is a <C>PropsReference</C>
+				.
 			</Lead>
 
 			<H2>MDTable</H2>

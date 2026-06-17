@@ -1,8 +1,8 @@
-import { registerComponent } from "@dennation/typebook";
 import {
 	C,
 	Callout,
 	CodeBlock,
+	getComponentMeta,
 	H2,
 	Icon,
 	Lead,
@@ -12,7 +12,7 @@ import {
 	SearchPalette,
 } from "@dennation/typebook/react";
 
-const searchPalette = registerComponent(SearchPalette);
+const searchPalette = getComponentMeta(SearchPalette);
 
 export function PageSearch() {
 	return (

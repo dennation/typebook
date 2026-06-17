@@ -28,7 +28,7 @@ apps/
 
 ## packages/typebook
 
-React component documentation library. In its bundler-plugin `transform` hook it scans each source module for `registerComponent()` calls and `<Snippet>` elements, extracts prop types via the TypeScript Compiler API, and **injects** the results back into the same module — `__props` into the `registerComponent()` config, `__snippetSource` onto the `<Snippet>` element. No files are generated; the handle returned by `registerComponent()` is self-contained. Consumers embed `<Story>`, `<Variants>`, `<Matrix>`, `<Playground>`, `<Snippet>` on any page to render component variants.
+React component documentation library. In its bundler-plugin `transform` hook it scans each source module for `getComponentMeta()` calls and `<Snippet>` elements, extracts prop types via the TypeScript Compiler API, and **injects** the results back into the same module — `__props` into the `getComponentMeta()` config, `__snippetSource` onto the `<Snippet>` element. No files are generated; the handle returned by `getComponentMeta()` is self-contained. Consumers embed `<Story>`, `<Variants>`, `<Matrix>`, `<Playground>`, `<Snippet>` on any page to render component variants.
 
 ### Commands
 
@@ -47,18 +47,16 @@ packages/typebook/
   tsconfig.json
   vite.config.ts
   src/
-    index.ts                  — Public package exports (registerComponent, variants, types)
-    types.ts                  — Shared types (TypebookConfig, ComponentHandle, PropInfo, PropType, …)
-    registerComponent.ts      — registerComponent(Component, config?) → ComponentHandle (carries component, defaultProps, props)
-    variants.ts               — allOf(of, prop), values(of, prop, vs), generate(of, prop, fn, n)
+    index.ts                  — Base entry: **types only** (the runtime authoring API lives in react/)
+    types.ts                  — Shared **React-free** types (TypebookConfig, PropInfo, PropType, MetaConfig*, VariantConfig, MissingProps, …)
     resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into arrays
-    constants.ts              — PACKAGE_NAME, NPM_PACKAGE_NAME, LOG_PREFIX, …
+    constants.ts              — PACKAGE_NAME, NPM_REACT_PACKAGE_NAME, LOG_PREFIX, …
     cli.ts                    — CLI entry: prints that codegen runs as a bundler plugin (no generate step)
     core/                     — Single-pass per-module transform pipeline
       transform.ts            — transformTypebook(code, filePath, tsClient): parses once, runs both scanners,
                                 injects __props / __snippetSource back into the source text (no file emitted).
                                 SnippetNotInlineError lives here.
-      registry-scanner.ts     — oxc AST: scanRegistrations(program) finds registerComponent(Component, …) calls
+      meta-scanner.ts        — oxc AST: scanMetaCalls(program) finds getComponentMeta(Component, …) calls
                                 and the position to inject __props (into config object, or as a new config arg)
       snippet-scanner.ts      — oxc AST: scanSnippets(program, src) finds every <Snippet>{fn}</Snippet>, slices the
                                 inline function's body (non-inline child → null → build error) + the inject position
@@ -75,8 +73,11 @@ packages/typebook/
       rspack.ts               — typebook() Rspack plugin
       esbuild.ts              — typebook() esbuild plugin
       farm.ts                 — typebook() Farm plugin
-    react/                          — Runtime, organized by Feature-Sliced Design
-      index.ts                      — Public exports
+    react/                          — Runtime + authoring API, organized by Feature-Sliced Design
+      index.ts                      — Public exports (incl. getComponentMeta / allOf / values / generate)
+      getComponentMeta.ts          — getComponentMeta(Component, config?) → ComponentMeta (component, defaultProps, props)
+      types.ts                      — React-coupled types: ComponentMeta / PropsOf / DefaultedOf (reference ComponentType)
+      variants.ts                   — allOf(of, prop), values(of, prop, vs), generate(of, prop, fn, n)
       (no root provider — handles and snippets carry their own data, injected at build time)
       widgets/                      — Large public blocks
         Layout/                     — <Layout sidebar={…}>{children}</Layout>
@@ -119,15 +120,15 @@ packages/typebook/
 
 ### Build entry points
 
-- **`index`** — `registerComponent`, `allOf`, `values`, `generate`, types.
-- **`react/index`** — `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary` + the docs component kit (md set, `CodeBlock`, `SearchPalette`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `PropsReference`).
+- **`index`** — **React-free** types only (`TypebookConfig`, `PropInfo`, `PropType`, `MetaConfig*`, `VariantConfig`, …). Authoring API and React-coupled types (`ComponentMeta`) live in `react/`.
+- **`react/index`** — authoring API (`getComponentMeta`, `allOf`, `values`, `generate`) + `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary` + the docs component kit (md set, `CodeBlock`, `SearchPalette`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `PropsReference`, `propsToRows`). Domain types come from the base entry, not re-exported here.
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
 - **`cli/index`** — `npx @dennation/typebook` (prints plugin usage; there is no codegen step).
 
 ### Package exports
 
-- `@dennation/typebook` — `registerComponent`, `allOf`, `values`, `generate`, types (`TypebookConfig`, `ComponentHandle`, `RegisterConfigPick`, `RegisterConfigOmit`, `RegisterConfigBase`, `PropInfo`, `PropType`, `MissingProps`, `PropsOf`, `DefaultedOf`, `VariantConfig`, …)
-- `@dennation/typebook/react` — **storybook runtime:** `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`. **docs kit** (for consumer documentation sites): md set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines; Shiki with a css-variables theme bound to the design tokens — any language, theme-aware colors, lazy-loaded grammars), `SearchPalette`/`useSearchHotkeys`/`SearchEntry`, `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
+- `@dennation/typebook` — **React-free types only** (`TypebookConfig`, `MetaConfigPick`, `MetaConfigOmit`, `MetaConfigBase`, `PropInfo`, `PropType`, `MissingProps`, `VariantConfig`, …). No `react` import. Authoring API and React-coupled types live in `/react`.
+- `@dennation/typebook/react` — **authoring API:** `getComponentMeta`, `allOf`, `values`, `generate` + the React-coupled types `ComponentMeta`/`PropsOf`/`DefaultedOf` (React-free domain types come from the base entry). **storybook runtime:** `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`. **docs kit** (for consumer documentation sites): md set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines; Shiki with a css-variables theme bound to the design tokens — any language, theme-aware colors, lazy-loaded grammars), `SearchPalette`/`useSearchHotkeys`/`SearchEntry`, `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
 > **What lives where.** The package exports only what is **universal** — the storybook runtime, the docs component kit (md set, CodeBlock, search palette, sidebar/toc/breadcrumbs/prev-next, CopyCommand), generic primitives (`Icon`, `Button`, `ThemeToggle`, `cx`) and the design system. Anything **specific to one site** (marketing landing sections, demo "gifs", section heading, scroll-reveal hook, layout constants, page content and nav data) lives in that app — see `apps/website`, not the package.
@@ -136,14 +137,14 @@ packages/typebook/
 
 > Navigation menus live in a **separate package**, `@dennation/menu` — see its section below. Typebook no longer exports `defineMenu`/`Menu`/`menuFromRouteTree`.
 
-### registerComponent() API
+### getComponentMeta() API
 
 ```ts
-import { allOf, registerComponent } from '@dennation/typebook'
+import { allOf, getComponentMeta } from '@dennation/typebook/react'
 import { Matrix, Story, Variants } from '@dennation/typebook/react'
 import { Button } from '../components/Button'
 
-const button = registerComponent(Button, {
+const button = getComponentMeta(Button, {
   defaultProps: { children: 'Click me' },
 })
 
@@ -152,10 +153,10 @@ const button = registerComponent(Button, {
 <Matrix of={button} x={allOf(button, 'color')} y={[allOf(button, 'variant')]} />
 ```
 
-- **No id.** `registerComponent(Component, config?)` returns a self-contained `ComponentHandle` (`component`, `defaultProps`, `props`). `<Story>`/`<Variants>`/`<Matrix>`/`<Playground>` read everything from the handle — there is no registry, no context, no lookup by key.
-- `registerComponent()` calls can live anywhere in `./src/**/*.{ts,tsx}` — no special filename required. They're **local**: import the handle to use it elsewhere; uniqueness isn't required, so there's no `DuplicateRegistrationError`.
-- **`props` is injected at build time.** As authored, the handle's `props` is `[]`; the plugin's `transform` hook extracts `PropInfo[]` via the TS Compiler API and injects it as `__props` into the `registerComponent()` config (or as a new config argument when none was passed). Without the plugin (e.g. plain `tsc`/tests) the handle still type-checks — `props` is just empty, so `<Variants>`/`<Matrix>`/`<Playground>` degrade gracefully.
-- `<Story>` / `<Variants>` / `<Matrix>` are **type-safe**: required props not covered by `defaultProps` must be passed via `props={…}` at the call site (`MissingProps` phantom type), inferred from `registerComponent`'s generics (not from the injected data).
+- **No id.** `getComponentMeta(Component, config?)` returns a self-contained `ComponentMeta` (`component`, `defaultProps`, `props`). `<Story>`/`<Variants>`/`<Matrix>`/`<Playground>` read everything from the handle — there is no registry, no context, no lookup by key.
+- `getComponentMeta()` calls can live anywhere in `./src/**/*.{ts,tsx}` — no special filename required. They're **local**: import the handle to use it elsewhere; uniqueness isn't required, so there's no `DuplicateRegistrationError`.
+- **`props` is injected at build time.** As authored, the handle's `props` is `[]`; the plugin's `transform` hook extracts `PropInfo[]` via the TS Compiler API and injects it as `__props` into the `getComponentMeta()` config (or as a new config argument when none was passed). Without the plugin (e.g. plain `tsc`/tests) the handle still type-checks — `props` is just empty, so `<Variants>`/`<Matrix>`/`<Playground>` degrade gracefully.
+- `<Story>` / `<Variants>` / `<Matrix>` are **type-safe**: required props not covered by `defaultProps` must be passed via `props={…}` at the call site (`MissingProps` phantom type), inferred from `getComponentMeta`'s generics (not from the injected data).
 
 ### Snippet API
 
@@ -192,9 +193,9 @@ import { Snippet } from '@dennation/typebook/react'
 ```
 vite.config.ts: typebook()  → transform hook, per module (enforce: 'pre')
   └── transformTypebook(code, filePath, tsClient)   (oxc-parse once, run both scanners)
-        ├── scanRegistrations: finds registerComponent(Component, …) + inject position
+        ├── scanMetaCalls: finds getComponentMeta(Component, …) + inject position
         │     └── ts-client.getRegisterProps(code) → PropInfo[] (defaultValues + JSDoc)
-        │           └── injects `__props: [...]` into the registerComponent() config
+        │           └── injects `__props: [...]` into the getComponentMeta() config
         └── scanSnippets: finds <Snippet>{fn}</Snippet> + slices source
               └── injects `__snippetSource={"…"}` onto the element
 
@@ -203,7 +204,7 @@ App.tsx:
         ↓
   __root.tsx → Layout → <Outlet /> → page component
         ↓
-  const button = registerComponent(Button, { /* __props injected here */ })
+  const button = getComponentMeta(Button, { /* __props injected here */ })
   <Story of={button} />        ← reads of.component / of.defaultProps
   <Variants of={button} …/>    ← reads of.props (the injected PropInfo[])
 ```
@@ -211,7 +212,7 @@ App.tsx:
 ### Key design decisions
 
 - **Injection over a generated file** — the plugin rewrites each module in its `transform` hook (injecting `__props` / `__snippetSource`) instead of emitting `ui-registry.gen.ts` / `snippets.gen.ts`. Data lives at the call site, so there's no central registry, no string-id indirection, no uniqueness errors, and no dev-server watcher graph — re-transformation is Vite's own module invalidation. Trade-off vs. a physical file: no on-disk artifact and no diff of extracted props (acceptable here — the registry was only ever consumed locally, not as a global catalog).
-- **Self-contained handle** — `registerComponent(Component, config?)` returns `{ component, defaultProps, props }`. Type-safety of `<Story of={…}>` comes from `registerComponent`'s generics, not the injected data, so plain `tsc` works without the plugin.
+- **Self-contained handle** — `getComponentMeta(Component, config?)` returns `{ component, defaultProps, props }`. Type-safety of `<Story of={…}>` comes from `getComponentMeta`'s generics, not the injected data, so plain `tsc` works without the plugin.
 - **No runtime provider** — handles and snippets carry their own data (injected at build time), so there is nothing to provide via context; the package exposes no `TypebookProvider`. Routing, history strategy, and route tree generation are the consumer's (`vite.config.ts` + `App.tsx`), which keeps any TanStack Router dependency out of the library.
 - **Type extraction via TS Compiler API** — `ts-client.ts` resolves prop types as strings via `ts.TypeChecker`, extracts default values from destructuring patterns, and reads JSDoc via `symbol.getDocumentationComment()`. It extracts against the transform's `code` (via an in-memory snapshot override) so oxc and TS character offsets agree even when an earlier plugin already rewrote the module.
 
@@ -316,7 +317,7 @@ examples/tanstack-router/
       __root.tsx          — TypebookLayout + sidebar nav + <Outlet />
       index.tsx
       about.tsx
-      button.tsx          — registerComponent(Button, …) + Story/Variants/Matrix/Snippet
+      button.tsx          — getComponentMeta(Button, …) + Story/Variants/Matrix/Snippet
     components/
       Button.tsx
 ```
@@ -491,12 +492,12 @@ function RootComponent() {
 ### src/pages/button.tsx
 
 ```tsx
-import { allOf, registerComponent } from '@dennation/typebook'
+import { allOf, getComponentMeta } from '@dennation/typebook/react'
 import { Matrix, Story, Variants } from '@dennation/typebook/react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '../components/Button'
 
-const button = registerComponent(Button, { defaultProps: { children: 'Click me' } })
+const button = getComponentMeta(Button, { defaultProps: { children: 'Click me' } })
 
 export const Route = createFileRoute('/button')({ component: ButtonPage })
 

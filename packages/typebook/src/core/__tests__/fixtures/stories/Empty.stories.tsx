@@ -1,4 +1,4 @@
-import { registerComponent } from "@dennation/typebook";
+import { getComponentMeta } from "@dennation/typebook/react";
 import { Empty } from "../components/Empty";
 
-export const comp = registerComponent(Empty);
+export const comp = getComponentMeta(Empty);

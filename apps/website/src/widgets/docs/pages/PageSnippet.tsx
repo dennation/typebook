@@ -59,8 +59,8 @@ export function PageSnippet() {
 				inline function's <C>body</C> straight from the file, dedents it and{" "}
 				<strong>injects it back onto the element</strong> as a{" "}
 				<C>__snippetSource</C> prop. At runtime the toggle reads that prop
-				directly (no context, no generated file, no fetch) and renders it through{" "}
-				<C>CodeBlock</C>.
+				directly (no context, no generated file, no fetch) and renders it
+				through <C>CodeBlock</C>.
 			</P>
 
 			<Callout type="warning" title="Inline functions only">

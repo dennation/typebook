@@ -1,76 +1,71 @@
 import { describe, expect, test } from "vitest";
 import { parseProgram } from "../ast.js";
-import {
-	mayContainRegistration,
-	scanRegistrations,
-} from "../registry-scanner.js";
+import { mayContainMetaCall, scanMetaCalls } from "../meta-scanner.js";
 
 /** Parse then scan, mirroring how the plugin feeds a pre-parsed program. */
 async function scan(filename: string, content: string) {
-	return scanRegistrations(await parseProgram(filename, content));
+	return scanMetaCalls(await parseProgram(filename, content));
 }
 
-describe("mayContainRegistration", () => {
-	test("detects registerComponent( substring", () => {
-		expect(mayContainRegistration("const x = registerComponent(Foo)")).toBe(
-			true,
-		);
+describe("mayContainMetaCall", () => {
+	test("detects getComponentMeta( substring", () => {
+		expect(mayContainMetaCall("const x = getComponentMeta(Foo)")).toBe(true);
 	});
 
-	test("returns false when registerComponent( absent", () => {
-		expect(mayContainRegistration("const x = 1")).toBe(false);
+	test("returns false when getComponentMeta( absent", () => {
+		expect(mayContainMetaCall("const x = 1")).toBe(false);
 	});
 });
 
-describe("scanRegistrations — call discovery", () => {
-	test("local (non-exported) register is captured", async () => {
+describe("scanMetaCalls — call discovery", () => {
+	test("local (non-exported) getComponentMeta call is captured", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { registerComponent } from '@dennation/typebook'
+			import { getComponentMeta } from '@dennation/typebook/react'
 			import { Button } from '@heroui/button'
-			const button = registerComponent(Button)
+			const button = getComponentMeta(Button)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
 	});
 
-	test("exported register is also captured", async () => {
+	test("exported getComponentMeta call is also captured", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { registerComponent } from '@dennation/typebook'
+			import { getComponentMeta } from '@dennation/typebook/react'
 			import { Button } from './Button'
-			export const button = registerComponent(Button)
+			export const button = getComponentMeta(Button)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
 	});
 
-	test("default-exported register is captured", async () => {
+	test("default-exported getComponentMeta call is captured", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { registerComponent } from '@dennation/typebook'
+			import { getComponentMeta } from '@dennation/typebook/react'
 			import { Button } from './Button'
-			export default registerComponent(Button)
+			export default getComponentMeta(Button)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
 	});
 
-	test("multiple registers in one file", async () => {
+	test("multiple getComponentMeta calls in one file", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { registerComponent } from '@dennation/typebook'
+			import { getComponentMeta } from '@dennation/typebook/react'
 			import { Button } from './Button'
 			import { Input } from './Input'
-			const a = registerComponent(Button)
-			const b = registerComponent(Input)
+			const a = getComponentMeta(Button)
+			const b = getComponentMeta(Input)
 		`,
 		);
 
@@ -81,28 +76,28 @@ describe("scanRegistrations — call discovery", () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { registerComponent } from '@dennation/typebook'
+			import { getComponentMeta } from '@dennation/typebook/react'
 			const MyComp = () => null
-			const comp = registerComponent(MyComp)
+			const comp = getComponentMeta(MyComp)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
 	});
 
-	test("file without register() returns empty", async () => {
+	test("file without getComponentMeta() returns empty", async () => {
 		const result = await scan("file.tsx", `export const foo = 1`);
 		expect(result).toEqual([]);
 	});
 
-	test("register() nested inside a function body is still found", async () => {
+	test("getComponentMeta() nested inside a function body is still found", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { registerComponent } from '@dennation/typebook'
+			import { getComponentMeta } from '@dennation/typebook/react'
 			import { Button } from './Button'
 			function Page() {
-				const b = registerComponent(Button)
+				const b = getComponentMeta(Button)
 				return null
 			}
 		`,
@@ -111,7 +106,7 @@ describe("scanRegistrations — call discovery", () => {
 		expect(result).toHaveLength(1);
 	});
 
-	test("empty file → empty registers", async () => {
+	test("empty file → empty result", async () => {
 		const result = await scan("file.tsx", "");
 		expect(result).toEqual([]);
 	});
@@ -120,7 +115,7 @@ describe("scanRegistrations — call discovery", () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { registerComponent as reg } from '@dennation/typebook'
+			import { getComponentMeta as reg } from '@dennation/typebook/react'
 			import { Button } from './Button'
 			const button = reg(Button)
 		`,
@@ -129,13 +124,13 @@ describe("scanRegistrations — call discovery", () => {
 		expect(result).toHaveLength(1);
 	});
 
-	test("registerComponent from a different package is ignored", async () => {
+	test("getComponentMeta from a different package is ignored", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { registerComponent } from 'some-other-lib'
+			import { getComponentMeta } from 'some-other-lib'
 			import { Button } from './Button'
-			const button = registerComponent(Button)
+			const button = getComponentMeta(Button)
 		`,
 		);
 
@@ -143,14 +138,14 @@ describe("scanRegistrations — call discovery", () => {
 	});
 });
 
-describe("scanRegistrations — injection target", () => {
-	test("records callStart for each register()", async () => {
+describe("scanMetaCalls — injection target", () => {
+	test("records callStart for each getComponentMeta()", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { registerComponent } from '@dennation/typebook'
+			import { getComponentMeta } from '@dennation/typebook/react'
 			import { Button } from './Button'
-			const button = registerComponent(Button)
+			const button = getComponentMeta(Button)
 		`,
 		);
 
@@ -160,9 +155,9 @@ describe("scanRegistrations — injection target", () => {
 
 	test("no config → newArg insertion after the component argument", async () => {
 		const content = `
-			import { registerComponent } from '@dennation/typebook'
+			import { getComponentMeta } from '@dennation/typebook/react'
 			import { Button } from './Button'
-			const button = registerComponent(Button)
+			const button = getComponentMeta(Button)
 		`;
 		const [call] = await scan("file.tsx", content);
 
@@ -175,9 +170,9 @@ describe("scanRegistrations — injection target", () => {
 
 	test("object-literal config → insertion just inside the brace", async () => {
 		const content = `
-			import { registerComponent } from '@dennation/typebook'
+			import { getComponentMeta } from '@dennation/typebook/react'
 			import { Button } from './Button'
-			const button = registerComponent(Button, { defaultProps: {} })
+			const button = getComponentMeta(Button, { defaultProps: {} })
 		`;
 		const [call] = await scan("file.tsx", content);
 
@@ -192,10 +187,10 @@ describe("scanRegistrations — injection target", () => {
 		const [call] = await scan(
 			"file.tsx",
 			`
-			import { registerComponent } from '@dennation/typebook'
+			import { getComponentMeta } from '@dennation/typebook/react'
 			import { Button } from './Button'
 			const cfg = { defaultProps: {} }
-			const button = registerComponent(Button, cfg)
+			const button = getComponentMeta(Button, cfg)
 		`,
 		);
 

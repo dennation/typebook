@@ -14,7 +14,7 @@ export function PageVariantHelpers() {
 		<>
 			<Lead>
 				Three helpers describe a variant axis for <C>{"<Variants>"}</C> and{" "}
-				<C>{"<Matrix>"}</C>. All take the <C>ComponentHandle</C> first, so the
+				<C>{"<Matrix>"}</C>. All take the <C>ComponentMeta</C> first, so the
 				prop name and values are autocompleted and type-checked against the
 				component.
 			</Lead>
@@ -70,8 +70,8 @@ allOf(button, "disabled")  // boolean → two variants`}
 
 			<Callout type="success" title="Resolved from the handle">
 				<C>allOf</C> reads the union members from the handle's injected{" "}
-				<C>props</C> at render time — when the component's type gains a value, the
-				grid updates on the next build with no code change.
+				<C>props</C> at render time — when the component's type gains a value,
+				the grid updates on the next build with no code change.
 			</Callout>
 		</>
 	);

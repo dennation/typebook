@@ -25,9 +25,9 @@ export function PageIntroduction({ go }: { go: DocsGo }) {
 				It ships two things that work together: a{" "}
 				<strong>storybook runtime</strong> (<C>Story</C>, <C>Variants</C>,{" "}
 				<C>Matrix</C>, <C>Playground</C>, <C>Snippet</C>) driven by build-time
-				prop injection, and a <strong>docs component kit</strong> (callouts, code
-				blocks, tabs, steps, search palette, sidebar — everything this site is
-				built from).
+				prop injection, and a <strong>docs component kit</strong> (callouts,
+				code blocks, tabs, steps, search palette, sidebar — everything this site
+				is built from).
 			</P>
 
 			<Callout type="info" title="This site is the demo">
@@ -39,7 +39,7 @@ export function PageIntroduction({ go }: { go: DocsGo }) {
 			<H2>How it works</H2>
 			<P>
 				The <C>typebook()</C> bundler plugin scans your sources for{" "}
-				<C>registerComponent(Component)</C> calls, resolves prop types, default
+				<C>getComponentMeta(Component)</C> calls, resolves prop types, default
 				values and JSDoc through the TypeScript Compiler API, and{" "}
 				<strong>injects</strong> the result straight back into each call as the
 				handle's <C>props</C>. No registry file, no context, no lookup — the
@@ -50,11 +50,11 @@ export function PageIntroduction({ go }: { go: DocsGo }) {
 				icon={<Icon.react size={14} />}
 				lang="tsx"
 				showLineNumbers
-				code={`import { allOf, registerComponent } from "@dennation/typebook";
+				code={`import { allOf, getComponentMeta } from "@dennation/typebook/react";
 import { Story, Variants } from "@dennation/typebook/react";
 import { Button } from "../components/Button";
 
-const button = registerComponent(Button, {
+const button = getComponentMeta(Button, {
   defaultProps: { children: "Click me" },
 });
 
@@ -67,12 +67,12 @@ const button = registerComponent(Button, {
 				Metadata is <strong>injected at the call site</strong>, not emitted to a
 				registry file — data lives where it's used, with no string-id
 				indirection and no provider to wire. Type-safety comes from{" "}
-				<C>registerComponent</C>'s generics, so <C>tsc</C> and tests pass without
-				the plugin. Routing stays the{" "}
-				<strong>consumer's responsibility</strong>, so the library works with any
-				router. And the same <C>typebook()</C> factory is published for every
-				bundler via <A href="https://unplugin.unjs.io">unplugin</A> — no bundler
-				is privileged.
+				<C>getComponentMeta</C>'s generics, so <C>tsc</C> and tests pass without
+				the plugin. Routing stays the <strong>consumer's responsibility</strong>
+				, so the library works with any router. And the same <C>typebook()</C>{" "}
+				factory is published for every bundler via{" "}
+				<A href="https://unplugin.unjs.io">unplugin</A> — no bundler is
+				privileged.
 			</P>
 
 			<H2>Next steps</H2>
@@ -86,7 +86,7 @@ const button = registerComponent(Button, {
 				<DocCard
 					icon={<Icon.book size={20} />}
 					title="Quick Start"
-					desc="From registerComponent() to a rendered story."
+					desc="From getComponentMeta() to a rendered story."
 					onClick={() => go("quick-start")}
 				/>
 			</Cards>

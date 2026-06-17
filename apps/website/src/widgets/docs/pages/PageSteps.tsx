@@ -1,7 +1,7 @@
-import { registerComponent } from "@dennation/typebook";
 import {
 	C,
 	CodeBlock,
+	getComponentMeta,
 	H2,
 	Lead,
 	P,
@@ -12,7 +12,7 @@ import {
 	Steps,
 } from "@dennation/typebook/react";
 
-const step = registerComponent(Step);
+const step = getComponentMeta(Step);
 
 export function PageSteps() {
 	return (

@@ -42,11 +42,11 @@ export function PageStory({ go }: { go: DocsGo }) {
 				props={[
 					{
 						name: "of",
-						type: "ComponentHandle",
+						type: "ComponentMeta",
 						required: true,
 						desc: (
 							<>
-								The handle returned by <C>register()</C>.
+								The handle returned by <C>getComponentMeta()</C>.
 							</>
 						),
 					},
