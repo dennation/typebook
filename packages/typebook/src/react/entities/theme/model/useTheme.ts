@@ -1,5 +1,5 @@
 import { useCallback, useState, useSyncExternalStore } from "react";
-import { THEME_STORAGE_KEY } from "@/constants.js";
+import { THEME_STORAGE_KEY } from "@/constants";
 
 export type Theme = "light" | "dark";
 

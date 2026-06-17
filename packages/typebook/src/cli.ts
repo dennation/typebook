@@ -1,4 +1,4 @@
-import { PACKAGE_NAME } from "./constants.js";
+import { PACKAGE_NAME } from "./constants";
 
 /**
  * Typebook no longer generates files. Component prop metadata and snippet sources

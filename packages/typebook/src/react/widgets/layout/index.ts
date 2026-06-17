@@ -1,1 +1,1 @@
-export { Layout, type LayoutProps } from "./ui/Layout.js";
+export { Layout, type LayoutProps } from "./ui/Layout";

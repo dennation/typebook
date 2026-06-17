@@ -1,1 +1,1 @@
-export { Matrix, type MatrixProps } from "./ui/Matrix.js";
+export { Matrix, type MatrixProps } from "./ui/Matrix";

@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { PropInfo } from "@/types.js";
+import type { PropInfo } from "@/types";
 
 /**
  * Returned by `getComponentMeta(Component, config)`. Self-contained: holds the

@@ -1,8 +1,8 @@
-import { LOG_PREFIX } from "../constants.js";
-import { parseProgram } from "./ast.js";
-import { mayContainMetaCall, scanMetaCalls } from "./meta-scanner.js";
-import { mayContainSnippet, scanSnippets } from "./snippet-scanner.js";
-import type { TypeScriptClient } from "./ts-client.js";
+import { LOG_PREFIX } from "../constants";
+import { parseProgram } from "./ast";
+import { mayContainMetaCall, scanMetaCalls } from "./meta-scanner";
+import { mayContainSnippet, scanSnippets } from "./snippet-scanner";
+import type { TypeScriptClient } from "./ts-client";
 
 /** Thrown when a `<Snippet>` child isn't an inline function component (can't be sliced). */
 export class SnippetNotInlineError extends Error {

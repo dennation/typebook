@@ -1,5 +1,5 @@
-import { getVariantProp, resolveVariantConfig } from "@/resolve.js";
-import type { PropInfo, VariantConfig } from "@/types.js";
+import { getVariantProp, resolveVariantConfig } from "@/resolve";
+import type { PropInfo, VariantConfig } from "@/types";
 
 export interface MatrixCell {
 	label: string;

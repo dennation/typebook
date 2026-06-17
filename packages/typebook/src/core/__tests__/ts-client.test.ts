@@ -2,10 +2,10 @@ import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import type { PropInfo } from "../../types.js";
-import { parseProgram } from "../ast.js";
-import { scanMetaCalls } from "../meta-scanner.js";
-import { TypeScriptClient } from "../ts-client.js";
+import type { PropInfo } from "../../types";
+import { parseProgram } from "../ast";
+import { scanMetaCalls } from "../meta-scanner";
+import { TypeScriptClient } from "../ts-client";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const FIXTURES = resolve(__dirname, "fixtures");

@@ -1,7 +1,7 @@
-import { Icon } from "@react/shared/ui/icon/index.js";
+import { Icon } from "@react/shared/ui/icon/index";
 import { useState } from "react";
 import { tv } from "tailwind-variants";
-import type { DocsNavSection } from "../model/types.js";
+import type { DocsNavSection } from "../model/types";
 
 export interface DocsSidebarProps {
 	/** Navigation sections to render. */

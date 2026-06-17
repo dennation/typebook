@@ -1,6 +1,6 @@
-import { Icon } from "@react/shared/ui/icon/index.js";
+import { Icon } from "@react/shared/ui/icon/index";
 import { tv } from "tailwind-variants";
-import type { DocsHeading } from "../lib/useDocHeadings.js";
+import type { DocsHeading } from "../lib/useDocHeadings";
 
 export interface DocsTocProps {
 	headings: DocsHeading[];

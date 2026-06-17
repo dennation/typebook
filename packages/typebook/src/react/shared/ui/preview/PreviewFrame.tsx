@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { memo } from "react";
-import { Preview } from "./Preview.js";
+import { Preview } from "./Preview";
 
 export interface PreviewFrameProps {
 	label: string;

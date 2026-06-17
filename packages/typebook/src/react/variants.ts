@@ -1,5 +1,5 @@
-import type { AllOfConfig, GenerateConfig, ValuesConfig } from "@/types.js";
-import type { ComponentMeta, PropsOf } from "./types.js";
+import type { AllOfConfig, GenerateConfig, ValuesConfig } from "@/types";
+import type { ComponentMeta, PropsOf } from "./types";
 
 /**
  * Auto-generate variants for a prop from its TypeScript type

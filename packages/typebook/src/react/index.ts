@@ -4,27 +4,27 @@ export {
 	CodeBlock,
 	type CodeBlockProps,
 	type CodeTab,
-} from "./features/code-block/index.js";
+} from "./features/code-block/index";
 export {
 	CopyCommand,
 	type CopyCommandProps,
-} from "./features/copy-command/index.js";
+} from "./features/copy-command/index";
 export {
 	type SearchEntry,
 	type SearchHotkeyActions,
 	SearchPalette,
 	type SearchPaletteProps,
 	useSearchHotkeys,
-} from "./features/search-palette/index.js";
+} from "./features/search-palette/index";
 export {
 	ThemeToggle,
 	type ThemeToggleProps,
-} from "./features/theme-toggle/index.js";
-export { getComponentMeta } from "./getComponentMeta.js";
-export { childText } from "./shared/lib/childText.js";
-export { cx } from "./shared/lib/cx.js";
-export { propsToRows } from "./shared/lib/propsToRows.js";
-export { slugify } from "./shared/lib/slugify.js";
+} from "./features/theme-toggle/index";
+export { getComponentMeta } from "./getComponentMeta";
+export { childText } from "./shared/lib/childText";
+export { cx } from "./shared/lib/cx";
+export { propsToRows } from "./shared/lib/propsToRows";
+export { slugify } from "./shared/lib/slugify";
 export {
 	ARROW_CLASS,
 	Button,
@@ -32,9 +32,9 @@ export {
 	type ButtonSize,
 	type ButtonVariant,
 	buttonClass,
-} from "./shared/ui/button/index.js";
+} from "./shared/ui/button/index";
 // Universal design-system primitives (reusable by consumer docs sites)
-export { Icon, type IconName, type IconProps } from "./shared/ui/icon/index.js";
+export { Icon, type IconName, type IconProps } from "./shared/ui/icon/index";
 export {
 	A,
 	Accordion,
@@ -69,38 +69,38 @@ export {
 	Tabs,
 	type TabsProps,
 	Ul,
-} from "./shared/ui/md/index.js";
-export { ErrorBoundary } from "./shared/ui/preview/index.js";
-export type { ComponentMeta, DefaultedOf, PropsOf } from "./types.js";
-export { allOf, generate, values } from "./variants.js";
+} from "./shared/ui/md/index";
+export { ErrorBoundary } from "./shared/ui/preview/index";
+export type { ComponentMeta, DefaultedOf, PropsOf } from "./types";
+export { allOf, generate, values } from "./variants";
 export {
 	Breadcrumbs,
 	type BreadcrumbsProps,
-} from "./widgets/breadcrumbs/index.js";
+} from "./widgets/breadcrumbs/index";
 export {
 	type DocsNavItem,
 	type DocsNavSection,
 	DocsSidebar,
 	type DocsSidebarProps,
-} from "./widgets/docs-sidebar/index.js";
+} from "./widgets/docs-sidebar/index";
 export {
 	type DocsHeading,
 	DocsToc,
 	type DocsTocProps,
 	type UseDocHeadingsOptions,
 	useDocHeadings,
-} from "./widgets/docs-toc/index.js";
-export { Layout, type LayoutProps } from "./widgets/layout/index.js";
-export { Matrix, type MatrixProps } from "./widgets/matrix/index.js";
+} from "./widgets/docs-toc/index";
+export { Layout, type LayoutProps } from "./widgets/layout/index";
+export { Matrix, type MatrixProps } from "./widgets/matrix/index";
 export {
 	Playground,
 	type PlaygroundProps,
-} from "./widgets/playground/index.js";
+} from "./widgets/playground/index";
 export {
 	type PrevNextItem,
 	PrevNextNav,
 	type PrevNextNavProps,
-} from "./widgets/prev-next-nav/index.js";
-export { Snippet, type SnippetProps } from "./widgets/snippet/index.js";
-export { Story, type StoryProps } from "./widgets/story/index.js";
-export { Variants, type VariantsProps } from "./widgets/variants/index.js";
+} from "./widgets/prev-next-nav/index";
+export { Snippet, type SnippetProps } from "./widgets/snippet/index";
+export { Story, type StoryProps } from "./widgets/story/index";
+export { Variants, type VariantsProps } from "./widgets/variants/index";

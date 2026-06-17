@@ -1,7 +1,7 @@
-import { Icon } from "@react/shared/ui/icon/index.js";
+import { Icon } from "@react/shared/ui/icon/index";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { tv } from "tailwind-variants";
-import type { SearchEntry } from "../model/types.js";
+import type { SearchEntry } from "../model/types";
 
 export interface SearchPaletteProps {
 	/** The search index to query. */

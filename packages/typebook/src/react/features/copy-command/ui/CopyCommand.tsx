@@ -1,4 +1,4 @@
-import { Icon } from "@react/shared/ui/icon/index.js";
+import { Icon } from "@react/shared/ui/icon/index";
 import { useCallback, useState } from "react";
 import { tv } from "tailwind-variants";
 

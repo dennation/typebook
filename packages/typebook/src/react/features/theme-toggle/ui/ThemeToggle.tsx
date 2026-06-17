@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { THEME_STORAGE_KEY } from "@/constants.js";
-import { Icon } from "../../../shared/ui/icon/index.js";
+import { THEME_STORAGE_KEY } from "@/constants";
+import { Icon } from "../../../shared/ui/icon/index";
 
 type Theme = "light" | "dark";
 

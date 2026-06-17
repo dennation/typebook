@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { parseProgram } from "../ast.js";
-import { mayContainSnippet, scanSnippets } from "../snippet-scanner.js";
+import { parseProgram } from "../ast";
+import { mayContainSnippet, scanSnippets } from "../snippet-scanner";
 
 /** Parse then scan, mirroring how the plugin feeds a pre-parsed program + source. */
 async function scan(filename: string, content: string) {

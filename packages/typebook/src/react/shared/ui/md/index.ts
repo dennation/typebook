@@ -2,16 +2,16 @@ export {
 	Accordion,
 	type AccordionItem,
 	type AccordionProps,
-} from "./Accordion.js";
-export { Callout, type CalloutProps, type CalloutType } from "./Callout.js";
-export { Cards, DocCard, type DocCardProps } from "./Cards.js";
-export { H2, H3 } from "./headings.js";
-export { MDTable, type MDTableProps } from "./MDTable.js";
+} from "./Accordion";
+export { Callout, type CalloutProps, type CalloutType } from "./Callout";
+export { Cards, DocCard, type DocCardProps } from "./Cards";
+export { H2, H3 } from "./headings";
+export { MDTable, type MDTableProps } from "./MDTable";
 export {
 	type PropRowData,
 	PropsReference,
 	type PropsReferenceProps,
-} from "./PropsReference.js";
+} from "./PropsReference";
 export {
 	A,
 	type AProps,
@@ -24,6 +24,6 @@ export {
 	P,
 	Quote,
 	Ul,
-} from "./prose.js";
-export { Step, type StepProps, Steps } from "./Steps.js";
-export { type TabItem, Tabs, type TabsProps } from "./Tabs.js";
+} from "./prose";
+export { Step, type StepProps, Steps } from "./Steps";
+export { type TabItem, Tabs, type TabsProps } from "./Tabs";

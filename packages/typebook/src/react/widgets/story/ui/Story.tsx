@@ -1,7 +1,7 @@
-import { Preview } from "@react/shared/ui/preview/index.js";
-import type { ComponentMeta } from "@react/types.js";
+import { Preview } from "@react/shared/ui/preview/index";
+import type { ComponentMeta } from "@react/types";
 import { createElement, useCallback } from "react";
-import type { MissingProps } from "@/types.js";
+import type { MissingProps } from "@/types";
 
 export type StoryProps<Props extends object, Defaulted extends keyof Props> = {
 	of: ComponentMeta<Props, Defaulted>;

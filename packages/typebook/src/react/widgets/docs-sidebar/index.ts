@@ -1,2 +1,2 @@
-export type { DocsNavItem, DocsNavSection } from "./model/types.js";
-export { DocsSidebar, type DocsSidebarProps } from "./ui/DocsSidebar.js";
+export type { DocsNavItem, DocsNavSection } from "./model/types";
+export { DocsSidebar, type DocsSidebarProps } from "./ui/DocsSidebar";

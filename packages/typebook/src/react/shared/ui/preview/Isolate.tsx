@@ -1,4 +1,4 @@
-import { IFRAME_STYLE } from "@react/shared/config/cssConstants.js";
+import { IFRAME_STYLE } from "@react/shared/config/cssConstants";
 import {
 	type PropsWithChildren,
 	type ReactNode,
@@ -7,7 +7,7 @@ import {
 	useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { LOG_PREFIX } from "@/constants.js";
+import { LOG_PREFIX } from "@/constants";
 
 type IframeFrameProps = PropsWithChildren<{
 	className?: string;

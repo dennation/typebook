@@ -1,9 +1,9 @@
 import type { UnpluginFactory } from "unplugin";
 import { createUnplugin } from "unplugin";
-import { LOG_PREFIX, PACKAGE_NAME } from "../constants.js";
-import { transformTypebook } from "../core/transform.js";
-import { TypeScriptClient } from "../core/ts-client.js";
-import type { TypebookConfig } from "../types.js";
+import { LOG_PREFIX, PACKAGE_NAME } from "../constants";
+import { transformTypebook } from "../core/transform";
+import { TypeScriptClient } from "../core/ts-client";
+import type { TypebookConfig } from "../types";
 
 /** Source files the plugin will consider rewriting (registrations + snippets live in TS/JS). */
 const TRANSFORM_ID = /\.(tsx|ts|jsx|js|mts|cts|mjs|cjs)(\?.*)?$/;

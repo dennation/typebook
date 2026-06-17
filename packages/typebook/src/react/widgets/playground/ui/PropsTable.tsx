@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import type { PropInfo } from "@/types.js";
-import { PropRow } from "./PropRow.js";
+import type { PropInfo } from "@/types";
+import { PropRow } from "./PropRow";
 
 export interface PropsTableProps {
 	props: PropInfo[];

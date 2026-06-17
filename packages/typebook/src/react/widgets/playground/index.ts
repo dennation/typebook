@@ -1,1 +1,1 @@
-export { Playground, type PlaygroundProps } from "./ui/Playground.js";
+export { Playground, type PlaygroundProps } from "./ui/Playground";

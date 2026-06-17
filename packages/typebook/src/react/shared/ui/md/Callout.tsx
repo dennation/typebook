@@ -1,4 +1,4 @@
-import { Icon, type IconProps } from "@react/shared/ui/icon/index.js";
+import { Icon, type IconProps } from "@react/shared/ui/icon/index";
 import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";
 

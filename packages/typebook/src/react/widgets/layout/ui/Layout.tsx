@@ -1,9 +1,9 @@
-import { type Theme, useTheme } from "@react/entities/theme/index.js";
+import { type Theme, useTheme } from "@react/entities/theme/index";
 import styles from "@react/shared/config/styles.css?inline";
 import type { ReactNode } from "react";
 import { useInsertionEffect } from "react";
 import { tv } from "tailwind-variants";
-import { STYLE_ELEMENT_ID } from "@/constants.js";
+import { STYLE_ELEMENT_ID } from "@/constants";
 
 const layout = tv({
 	slots: {

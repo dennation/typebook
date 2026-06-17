@@ -1,4 +1,4 @@
-import type { PropInfo } from "@/types.js";
+import type { PropInfo } from "@/types";
 
 /** Whether the Playground can render an interactive control for this prop. */
 export function isControllable(prop: PropInfo): boolean {

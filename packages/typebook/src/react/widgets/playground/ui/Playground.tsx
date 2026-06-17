@@ -1,7 +1,7 @@
-import { Preview } from "@react/shared/ui/preview/index.js";
-import type { ComponentMeta } from "@react/types.js";
+import { Preview } from "@react/shared/ui/preview/index";
+import type { ComponentMeta } from "@react/types";
 import { createElement, useCallback, useState } from "react";
-import { PropsTable } from "./PropsTable.js";
+import { PropsTable } from "./PropsTable";
 
 export interface PlaygroundProps {
 	of: ComponentMeta<any>;

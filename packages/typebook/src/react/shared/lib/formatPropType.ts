@@ -1,4 +1,4 @@
-import type { PropInfo } from "@/types.js";
+import type { PropInfo } from "@/types";
 
 /** Render a {@link PropInfo}'s type as a human-readable string (e.g. `"sm" | "md"`). */
 export function formatPropType(prop: PropInfo): string {
