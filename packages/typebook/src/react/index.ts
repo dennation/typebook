@@ -36,41 +36,39 @@ export {
 // Universal design-system primitives (reusable by consumer docs sites)
 export { Icon, type IconName, type IconProps } from "./shared/ui/icon/index.js";
 export {
-	A,
 	Accordion,
 	type AccordionItem,
 	type AccordionProps,
-	type AProps,
-	C,
+} from "./shared/ui/accordion/index.js";
+export {
 	Callout,
 	type CalloutProps,
 	type CalloutType,
-	Cards,
-	DocCard,
-	type DocCardProps,
-	H2,
-	H3,
+} from "./shared/ui/callout/index.js";
+export { Cards, DocCard, type DocCardProps } from "./shared/ui/cards/index.js";
+export { H2, H3 } from "./shared/ui/headings/index.js";
+export { MDTable, type MDTableProps } from "./shared/ui/md-table/index.js";
+export { ErrorBoundary } from "./shared/ui/preview/index.js";
+export {
+	type PropRowData,
+	PropsReference,
+	type PropsReferenceProps,
+} from "./shared/ui/props-reference/index.js";
+export {
+	A,
+	type AProps,
+	C,
 	Hr,
 	ImgPlaceholder,
 	Lead,
 	Li,
-	MDTable,
-	type MDTableProps,
 	Ol,
 	P,
-	type PropRowData,
-	PropsReference,
-	type PropsReferenceProps,
 	Quote,
-	Step,
-	type StepProps,
-	Steps,
-	type TabItem,
-	Tabs,
-	type TabsProps,
 	Ul,
-} from "./shared/ui/md/index.js";
-export { ErrorBoundary } from "./shared/ui/preview/index.js";
+} from "./shared/ui/prose/index.js";
+export { Step, type StepProps, Steps } from "./shared/ui/steps/index.js";
+export { type TabItem, Tabs, type TabsProps } from "./shared/ui/tabs/index.js";
 export type { ComponentMeta, DefaultedOf, PropsOf } from "./types.js";
 export { allOf, generate, values } from "./variants.js";
 export {
