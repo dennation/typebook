@@ -14,7 +14,7 @@ import { PageNavigation } from "./PageNavigation.js";
 import { PagePlayground } from "./PagePlayground.js";
 import { PageProse } from "./PageProse.js";
 import { PageQuickStart } from "./PageQuickStart.js";
-import { PageRegister } from "./PageRegister.js";
+import { PageGetComponentMeta } from "./PageGetComponentMeta.js";
 import { PageSearch } from "./PageSearch.js";
 import { PageSnippet } from "./PageSnippet.js";
 import { PageSteps } from "./PageSteps.js";
@@ -49,7 +49,7 @@ export const PAGES: Record<string, ComponentType<{ go: DocsGo }>> = {
 	search: PageSearch,
 	navigation: PageNavigation,
 	"copy-command": PageCopyCommand,
-	register: PageRegister,
+	"get-component-meta": PageGetComponentMeta,
 	"variant-helpers": PageVariantHelpers,
 	"bundler-plugin": PageBundlerPlugin,
 	hooks: PageHooks,

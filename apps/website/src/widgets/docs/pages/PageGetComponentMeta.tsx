@@ -9,7 +9,7 @@ import {
 	PropsReference,
 } from "@dennation/typebook/react";
 
-export function PageRegister() {
+export function PageGetComponentMeta() {
 	return (
 		<>
 			<Lead>

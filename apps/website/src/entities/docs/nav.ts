@@ -59,7 +59,7 @@ export const NAV: DocsNavSection[] = [
 		label: "API Reference",
 		icon: "cog",
 		items: [
-			{ slug: "register", title: "getComponentMeta()" },
+			{ slug: "get-component-meta", title: "getComponentMeta()" },
 			{ slug: "variant-helpers", title: "Variant helpers" },
 			{ slug: "bundler-plugin", title: "Bundler plugin" },
 			{ slug: "hooks", title: "Hooks" },
@@ -220,7 +220,7 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		desc: "Copy-able install-command pill",
 	},
 	{
-		slug: "register",
+		slug: "get-component-meta",
 		title: "getComponentMeta()",
 		section: "API Reference",
 		desc: "Register a component for documentation",
