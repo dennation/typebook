@@ -5,7 +5,7 @@ import {
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
 } from "@dennation/typebook/react";
 
 export function PageMatrix() {
@@ -22,7 +22,7 @@ export function PageMatrix() {
 				file="src/pages/button.tsx"
 				icon={<Icon.react size={14} />}
 				lang="tsx"
-				code={`import { allOf } from "@dennation/typebook";
+				code={`import { allOf } from "@dennation/typebook/react";
 import { Matrix } from "@dennation/typebook/react";
 
 <Matrix
@@ -37,15 +37,15 @@ import { Matrix } from "@dennation/typebook/react";
 			</P>
 
 			<H2>Props</H2>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "of",
-						type: "ComponentHandle",
+						type: "ComponentMeta",
 						required: true,
 						desc: (
 							<>
-								The handle returned by <C>register()</C>.
+								The handle returned by <C>getComponentMeta()</C>.
 							</>
 						),
 					},

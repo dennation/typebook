@@ -9,9 +9,9 @@ export { H2, H3 } from "./headings.js";
 export { MDTable, type MDTableProps } from "./MDTable.js";
 export {
 	type PropRowData,
-	PropsTable,
-	type PropsTableProps,
-} from "./PropsTable.js";
+	PropsReference,
+	type PropsReferenceProps,
+} from "./PropsReference.js";
 export {
 	A,
 	type AProps,

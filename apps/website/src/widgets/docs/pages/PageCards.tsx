@@ -2,14 +2,18 @@ import {
 	C,
 	Cards,
 	DocCard,
+	getComponentMeta,
 	H2,
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
+	propsToRows,
 	Snippet,
 } from "@dennation/typebook/react";
 import type { DocsGo } from "../go.js";
+
+const docCard = getComponentMeta(DocCard);
 
 export function PageCards({ go }: { go: DocsGo }) {
 	return (
@@ -41,32 +45,7 @@ export function PageCards({ go }: { go: DocsGo }) {
 			</Snippet>
 
 			<H2>DocCard props</H2>
-			<PropsTable
-				props={[
-					{
-						name: "title",
-						type: "string",
-						required: true,
-						desc: "Card heading; a chevron is appended automatically.",
-					},
-					{
-						name: "desc",
-						type: "string",
-						required: true,
-						desc: "One-line description under the title.",
-					},
-					{
-						name: "icon",
-						type: "ReactNode",
-						desc: "Accent-colored icon above the title.",
-					},
-					{
-						name: "onClick",
-						type: "() => void",
-						desc: "Navigation handler. Cards render as buttons, so routing stays yours.",
-					},
-				]}
-			/>
+			<PropsReference props={propsToRows(docCard.props)} />
 			<P>
 				<C>Cards</C> itself takes only <C>children</C>.
 			</P>

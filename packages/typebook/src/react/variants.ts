@@ -1,20 +1,15 @@
-import type {
-	AllOfConfig,
-	ComponentHandle,
-	GenerateConfig,
-	PropsOf,
-	ValuesConfig,
-} from "./types.js";
+import type { AllOfConfig, GenerateConfig, ValuesConfig } from "@/types.js";
+import type { ComponentMeta, PropsOf } from "./types.js";
 
 /**
  * Auto-generate variants for a prop from its TypeScript type
- * (literal union or boolean). The first argument is the `ComponentHandle`
- * returned by `registerComponent()` — used for prop-name autocomplete.
+ * (literal union or boolean). The first argument is the `ComponentMeta`
+ * returned by `getComponentMeta()` — used for prop-name autocomplete.
  */
-export function allOf<
-	R extends ComponentHandle<any>,
-	K extends keyof PropsOf<R>,
->(_of: R, prop: K): AllOfConfig {
+export function allOf<R extends ComponentMeta<any>, K extends keyof PropsOf<R>>(
+	_of: R,
+	prop: K,
+): AllOfConfig {
 	return { __type: "allOf", prop: String(prop) };
 }
 
@@ -23,7 +18,7 @@ export function allOf<
  * Values are typed against the prop's TypeScript type.
  */
 export function values<
-	R extends ComponentHandle<any>,
+	R extends ComponentMeta<any>,
 	K extends keyof PropsOf<R>,
 >(_of: R, prop: K, values: PropsOf<R>[K][]): ValuesConfig {
 	return { __type: "values", prop: String(prop), values };
@@ -34,7 +29,7 @@ export function values<
  * The function's return type is constrained to the prop's TypeScript type.
  */
 export function generate<
-	R extends ComponentHandle<any>,
+	R extends ComponentMeta<any>,
 	K extends keyof PropsOf<R>,
 >(_of: R, prop: K, fn: () => PropsOf<R>[K], count: number): GenerateConfig {
 	return { __type: "generate", prop: String(prop), fn, count };

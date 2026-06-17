@@ -1,7 +1,7 @@
-import { registerComponent } from "@dennation/typebook";
+import { getComponentMeta } from "@dennation/typebook/react";
 import { Basic } from "../components/Basic";
 
-export const basic = registerComponent(Basic, {
+export const basic = getComponentMeta(Basic, {
 	defaultProps: { label: "Hello" },
 	pick: ["size", "disabled"],
 });

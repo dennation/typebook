@@ -1,9 +1,6 @@
 import { LOG_PREFIX } from "../constants.js";
 import { parseProgram } from "./ast.js";
-import {
-	mayContainRegistration,
-	scanRegistrations,
-} from "./registry-scanner.js";
+import { mayContainMetaCall, scanMetaCalls } from "./meta-scanner.js";
 import { mayContainSnippet, scanSnippets } from "./snippet-scanner.js";
 import type { TypeScriptClient } from "./ts-client.js";
 
@@ -33,7 +30,7 @@ interface Edit {
  * generated file. Mirrors fumadocs' `transformStoryFile`: the module is parsed once,
  * both collectors run on the one AST, and the results are spliced back into the
  * source text:
- * - each `registerComponent(Component, config?)` call gets a `__props: PropInfo[]`
+ * - each `getComponentMeta(Component, config?)` call gets a `__props: PropInfo[]`
  *   literal (extracted via the TypeScript client) injected into its config object;
  * - each `<Snippet>{fn}</Snippet>` element gets the sliced source of `fn`'s body
  *   injected as a `__snippetSource` prop.
@@ -48,7 +45,7 @@ export async function transformTypebook(
 	filePath: string,
 	tsClient: TypeScriptClient | null,
 ): Promise<string | undefined> {
-	const hasRegistration = mayContainRegistration(code);
+	const hasRegistration = mayContainMetaCall(code);
 	const hasSnippet = mayContainSnippet(code);
 	if (!hasRegistration && !hasSnippet) return undefined;
 
@@ -56,17 +53,17 @@ export async function transformTypebook(
 	const edits: Edit[] = [];
 
 	if (hasRegistration) {
-		for (const call of scanRegistrations(program)) {
+		for (const call of scanMetaCalls(program)) {
 			if (call.inject.kind === "unsupported") {
 				console.warn(
 					LOG_PREFIX,
-					`registerComponent() in ${filePath} has a non-literal config; props not injected.`,
+					`getComponentMeta() in ${filePath} has a non-literal config; props not injected.`,
 				);
 				continue;
 			}
 			const props =
 				(tsClient &&
-					(await tsClient.getRegisterProps(filePath, call.callStart, code))) ||
+					(await tsClient.getProps(filePath, call.callStart, code))) ||
 				[];
 			const literal = JSON.stringify(props);
 			edits.push(

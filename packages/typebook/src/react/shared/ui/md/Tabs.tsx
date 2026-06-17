@@ -6,6 +6,7 @@ export interface TabItem {
 }
 
 export interface TabsProps {
+	/** Panels to switch between: { label: string, content: ReactNode }. Labels double as keys, so keep them unique. */
 	tabs: TabItem[];
 }
 

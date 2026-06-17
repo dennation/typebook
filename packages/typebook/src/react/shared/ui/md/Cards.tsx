@@ -9,9 +9,13 @@ export const Cards = ({ children }: { children: ReactNode }) => (
 );
 
 export interface DocCardProps {
+	/** Accent-colored icon above the title. */
 	icon?: ReactNode;
+	/** Card heading; a chevron is appended automatically. */
 	title: string;
+	/** One-line description under the title. */
 	desc: string;
+	/** Navigation handler. Cards render as buttons, so routing stays yours. */
 	onClick?: () => void;
 }
 

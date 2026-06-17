@@ -1,14 +1,15 @@
 import { getGridStyle } from "@react/shared/lib/getGridStyle.js";
 import { PreviewFrame } from "@react/shared/ui/preview/index.js";
+import type { ComponentMeta } from "@react/types.js";
 import { createElement, useCallback } from "react";
 import { resolveVariantConfig } from "@/resolve.js";
-import type { ComponentHandle, MissingProps, VariantConfig } from "@/types.js";
+import type { MissingProps, VariantConfig } from "@/types.js";
 
 export type VariantsProps<
 	Props extends object,
 	Defaulted extends keyof Props,
 > = {
-	of: ComponentHandle<Props, Defaulted>;
+	of: ComponentMeta<Props, Defaulted>;
 	items: VariantConfig;
 	columns?: number;
 	isolate?: boolean;

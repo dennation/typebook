@@ -1,18 +1,17 @@
-export { registerComponent } from "./registerComponent.js";
+// Type-only entry. The runtime authoring API (getComponentMeta, allOf, values,
+// generate) and the React runtime live in `@dennation/typebook/react`; bundler
+// plugins live in `@dennation/typebook/{vite,rollup,…}`. This entry exists so
+// types (e.g. TypebookConfig for a bundler config) are reachable without React.
 export type {
 	AllOfConfig,
-	ComponentHandle,
-	DefaultedOf,
 	GenerateConfig,
+	MetaConfigBase,
+	MetaConfigOmit,
+	MetaConfigPick,
 	MissingProps,
 	PropInfo,
-	PropsOf,
 	PropType,
-	RegisterConfigBase,
-	RegisterConfigOmit,
-	RegisterConfigPick,
 	TypebookConfig,
 	ValuesConfig,
 	VariantConfig,
 } from "./types.js";
-export { allOf, generate, values } from "./variants.js";

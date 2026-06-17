@@ -7,6 +7,7 @@ export interface AccordionItem {
 }
 
 export interface AccordionProps {
+	/** The questions and answers: { q: string, a: ReactNode }. Questions double as keys, so keep them unique. */
 	items: AccordionItem[];
 }
 

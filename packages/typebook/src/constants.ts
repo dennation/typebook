@@ -4,10 +4,7 @@
  */
 export const PACKAGE_NAME = "typebook";
 
-/** npm package name — used to verify registerComponent() imports at scan time */
-export const NPM_PACKAGE_NAME = "@dennation/typebook";
-
-/** React subpath export — used to verify <Snippet> imports at scan time */
+/** React subpath export — used to verify getComponentMeta() and <Snippet> imports at scan time */
 export const NPM_REACT_PACKAGE_NAME = "@dennation/typebook/react";
 
 /** Log prefix for console output */

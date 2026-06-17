@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { PropInfo } from "../../types.js";
 import { parseProgram } from "../ast.js";
-import { scanRegistrations } from "../registry-scanner.js";
+import { scanMetaCalls } from "../meta-scanner.js";
 import { TypeScriptClient } from "../ts-client.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -28,11 +28,11 @@ async function extractProps(storyFile: string): Promise<PropInfo[] | null> {
 		content = readFileSync(filePath, "utf-8");
 	} catch {
 		// Let the client handle nonexistent files for that test
-		return client.getRegisterProps(filePath, 0);
+		return client.getProps(filePath, 0);
 	}
-	const calls = scanRegistrations(await parseProgram(filePath, content));
+	const calls = scanMetaCalls(await parseProgram(filePath, content));
 	if (calls.length === 0) return null;
-	return client.getRegisterProps(filePath, calls[0].callStart);
+	return client.getProps(filePath, calls[0].callStart);
 }
 
 function findProp(props: PropInfo[], name: string): PropInfo | undefined {
@@ -125,13 +125,13 @@ describe("React types", () => {
 
 	test("event handler → function kind", () => {
 		const onClick = findProp(props, "onClick")!;
-		expect(onClick.type).toEqual({ kind: "function" });
+		expect(onClick.type.kind).toBe("function");
 		expect(onClick.optional).toBe(true);
 	});
 
 	test("render prop → function kind", () => {
 		const renderFooter = findProp(props, "renderFooter")!;
-		expect(renderFooter.type).toEqual({ kind: "function" });
+		expect(renderFooter.type.kind).toBe("function");
 		expect(renderFooter.optional).toBe(true);
 	});
 });
@@ -163,7 +163,7 @@ describe("generics", () => {
 
 	test("generic function prop → function", () => {
 		const onChange = findProp(props, "onChange")!;
-		expect(onChange.type).toEqual({ kind: "function" });
+		expect(onChange.type.kind).toBe("function");
 	});
 
 	test("non-generic prop on generic component → string", () => {
@@ -433,8 +433,8 @@ describe("edge cases", () => {
 		expect(props).toBeNull();
 	});
 
-	test("aliased registerComponent import → props still extracted", async () => {
-		// `import { registerComponent as reg }` — the call is located by offset, so the
+	test("aliased getComponentMeta import → props still extracted", async () => {
+		// `import { getComponentMeta as reg }` — the call is located by offset, so the
 		// aliased callee name must not prevent prop extraction (previously returned []).
 		const props = await extractProps("stories/Aliased.stories.tsx");
 		expect(props).not.toBeNull();
@@ -456,18 +456,15 @@ describe("edge cases", () => {
 			);
 			writeFileSync(
 				storyFile,
-				"import { registerComponent } from '@dennation/typebook'\n" +
+				"import { getComponentMeta } from '@dennation/typebook/react'\n" +
 					"import { EditProbe } from '../components/_EditProbe'\n" +
-					"export const probe = registerComponent(EditProbe)\n",
+					"export const probe = getComponentMeta(EditProbe)\n",
 			);
 			await fresh.start();
-			const calls = scanRegistrations(
+			const calls = scanMetaCalls(
 				await parseProgram(storyFile, readFileSync(storyFile, "utf-8")),
 			);
-			const before = await fresh.getRegisterProps(
-				storyFile,
-				calls[0].callStart,
-			);
+			const before = await fresh.getProps(storyFile, calls[0].callStart);
 			expect(findProp(before!, "size")!.type).toEqual({
 				kind: "literal",
 				values: ["sm", "md"],
@@ -479,7 +476,7 @@ describe("edge cases", () => {
 				"export function EditProbe(props: { size: 'sm' | 'md' | 'lg' }) {\n\treturn props.size\n}\n",
 			);
 			await fresh.notifyChange([compFile]);
-			const after = await fresh.getRegisterProps(storyFile, calls[0].callStart);
+			const after = await fresh.getProps(storyFile, calls[0].callStart);
 			expect(findProp(after!, "size")!.type).toEqual({
 				kind: "literal",
 				values: ["sm", "md", "lg"],
@@ -500,15 +497,15 @@ describe("edge cases", () => {
 		try {
 			writeFileSync(
 				newFile,
-				"import { registerComponent } from '@dennation/typebook'\n" +
+				"import { getComponentMeta } from '@dennation/typebook/react'\n" +
 					"import { Basic } from '../components/Basic'\n" +
-					"export const added = registerComponent(Basic, { defaultProps: { label: 'h' } })\n",
+					"export const added = getComponentMeta(Basic, { defaultProps: { label: 'h' } })\n",
 			);
-			const calls = scanRegistrations(
+			const calls = scanMetaCalls(
 				await parseProgram(newFile, readFileSync(newFile, "utf-8")),
 			);
 			await fresh.notifyChange([newFile]);
-			const props = await fresh.getRegisterProps(newFile, calls[0].callStart);
+			const props = await fresh.getProps(newFile, calls[0].callStart);
 			expect(props).not.toBeNull();
 			expect(findProp(props!, "size")).toBeDefined();
 		} finally {

@@ -2,13 +2,17 @@ import {
 	C,
 	Callout,
 	CodeBlock,
+	getComponentMeta,
 	H2,
 	H3,
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
+	propsToRows,
 } from "@dennation/typebook/react";
+
+const codeBlock = getComponentMeta(CodeBlock);
 
 export function PageCodeBlock() {
 	return (
@@ -61,57 +65,7 @@ export function PageCodeBlock() {
 			/>
 
 			<H2>Props</H2>
-			<PropsTable
-				props={[
-					{
-						name: "code",
-						type: "string",
-						desc: (
-							<>
-								The snippet source (single-snippet form; ignored when{" "}
-								<C>tabs</C> is set).
-							</>
-						),
-					},
-					{
-						name: "lang",
-						type: "string",
-						default: '"tsx"',
-						desc: "Any Shiki language id (tsx, css, yaml, python, …). Grammars load on demand; unknown ids fall back to plain text.",
-					},
-					{
-						name: "file",
-						type: "string",
-						desc: "Filename shown in the header bar (single-snippet form).",
-					},
-					{
-						name: "icon",
-						type: "ReactNode",
-						desc: "Small icon rendered next to the filename.",
-					},
-					{
-						name: "tabs",
-						type: "CodeTab[]",
-						desc: (
-							<>
-								Tabbed variants: <C>{"{ label, code, lang?, file?, icon? }"}</C>
-								.
-							</>
-						),
-					},
-					{
-						name: "showLineNumbers",
-						type: "boolean",
-						desc: "Render a line-number gutter.",
-					},
-					{
-						name: "highlightLines",
-						type: "number[]",
-						default: "[]",
-						desc: "1-based line numbers to tint with the accent color.",
-					},
-				]}
-			/>
+			<PropsReference props={propsToRows(codeBlock.props)} />
 
 			<Callout type="info" title="Async by design">
 				Shiki and its grammars load lazily on the first render; until then the

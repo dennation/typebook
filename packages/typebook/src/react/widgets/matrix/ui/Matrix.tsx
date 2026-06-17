@@ -1,10 +1,11 @@
+import type { ComponentMeta } from "@react/types.js";
 import { createElement, useCallback } from "react";
-import type { ComponentHandle, MissingProps, VariantConfig } from "@/types.js";
+import type { MissingProps, VariantConfig } from "@/types.js";
 import { buildMatrixRows } from "../lib/buildMatrixRows.js";
 import { MatrixTable } from "./MatrixTable.js";
 
 export type MatrixProps<Props extends object, Defaulted extends keyof Props> = {
-	of: ComponentHandle<Props, Defaulted>;
+	of: ComponentMeta<Props, Defaulted>;
 	x: VariantConfig;
 	y: VariantConfig[];
 	isolate?: boolean;

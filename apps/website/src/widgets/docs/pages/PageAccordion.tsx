@@ -1,11 +1,15 @@
 import {
 	Accordion,
 	C,
+	getComponentMeta,
 	H2,
 	Lead,
-	PropsTable,
+	PropsReference,
+	propsToRows,
 	Snippet,
 } from "@dennation/typebook/react";
+
+const accordion = getComponentMeta(Accordion);
 
 export function PageAccordion() {
 	return (
@@ -40,22 +44,7 @@ export function PageAccordion() {
 			</Snippet>
 
 			<H2>Props</H2>
-			<PropsTable
-				props={[
-					{
-						name: "items",
-						type: "AccordionItem[]",
-						required: true,
-						desc: (
-							<>
-								The questions and answers:{" "}
-								<C>{"{ q: string, a: ReactNode }"}</C>. Questions double as
-								keys, so keep them unique.
-							</>
-						),
-					},
-				]}
-			/>
+			<PropsReference props={propsToRows(accordion.props)} />
 		</>
 	);
 }

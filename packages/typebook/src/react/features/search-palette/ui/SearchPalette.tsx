@@ -6,7 +6,9 @@ import type { SearchEntry } from "../model/types.js";
 export interface SearchPaletteProps {
 	/** The search index to query. */
 	index: SearchEntry[];
+	/** Called on Escape, backdrop click or after choosing a result. */
 	onClose: () => void;
+	/** Navigation callback — the palette knows nothing about your router. */
 	onNavigate: (slug: string, heading?: string) => void;
 }
 

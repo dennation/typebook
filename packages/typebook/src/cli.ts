@@ -2,7 +2,7 @@ import { PACKAGE_NAME } from "./constants.js";
 
 /**
  * Typebook no longer generates files. Component prop metadata and snippet sources
- * are injected directly into each `registerComponent()` / `<Snippet>` call by the
+ * are injected directly into each `getComponentMeta()` / `<Snippet>` call by the
  * bundler plugin at build time, so there is nothing to pre-generate from a CLI.
  */
 console.log(`

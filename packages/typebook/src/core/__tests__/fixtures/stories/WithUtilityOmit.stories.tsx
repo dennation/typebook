@@ -1,7 +1,7 @@
-import { registerComponent } from "@dennation/typebook";
+import { getComponentMeta } from "@dennation/typebook/react";
 import { OmittedComponent } from "../components/WithUtilityTypes";
 
-export const comp = registerComponent(OmittedComponent, {
+export const comp = getComponentMeta(OmittedComponent, {
 	defaultProps: { a: "hello" },
 	pick: ["a", "b", "d"],
 });

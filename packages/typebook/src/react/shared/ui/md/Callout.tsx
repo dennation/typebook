@@ -18,8 +18,14 @@ const CALLOUT_C: Record<CalloutType, string> = {
 };
 
 export interface CalloutProps {
+	/**
+	 * Visual intent. Controls the border, background tint and icon.
+	 * @default "info"
+	 */
 	type?: CalloutType;
+	/** Optional bold heading rendered above the body. */
 	title?: string;
+	/** Body content. A plain string is wrapped in a paragraph; rich children render as-is. */
 	children: ReactNode;
 }
 

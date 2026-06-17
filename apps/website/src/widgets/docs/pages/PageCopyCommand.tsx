@@ -1,11 +1,15 @@
 import {
 	C,
 	CopyCommand,
+	getComponentMeta,
 	H2,
 	Lead,
-	PropsTable,
+	PropsReference,
+	propsToRows,
 	Snippet,
 } from "@dennation/typebook/react";
+
+const copyCommand = getComponentMeta(CopyCommand);
 
 export function PageCopyCommand() {
 	return (
@@ -22,16 +26,7 @@ export function PageCopyCommand() {
 			</Snippet>
 
 			<H2>Props</H2>
-			<PropsTable
-				props={[
-					{
-						name: "cmd",
-						type: "string",
-						required: true,
-						desc: "The shell command to display and copy to the clipboard.",
-					},
-				]}
-			/>
+			<PropsReference props={propsToRows(copyCommand.props)} />
 		</>
 	);
 }

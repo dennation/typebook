@@ -1,9 +1,10 @@
 import { Preview } from "@react/shared/ui/preview/index.js";
+import type { ComponentMeta } from "@react/types.js";
 import { createElement, useCallback } from "react";
-import type { ComponentHandle, MissingProps } from "@/types.js";
+import type { MissingProps } from "@/types.js";
 
 export type StoryProps<Props extends object, Defaulted extends keyof Props> = {
-	of: ComponentHandle<Props, Defaulted>;
+	of: ComponentMeta<Props, Defaulted>;
 	isolate?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
 	? { props?: Partial<Props> }

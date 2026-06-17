@@ -7,7 +7,7 @@ import {
 	Lead,
 	Li,
 	P,
-	PropsTable,
+	PropsReference,
 	Ul,
 } from "@dennation/typebook/react";
 
@@ -50,15 +50,15 @@ export function PagePlayground() {
 			</Callout>
 
 			<H2>Props</H2>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "of",
-						type: "ComponentHandle",
+						type: "ComponentMeta",
 						required: true,
 						desc: (
 							<>
-								The handle returned by <C>register()</C>. Initial control values
+								The handle returned by <C>getComponentMeta()</C>. Initial control values
 								come from its <C>defaultProps</C>.
 							</>
 						),

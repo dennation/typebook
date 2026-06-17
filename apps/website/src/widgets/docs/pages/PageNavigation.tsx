@@ -1,13 +1,20 @@
 import {
+	Breadcrumbs,
 	C,
 	Callout,
 	CodeBlock,
+	getComponentMeta,
 	H2,
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PrevNextNav,
+	PropsReference,
+	propsToRows,
 } from "@dennation/typebook/react";
+
+const breadcrumbs = getComponentMeta(Breadcrumbs);
+const prevNextNav = getComponentMeta(PrevNextNav);
 
 export function PageNavigation() {
 	return (
@@ -63,16 +70,7 @@ export function PageNavigation() {
 				lang="tsx"
 				code={`<Breadcrumbs items={["Docs", section, title]} />`}
 			/>
-			<PropsTable
-				props={[
-					{
-						name: "items",
-						type: "ReactNode[]",
-						required: true,
-						desc: "Trail items, root first. The last one is highlighted as current.",
-					},
-				]}
-			/>
+			<PropsReference props={propsToRows(breadcrumbs.props)} />
 
 			<H2>PrevNextNav</H2>
 			<CodeBlock
@@ -84,20 +82,7 @@ export function PageNavigation() {
   onNext={() => go(next.slug)}
 />`}
 			/>
-			<PropsTable
-				props={[
-					{
-						name: "prev / next",
-						type: "{ title: string } | null",
-						desc: "Card contents; a missing side renders an empty slot to keep the grid.",
-					},
-					{
-						name: "onPrev / onNext",
-						type: "() => void",
-						desc: "Click handlers for each card.",
-					},
-				]}
-			/>
+			<PropsReference props={propsToRows(prevNextNav.props)} />
 
 			<Callout type="info" title="Bring your own router">
 				None of these components import a router. The sidebar on this site calls

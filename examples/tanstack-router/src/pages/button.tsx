@@ -1,9 +1,15 @@
-import { allOf, registerComponent } from "@dennation/typebook";
-import { Matrix, Snippet, Story, Variants } from "@dennation/typebook/react";
+import {
+	allOf,
+	getComponentMeta,
+	Matrix,
+	Snippet,
+	Story,
+	Variants,
+} from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "../components/Button";
 
-const button = registerComponent(Button, {
+const button = getComponentMeta(Button, {
 	// defaultProps: { children: 'Click me' },
 });
 

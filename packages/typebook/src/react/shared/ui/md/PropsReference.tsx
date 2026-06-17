@@ -8,12 +8,12 @@ export interface PropRowData {
 	desc: ReactNode;
 }
 
-export interface PropsTableProps {
+export interface PropsReferenceProps {
 	props: PropRowData[];
 }
 
 /** Component API table — one striped row per prop. */
-export function PropsTable({ props }: PropsTableProps) {
+export function PropsReference({ props }: PropsReferenceProps) {
 	return (
 		<div className="flex flex-col border border-border rounded-(--radius-token) overflow-hidden">
 			{props.map((p) => (

@@ -1,8 +1,6 @@
-import { registerComponent } from "@dennation/typebook";
+import { getComponentMeta } from "@dennation/typebook/react";
 import { PartialComponent } from "../components/WithUtilityTypes";
 
-export const comp = registerComponent(PartialComponent,
-	{
-		pick: ["a", "b", "c", "d"],
-	},
-);
+export const comp = getComponentMeta(PartialComponent, {
+	pick: ["a", "b", "c", "d"],
+});

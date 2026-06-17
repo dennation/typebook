@@ -3,14 +3,18 @@ import {
 	Callout,
 	Cards,
 	DocCard,
+	getComponentMeta,
 	H2,
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
+	propsToRows,
 	Snippet,
 } from "@dennation/typebook/react";
 import type { DocsGo } from "../go.js";
+
+const callout = getComponentMeta(Callout);
 
 export function PageCallout({ go }: { go: DocsGo }) {
 	return (
@@ -51,27 +55,7 @@ export function PageCallout({ go }: { go: DocsGo }) {
 			</div>
 
 			<H2>Props</H2>
-			<PropsTable
-				props={[
-					{
-						name: "type",
-						type: '"info" | "warning" | "danger" | "success"',
-						default: '"info"',
-						desc: "Visual intent. Controls the border, background tint and icon.",
-					},
-					{
-						name: "title",
-						type: "string",
-						desc: "Optional bold heading rendered above the body.",
-					},
-					{
-						name: "children",
-						type: "ReactNode",
-						required: true,
-						desc: "Body content. A plain string is wrapped in a paragraph; rich children render as-is.",
-					},
-				]}
-			/>
+			<PropsReference props={propsToRows(callout.props)} />
 
 			<H2>Notes</H2>
 			<P>

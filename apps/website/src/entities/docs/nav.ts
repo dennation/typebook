@@ -59,7 +59,7 @@ export const NAV: DocsNavSection[] = [
 		label: "API Reference",
 		icon: "cog",
 		items: [
-			{ slug: "register", title: "register()" },
+			{ slug: "get-component-meta", title: "getComponentMeta()" },
 			{ slug: "variant-helpers", title: "Variant helpers" },
 			{ slug: "bundler-plugin", title: "Bundler plugin" },
 			{ slug: "hooks", title: "Hooks" },
@@ -108,7 +108,7 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		slug: "quick-start",
 		title: "Quick Start",
 		section: "Getting Started",
-		desc: "register() a component and render its stories",
+		desc: "getComponentMeta() to register a component and render its stories",
 	},
 	{
 		slug: "theming",
@@ -193,7 +193,7 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		slug: "tables",
 		title: "Tables",
 		section: "Components",
-		desc: "MDTable for data, PropsTable for component APIs",
+		desc: "MDTable for data, PropsReference for component APIs",
 	},
 	{
 		slug: "prose",
@@ -220,8 +220,8 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		desc: "Copy-able install-command pill",
 	},
 	{
-		slug: "register",
-		title: "register()",
+		slug: "get-component-meta",
+		title: "getComponentMeta()",
 		section: "API Reference",
 		desc: "Register a component for documentation",
 	},

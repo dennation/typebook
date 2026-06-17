@@ -82,7 +82,8 @@ export class TypeScriptClient {
 			getScriptVersion: (f) => String(this.fileVersions.get(f) ?? 0),
 			getScriptSnapshot: (f) => {
 				const override = this.overrides.get(f);
-				if (override !== undefined) return ts.ScriptSnapshot.fromString(override);
+				if (override !== undefined)
+					return ts.ScriptSnapshot.fromString(override);
 				const text = ts.sys.readFile(f);
 				return text === undefined
 					? undefined
@@ -106,10 +107,10 @@ export class TypeScriptClient {
 	}
 
 	/**
-	 * Extract props for a single `registerComponent(Component, ...)` call located at `callStart`
+	 * Extract props for a single `getComponentMeta(Component, ...)` call located at `callStart`
 	 * (character offset in the source).
 	 */
-	async getRegisterProps(
+	async getProps(
 		filePath: string,
 		callStart: number,
 		content?: string,
@@ -127,16 +128,16 @@ export class TypeScriptClient {
 			return null;
 		}
 
-		const callExpr = this.findRegisterCallAt(sourceFile, callStart);
+		const callExpr = this.findMetaCallAt(sourceFile, callStart);
 		if (!callExpr) {
 			console.warn(
 				LOG_PREFIX,
-				`No registerComponent() call at offset ${callStart} in ${filePath}`,
+				`No getComponentMeta() call at offset ${callStart} in ${filePath}`,
 			);
 			return null;
 		}
 
-		return this.extractPropsFromRegisterCall(callExpr);
+		return this.extractPropsFromCall(callExpr);
 	}
 
 	/**
@@ -152,17 +153,17 @@ export class TypeScriptClient {
 	}
 
 	/**
-	 * Locate the `register(...)` CallExpression that starts at the given character offset.
+	 * Locate the `getComponentMeta(...)` CallExpression that starts at the given character offset.
 	 */
-	private findRegisterCallAt(
+	private findMetaCallAt(
 		sourceFile: ts.SourceFile,
 		callStart: number,
 	): ts.CallExpression | null {
 		let found: ts.CallExpression | null = null;
 		const visit = (node: ts.Node): void => {
 			if (found) return;
-			// The scanner already validated this is a registerComponent() call (resolving any
-			// import alias such as `import { registerComponent as reg }`). `callStart` uniquely
+			// The scanner already validated this is a getComponentMeta() call (resolving any
+			// import alias such as `import { getComponentMeta as reg }`). `callStart` uniquely
 			// pins the exact CallExpression, so match on the offset rather than re-checking the
 			// callee name — a name check here would silently reject aliased calls and drop their props.
 			if (
@@ -178,9 +179,7 @@ export class TypeScriptClient {
 		return found;
 	}
 
-	private extractPropsFromRegisterCall(
-		callExpr: ts.CallExpression,
-	): PropInfo[] | null {
+	private extractPropsFromCall(callExpr: ts.CallExpression): PropInfo[] | null {
 		const checker = this.checker;
 		if (!checker) return null;
 
@@ -327,6 +326,12 @@ export class TypeScriptClient {
 				type: typeInfo,
 			};
 			if (description) info.description = description;
+			// `@default`/`@defaultValue` JSDoc tag — the only default that survives into a
+			// `.d.ts` (parameter-destructuring defaults don't), so docs sourced from a built
+			// package can still show defaults. A destructuring default, when available, wins
+			// (applied later from the component's own source).
+			const defaultTag = getSymbolDefaultTag(checker, prop);
+			if (defaultTag) info.defaultValue = defaultTag;
 
 			props.push(info);
 		}
@@ -395,12 +400,15 @@ export class TypeScriptClient {
 
 		const signatures = type.getCallSignatures();
 		if (signatures.length > 0) {
-			return { kind: "function" };
+			// Keep the signature string so docs can show `(e: MouseEvent) => void`
+			// instead of a bare `function`.
+			return { kind: "function", raw: typeString };
 		}
 
 		if (
-			typeString.includes("ReactNode") ||
-			typeString.includes("ReactElement")
+			(typeString.includes("ReactNode") ||
+				typeString.includes("ReactElement")) &&
+			!typeString.endsWith("[]")
 		) {
 			return { kind: "node" };
 		}
@@ -446,6 +454,23 @@ function getSymbolDescription(
 	const parts = symbol.getDocumentationComment(checker);
 	if (parts.length === 0) return "";
 	return ts.displayPartsToString(parts).trim();
+}
+
+/**
+ * Read a prop's `@default` (or `@defaultValue`) JSDoc tag, or "" when absent. Unlike a
+ * parameter-destructuring default, a JSDoc tag is preserved in emitted `.d.ts`, so it's
+ * the way to surface a default for a component documented from a built package.
+ */
+function getSymbolDefaultTag(
+	checker: ts.TypeChecker,
+	symbol: ts.Symbol,
+): string {
+	for (const tag of symbol.getJsDocTags(checker)) {
+		if (tag.name === "default" || tag.name === "defaultValue") {
+			return ts.displayPartsToString(tag.text).trim();
+		}
+	}
+	return "";
 }
 
 /**

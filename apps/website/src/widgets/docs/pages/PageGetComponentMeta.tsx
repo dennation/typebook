@@ -6,15 +6,15 @@ import {
 	Icon,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
 } from "@dennation/typebook/react";
 
-export function PageRegister() {
+export function PageGetComponentMeta() {
 	return (
 		<>
 			<Lead>
-				<C>registerComponent(Component, config?)</C> registers a component for
-				documentation and returns a typed, self-contained <C>ComponentHandle</C>{" "}
+				<C>getComponentMeta(Component, config?)</C> registers a component for
+				documentation and returns a typed, self-contained <C>ComponentMeta</C>{" "}
 				that the story components consume. The bundler plugin finds these calls
 				statically and injects the extracted prop metadata into the handle's{" "}
 				<C>props</C> at build time.
@@ -25,16 +25,16 @@ export function PageRegister() {
 				file="src/pages/button.tsx"
 				icon={<Icon.react size={14} />}
 				lang="tsx"
-				code={`import { registerComponent } from "@dennation/typebook";
+				code={`import { getComponentMeta } from "@dennation/typebook/react";
 import { Button } from "../components/Button";
 
-const button = registerComponent(Button, {
+const button = getComponentMeta(Button, {
   defaultProps: { children: "Click me" },
 });`}
 			/>
 
 			<H2>Arguments</H2>
-			<PropsTable
+			<PropsReference
 				props={[
 					{
 						name: "component",

@@ -6,9 +6,13 @@ export interface PrevNextItem {
 }
 
 export interface PrevNextNavProps {
+	/** Previous-page card contents; a missing side renders an empty slot to keep the grid. */
 	prev?: PrevNextItem | null;
+	/** Next-page card contents; a missing side renders an empty slot to keep the grid. */
 	next?: PrevNextItem | null;
+	/** Click handler for the previous-page card. */
 	onPrev?: () => void;
+	/** Click handler for the next-page card. */
 	onNext?: () => void;
 }
 

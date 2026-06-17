@@ -1,7 +1,7 @@
-import { registerComponent } from "@dennation/typebook";
+import { getComponentMeta } from "@dennation/typebook/react";
 import { ComplexUnion } from "../components/WithComplexUnions";
 
-export const comp = registerComponent(ComplexUnion, {
+export const comp = getComponentMeta(ComplexUnion, {
 	defaultProps: {
 		mixed: "hello",
 		numLiteral: 1,

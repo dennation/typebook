@@ -1,14 +1,18 @@
 import {
 	C,
 	CodeBlock,
+	getComponentMeta,
 	H2,
 	Lead,
 	P,
-	PropsTable,
+	PropsReference,
+	propsToRows,
 	Snippet,
 	Step,
 	Steps,
 } from "@dennation/typebook/react";
+
+const step = getComponentMeta(Step);
 
 export function PageSteps() {
 	return (
@@ -43,20 +47,7 @@ export function PageSteps() {
 			<P>
 				<C>Steps</C> takes only <C>children</C>. Each <C>Step</C> accepts:
 			</P>
-			<PropsTable
-				props={[
-					{
-						name: "title",
-						type: "string",
-						desc: "Optional bold heading next to the step number.",
-					},
-					{
-						name: "children",
-						type: "ReactNode",
-						desc: "Step body; consecutive blocks get vertical rhythm automatically.",
-					},
-				]}
-			/>
+			<PropsReference props={propsToRows(step.props)} />
 		</>
 	);
 }
