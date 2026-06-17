@@ -1,4 +1,4 @@
-import { unplugin } from "./factory.js";
+import { unplugin } from "./factory";
 
 /** Typebook plugin for Rolldown. */
 export const typebook = unplugin.rolldown;

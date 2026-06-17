@@ -1,4 +1,4 @@
-import { CodeBlock } from "@react/features/code-block/index.js";
+import { CodeBlock } from "@react/features/code-block/index";
 import { type ReactNode, useState } from "react";
 
 export interface SnippetProps {

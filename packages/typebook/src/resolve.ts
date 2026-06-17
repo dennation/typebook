@@ -1,4 +1,4 @@
-import type { PropInfo, VariantConfig } from "./types.js";
+import type { PropInfo, VariantConfig } from "./types";
 
 interface Variant {
 	label: string;

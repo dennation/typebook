@@ -1,1 +1,1 @@
-export { Variants, type VariantsProps } from "./ui/Variants.js";
+export { Variants, type VariantsProps } from "./ui/Variants";

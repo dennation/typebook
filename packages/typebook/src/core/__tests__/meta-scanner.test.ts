@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { parseProgram } from "../ast.js";
-import { mayContainMetaCall, scanMetaCalls } from "../meta-scanner.js";
+import { parseProgram } from "../ast";
+import { mayContainMetaCall, scanMetaCalls } from "../meta-scanner";
 
 /** Parse then scan, mirroring how the plugin feeds a pre-parsed program. */
 async function scan(filename: string, content: string) {

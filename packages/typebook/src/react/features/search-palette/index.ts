@@ -1,6 +1,6 @@
 export {
 	type SearchHotkeyActions,
 	useSearchHotkeys,
-} from "./lib/useSearchHotkeys.js";
-export type { SearchEntry } from "./model/types.js";
-export { SearchPalette, type SearchPaletteProps } from "./ui/SearchPalette.js";
+} from "./lib/useSearchHotkeys";
+export type { SearchEntry } from "./model/types";
+export { SearchPalette, type SearchPaletteProps } from "./ui/SearchPalette";

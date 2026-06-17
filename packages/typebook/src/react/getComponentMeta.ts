@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 import type { Simplify } from "type-fest";
-import type { MetaConfigOmit, MetaConfigPick, PropInfo } from "@/types.js";
-import type { ComponentMeta } from "./types.js";
+import type { MetaConfigOmit, MetaConfigPick, PropInfo } from "@/types";
+import type { ComponentMeta } from "./types";
 
 /** Register a component with a `pick` whitelist of props to document. */
 export function getComponentMeta<

@@ -6,8 +6,8 @@ import type {
 	JSXElement,
 	JSXOpeningElement,
 } from "oxc-parser";
-import { NPM_REACT_PACKAGE_NAME } from "../constants.js";
-import { moduleExportName, type Program, walk } from "./ast.js";
+import { NPM_REACT_PACKAGE_NAME } from "../constants";
+import { moduleExportName, type Program, walk } from "./ast";
 
 /**
  * A single `<Snippet>{fn}</Snippet>` element found in a file. Its child must be an inline

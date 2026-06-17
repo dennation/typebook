@@ -110,12 +110,15 @@ packages/typebook/
         (no component-meta / snippets entities — handles and snippets carry their own data, injected at build time)
       shared/                       — Reusable primitives
         ui/Preview/                 — <Preview>, <PreviewFrame>, <Isolate>, <ErrorBoundary>
-        ui/md/                      — Markdown/MDX content set: Callout, MDTable, PropsReference, Tabs,
-                                      Steps, Accordion, Cards/DocCard, H2/H3, P/Lead/C/A/Ul/Ol/Li/Hr/Quote, ImgPlaceholder
+        ui/{accordion,callout,cards,md-table,props-reference,steps,tabs,prose,headings}/
+                                      — the Markdown/MDX content set, one folder per component
+                                        (no "md" wrapper folder): Callout, MDTable, PropsReference,
+                                        Tabs, Steps, Accordion, Cards/DocCard, prose (P/Lead/C/A/
+                                        Ul/Ol/Li/Hr/Quote/ImgPlaceholder), headings (H2/H3)
         lib/getGridStyle.ts         — CSS grid layout for variant grids
         lib/formatPropType.ts       — render a PropInfo's type as a string ("sm" | "md", …)
         lib/propsToRows.ts          — map a handle's extracted props → PropsReference rows (auto props table)
-        lib/slugify.ts, childText.ts — heading anchor helpers used by the md set
+        lib/slugify.ts, childText.ts — heading anchor helpers used by the content set
         config/styles.css           — Typebook UI styles (Tailwind)
         config/cssConstants.ts      — CSS constants (CENTERED_CONTENT_STYLE, IFRAME_STYLE)
 ```
@@ -123,17 +126,17 @@ packages/typebook/
 ### Build entry points
 
 - **`index`** — **React-free** types only (`TypebookConfig`, `PropInfo`, `PropType`, `MetaConfig*`, `VariantConfig`, …). Authoring API and React-coupled types (`ComponentMeta`) live in `react/`.
-- **`react/index`** — authoring API (`getComponentMeta`, `allOf`, `values`, `generate`) + `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary` + the docs component kit (md set, `CodeBlock`, `SearchPalette`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `PropsReference`, `propsToRows`). Domain types come from the base entry, not re-exported here.
+- **`react/index`** — authoring API (`getComponentMeta`, `allOf`, `values`, `generate`) + `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary` + the docs component kit (content set, `CodeBlock`, `SearchPalette`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `PropsReference`, `propsToRows`). Domain types come from the base entry, not re-exported here.
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
 - **`cli/index`** — `npx @dennation/typebook` (prints plugin usage; there is no codegen step).
 
 ### Package exports
 
 - `@dennation/typebook` — **React-free types only** (`TypebookConfig`, `MetaConfigPick`, `MetaConfigOmit`, `MetaConfigBase`, `PropInfo`, `PropType`, `MissingProps`, `VariantConfig`, …). No `react` import. Authoring API and React-coupled types live in `/react`.
-- `@dennation/typebook/react` — **authoring API:** `getComponentMeta`, `allOf`, `values`, `generate` + the React-coupled types `ComponentMeta`/`PropsOf`/`DefaultedOf` (React-free domain types come from the base entry). **storybook runtime:** `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`. **docs kit** (for consumer documentation sites): md set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines; Shiki with the One Light / One Dark Pro theme pair, each token carrying both colors so highlighting follows the theme — any language, theme-aware colors, lazy-loaded grammars), `SearchPalette`/`useSearchHotkeys`/`SearchEntry`, `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
+- `@dennation/typebook/react` — **authoring API:** `getComponentMeta`, `allOf`, `values`, `generate` + the React-coupled types `ComponentMeta`/`PropsOf`/`DefaultedOf` (React-free domain types come from the base entry). **storybook runtime:** `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`. **docs kit** (for consumer documentation sites): content set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines; Shiki with the One Light / One Dark Pro theme pair, each token carrying both colors so highlighting follows the theme — any language, theme-aware colors, lazy-loaded grammars), `SearchPalette`/`useSearchHotkeys`/`SearchEntry`, `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Icon`, `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`.
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
-> **What lives where.** The package exports only what is **universal** — the storybook runtime, the docs component kit (md set, CodeBlock, search palette, sidebar/toc/breadcrumbs/prev-next, CopyCommand), generic primitives (`Icon`, `Button`, `ThemeToggle`, `cx`) and the design system. Anything **specific to one site** (marketing landing sections, demo "gifs", section heading, scroll-reveal hook, layout constants, page content and nav data) lives in that app — see `apps/website`, not the package.
+> **What lives where.** The package exports only what is **universal** — the storybook runtime, the docs component kit (content set, CodeBlock, search palette, sidebar/toc/breadcrumbs/prev-next, CopyCommand), generic primitives (`Icon`, `Button`, `ThemeToggle`, `cx`) and the design system. Anything **specific to one site** (marketing landing sections, demo "gifs", section heading, scroll-reveal hook, layout constants, page content and nav data) lives in that app — see `apps/website`, not the package.
 
 > **Design system.** The package ships one OKLCH token system in `src/react/shared/config/theme.css` (`--bg`/`--fg`/`--accent`/… with a `[data-theme="dark"]` block), re-exported into Tailwind utilities via `@theme inline` (`bg-bg`, `text-fg-muted`, `border-border`, `text-accent`, `bg-accent-soft`, …) and including the `.reveal`/`.in` helpers, the `.tb-tok` live-highlight rule + keyframes. The old `st:`-prefixed token set is gone; the storybook UI and any consumer site read these tokens. `shared/config/styles.css` (`@import "tailwindcss"` + theme + `@source`) is injected at runtime by `<Layout>`; a consumer that renders its own page (not via `<Layout>`) supplies the CSS itself by importing the shared `theme.css` and `@source`-scanning its components (see `apps/website`).
 
@@ -342,7 +345,7 @@ pnpm --filter @dennation/example-tanstack-router-mdx typecheck
 
 ## apps/website
 
-`@dennation/website` — the marketing landing + docs site, built from the Typebok design handoff. A Vite + React app with TanStack Router (file-based routes in `src/pages/`, basepath from `import.meta.env.BASE_URL` for GitHub Pages). Site-specific components live **here**; the docs UI itself (md set, CodeBlock, SearchPalette, DocsSidebar/DocsToc, Breadcrumbs, PrevNextNav, CopyCommand) comes from `@dennation/typebook/react`. Organized FSD-style: `pages/`, `entities/`, `shared/`, `widgets/`. Deployed to GitHub Pages by `.github/workflows/deploy-website.yml` (SPA fallback via `404.html`).
+`@dennation/website` — the marketing landing + docs site, built from the Typebok design handoff. A Vite + React app with TanStack Router (file-based routes in `src/pages/`, basepath from `import.meta.env.BASE_URL` for GitHub Pages). Site-specific components live **here**; the docs UI itself (content set, CodeBlock, SearchPalette, DocsSidebar/DocsToc, Breadcrumbs, PrevNextNav, CopyCommand) comes from `@dennation/typebook/react`. Organized FSD-style: `pages/`, `entities/`, `shared/`, `widgets/`. Deployed to GitHub Pages by `.github/workflows/deploy-website.yml` (SPA fallback via `404.html`).
 
 ### Commands
 

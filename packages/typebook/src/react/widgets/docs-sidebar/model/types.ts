@@ -1,4 +1,4 @@
-import type { IconName } from "@react/shared/ui/icon/index.js";
+import type { IconName } from "@react/shared/ui/icon/index";
 
 export interface DocsNavItem {
 	slug: string;

@@ -1,7 +1,7 @@
-import { cx } from "@react/shared/lib/cx.js";
-import { Icon } from "@react/shared/ui/icon/index.js";
+import { Icon } from "@react/shared/ui/icon/index";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import type { SearchEntry } from "../model/types.js";
+import { tv } from "tailwind-variants";
+import type { SearchEntry } from "../model/types";
 
 export interface SearchPaletteProps {
 	/** The search index to query. */
@@ -21,8 +21,34 @@ interface ResultGroup {
 	items: ScoredEntry[];
 }
 
-const KBD =
-	"font-mono text-[10px] bg-bg border border-border rounded-[4px] px-1.25 py-px min-w-4.5 text-center";
+const kbd = tv({
+	base: "font-mono text-[10px] bg-bg border border-border rounded-[4px] px-1.25 py-px min-w-4.5 text-center",
+});
+
+const result = tv({
+	slots: {
+		row: "flex items-center gap-3 w-full px-3 py-2.5 rounded-[9px] text-left bg-transparent border-none transition-colors duration-100",
+		icon: "shrink-0 inline-flex",
+		title: "text-[14px] font-medium flex items-center gap-1.75",
+		enter: "inline-flex",
+	},
+	variants: {
+		active: {
+			true: {
+				row: "bg-accent-soft text-accent",
+				icon: "text-accent",
+				title: "text-accent",
+				enter: "opacity-100 text-accent",
+			},
+			false: {
+				row: "text-fg-muted",
+				icon: "text-fg-subtle",
+				title: "text-fg",
+				enter: "opacity-0 text-fg-subtle",
+			},
+		},
+	},
+});
 
 /** ⌘K command palette: fuzzy page/heading search with keyboard navigation. */
 export function SearchPalette({
@@ -152,24 +178,17 @@ export function SearchPalette({
 								flatIdx++;
 								const idx = flatIdx;
 								const isActive = idx === active;
+								const styles = result({ active: isActive });
 								return (
 									<button
 										key={r.slug + (r.heading ?? "")}
 										type="button"
 										data-cmdk-active={isActive ? "" : undefined}
-										className={cx(
-											"flex items-center gap-3 w-full px-3 py-2.5 rounded-[9px] text-left bg-transparent border-none transition-colors duration-100",
-											isActive ? "bg-accent-soft text-accent" : "text-fg-muted",
-										)}
+										className={styles.row()}
 										onMouseEnter={() => setActive(idx)}
 										onClick={() => choose(r)}
 									>
-										<span
-											className={cx(
-												"shrink-0 inline-flex",
-												isActive ? "text-accent" : "text-fg-subtle",
-											)}
-										>
+										<span className={styles.icon()}>
 											{r.heading ? (
 												<Icon.hash size={16} />
 											) : (
@@ -177,12 +196,7 @@ export function SearchPalette({
 											)}
 										</span>
 										<span className="min-w-0 flex-1">
-											<span
-												className={cx(
-													"text-[14px] font-medium flex items-center gap-1.75",
-													isActive ? "text-accent" : "text-fg",
-												)}
-											>
+											<span className={styles.title()}>
 												{highlightText(r.title)}
 											</span>
 											{r.desc && (
@@ -191,14 +205,7 @@ export function SearchPalette({
 												</span>
 											)}
 										</span>
-										<span
-											className={cx(
-												"inline-flex",
-												isActive
-													? "opacity-100 text-accent"
-													: "opacity-0 text-fg-subtle",
-											)}
-										>
+										<span className={styles.enter()}>
 											<Icon.enter size={15} />
 										</span>
 									</button>
@@ -209,16 +216,16 @@ export function SearchPalette({
 				</div>
 				<div className="flex items-center gap-4 px-4 py-2.5 border-t border-border bg-bg-secondary text-[12px] text-fg-subtle">
 					<span className="flex items-center gap-1.5">
-						<kbd className={cx(KBD, "inline-flex justify-center")}>
+						<kbd className={kbd({ className: "inline-flex justify-center" })}>
 							<Icon.arrowUpDown size={11} />
 						</kbd>{" "}
 						navigate
 					</span>
 					<span className="flex items-center gap-1.5">
-						<kbd className={cx(KBD, "inline-block")}>↵</kbd> open
+						<kbd className={kbd({ className: "inline-block" })}>↵</kbd> open
 					</span>
 					<span className="flex items-center gap-1.5">
-						<kbd className={cx(KBD, "inline-block")}>esc</kbd> close
+						<kbd className={kbd({ className: "inline-block" })}>esc</kbd> close
 					</span>
 					<span className="ml-auto">
 						{results.length} result{results.length === 1 ? "" : "s"}
