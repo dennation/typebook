@@ -1,5 +1,5 @@
 import { cx, Icon } from "@dennation/typebook/react";
-import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses.js";
+import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses";
 
 const ANIM =
 	"animate-[dtIn_6.5s_ease_infinite] motion-reduce:animate-none motion-reduce:opacity-100";

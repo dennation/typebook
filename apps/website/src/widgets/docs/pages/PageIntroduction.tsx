@@ -10,7 +10,7 @@ import {
 	Lead,
 	P,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go.js";
+import type { DocsGo } from "../go";
 
 export function PageIntroduction({ go }: { go: DocsGo }) {
 	return (

@@ -9,7 +9,7 @@ import {
 	P,
 	PropsReference,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go.js";
+import type { DocsGo } from "../go";
 
 export function PageStory({ go }: { go: DocsGo }) {
 	return (

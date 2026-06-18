@@ -1,5 +1,5 @@
 import { cx, Icon } from "@dennation/typebook/react";
-import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses.js";
+import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses";
 
 const CARD =
 	"absolute inset-0 rounded-[12px] border p-5 flex flex-col gap-3 shadow-md";

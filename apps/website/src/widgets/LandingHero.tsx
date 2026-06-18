@@ -5,7 +5,7 @@ import {
 	cx,
 	Icon,
 } from "@dennation/typebook/react";
-import { CONTAINER } from "../shared/lib/landingLayout.js";
+import { CONTAINER } from "../shared/lib/landingLayout";
 
 const MINI_IT =
 	"flex items-center gap-2 text-[12.5px] text-fg-muted px-2 py-1.25 rounded-[6px]";

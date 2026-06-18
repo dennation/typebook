@@ -1,5 +1,5 @@
 import { Icon } from "@dennation/typebook/react";
-import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses.js";
+import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses";
 
 /** DEMO 4 — MDX component: code compiles to a rendered block. */
 export function DemoMdx() {
