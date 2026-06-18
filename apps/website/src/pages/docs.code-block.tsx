@@ -12,6 +12,7 @@ import {
 	propsToRows,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 const codeBlock = getComponentMeta(CodeBlock);
 
@@ -73,6 +74,10 @@ function PageCodeBlock() {
 				code shows as plain text. Common languages (tsx, bash, json) are
 				preloaded with the engine, others fetch their grammar on demand.
 			</Callout>
+			<DocsFooter
+				prev={{ to: "/docs/callout", title: "Callout" }}
+				next={{ to: "/docs/tabs", title: "Tabs" }}
+			/>
 		</>
 	);
 }

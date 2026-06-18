@@ -11,6 +11,7 @@ import {
 	Ul,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PagePlayground() {
 	return (
@@ -70,6 +71,10 @@ function PagePlayground() {
 				Props that can't be edited as plain values (functions, nodes, complex
 				objects) are shown read-only with their type.
 			</P>
+			<DocsFooter
+				prev={{ to: "/docs/matrix", title: "Matrix" }}
+				next={{ to: "/docs/snippet", title: "Snippet" }}
+			/>
 		</>
 	);
 }

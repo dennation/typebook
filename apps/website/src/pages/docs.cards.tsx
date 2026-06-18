@@ -12,6 +12,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 const docCard = getComponentMeta(DocCard);
@@ -51,6 +52,10 @@ function PageCards() {
 			<P>
 				<C>Cards</C> itself takes only <C>children</C>.
 			</P>
+			<DocsFooter
+				prev={{ to: "/docs/steps", title: "Steps" }}
+				next={{ to: "/docs/accordion", title: "Accordion" }}
+			/>
 		</>
 	);
 }

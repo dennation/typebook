@@ -16,6 +16,7 @@ import {
 	Ul,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PageProse() {
 	return (
@@ -94,6 +95,10 @@ function PageProse() {
 						"Hatched stand-in with a label and optional height",
 					],
 				]}
+			/>
+			<DocsFooter
+				prev={{ to: "/docs/tables", title: "Tables" }}
+				next={{ to: "/docs/search", title: "Search" }}
 			/>
 		</>
 	);

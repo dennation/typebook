@@ -8,6 +8,7 @@ import {
 	PropsReference,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PageMatrix() {
 	return (
@@ -73,6 +74,10 @@ import { Matrix } from "@dennation/typebook/react";
 						desc: "Render each cell inside an iframe.",
 					},
 				]}
+			/>
+			<DocsFooter
+				prev={{ to: "/docs/variants", title: "Variants" }}
+				next={{ to: "/docs/playground", title: "Playground" }}
 			/>
 		</>
 	);

@@ -10,6 +10,7 @@ import {
 	PropsReference,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 function PageStory() {
@@ -76,6 +77,10 @@ function PageStory() {
 				<A onClick={() => go("variants")}>Variants</A>. Two axes? Use{" "}
 				<A onClick={() => go("matrix")}>Matrix</A>.
 			</P>
+			<DocsFooter
+				prev={{ to: "/docs/theming", title: "Theming" }}
+				next={{ to: "/docs/variants", title: "Variants" }}
+			/>
 		</>
 	);
 }

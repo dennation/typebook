@@ -12,6 +12,7 @@ import {
 	SearchPalette,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 const searchPalette = getComponentMeta(SearchPalette);
 
@@ -79,6 +80,10 @@ const SEARCH_INDEX: SearchEntry[] = [
 
 			<H2>SearchPalette props</H2>
 			<PropsReference props={propsToRows(searchPalette.props)} />
+			<DocsFooter
+				prev={{ to: "/docs/prose", title: "Prose" }}
+				next={{ to: "/docs/navigation", title: "Navigation" }}
+			/>
 		</>
 	);
 }
