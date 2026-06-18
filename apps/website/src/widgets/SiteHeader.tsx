@@ -7,9 +7,9 @@ import {
 } from "@dennation/typebook/react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { DEFAULT_DOCS_SLUG } from "../entities/docs/nav.js";
-import { GITHUB_URL } from "../shared/lib/siteLinks.js";
-import { useShell } from "./layout/ShellContext.js";
+import { DEFAULT_DOCS_SLUG } from "../entities/docs/nav";
+import { GITHUB_URL } from "../shared/lib/siteLinks";
+import { useShell } from "./layout/ShellContext";
 
 const NAV_LINK =
 	"text-[13.5px] text-fg-muted font-[450] px-2.75 py-1.5 rounded-[7px] transition-colors duration-140 hover:text-fg hover:bg-bg-tertiary";

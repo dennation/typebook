@@ -8,10 +8,10 @@ import {
 } from "@dennation/typebook/react";
 import { Outlet, useMatches } from "@tanstack/react-router";
 import { useRef } from "react";
-import { DEFAULT_DOCS_SLUG, NAV, pageMeta } from "../../entities/docs/nav.js";
-import { GITHUB_URL } from "../../shared/lib/siteLinks.js";
-import { useShell } from "../layout/ShellContext.js";
-import { useDocsGo } from "./useDocsGo.js";
+import { DEFAULT_DOCS_SLUG, NAV, pageMeta } from "../../entities/docs/nav";
+import { GITHUB_URL } from "../../shared/lib/siteLinks";
+import { useShell } from "../layout/ShellContext";
+import { useDocsGo } from "./useDocsGo";
 
 /** Current docs slug from the matched leaf route (`/docs/<slug>`). */
 function useCurrentSlug(): string {

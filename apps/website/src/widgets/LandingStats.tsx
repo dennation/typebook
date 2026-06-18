@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CONTAINER } from "../shared/lib/landingLayout.js";
+import { CONTAINER } from "../shared/lib/landingLayout";
 
 const ITEMS: { num: ReactNode; lbl: string }[] = [
 	{

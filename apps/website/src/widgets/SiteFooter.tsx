@@ -1,4 +1,4 @@
-import { CONTAINER } from "../shared/lib/landingLayout.js";
+import { CONTAINER } from "../shared/lib/landingLayout";
 
 export interface SiteFooterProps {
 	/** Link target used for the "Introduction" link. */

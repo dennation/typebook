@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
-import { useShell } from "../layout/ShellContext.js";
-import type { DocsGo } from "./go.js";
+import { useShell } from "../layout/ShellContext";
+import type { DocsGo } from "./go";
 
 /**
  * In-docs navigation backed by the router. The data-driven nav (sidebar,

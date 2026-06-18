@@ -10,7 +10,7 @@ import {
 	P,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useDocsGo } from "../widgets/docs/useDocsGo.js";
+import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 function PageQuickStart() {
 	const go = useDocsGo();
