@@ -6,46 +6,41 @@ import {
 	PrevNextNav,
 	useDocHeadings,
 } from "@dennation/typebook/react";
-import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useRef } from "react";
-import { NAV, pageMeta } from "../../entities/docs/nav.js";
+import { Outlet, useMatches } from "@tanstack/react-router";
+import { useRef } from "react";
+import { DEFAULT_DOCS_SLUG, NAV, pageMeta } from "../../entities/docs/nav.js";
+import { GITHUB_URL } from "../../shared/lib/siteLinks.js";
 import { useShell } from "../layout/ShellContext.js";
-import type { DocsGo } from "./go.js";
-import { GenericPage, PAGES } from "./pages/index.js";
+import { useDocsGo } from "./useDocsGo.js";
 
-export interface DocsPageProps {
-	slug: string;
-	githubHref: string;
+/** Current docs slug from the matched leaf route (`/docs/<slug>`). */
+function useCurrentSlug(): string {
+	const matches = useMatches();
+	const leafId = matches[matches.length - 1]?.routeId ?? "";
+	return leafId.split("/").pop() || DEFAULT_DOCS_SLUG;
 }
 
-/** Full docs screen: sidebar + content + TOC under the shared site header. */
-export function DocsPage({ slug, githubHref }: DocsPageProps) {
-	const navigate = useNavigate();
+/**
+ * Docs layout shell: sidebar + content + TOC under the shared site header.
+ * Rendered once by the `/docs` layout route; the per-page content comes
+ * through `<Outlet />`, so the chrome (sidebar, breadcrumbs, TOC, prev/next)
+ * never remounts when switching pages.
+ */
+export function DocsShell() {
 	const { docsMenuOpen, setDocsMenuOpen } = useShell();
 	const contentRef = useRef<HTMLElement>(null);
 	const scrollerRef = useRef<HTMLDivElement>(null);
+	const go = useDocsGo();
 
+	const slug = useCurrentSlug();
 	const meta = pageMeta(slug);
 	const { prev, next } = meta;
-	const PageComp = PAGES[slug];
 
 	const { headings, activeId, jump } = useDocHeadings({
 		contentRef,
 		scrollerRef,
 		pageKey: slug,
 	});
-
-	const go = useCallback<DocsGo>(
-		(nextSlug, heading) => {
-			setDocsMenuOpen(false);
-			void navigate({
-				to: "/docs/$slug",
-				params: { slug: nextSlug },
-				hash: heading,
-			});
-		},
-		[navigate, setDocsMenuOpen],
-	);
 
 	return (
 		<div className="min-h-screen">
@@ -75,17 +70,13 @@ export function DocsPage({ slug, githubHref }: DocsPageProps) {
 								{meta.page.title}
 							</h1>
 							<div className="doc-prose text-[15.5px] leading-[calc(1.72*var(--density))] [&>*+*]:mt-[calc(18px*var(--density))]">
-								{PageComp ? (
-									<PageComp go={go} />
-								) : (
-									<GenericPage meta={meta} go={go} />
-								)}
+								<Outlet />
 							</div>
 
 							<footer className="mt-[calc(64px*var(--density))] pt-7 border-t border-border">
 								<div className="flex items-center justify-between text-[13px] text-fg-subtle mb-6">
 									<a
-										href={githubHref}
+										href={GITHUB_URL}
 										className="text-fg-muted inline-flex items-center gap-1.5 hover:text-accent"
 									>
 										<Icon.edit size={14} /> Edit this page on GitHub
@@ -107,8 +98,8 @@ export function DocsPage({ slug, githubHref }: DocsPageProps) {
 					headings={headings}
 					activeId={activeId}
 					onJump={jump}
-					editHref={githubHref}
-					issueHref={`${githubHref}/issues`}
+					editHref={GITHUB_URL}
+					issueHref={`${GITHUB_URL}/issues`}
 				/>
 			</div>
 		</div>

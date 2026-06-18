@@ -7,8 +7,9 @@ import {
 	Lead,
 	PropsReference,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
-export function PageVariants() {
+function PageVariants() {
 	return (
 		<>
 			<Lead>
@@ -83,3 +84,7 @@ import { Variants } from "@dennation/typebook/react";
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/variants")({
+	component: PageVariants,
+});

@@ -9,10 +9,11 @@ import {
 	Snippet,
 	Tabs,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
 const tabs = getComponentMeta(Tabs);
 
-export function PageTabs() {
+function PageTabs() {
 	return (
 		<>
 			<Lead>
@@ -47,3 +48,5 @@ export function PageTabs() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/tabs")({ component: PageTabs });

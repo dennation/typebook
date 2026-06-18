@@ -8,12 +8,13 @@ import {
 	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
 function Boom(): never {
 	throw new Error("Something went wrong rendering this component.");
 }
 
-export function PageErrorBoundary() {
+function PageErrorBoundary() {
 	return (
 		<>
 			<Lead>
@@ -69,3 +70,7 @@ export function PageErrorBoundary() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/error-boundary")({
+	component: PageErrorBoundary,
+});

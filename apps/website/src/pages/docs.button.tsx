@@ -9,8 +9,9 @@ import {
 	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
-export function PageButton() {
+function PageButton() {
 	return (
 		<>
 			<Lead>
@@ -97,3 +98,5 @@ export function PageButton() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/button")({ component: PageButton });

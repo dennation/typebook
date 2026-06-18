@@ -369,8 +369,11 @@ apps/website/
     pages/                — file-based routes
       __root.tsx          — RootLayout (shared SiteHeader + ⌘K palette + <Outlet/>)
       index.tsx           — landing
-      docs.index.tsx      — redirect → /docs/introduction
-      docs.$slug.tsx      — docs page (unknown slugs redirect to introduction)
+      docs.tsx            — /docs layout route: renders DocsShell + <Outlet/> (chrome once)
+      docs.index.tsx      — redirect /docs → /docs/introduction
+      docs.<slug>.tsx     — one file per docs page (docs.button.tsx, docs.callout.tsx, …):
+                            createFileRoute("/docs/<slug>") + the page component inline.
+                            Unknown slugs 404 (no map, no guard). autoCodeSplitting → one chunk per page
     entities/docs/nav.ts  — NAV sections, FLAT order, pageMeta(), SEARCH_INDEX (this site's content data)
     shared/
       lib/{useReveal.ts, landingLayout.ts, siteLinks.ts}   — scroll-reveal hook + class constants + GITHUB_URL
@@ -383,9 +386,10 @@ apps/website/
       LandingHero.tsx, LandingFeatures.tsx, LandingCompare.tsx, LandingStats.tsx, LandingCta.tsx
       demos/{DemoSearch,DemoTree,DemoTheme,DemoMdx}.tsx + demoClasses.ts   — looping feature "gifs"
       docs/
-        DocsPage.tsx                          — docs screen: DocsSidebar + content + DocsToc (package components)
+        DocsShell.tsx                         — /docs layout shell: DocsSidebar + <Outlet/> + DocsToc, current slug from useMatches()
+        useDocsGo.ts                          — useDocsGo(): router-backed in-docs navigation (builds /docs/<slug>)
         go.ts                                 — DocsGo navigation type
-        pages/                                — page content (Introduction, Installation, Quick Start, Markdown, Callout, GenericPage)
+                                              (page content lives in the route files src/pages/docs.<slug>.tsx, not here)
 ```
 
 - **Styling.** `styles.css` imports the package's single source of truth, `packages/typebook/src/react/shared/config/theme.css`, and `@source`-scans both the app and `packages/typebook/src/react/**/*.tsx` (the latter so the universal primitives' utilities are emitted). Theme switching writes `data-theme` on `<html>` (key `typebook-theme`); a small inline script in `index.html` applies it before paint to avoid a flash.

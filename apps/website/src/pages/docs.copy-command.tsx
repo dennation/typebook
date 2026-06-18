@@ -8,10 +8,11 @@ import {
 	propsToRows,
 	Snippet,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
 const copyCommand = getComponentMeta(CopyCommand);
 
-export function PageCopyCommand() {
+function PageCopyCommand() {
 	return (
 		<>
 			<Lead>
@@ -30,3 +31,7 @@ export function PageCopyCommand() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/copy-command")({
+	component: PageCopyCommand,
+});

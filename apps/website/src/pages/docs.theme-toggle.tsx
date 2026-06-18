@@ -9,9 +9,11 @@ import {
 	Snippet,
 	ThemeToggle,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go.js";
+import { createFileRoute } from "@tanstack/react-router";
+import { useDocsGo } from "../widgets/docs/useDocsGo.js";
 
-export function PageThemeToggle({ go }: { go: DocsGo }) {
+function PageThemeToggle() {
+	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
@@ -62,3 +64,7 @@ export function PageThemeToggle({ go }: { go: DocsGo }) {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/theme-toggle")({
+	component: PageThemeToggle,
+});

@@ -8,10 +8,11 @@ import {
 	propsToRows,
 	Snippet,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
 const accordion = getComponentMeta(Accordion);
 
-export function PageAccordion() {
+function PageAccordion() {
 	return (
 		<>
 			<Lead>
@@ -48,3 +49,7 @@ export function PageAccordion() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/accordion")({
+	component: PageAccordion,
+});

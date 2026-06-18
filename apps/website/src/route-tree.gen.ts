@@ -9,58 +9,372 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './pages/__root'
+import { Route as DocsRouteImport } from './pages/docs'
 import { Route as IndexRouteImport } from './pages/index'
 import { Route as DocsIndexRouteImport } from './pages/docs.index'
-import { Route as DocsSlugRouteImport } from './pages/docs.$slug'
+import { Route as DocsVariantsRouteImport } from './pages/docs.variants'
+import { Route as DocsThemingRouteImport } from './pages/docs.theming'
+import { Route as DocsThemeToggleRouteImport } from './pages/docs.theme-toggle'
+import { Route as DocsTabsRouteImport } from './pages/docs.tabs'
+import { Route as DocsTablesRouteImport } from './pages/docs.tables'
+import { Route as DocsStoryRouteImport } from './pages/docs.story'
+import { Route as DocsStepsRouteImport } from './pages/docs.steps'
+import { Route as DocsSnippetRouteImport } from './pages/docs.snippet'
+import { Route as DocsSearchRouteImport } from './pages/docs.search'
+import { Route as DocsQuickStartRouteImport } from './pages/docs.quick-start'
+import { Route as DocsProseRouteImport } from './pages/docs.prose'
+import { Route as DocsPlaygroundRouteImport } from './pages/docs.playground'
+import { Route as DocsNavigationRouteImport } from './pages/docs.navigation'
+import { Route as DocsMatrixRouteImport } from './pages/docs.matrix'
+import { Route as DocsLayoutRouteImport } from './pages/docs.layout'
+import { Route as DocsIntroductionRouteImport } from './pages/docs.introduction'
+import { Route as DocsInstallationRouteImport } from './pages/docs.installation'
+import { Route as DocsIconRouteImport } from './pages/docs.icon'
+import { Route as DocsErrorBoundaryRouteImport } from './pages/docs.error-boundary'
+import { Route as DocsCopyCommandRouteImport } from './pages/docs.copy-command'
+import { Route as DocsCodeBlockRouteImport } from './pages/docs.code-block'
+import { Route as DocsCardsRouteImport } from './pages/docs.cards'
+import { Route as DocsCalloutRouteImport } from './pages/docs.callout'
+import { Route as DocsButtonRouteImport } from './pages/docs.button'
+import { Route as DocsAccordionRouteImport } from './pages/docs.accordion'
 
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsIndexRoute = DocsIndexRouteImport.update({
-  id: '/docs/',
-  path: '/docs/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => DocsRoute,
 } as any)
-const DocsSlugRoute = DocsSlugRouteImport.update({
-  id: '/docs/$slug',
-  path: '/docs/$slug',
-  getParentRoute: () => rootRouteImport,
+const DocsVariantsRoute = DocsVariantsRouteImport.update({
+  id: '/variants',
+  path: '/variants',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsThemingRoute = DocsThemingRouteImport.update({
+  id: '/theming',
+  path: '/theming',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsThemeToggleRoute = DocsThemeToggleRouteImport.update({
+  id: '/theme-toggle',
+  path: '/theme-toggle',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsTabsRoute = DocsTabsRouteImport.update({
+  id: '/tabs',
+  path: '/tabs',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsTablesRoute = DocsTablesRouteImport.update({
+  id: '/tables',
+  path: '/tables',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsStoryRoute = DocsStoryRouteImport.update({
+  id: '/story',
+  path: '/story',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsStepsRoute = DocsStepsRouteImport.update({
+  id: '/steps',
+  path: '/steps',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsSnippetRoute = DocsSnippetRouteImport.update({
+  id: '/snippet',
+  path: '/snippet',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsSearchRoute = DocsSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsQuickStartRoute = DocsQuickStartRouteImport.update({
+  id: '/quick-start',
+  path: '/quick-start',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsProseRoute = DocsProseRouteImport.update({
+  id: '/prose',
+  path: '/prose',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsPlaygroundRoute = DocsPlaygroundRouteImport.update({
+  id: '/playground',
+  path: '/playground',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsNavigationRoute = DocsNavigationRouteImport.update({
+  id: '/navigation',
+  path: '/navigation',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsMatrixRoute = DocsMatrixRouteImport.update({
+  id: '/matrix',
+  path: '/matrix',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsLayoutRoute = DocsLayoutRouteImport.update({
+  id: '/layout',
+  path: '/layout',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsIntroductionRoute = DocsIntroductionRouteImport.update({
+  id: '/introduction',
+  path: '/introduction',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsInstallationRoute = DocsInstallationRouteImport.update({
+  id: '/installation',
+  path: '/installation',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsIconRoute = DocsIconRouteImport.update({
+  id: '/icon',
+  path: '/icon',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsErrorBoundaryRoute = DocsErrorBoundaryRouteImport.update({
+  id: '/error-boundary',
+  path: '/error-boundary',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsCopyCommandRoute = DocsCopyCommandRouteImport.update({
+  id: '/copy-command',
+  path: '/copy-command',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsCodeBlockRoute = DocsCodeBlockRouteImport.update({
+  id: '/code-block',
+  path: '/code-block',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsCardsRoute = DocsCardsRouteImport.update({
+  id: '/cards',
+  path: '/cards',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsCalloutRoute = DocsCalloutRouteImport.update({
+  id: '/callout',
+  path: '/callout',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsButtonRoute = DocsButtonRouteImport.update({
+  id: '/button',
+  path: '/button',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsAccordionRoute = DocsAccordionRouteImport.update({
+  id: '/accordion',
+  path: '/accordion',
+  getParentRoute: () => DocsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/docs/$slug': typeof DocsSlugRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/docs/accordion': typeof DocsAccordionRoute
+  '/docs/button': typeof DocsButtonRoute
+  '/docs/callout': typeof DocsCalloutRoute
+  '/docs/cards': typeof DocsCardsRoute
+  '/docs/code-block': typeof DocsCodeBlockRoute
+  '/docs/copy-command': typeof DocsCopyCommandRoute
+  '/docs/error-boundary': typeof DocsErrorBoundaryRoute
+  '/docs/icon': typeof DocsIconRoute
+  '/docs/installation': typeof DocsInstallationRoute
+  '/docs/introduction': typeof DocsIntroductionRoute
+  '/docs/layout': typeof DocsLayoutRoute
+  '/docs/matrix': typeof DocsMatrixRoute
+  '/docs/navigation': typeof DocsNavigationRoute
+  '/docs/playground': typeof DocsPlaygroundRoute
+  '/docs/prose': typeof DocsProseRoute
+  '/docs/quick-start': typeof DocsQuickStartRoute
+  '/docs/search': typeof DocsSearchRoute
+  '/docs/snippet': typeof DocsSnippetRoute
+  '/docs/steps': typeof DocsStepsRoute
+  '/docs/story': typeof DocsStoryRoute
+  '/docs/tables': typeof DocsTablesRoute
+  '/docs/tabs': typeof DocsTabsRoute
+  '/docs/theme-toggle': typeof DocsThemeToggleRoute
+  '/docs/theming': typeof DocsThemingRoute
+  '/docs/variants': typeof DocsVariantsRoute
   '/docs/': typeof DocsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/docs/$slug': typeof DocsSlugRoute
+  '/docs/accordion': typeof DocsAccordionRoute
+  '/docs/button': typeof DocsButtonRoute
+  '/docs/callout': typeof DocsCalloutRoute
+  '/docs/cards': typeof DocsCardsRoute
+  '/docs/code-block': typeof DocsCodeBlockRoute
+  '/docs/copy-command': typeof DocsCopyCommandRoute
+  '/docs/error-boundary': typeof DocsErrorBoundaryRoute
+  '/docs/icon': typeof DocsIconRoute
+  '/docs/installation': typeof DocsInstallationRoute
+  '/docs/introduction': typeof DocsIntroductionRoute
+  '/docs/layout': typeof DocsLayoutRoute
+  '/docs/matrix': typeof DocsMatrixRoute
+  '/docs/navigation': typeof DocsNavigationRoute
+  '/docs/playground': typeof DocsPlaygroundRoute
+  '/docs/prose': typeof DocsProseRoute
+  '/docs/quick-start': typeof DocsQuickStartRoute
+  '/docs/search': typeof DocsSearchRoute
+  '/docs/snippet': typeof DocsSnippetRoute
+  '/docs/steps': typeof DocsStepsRoute
+  '/docs/story': typeof DocsStoryRoute
+  '/docs/tables': typeof DocsTablesRoute
+  '/docs/tabs': typeof DocsTabsRoute
+  '/docs/theme-toggle': typeof DocsThemeToggleRoute
+  '/docs/theming': typeof DocsThemingRoute
+  '/docs/variants': typeof DocsVariantsRoute
   '/docs': typeof DocsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/docs/$slug': typeof DocsSlugRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/docs/accordion': typeof DocsAccordionRoute
+  '/docs/button': typeof DocsButtonRoute
+  '/docs/callout': typeof DocsCalloutRoute
+  '/docs/cards': typeof DocsCardsRoute
+  '/docs/code-block': typeof DocsCodeBlockRoute
+  '/docs/copy-command': typeof DocsCopyCommandRoute
+  '/docs/error-boundary': typeof DocsErrorBoundaryRoute
+  '/docs/icon': typeof DocsIconRoute
+  '/docs/installation': typeof DocsInstallationRoute
+  '/docs/introduction': typeof DocsIntroductionRoute
+  '/docs/layout': typeof DocsLayoutRoute
+  '/docs/matrix': typeof DocsMatrixRoute
+  '/docs/navigation': typeof DocsNavigationRoute
+  '/docs/playground': typeof DocsPlaygroundRoute
+  '/docs/prose': typeof DocsProseRoute
+  '/docs/quick-start': typeof DocsQuickStartRoute
+  '/docs/search': typeof DocsSearchRoute
+  '/docs/snippet': typeof DocsSnippetRoute
+  '/docs/steps': typeof DocsStepsRoute
+  '/docs/story': typeof DocsStoryRoute
+  '/docs/tables': typeof DocsTablesRoute
+  '/docs/tabs': typeof DocsTabsRoute
+  '/docs/theme-toggle': typeof DocsThemeToggleRoute
+  '/docs/theming': typeof DocsThemingRoute
+  '/docs/variants': typeof DocsVariantsRoute
   '/docs/': typeof DocsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/docs/$slug' | '/docs/'
+  fullPaths:
+    | '/'
+    | '/docs'
+    | '/docs/accordion'
+    | '/docs/button'
+    | '/docs/callout'
+    | '/docs/cards'
+    | '/docs/code-block'
+    | '/docs/copy-command'
+    | '/docs/error-boundary'
+    | '/docs/icon'
+    | '/docs/installation'
+    | '/docs/introduction'
+    | '/docs/layout'
+    | '/docs/matrix'
+    | '/docs/navigation'
+    | '/docs/playground'
+    | '/docs/prose'
+    | '/docs/quick-start'
+    | '/docs/search'
+    | '/docs/snippet'
+    | '/docs/steps'
+    | '/docs/story'
+    | '/docs/tables'
+    | '/docs/tabs'
+    | '/docs/theme-toggle'
+    | '/docs/theming'
+    | '/docs/variants'
+    | '/docs/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/docs/$slug' | '/docs'
-  id: '__root__' | '/' | '/docs/$slug' | '/docs/'
+  to:
+    | '/'
+    | '/docs/accordion'
+    | '/docs/button'
+    | '/docs/callout'
+    | '/docs/cards'
+    | '/docs/code-block'
+    | '/docs/copy-command'
+    | '/docs/error-boundary'
+    | '/docs/icon'
+    | '/docs/installation'
+    | '/docs/introduction'
+    | '/docs/layout'
+    | '/docs/matrix'
+    | '/docs/navigation'
+    | '/docs/playground'
+    | '/docs/prose'
+    | '/docs/quick-start'
+    | '/docs/search'
+    | '/docs/snippet'
+    | '/docs/steps'
+    | '/docs/story'
+    | '/docs/tables'
+    | '/docs/tabs'
+    | '/docs/theme-toggle'
+    | '/docs/theming'
+    | '/docs/variants'
+    | '/docs'
+  id:
+    | '__root__'
+    | '/'
+    | '/docs'
+    | '/docs/accordion'
+    | '/docs/button'
+    | '/docs/callout'
+    | '/docs/cards'
+    | '/docs/code-block'
+    | '/docs/copy-command'
+    | '/docs/error-boundary'
+    | '/docs/icon'
+    | '/docs/installation'
+    | '/docs/introduction'
+    | '/docs/layout'
+    | '/docs/matrix'
+    | '/docs/navigation'
+    | '/docs/playground'
+    | '/docs/prose'
+    | '/docs/quick-start'
+    | '/docs/search'
+    | '/docs/snippet'
+    | '/docs/steps'
+    | '/docs/story'
+    | '/docs/tables'
+    | '/docs/tabs'
+    | '/docs/theme-toggle'
+    | '/docs/theming'
+    | '/docs/variants'
+    | '/docs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DocsSlugRoute: typeof DocsSlugRoute
-  DocsIndexRoute: typeof DocsIndexRoute
+  DocsRoute: typeof DocsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -70,25 +384,252 @@ declare module '@tanstack/react-router' {
     }
     '/docs/': {
       id: '/docs/'
-      path: '/docs'
+      path: '/'
       fullPath: '/docs/'
       preLoaderRoute: typeof DocsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DocsRoute
     }
-    '/docs/$slug': {
-      id: '/docs/$slug'
-      path: '/docs/$slug'
-      fullPath: '/docs/$slug'
-      preLoaderRoute: typeof DocsSlugRouteImport
-      parentRoute: typeof rootRouteImport
+    '/docs/variants': {
+      id: '/docs/variants'
+      path: '/variants'
+      fullPath: '/docs/variants'
+      preLoaderRoute: typeof DocsVariantsRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/theming': {
+      id: '/docs/theming'
+      path: '/theming'
+      fullPath: '/docs/theming'
+      preLoaderRoute: typeof DocsThemingRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/theme-toggle': {
+      id: '/docs/theme-toggle'
+      path: '/theme-toggle'
+      fullPath: '/docs/theme-toggle'
+      preLoaderRoute: typeof DocsThemeToggleRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/tabs': {
+      id: '/docs/tabs'
+      path: '/tabs'
+      fullPath: '/docs/tabs'
+      preLoaderRoute: typeof DocsTabsRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/tables': {
+      id: '/docs/tables'
+      path: '/tables'
+      fullPath: '/docs/tables'
+      preLoaderRoute: typeof DocsTablesRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/story': {
+      id: '/docs/story'
+      path: '/story'
+      fullPath: '/docs/story'
+      preLoaderRoute: typeof DocsStoryRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/steps': {
+      id: '/docs/steps'
+      path: '/steps'
+      fullPath: '/docs/steps'
+      preLoaderRoute: typeof DocsStepsRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/snippet': {
+      id: '/docs/snippet'
+      path: '/snippet'
+      fullPath: '/docs/snippet'
+      preLoaderRoute: typeof DocsSnippetRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/search': {
+      id: '/docs/search'
+      path: '/search'
+      fullPath: '/docs/search'
+      preLoaderRoute: typeof DocsSearchRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/quick-start': {
+      id: '/docs/quick-start'
+      path: '/quick-start'
+      fullPath: '/docs/quick-start'
+      preLoaderRoute: typeof DocsQuickStartRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/prose': {
+      id: '/docs/prose'
+      path: '/prose'
+      fullPath: '/docs/prose'
+      preLoaderRoute: typeof DocsProseRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/playground': {
+      id: '/docs/playground'
+      path: '/playground'
+      fullPath: '/docs/playground'
+      preLoaderRoute: typeof DocsPlaygroundRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/navigation': {
+      id: '/docs/navigation'
+      path: '/navigation'
+      fullPath: '/docs/navigation'
+      preLoaderRoute: typeof DocsNavigationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/matrix': {
+      id: '/docs/matrix'
+      path: '/matrix'
+      fullPath: '/docs/matrix'
+      preLoaderRoute: typeof DocsMatrixRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/layout': {
+      id: '/docs/layout'
+      path: '/layout'
+      fullPath: '/docs/layout'
+      preLoaderRoute: typeof DocsLayoutRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/introduction': {
+      id: '/docs/introduction'
+      path: '/introduction'
+      fullPath: '/docs/introduction'
+      preLoaderRoute: typeof DocsIntroductionRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/installation': {
+      id: '/docs/installation'
+      path: '/installation'
+      fullPath: '/docs/installation'
+      preLoaderRoute: typeof DocsInstallationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/icon': {
+      id: '/docs/icon'
+      path: '/icon'
+      fullPath: '/docs/icon'
+      preLoaderRoute: typeof DocsIconRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/error-boundary': {
+      id: '/docs/error-boundary'
+      path: '/error-boundary'
+      fullPath: '/docs/error-boundary'
+      preLoaderRoute: typeof DocsErrorBoundaryRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/copy-command': {
+      id: '/docs/copy-command'
+      path: '/copy-command'
+      fullPath: '/docs/copy-command'
+      preLoaderRoute: typeof DocsCopyCommandRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/code-block': {
+      id: '/docs/code-block'
+      path: '/code-block'
+      fullPath: '/docs/code-block'
+      preLoaderRoute: typeof DocsCodeBlockRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/cards': {
+      id: '/docs/cards'
+      path: '/cards'
+      fullPath: '/docs/cards'
+      preLoaderRoute: typeof DocsCardsRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/callout': {
+      id: '/docs/callout'
+      path: '/callout'
+      fullPath: '/docs/callout'
+      preLoaderRoute: typeof DocsCalloutRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/button': {
+      id: '/docs/button'
+      path: '/button'
+      fullPath: '/docs/button'
+      preLoaderRoute: typeof DocsButtonRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/accordion': {
+      id: '/docs/accordion'
+      path: '/accordion'
+      fullPath: '/docs/accordion'
+      preLoaderRoute: typeof DocsAccordionRouteImport
+      parentRoute: typeof DocsRoute
     }
   }
 }
 
+interface DocsRouteChildren {
+  DocsAccordionRoute: typeof DocsAccordionRoute
+  DocsButtonRoute: typeof DocsButtonRoute
+  DocsCalloutRoute: typeof DocsCalloutRoute
+  DocsCardsRoute: typeof DocsCardsRoute
+  DocsCodeBlockRoute: typeof DocsCodeBlockRoute
+  DocsCopyCommandRoute: typeof DocsCopyCommandRoute
+  DocsErrorBoundaryRoute: typeof DocsErrorBoundaryRoute
+  DocsIconRoute: typeof DocsIconRoute
+  DocsInstallationRoute: typeof DocsInstallationRoute
+  DocsIntroductionRoute: typeof DocsIntroductionRoute
+  DocsLayoutRoute: typeof DocsLayoutRoute
+  DocsMatrixRoute: typeof DocsMatrixRoute
+  DocsNavigationRoute: typeof DocsNavigationRoute
+  DocsPlaygroundRoute: typeof DocsPlaygroundRoute
+  DocsProseRoute: typeof DocsProseRoute
+  DocsQuickStartRoute: typeof DocsQuickStartRoute
+  DocsSearchRoute: typeof DocsSearchRoute
+  DocsSnippetRoute: typeof DocsSnippetRoute
+  DocsStepsRoute: typeof DocsStepsRoute
+  DocsStoryRoute: typeof DocsStoryRoute
+  DocsTablesRoute: typeof DocsTablesRoute
+  DocsTabsRoute: typeof DocsTabsRoute
+  DocsThemeToggleRoute: typeof DocsThemeToggleRoute
+  DocsThemingRoute: typeof DocsThemingRoute
+  DocsVariantsRoute: typeof DocsVariantsRoute
+  DocsIndexRoute: typeof DocsIndexRoute
+}
+
+const DocsRouteChildren: DocsRouteChildren = {
+  DocsAccordionRoute: DocsAccordionRoute,
+  DocsButtonRoute: DocsButtonRoute,
+  DocsCalloutRoute: DocsCalloutRoute,
+  DocsCardsRoute: DocsCardsRoute,
+  DocsCodeBlockRoute: DocsCodeBlockRoute,
+  DocsCopyCommandRoute: DocsCopyCommandRoute,
+  DocsErrorBoundaryRoute: DocsErrorBoundaryRoute,
+  DocsIconRoute: DocsIconRoute,
+  DocsInstallationRoute: DocsInstallationRoute,
+  DocsIntroductionRoute: DocsIntroductionRoute,
+  DocsLayoutRoute: DocsLayoutRoute,
+  DocsMatrixRoute: DocsMatrixRoute,
+  DocsNavigationRoute: DocsNavigationRoute,
+  DocsPlaygroundRoute: DocsPlaygroundRoute,
+  DocsProseRoute: DocsProseRoute,
+  DocsQuickStartRoute: DocsQuickStartRoute,
+  DocsSearchRoute: DocsSearchRoute,
+  DocsSnippetRoute: DocsSnippetRoute,
+  DocsStepsRoute: DocsStepsRoute,
+  DocsStoryRoute: DocsStoryRoute,
+  DocsTablesRoute: DocsTablesRoute,
+  DocsTabsRoute: DocsTabsRoute,
+  DocsThemeToggleRoute: DocsThemeToggleRoute,
+  DocsThemingRoute: DocsThemingRoute,
+  DocsVariantsRoute: DocsVariantsRoute,
+  DocsIndexRoute: DocsIndexRoute,
+}
+
+const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DocsSlugRoute: DocsSlugRoute,
-  DocsIndexRoute: DocsIndexRoute,
+  DocsRoute: DocsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

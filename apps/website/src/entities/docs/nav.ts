@@ -69,10 +69,6 @@ export const FLAT: DocsFlatPage[] = NAV.flatMap((sec) =>
 
 export const DEFAULT_DOCS_SLUG = "introduction";
 
-export function isDocsSlug(slug: string): boolean {
-	return FLAT.some((p) => p.slug === slug);
-}
-
 export function pageMeta(slug: string): DocsPageMeta {
 	const idx = Math.max(
 		0,

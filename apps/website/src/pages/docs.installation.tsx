@@ -10,9 +10,11 @@ import {
 	Step,
 	Steps,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go.js";
+import { createFileRoute } from "@tanstack/react-router";
+import { useDocsGo } from "../widgets/docs/useDocsGo.js";
 
-export function PageInstallation({ go }: { go: DocsGo }) {
+function PageInstallation() {
+	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
@@ -114,3 +116,7 @@ const button = getComponentMeta(Button, {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/installation")({
+	component: PageInstallation,
+});

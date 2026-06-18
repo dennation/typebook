@@ -8,8 +8,9 @@ import {
 	P,
 	PropsReference,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
-export function PageSnippet() {
+function PageSnippet() {
 	return (
 		<>
 			<Lead>
@@ -90,3 +91,7 @@ export function PageSnippet() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/snippet")({
+	component: PageSnippet,
+});

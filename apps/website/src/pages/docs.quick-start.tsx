@@ -9,9 +9,11 @@ import {
 	MDTable,
 	P,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go.js";
+import { createFileRoute } from "@tanstack/react-router";
+import { useDocsGo } from "../widgets/docs/useDocsGo.js";
 
-export function PageQuickStart({ go }: { go: DocsGo }) {
+function PageQuickStart() {
+	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
@@ -98,3 +100,7 @@ import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/quick-start")({
+	component: PageQuickStart,
+});

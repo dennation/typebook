@@ -7,8 +7,9 @@ import {
 	P,
 	PropsReference,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
-export function PageMatrix() {
+function PageMatrix() {
 	return (
 		<>
 			<Lead>
@@ -76,3 +77,5 @@ import { Matrix } from "@dennation/typebook/react";
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/matrix")({ component: PageMatrix });

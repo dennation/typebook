@@ -15,8 +15,9 @@ import {
 	Quote,
 	Ul,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
-export function PageProse() {
+function PageProse() {
 	return (
 		<>
 			<Lead>
@@ -97,3 +98,5 @@ export function PageProse() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/prose")({ component: PageProse });
