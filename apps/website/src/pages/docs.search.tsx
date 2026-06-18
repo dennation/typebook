@@ -11,10 +11,11 @@ import {
 	propsToRows,
 	SearchPalette,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
 const searchPalette = getComponentMeta(SearchPalette);
 
-export function PageSearch() {
+function PageSearch() {
 	return (
 		<>
 			<Lead>
@@ -81,3 +82,5 @@ const SEARCH_INDEX: SearchEntry[] = [
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/search")({ component: PageSearch });

@@ -9,9 +9,11 @@ import {
 	P,
 	PropsReference,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go";
+import { createFileRoute } from "@tanstack/react-router";
+import { useDocsGo } from "../widgets/docs/useDocsGo";
 
-export function PageStory({ go }: { go: DocsGo }) {
+function PageStory() {
+	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
@@ -77,3 +79,5 @@ export function PageStory({ go }: { go: DocsGo }) {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/story")({ component: PageStory });

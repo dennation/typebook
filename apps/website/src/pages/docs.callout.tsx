@@ -12,11 +12,13 @@ import {
 	propsToRows,
 	Snippet,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go";
+import { createFileRoute } from "@tanstack/react-router";
+import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 const callout = getComponentMeta(Callout);
 
-export function PageCallout({ go }: { go: DocsGo }) {
+function PageCallout() {
+	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
@@ -83,3 +85,7 @@ export function PageCallout({ go }: { go: DocsGo }) {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/callout")({
+	component: PageCallout,
+});

@@ -11,10 +11,11 @@ import {
 	Step,
 	Steps,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
 const step = getComponentMeta(Step);
 
-export function PageSteps() {
+function PageSteps() {
 	return (
 		<>
 			<Lead>
@@ -51,3 +52,5 @@ export function PageSteps() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/steps")({ component: PageSteps });

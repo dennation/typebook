@@ -11,10 +11,11 @@ import {
 	PropsReference,
 	propsToRows,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
 const codeBlock = getComponentMeta(CodeBlock);
 
-export function PageCodeBlock() {
+function PageCodeBlock() {
 	return (
 		<>
 			<Lead>
@@ -75,3 +76,7 @@ export function PageCodeBlock() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/code-block")({
+	component: PageCodeBlock,
+});

@@ -7,8 +7,9 @@ import {
 	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
-export function PageTables() {
+function PageTables() {
 	return (
 		<>
 			<Lead>
@@ -92,3 +93,5 @@ export function PageTables() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/tables")({ component: PageTables });

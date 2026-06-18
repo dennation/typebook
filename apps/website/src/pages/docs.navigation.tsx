@@ -12,11 +12,12 @@ import {
 	PropsReference,
 	propsToRows,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
 const breadcrumbs = getComponentMeta(Breadcrumbs);
 const prevNextNav = getComponentMeta(PrevNextNav);
 
-export function PageNavigation() {
+function PageNavigation() {
 	return (
 		<>
 			<Lead>
@@ -91,3 +92,7 @@ export function PageNavigation() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/navigation")({
+	component: PageNavigation,
+});

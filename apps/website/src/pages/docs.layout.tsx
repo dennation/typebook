@@ -8,9 +8,11 @@ import {
 	P,
 	PropsReference,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go";
+import { createFileRoute } from "@tanstack/react-router";
+import { useDocsGo } from "../widgets/docs/useDocsGo";
 
-export function PageLayout({ go }: { go: DocsGo }) {
+function PageLayout() {
+	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
@@ -75,3 +77,5 @@ function RootComponent() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/layout")({ component: PageLayout });

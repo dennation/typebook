@@ -72,8 +72,7 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 			</Link>
 			<nav className="flex gap-0.5 ml-3.5 max-[820px]:hidden">
 				<Link
-					to="/docs/$slug"
-					params={{ slug: DEFAULT_DOCS_SLUG }}
+					to={`/docs/${DEFAULT_DOCS_SLUG}`}
 					className={isDocs ? NAV_LINK_ACTIVE : NAV_LINK}
 				>
 					Docs
@@ -110,8 +109,7 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 				</a>
 				<ThemeToggle className={ICON_BTN} />
 				<Link
-					to="/docs/$slug"
-					params={{ slug: DEFAULT_DOCS_SLUG }}
+					to={`/docs/${DEFAULT_DOCS_SLUG}`}
 					className={cx(buttonClass("primary", "sm"), "ml-1")}
 				>
 					Get started <Icon.chevR size={15} className={ARROW_CLASS} />

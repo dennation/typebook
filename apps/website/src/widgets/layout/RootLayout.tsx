@@ -27,7 +27,7 @@ export function RootLayout() {
 	);
 
 	const goFromSearch = (slug: string, heading?: string) => {
-		void navigate({ to: "/docs/$slug", params: { slug }, hash: heading });
+		void navigate({ to: `/docs/${slug}` as "/docs", hash: heading });
 	};
 
 	return (

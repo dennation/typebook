@@ -8,8 +8,9 @@ import {
 	MDTable,
 	P,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
-export function PageTheming() {
+function PageTheming() {
 	return (
 		<>
 			<Lead>
@@ -101,3 +102,7 @@ export function PageTheming() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/theming")({
+	component: PageTheming,
+});

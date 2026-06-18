@@ -8,6 +8,7 @@ import {
 	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
 const NAMES = [
 	"search",
@@ -44,7 +45,7 @@ const NAMES = [
 	"type",
 ] as const;
 
-export function PageIcon() {
+function PageIcon() {
 	return (
 		<>
 			<Lead>
@@ -124,3 +125,5 @@ export function PageIcon() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/icon")({ component: PageIcon });

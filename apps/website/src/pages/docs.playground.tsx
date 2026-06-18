@@ -10,8 +10,9 @@ import {
 	PropsReference,
 	Ul,
 } from "@dennation/typebook/react";
+import { createFileRoute } from "@tanstack/react-router";
 
-export function PagePlayground() {
+function PagePlayground() {
 	return (
 		<>
 			<Lead>
@@ -58,8 +59,8 @@ export function PagePlayground() {
 						required: true,
 						desc: (
 							<>
-								The handle returned by <C>getComponentMeta()</C>. Initial control values
-								come from its <C>defaultProps</C>.
+								The handle returned by <C>getComponentMeta()</C>. Initial
+								control values come from its <C>defaultProps</C>.
 							</>
 						),
 					},
@@ -72,3 +73,7 @@ export function PagePlayground() {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/playground")({
+	component: PagePlayground,
+});

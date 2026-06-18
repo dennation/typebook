@@ -10,9 +10,11 @@ import {
 	Lead,
 	P,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go";
+import { createFileRoute } from "@tanstack/react-router";
+import { useDocsGo } from "../widgets/docs/useDocsGo";
 
-export function PageIntroduction({ go }: { go: DocsGo }) {
+function PageIntroduction() {
+	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
@@ -93,3 +95,7 @@ const button = getComponentMeta(Button, {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/introduction")({
+	component: PageIntroduction,
+});

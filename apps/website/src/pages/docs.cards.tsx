@@ -11,11 +11,13 @@ import {
 	propsToRows,
 	Snippet,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go";
+import { createFileRoute } from "@tanstack/react-router";
+import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 const docCard = getComponentMeta(DocCard);
 
-export function PageCards({ go }: { go: DocsGo }) {
+function PageCards() {
+	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
@@ -52,3 +54,5 @@ export function PageCards({ go }: { go: DocsGo }) {
 		</>
 	);
 }
+
+export const Route = createFileRoute("/docs/cards")({ component: PageCards });
