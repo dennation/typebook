@@ -4,7 +4,7 @@ import {
 	CopyCommand,
 	Icon,
 } from "@dennation/typebook/react";
-import { CONTAINER } from "../shared/lib/landingLayout.js";
+import { CONTAINER } from "../shared/lib/landingLayout";
 
 export interface LandingCtaProps {
 	/** Link target for the "Get started free" CTA. */

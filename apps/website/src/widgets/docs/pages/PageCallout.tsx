@@ -12,7 +12,7 @@ import {
 	propsToRows,
 	Snippet,
 } from "@dennation/typebook/react";
-import type { DocsGo } from "../go.js";
+import type { DocsGo } from "../go";
 
 const callout = getComponentMeta(Callout);
 

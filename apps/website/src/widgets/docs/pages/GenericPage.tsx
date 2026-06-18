@@ -9,8 +9,8 @@ import {
 	Lead,
 	P,
 } from "@dennation/typebook/react";
-import type { DocsPageMeta } from "../../../entities/docs/nav.js";
-import type { DocsGo } from "../go.js";
+import type { DocsPageMeta } from "../../../entities/docs/nav";
+import type { DocsGo } from "../go";
 
 /** Real-but-generic template for slugs without bespoke content. */
 export function GenericPage({ meta, go }: { meta: DocsPageMeta; go: DocsGo }) {

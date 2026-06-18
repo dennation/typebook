@@ -1,11 +1,11 @@
 import { cx, Icon } from "@dennation/typebook/react";
 import type { ReactNode } from "react";
-import { CONTAINER, SECTION_PAD } from "../shared/lib/landingLayout.js";
-import { SectionHead } from "../shared/ui/SectionHead.js";
-import { DemoMdx } from "./demos/DemoMdx.js";
-import { DemoSearch } from "./demos/DemoSearch.js";
-import { DemoTheme } from "./demos/DemoTheme.js";
-import { DemoTree } from "./demos/DemoTree.js";
+import { CONTAINER, SECTION_PAD } from "../shared/lib/landingLayout";
+import { SectionHead } from "../shared/ui/SectionHead";
+import { DemoMdx } from "./demos/DemoMdx";
+import { DemoSearch } from "./demos/DemoSearch";
+import { DemoTheme } from "./demos/DemoTheme";
+import { DemoTree } from "./demos/DemoTree";
 
 interface Feature {
 	icon: ReactNode;

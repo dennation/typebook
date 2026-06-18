@@ -8,10 +8,10 @@ import {
 } from "@dennation/typebook/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useRef } from "react";
-import { NAV, pageMeta } from "../../entities/docs/nav.js";
-import { useShell } from "../layout/ShellContext.js";
-import type { DocsGo } from "./go.js";
-import { GenericPage, PAGES } from "./pages/index.js";
+import { NAV, pageMeta } from "../../entities/docs/nav";
+import { useShell } from "../layout/ShellContext";
+import type { DocsGo } from "./go";
+import { GenericPage, PAGES } from "./pages/index";
 
 export interface DocsPageProps {
 	slug: string;

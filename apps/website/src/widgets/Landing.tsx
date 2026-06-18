@@ -1,10 +1,10 @@
-import { useReveal } from "../shared/lib/useReveal.js";
-import { LandingCompare } from "./LandingCompare.js";
-import { LandingCta } from "./LandingCta.js";
-import { LandingFeatures } from "./LandingFeatures.js";
-import { LandingHero } from "./LandingHero.js";
-import { LandingStats } from "./LandingStats.js";
-import { SiteFooter } from "./SiteFooter.js";
+import { useReveal } from "../shared/lib/useReveal";
+import { LandingCompare } from "./LandingCompare";
+import { LandingCta } from "./LandingCta";
+import { LandingFeatures } from "./LandingFeatures";
+import { LandingHero } from "./LandingHero";
+import { LandingStats } from "./LandingStats";
+import { SiteFooter } from "./SiteFooter";
 
 export interface LandingProps {
 	/** Link target for "Docs"/"Get started" CTAs across the page. */

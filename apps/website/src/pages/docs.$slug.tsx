@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { DEFAULT_DOCS_SLUG, isDocsSlug } from "../entities/docs/nav.js";
-import { GITHUB_URL } from "../shared/lib/siteLinks.js";
-import { DocsPage } from "../widgets/docs/DocsPage.js";
+import { DEFAULT_DOCS_SLUG, isDocsSlug } from "../entities/docs/nav";
+import { GITHUB_URL } from "../shared/lib/siteLinks";
+import { DocsPage } from "../widgets/docs/DocsPage";
 
 export const Route = createFileRoute("/docs/$slug")({
 	beforeLoad: ({ params }) => {

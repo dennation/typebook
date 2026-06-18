@@ -7,7 +7,7 @@ import {
 	DS_RP,
 	DS_RT,
 	REC_DOT,
-} from "./demoClasses.js";
+} from "./demoClasses";
 
 /** DEMO 1 — Command palette (⌘K) instant search. */
 export function DemoSearch() {

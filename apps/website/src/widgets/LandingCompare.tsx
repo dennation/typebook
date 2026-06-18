@@ -1,7 +1,7 @@
 import { cx, Icon } from "@dennation/typebook/react";
 import type { ReactNode } from "react";
-import { CONTAINER, SECTION_PAD } from "../shared/lib/landingLayout.js";
-import { SectionHead } from "../shared/ui/SectionHead.js";
+import { CONTAINER, SECTION_PAD } from "../shared/lib/landingLayout";
+import { SectionHead } from "../shared/ui/SectionHead";
 
 const COLS: { name: string; tag: string; own?: boolean }[] = [
 	{ name: "Typebok", tag: "this", own: true },
