@@ -10,6 +10,7 @@ import {
 	ThemeToggle,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 function PageThemeToggle() {
@@ -60,6 +61,10 @@ function PageThemeToggle() {
 						desc: "Icon size in px.",
 					},
 				]}
+			/>
+			<DocsFooter
+				prev={{ to: "/docs/icon", title: "Icon" }}
+				next={{ to: "/docs/error-boundary", title: "ErrorBoundary" }}
 			/>
 		</>
 	);

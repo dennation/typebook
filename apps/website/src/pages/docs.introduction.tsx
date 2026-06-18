@@ -11,6 +11,7 @@ import {
 	P,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 function PageIntroduction() {
@@ -92,6 +93,7 @@ const button = getComponentMeta(Button, {
 					onClick={() => go("quick-start")}
 				/>
 			</Cards>
+			<DocsFooter next={{ to: "/docs/installation", title: "Installation" }} />
 		</>
 	);
 }

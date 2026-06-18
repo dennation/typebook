@@ -9,6 +9,7 @@ import {
 	PropsReference,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PageSnippet() {
 	return (
@@ -87,6 +88,10 @@ function PageSnippet() {
 						desc: "Optional label shown as the filename above the revealed source.",
 					},
 				]}
+			/>
+			<DocsFooter
+				prev={{ to: "/docs/playground", title: "Playground" }}
+				next={{ to: "/docs/callout", title: "Callout" }}
 			/>
 		</>
 	);

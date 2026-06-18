@@ -13,6 +13,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 const callout = getComponentMeta(Callout);
@@ -82,6 +83,10 @@ function PageCallout() {
 					onClick={() => go("tabs")}
 				/>
 			</Cards>
+			<DocsFooter
+				prev={{ to: "/docs/snippet", title: "Snippet" }}
+				next={{ to: "/docs/code-block", title: "CodeBlock" }}
+			/>
 		</>
 	);
 }

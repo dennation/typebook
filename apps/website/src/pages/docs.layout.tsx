@@ -9,6 +9,7 @@ import {
 	PropsReference,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 function PageLayout() {
@@ -73,6 +74,10 @@ function RootComponent() {
 						desc: "Pin the page to a fixed theme instead of following the user's preference.",
 					},
 				]}
+			/>
+			<DocsFooter
+				prev={{ to: "/docs/copy-command", title: "CopyCommand" }}
+				next={{ to: "/docs/button", title: "Button" }}
 			/>
 		</>
 	);

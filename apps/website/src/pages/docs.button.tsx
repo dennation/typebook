@@ -10,6 +10,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PageButton() {
 	return (
@@ -94,6 +95,10 @@ function PageButton() {
 						desc: "All native attributes for the chosen element (onClick, disabled, href, …).",
 					},
 				]}
+			/>
+			<DocsFooter
+				prev={{ to: "/docs/layout", title: "Layout" }}
+				next={{ to: "/docs/icon", title: "Icon" }}
 			/>
 		</>
 	);

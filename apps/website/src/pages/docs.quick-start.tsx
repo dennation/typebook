@@ -10,6 +10,7 @@ import {
 	P,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 function PageQuickStart() {
@@ -97,6 +98,10 @@ import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 				Continue with <A onClick={() => go("story")}>Story</A> for the full prop
 				reference of each story component.
 			</P>
+			<DocsFooter
+				prev={{ to: "/docs/installation", title: "Installation" }}
+				next={{ to: "/docs/theming", title: "Theming" }}
+			/>
 		</>
 	);
 }

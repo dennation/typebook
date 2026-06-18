@@ -14,6 +14,9 @@ importers:
 
   apps/website:
     dependencies:
+      '@dennation/menu':
+        specifier: workspace:*
+        version: link:../../packages/menu
       '@dennation/typebook':
         specifier: workspace:*
         version: link:../../packages/typebook

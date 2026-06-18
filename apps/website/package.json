@@ -10,6 +10,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@dennation/menu": "workspace:*",
 		"@dennation/typebook": "workspace:*",
 		"@tanstack/react-router": "^1.168.0",
 		"react": "^19.0.0",

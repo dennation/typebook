@@ -374,7 +374,9 @@ apps/website/
       docs.<slug>.tsx     — one file per docs page (docs.button.tsx, docs.callout.tsx, …):
                             createFileRoute("/docs/<slug>") + the page component inline.
                             Unknown slugs 404 (no map, no guard). autoCodeSplitting → one chunk per page
-    entities/docs/nav.ts  — NAV sections, FLAT order, pageMeta(), SEARCH_INDEX (this site's content data)
+    entities/docs/nav.ts  — three `@dennation/menu` section menus (GETTING_STARTED/STORYBOOK/COMPONENTS,
+                            keyed by /docs/<slug>), SECTIONS, NEW_PAGES, pageMeta() (title+section from the
+                            menus), SEARCH_INDEX. Prev/next are authored per page (DocsFooter), not derived here
     shared/
       lib/{useReveal.ts, landingLayout.ts, siteLinks.ts}   — scroll-reveal hook + class constants + GITHUB_URL
       ui/SectionHead.tsx                      — section eyebrow + title + subtitle
@@ -387,7 +389,11 @@ apps/website/
       demos/{DemoSearch,DemoTree,DemoTheme,DemoMdx}.tsx + demoClasses.ts   — looping feature "gifs"
       docs/
         DocsShell.tsx                         — /docs layout shell: DocsSidebar + <Outlet/> + DocsToc, current slug from useMatches()
-        useDocsGo.ts                          — useDocsGo(): router-backed in-docs navigation (builds /docs/<slug>)
+        DocsFooter.tsx                        — per-page footer: "edit on GitHub" + prev/next as router <Link>s (props authored on each page)
+        sidebar/{DocsSidebar,SidebarShell,SidebarSection,sidebarMenu}.tsx
+                                              — sidebar: sections written out in JSX; items rendered via @dennation/menu,
+                                                its Item a TanStack <Link> (active state from the router)
+        useDocsGo.ts                          — useDocsGo(): router-backed nav still used by in-content <A>/<DocCard> links
         go.ts                                 — DocsGo navigation type
                                               (page content lives in the route files src/pages/docs.<slug>.tsx, not here)
 ```

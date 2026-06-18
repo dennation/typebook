@@ -9,6 +9,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 const copyCommand = getComponentMeta(CopyCommand);
 
@@ -28,6 +29,10 @@ function PageCopyCommand() {
 
 			<H2>Props</H2>
 			<PropsReference props={propsToRows(copyCommand.props)} />
+			<DocsFooter
+				prev={{ to: "/docs/navigation", title: "Navigation" }}
+				next={{ to: "/docs/layout", title: "Layout" }}
+			/>
 		</>
 	);
 }

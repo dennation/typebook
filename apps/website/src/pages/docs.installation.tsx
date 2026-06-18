@@ -11,6 +11,7 @@ import {
 	Steps,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 function PageInstallation() {
@@ -113,6 +114,10 @@ const button = getComponentMeta(Button, {
 				<C>tsc</C> and tests still type-check without it — the handle's{" "}
 				<C>props</C> is simply empty until a build runs.
 			</Callout>
+			<DocsFooter
+				prev={{ to: "/docs/introduction", title: "Introduction" }}
+				next={{ to: "/docs/quick-start", title: "Quick Start" }}
+			/>
 		</>
 	);
 }
