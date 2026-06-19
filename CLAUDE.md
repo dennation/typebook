@@ -393,9 +393,8 @@ apps/website/
         sidebar/{DocsSidebar,SidebarShell,SidebarSection,sidebarMenu}.tsx
                                               — sidebar: sections written out in JSX; items rendered via @dennation/menu,
                                                 its Item a TanStack <Link> (active state from the router)
-        useDocsGo.ts                          — useDocsGo(): router-backed nav still used by in-content <A>/<DocCard> links
-        go.ts                                 — DocsGo navigation type
-                                              (page content lives in the route files src/pages/docs.<slug>.tsx, not here)
+                                              (page content lives in the route files src/pages/docs.<slug>.tsx, not here;
+                                               in-content nav is plain <Link>/useNavigate — no shared go() wrapper)
 ```
 
 - **Styling.** `styles.css` imports the package's single source of truth, `packages/typebook/src/react/shared/config/theme.css`, and `@source`-scans both the app and `packages/typebook/src/react/**/*.tsx` (the latter so the universal primitives' utilities are emitted). Theme switching writes `data-theme` on `<html>` (key `typebook-theme`); a small inline script in `index.html` applies it before paint to avoid a flash.

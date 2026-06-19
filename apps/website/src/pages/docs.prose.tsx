@@ -1,5 +1,4 @@
 import {
-	A,
 	C,
 	CodeBlock,
 	H2,
@@ -55,7 +54,7 @@ function PageProse() {
 			<H3>Inline</H3>
 			<P>
 				Inline code like <C>useDocHeadings()</C> uses the <C>.inline-code</C>{" "}
-				theme class; <A href="https://github.com/dennation/typebook">links</A>{" "}
+				theme class; <a href="https://github.com/dennation/typebook">links</a>{" "}
 				carry the accent color and an offset underline. <C>A</C> takes an{" "}
 				<C>onClick</C> for in-app navigation instead of a hard <C>href</C>.
 			</P>

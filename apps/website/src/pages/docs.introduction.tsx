@@ -1,5 +1,4 @@
 import {
-	A,
 	C,
 	Callout,
 	Cards,
@@ -10,12 +9,11 @@ import {
 	Lead,
 	P,
 } from "@dennation/typebook/react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { DocsFooter } from "../widgets/docs/DocsFooter";
-import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 function PageIntroduction() {
-	const go = useDocsGo();
+	const navigate = useNavigate();
 	return (
 		<>
 			<Lead>
@@ -74,7 +72,7 @@ const button = getComponentMeta(Button, {
 				the plugin. Routing stays the <strong>consumer's responsibility</strong>
 				, so the library works with any router. And the same <C>typebook()</C>{" "}
 				factory is published for every bundler via{" "}
-				<A href="https://unplugin.unjs.io">unplugin</A> — no bundler is
+				<a href="https://unplugin.unjs.io">unplugin</a> — no bundler is
 				privileged.
 			</P>
 
@@ -84,13 +82,13 @@ const button = getComponentMeta(Button, {
 					icon={<Icon.rocket size={20} />}
 					title="Installation"
 					desc="Add the package and wire the bundler plugin."
-					onClick={() => go("installation")}
+					onClick={() => navigate({ to: "/docs/installation" })}
 				/>
 				<DocCard
 					icon={<Icon.book size={20} />}
 					title="Quick Start"
 					desc="From getComponentMeta() to a rendered story."
-					onClick={() => go("quick-start")}
+					onClick={() => navigate({ to: "/docs/quick-start" })}
 				/>
 			</Cards>
 			<DocsFooter next={{ to: "/docs/installation", title: "Installation" }} />
