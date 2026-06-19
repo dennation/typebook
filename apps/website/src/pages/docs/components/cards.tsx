@@ -11,7 +11,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Search, Zap } from "lucide-react";
+import { Palette, Zap } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 const docCard = getComponentMeta(DocCard);
@@ -39,10 +39,10 @@ function PageCards() {
 							}
 						/>
 						<DocCard
-							icon={<Search size={20} />}
-							title="Search"
-							desc="Jump to the SearchPalette docs."
-							onClick={() => navigate({ to: "/docs/components/search" })}
+							icon={<Palette size={20} />}
+							title="Theming"
+							desc="Jump to the theming guide."
+							onClick={() => navigate({ to: "/docs/guides/theming" })}
 						/>
 					</Cards>
 				)}

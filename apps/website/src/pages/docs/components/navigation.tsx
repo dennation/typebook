@@ -92,7 +92,7 @@ function PageNavigation() {
 				TanStack Router <C>&lt;Link&gt;</C>; yours can render anything.
 			</Callout>
 			<DocsFooter
-				prev={{ to: "/docs/components/search", title: "Search" }}
+				prev={{ to: "/docs/components/prose", title: "Prose" }}
 				next={{ to: "/docs/components/copy-command", title: "CopyCommand" }}
 			/>
 		</>

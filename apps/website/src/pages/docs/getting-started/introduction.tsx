@@ -28,14 +28,12 @@ function PageIntroduction() {
 				<strong>storybook runtime</strong> (<C>Story</C>, <C>Variants</C>,{" "}
 				<C>Matrix</C>, <C>Playground</C>, <C>Snippet</C>) driven by build-time
 				prop injection, and a <strong>docs component kit</strong> (callouts,
-				code blocks, tabs, steps, search palette, sidebar — everything this site
-				is built from).
+				code blocks, tabs, steps, sidebar — everything this site is built from).
 			</P>
 
 			<Callout type="info" title="This site is the demo">
 				Every component documented here renders the documentation you are
-				reading: the sidebar is <C>DocsSidebar</C>, the ⌘K palette is{" "}
-				<C>SearchPalette</C>, this note is <C>Callout</C>.
+				reading: the sidebar is <C>DocsSidebar</C>, this note is <C>Callout</C>.
 			</Callout>
 
 			<H2>How it works</H2>

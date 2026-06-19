@@ -1,5 +1,5 @@
 import { defineMenu, type Menu } from "@dennation/menu";
-import type { SearchEntry } from "@dennation/typebook/react";
+import type { SearchEntry } from "../../features/search";
 
 /*
  * Docs navigation data. The sidebar lays its sections out explicitly in JSX and
@@ -45,7 +45,6 @@ export const COMPONENTS = defineMenu<DocsMeta | undefined>({
 	"/docs/components/accordion": { title: "Accordion" },
 	"/docs/components/tables": { title: "Tables" },
 	"/docs/components/prose": { title: "Prose" },
-	"/docs/components/search": { title: "Search", meta: { badge: "new" } },
 	"/docs/components/navigation": { title: "Navigation" },
 	"/docs/components/copy-command": { title: "CopyCommand" },
 	"/docs/components/layout": { title: "Layout" },
@@ -190,12 +189,6 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		title: "Prose",
 		section: "Components",
 		desc: "Headings with anchors, paragraphs, lists, quotes, links",
-	},
-	{
-		slug: "components/search",
-		title: "Search",
-		section: "Components",
-		desc: "SearchPalette (⌘K) and useSearchHotkeys",
 	},
 	{
 		slug: "components/navigation",

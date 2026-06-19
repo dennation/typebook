@@ -7,11 +7,8 @@ import {
 import {
 	Box,
 	ChevronRight,
-	CornerDownLeft,
-	Hash,
 	Link2,
 	Rocket,
-	Search,
 	TriangleAlert,
 	Zap,
 } from "lucide-react";
@@ -57,7 +54,7 @@ export function LandingHero({
 					<span className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-[99px] bg-accent-soft text-accent border border-accent-soft-border">
 						v2.4
 					</span>
-					<span>Instant ⌘K search is here</span>
+					<span>Type-safe variant grids are here</span>
 					<span className="text-fg-subtle inline-flex">
 						<ChevronRight size={13} />
 					</span>
@@ -73,8 +70,7 @@ export function LandingHero({
 					Typebok is a content-first documentation framework for React. Write
 					plain
 					<strong className="text-fg font-semibold"> Markdown or MDX</strong> —
-					ship a polished sidebar, instant search, syntax highlighting and dark
-					mode with{" "}
+					ship a polished sidebar, syntax highlighting and dark mode with{" "}
 					<strong className="text-fg font-semibold">zero config</strong>.
 				</p>
 				<div className="flex items-center gap-3 flex-wrap justify-center mb-5.5">
@@ -186,40 +182,29 @@ export function LandingHero({
 						</div>
 					</div>
 					<div className="absolute z-3 -right-2 -bottom-8.5 w-[min(360px,76vw)] bg-bg border border-border-strong rounded-[14px] shadow-lg overflow-hidden animate-[floaty_6s_ease-in-out_infinite] motion-reduce:animate-none max-[620px]:hidden">
-						<div className="flex items-center gap-2.5 px-3.75 py-3.25 border-b border-border">
-							<span className="text-fg-subtle shrink-0 inline-flex">
-								<Search size={16} />
+						<div className="flex items-center gap-2 px-3.75 py-2.75 border-b border-border bg-bg-secondary font-mono text-[11px] text-fg-subtle">
+							<span className="text-accent inline-flex">
+								<Box size={13} />
 							</span>
-							<span className="text-[14.5px] relative whitespace-nowrap overflow-hidden">
-								<span className="text-fg">callout</span>
-								<span className="inline-block w-[1.5px] h-4 bg-accent align-[-3px] ml-px animate-[blink_1s_step-end_infinite] motion-reduce:animate-none" />
-							</span>
-							<span className="font-mono text-[11px] text-fg-muted border border-border rounded-[5px] px-1.5 py-0.5 ml-auto">
-								esc
+							Button.tsx
+							<span className="ml-auto rounded-[99px] border border-border bg-bg px-2 py-0.5 text-[10px]">
+								allOf(button, "size")
 							</span>
 						</div>
-						<div className="p-1.75 flex flex-col gap-0.5">
-							<div className="flex items-center gap-2.75 px-2.75 py-2.25 rounded-lg bg-accent-soft">
-								<span className="text-accent shrink-0 inline-flex">
-									<Box size={15} />
-								</span>
-								<span className="text-[13px] font-medium text-accent">
-									Callout
-								</span>
-								<span className="ml-auto text-accent inline-flex">
-									<CornerDownLeft size={14} />
-								</span>
+						<div className="p-4">
+							<div className="text-[10px] font-semibold tracking-[0.06em] uppercase text-fg-subtle mb-2.5">
+								size
 							</div>
-							<div className="flex items-center gap-2.75 px-2.75 py-2.25 rounded-lg">
-								<span className="text-fg-subtle shrink-0 inline-flex">
-									<Hash size={15} />
-								</span>
-								<span className="text-[13px] font-medium text-fg">
-									Callout props
-								</span>
-								<span className="text-[11px] text-fg-subtle ml-auto font-mono">
-									Callout
-								</span>
+							<div className="flex flex-wrap items-center gap-2.5">
+								<button type="button" className={buttonClass("primary", "sm")}>
+									Button
+								</button>
+								<button type="button" className={buttonClass("primary", "md")}>
+									Button
+								</button>
+								<button type="button" className={buttonClass("primary", "lg")}>
+									Button
+								</button>
 							</div>
 						</div>
 					</div>

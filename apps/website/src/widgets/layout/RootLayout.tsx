@@ -1,7 +1,7 @@
-import { SearchPalette, useSearchHotkeys } from "@dennation/typebook/react";
 import { Outlet, useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import { SEARCH_INDEX } from "../../entities/docs/nav";
+import { SearchPalette, useSearchHotkeys } from "../../features/search";
 import { SiteHeader } from "../SiteHeader";
 import { ShellContext, type ShellState } from "./ShellContext";
 

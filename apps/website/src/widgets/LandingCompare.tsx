@@ -37,9 +37,9 @@ const ROWS: { f: string; s: string; v: ReactNode[] }[] = [
 		v: [Y, Y, P("partial"), N],
 	},
 	{
-		f: "Zero-config search",
-		s: "Built-in, no external service",
-		v: [Y, P("plugin"), P("plugin"), Y],
+		f: "Props tables from types",
+		s: "Extracted by the TS compiler",
+		v: [Y, N, N, N],
 	},
 	{
 		f: "Token-level theming",

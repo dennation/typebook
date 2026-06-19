@@ -365,54 +365,6 @@ button {
 		opacity: 0.3;
 	}
 }
-@keyframes blink {
-	50% {
-		opacity: 0;
-	}
-}
-@keyframes dsCollapse {
-	0%,
-	34% {
-		max-height: 40px;
-		opacity: 1;
-		padding-top: 9px;
-		padding-bottom: 9px;
-		margin-bottom: 0;
-	}
-	44%,
-	92% {
-		max-height: 0;
-		opacity: 0;
-		padding-top: 0;
-		padding-bottom: 0;
-	}
-	100% {
-		max-height: 40px;
-		opacity: 1;
-		padding-top: 9px;
-		padding-bottom: 9px;
-	}
-}
-@keyframes dsSel {
-	0%,
-	48% {
-		background: transparent;
-	}
-	56%,
-	100% {
-		background: var(--accent-soft);
-	}
-}
-@keyframes dsEnter {
-	0%,
-	55% {
-		opacity: 0;
-	}
-	64%,
-	100% {
-		opacity: 1;
-	}
-}
 @keyframes dtIn {
 	0%,
 	8% {
