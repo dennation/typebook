@@ -12,12 +12,12 @@ import { Route as rootRouteImport } from './pages/__root'
 import { Route as DocsRouteRouteImport } from './pages/docs/route'
 import { Route as IndexRouteImport } from './pages/index'
 import { Route as DocsIndexRouteImport } from './pages/docs/index'
-import { Route as DocsStorybookVariantsRouteImport } from './pages/docs/storybook/variants'
-import { Route as DocsStorybookStoryRouteImport } from './pages/docs/storybook/story'
-import { Route as DocsStorybookSnippetRouteImport } from './pages/docs/storybook/snippet'
-import { Route as DocsStorybookPlaygroundRouteImport } from './pages/docs/storybook/playground'
-import { Route as DocsStorybookMatrixRouteImport } from './pages/docs/storybook/matrix'
+import { Route as DocsGuidesVariantsRouteImport } from './pages/docs/guides/variants'
 import { Route as DocsGuidesThemingRouteImport } from './pages/docs/guides/theming'
+import { Route as DocsGuidesStoryRouteImport } from './pages/docs/guides/story'
+import { Route as DocsGuidesSnippetRouteImport } from './pages/docs/guides/snippet'
+import { Route as DocsGuidesPlaygroundRouteImport } from './pages/docs/guides/playground'
+import { Route as DocsGuidesMatrixRouteImport } from './pages/docs/guides/matrix'
 import { Route as DocsGettingStartedQuickStartRouteImport } from './pages/docs/getting-started/quick-start'
 import { Route as DocsGettingStartedIntroductionRouteImport } from './pages/docs/getting-started/introduction'
 import { Route as DocsGettingStartedInstallationRouteImport } from './pages/docs/getting-started/installation'
@@ -53,34 +53,34 @@ const DocsIndexRoute = DocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DocsRouteRoute,
 } as any)
-const DocsStorybookVariantsRoute = DocsStorybookVariantsRouteImport.update({
-  id: '/storybook/variants',
-  path: '/storybook/variants',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
-const DocsStorybookStoryRoute = DocsStorybookStoryRouteImport.update({
-  id: '/storybook/story',
-  path: '/storybook/story',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
-const DocsStorybookSnippetRoute = DocsStorybookSnippetRouteImport.update({
-  id: '/storybook/snippet',
-  path: '/storybook/snippet',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
-const DocsStorybookPlaygroundRoute = DocsStorybookPlaygroundRouteImport.update({
-  id: '/storybook/playground',
-  path: '/storybook/playground',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
-const DocsStorybookMatrixRoute = DocsStorybookMatrixRouteImport.update({
-  id: '/storybook/matrix',
-  path: '/storybook/matrix',
+const DocsGuidesVariantsRoute = DocsGuidesVariantsRouteImport.update({
+  id: '/guides/variants',
+  path: '/guides/variants',
   getParentRoute: () => DocsRouteRoute,
 } as any)
 const DocsGuidesThemingRoute = DocsGuidesThemingRouteImport.update({
   id: '/guides/theming',
   path: '/guides/theming',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsGuidesStoryRoute = DocsGuidesStoryRouteImport.update({
+  id: '/guides/story',
+  path: '/guides/story',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsGuidesSnippetRoute = DocsGuidesSnippetRouteImport.update({
+  id: '/guides/snippet',
+  path: '/guides/snippet',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsGuidesPlaygroundRoute = DocsGuidesPlaygroundRouteImport.update({
+  id: '/guides/playground',
+  path: '/guides/playground',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsGuidesMatrixRoute = DocsGuidesMatrixRouteImport.update({
+  id: '/guides/matrix',
+  path: '/guides/matrix',
   getParentRoute: () => DocsRouteRoute,
 } as any)
 const DocsGettingStartedQuickStartRoute =
@@ -209,12 +209,12 @@ export interface FileRoutesByFullPath {
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
+  '/docs/guides/matrix': typeof DocsGuidesMatrixRoute
+  '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
+  '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
+  '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
-  '/docs/storybook/matrix': typeof DocsStorybookMatrixRoute
-  '/docs/storybook/playground': typeof DocsStorybookPlaygroundRoute
-  '/docs/storybook/snippet': typeof DocsStorybookSnippetRoute
-  '/docs/storybook/story': typeof DocsStorybookStoryRoute
-  '/docs/storybook/variants': typeof DocsStorybookVariantsRoute
+  '/docs/guides/variants': typeof DocsGuidesVariantsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -238,12 +238,12 @@ export interface FileRoutesByTo {
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
+  '/docs/guides/matrix': typeof DocsGuidesMatrixRoute
+  '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
+  '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
+  '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
-  '/docs/storybook/matrix': typeof DocsStorybookMatrixRoute
-  '/docs/storybook/playground': typeof DocsStorybookPlaygroundRoute
-  '/docs/storybook/snippet': typeof DocsStorybookSnippetRoute
-  '/docs/storybook/story': typeof DocsStorybookStoryRoute
-  '/docs/storybook/variants': typeof DocsStorybookVariantsRoute
+  '/docs/guides/variants': typeof DocsGuidesVariantsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -269,12 +269,12 @@ export interface FileRoutesById {
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
+  '/docs/guides/matrix': typeof DocsGuidesMatrixRoute
+  '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
+  '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
+  '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
-  '/docs/storybook/matrix': typeof DocsStorybookMatrixRoute
-  '/docs/storybook/playground': typeof DocsStorybookPlaygroundRoute
-  '/docs/storybook/snippet': typeof DocsStorybookSnippetRoute
-  '/docs/storybook/story': typeof DocsStorybookStoryRoute
-  '/docs/storybook/variants': typeof DocsStorybookVariantsRoute
+  '/docs/guides/variants': typeof DocsGuidesVariantsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -301,12 +301,12 @@ export interface FileRouteTypes {
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
+    | '/docs/guides/matrix'
+    | '/docs/guides/playground'
+    | '/docs/guides/snippet'
+    | '/docs/guides/story'
     | '/docs/guides/theming'
-    | '/docs/storybook/matrix'
-    | '/docs/storybook/playground'
-    | '/docs/storybook/snippet'
-    | '/docs/storybook/story'
-    | '/docs/storybook/variants'
+    | '/docs/guides/variants'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -330,12 +330,12 @@ export interface FileRouteTypes {
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
+    | '/docs/guides/matrix'
+    | '/docs/guides/playground'
+    | '/docs/guides/snippet'
+    | '/docs/guides/story'
     | '/docs/guides/theming'
-    | '/docs/storybook/matrix'
-    | '/docs/storybook/playground'
-    | '/docs/storybook/snippet'
-    | '/docs/storybook/story'
-    | '/docs/storybook/variants'
+    | '/docs/guides/variants'
   id:
     | '__root__'
     | '/'
@@ -360,12 +360,12 @@ export interface FileRouteTypes {
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
+    | '/docs/guides/matrix'
+    | '/docs/guides/playground'
+    | '/docs/guides/snippet'
+    | '/docs/guides/story'
     | '/docs/guides/theming'
-    | '/docs/storybook/matrix'
-    | '/docs/storybook/playground'
-    | '/docs/storybook/snippet'
-    | '/docs/storybook/story'
-    | '/docs/storybook/variants'
+    | '/docs/guides/variants'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -396,39 +396,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof DocsRouteRoute
     }
-    '/docs/storybook/variants': {
-      id: '/docs/storybook/variants'
-      path: '/storybook/variants'
-      fullPath: '/docs/storybook/variants'
-      preLoaderRoute: typeof DocsStorybookVariantsRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/storybook/story': {
-      id: '/docs/storybook/story'
-      path: '/storybook/story'
-      fullPath: '/docs/storybook/story'
-      preLoaderRoute: typeof DocsStorybookStoryRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/storybook/snippet': {
-      id: '/docs/storybook/snippet'
-      path: '/storybook/snippet'
-      fullPath: '/docs/storybook/snippet'
-      preLoaderRoute: typeof DocsStorybookSnippetRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/storybook/playground': {
-      id: '/docs/storybook/playground'
-      path: '/storybook/playground'
-      fullPath: '/docs/storybook/playground'
-      preLoaderRoute: typeof DocsStorybookPlaygroundRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/storybook/matrix': {
-      id: '/docs/storybook/matrix'
-      path: '/storybook/matrix'
-      fullPath: '/docs/storybook/matrix'
-      preLoaderRoute: typeof DocsStorybookMatrixRouteImport
+    '/docs/guides/variants': {
+      id: '/docs/guides/variants'
+      path: '/guides/variants'
+      fullPath: '/docs/guides/variants'
+      preLoaderRoute: typeof DocsGuidesVariantsRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/guides/theming': {
@@ -436,6 +408,34 @@ declare module '@tanstack/react-router' {
       path: '/guides/theming'
       fullPath: '/docs/guides/theming'
       preLoaderRoute: typeof DocsGuidesThemingRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/guides/story': {
+      id: '/docs/guides/story'
+      path: '/guides/story'
+      fullPath: '/docs/guides/story'
+      preLoaderRoute: typeof DocsGuidesStoryRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/guides/snippet': {
+      id: '/docs/guides/snippet'
+      path: '/guides/snippet'
+      fullPath: '/docs/guides/snippet'
+      preLoaderRoute: typeof DocsGuidesSnippetRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/guides/playground': {
+      id: '/docs/guides/playground'
+      path: '/guides/playground'
+      fullPath: '/docs/guides/playground'
+      preLoaderRoute: typeof DocsGuidesPlaygroundRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/guides/matrix': {
+      id: '/docs/guides/matrix'
+      path: '/guides/matrix'
+      fullPath: '/docs/guides/matrix'
+      preLoaderRoute: typeof DocsGuidesMatrixRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/getting-started/quick-start': {
@@ -595,12 +595,12 @@ interface DocsRouteRouteChildren {
   DocsGettingStartedInstallationRoute: typeof DocsGettingStartedInstallationRoute
   DocsGettingStartedIntroductionRoute: typeof DocsGettingStartedIntroductionRoute
   DocsGettingStartedQuickStartRoute: typeof DocsGettingStartedQuickStartRoute
+  DocsGuidesMatrixRoute: typeof DocsGuidesMatrixRoute
+  DocsGuidesPlaygroundRoute: typeof DocsGuidesPlaygroundRoute
+  DocsGuidesSnippetRoute: typeof DocsGuidesSnippetRoute
+  DocsGuidesStoryRoute: typeof DocsGuidesStoryRoute
   DocsGuidesThemingRoute: typeof DocsGuidesThemingRoute
-  DocsStorybookMatrixRoute: typeof DocsStorybookMatrixRoute
-  DocsStorybookPlaygroundRoute: typeof DocsStorybookPlaygroundRoute
-  DocsStorybookSnippetRoute: typeof DocsStorybookSnippetRoute
-  DocsStorybookStoryRoute: typeof DocsStorybookStoryRoute
-  DocsStorybookVariantsRoute: typeof DocsStorybookVariantsRoute
+  DocsGuidesVariantsRoute: typeof DocsGuidesVariantsRoute
 }
 
 const DocsRouteRouteChildren: DocsRouteRouteChildren = {
@@ -624,12 +624,12 @@ const DocsRouteRouteChildren: DocsRouteRouteChildren = {
   DocsGettingStartedInstallationRoute: DocsGettingStartedInstallationRoute,
   DocsGettingStartedIntroductionRoute: DocsGettingStartedIntroductionRoute,
   DocsGettingStartedQuickStartRoute: DocsGettingStartedQuickStartRoute,
+  DocsGuidesMatrixRoute: DocsGuidesMatrixRoute,
+  DocsGuidesPlaygroundRoute: DocsGuidesPlaygroundRoute,
+  DocsGuidesSnippetRoute: DocsGuidesSnippetRoute,
+  DocsGuidesStoryRoute: DocsGuidesStoryRoute,
   DocsGuidesThemingRoute: DocsGuidesThemingRoute,
-  DocsStorybookMatrixRoute: DocsStorybookMatrixRoute,
-  DocsStorybookPlaygroundRoute: DocsStorybookPlaygroundRoute,
-  DocsStorybookSnippetRoute: DocsStorybookSnippetRoute,
-  DocsStorybookStoryRoute: DocsStorybookStoryRoute,
-  DocsStorybookVariantsRoute: DocsStorybookVariantsRoute,
+  DocsGuidesVariantsRoute: DocsGuidesVariantsRoute,
 }
 
 const DocsRouteRouteWithChildren = DocsRouteRoute._addFileChildren(

@@ -76,13 +76,13 @@ import { Matrix } from "@dennation/typebook/react";
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/storybook/variants", title: "Variants" }}
-				next={{ to: "/docs/storybook/playground", title: "Playground" }}
+				prev={{ to: "/docs/guides/variants", title: "Variant grids" }}
+				next={{ to: "/docs/guides/playground", title: "Interactive playground" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/storybook/matrix")({
+export const Route = createFileRoute("/docs/guides/matrix")({
 	component: PageMatrix,
 });

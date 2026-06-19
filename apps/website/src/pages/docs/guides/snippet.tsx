@@ -90,13 +90,13 @@ function PageSnippet() {
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/storybook/playground", title: "Playground" }}
+				prev={{ to: "/docs/guides/playground", title: "Interactive playground" }}
 				next={{ to: "/docs/components/callout", title: "Callout" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/storybook/snippet")({
+export const Route = createFileRoute("/docs/guides/snippet")({
 	component: PageSnippet,
 });

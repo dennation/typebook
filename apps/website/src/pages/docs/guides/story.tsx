@@ -71,17 +71,17 @@ function PageStory() {
 			<H2>Related</H2>
 			<P>
 				Need several values of one prop at once? Use{" "}
-				<Link to="/docs/storybook/variants">Variants</Link>. Two axes? Use{" "}
-				<Link to="/docs/storybook/matrix">Matrix</Link>.
+				<Link to="/docs/guides/variants">Variant grids</Link>. Two axes? Use{" "}
+				<Link to="/docs/guides/matrix">Prop matrices</Link>.
 			</P>
 			<DocsFooter
 				prev={{ to: "/docs/guides/theming", title: "Theming" }}
-				next={{ to: "/docs/storybook/variants", title: "Variants" }}
+				next={{ to: "/docs/guides/variants", title: "Variant grids" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/storybook/story")({
+export const Route = createFileRoute("/docs/guides/story")({
 	component: PageStory,
 });
