@@ -1,5 +1,4 @@
 import {
-	A,
 	C,
 	CodeBlock,
 	H2,
@@ -9,12 +8,10 @@ import {
 	Snippet,
 	ThemeToggle,
 } from "@dennation/typebook/react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { DocsFooter } from "../widgets/docs/DocsFooter";
-import { useDocsGo } from "../widgets/docs/useDocsGo";
 
 function PageThemeToggle() {
-	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
@@ -35,9 +32,8 @@ function PageThemeToggle() {
 			<H2>Usage</H2>
 			<P>
 				The button renders a sun/moon icon for the current theme — style it
-				through <C>className</C>. See{" "}
-				<A onClick={() => go("theming")}>Theming</A> for the token system it
-				drives.
+				through <C>className</C>. See <Link to="/docs/theming">Theming</Link>{" "}
+				for the token system it drives.
 			</P>
 			<CodeBlock
 				lang="tsx"
