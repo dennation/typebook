@@ -1,5 +1,6 @@
-import { cx, Icon } from "@dennation/typebook/react";
+import { cx } from "@dennation/typebook/react";
 import { Link } from "@tanstack/react-router";
+import { ChevronLeft, ChevronRight, SquarePen } from "lucide-react";
 import { GITHUB_URL } from "../../shared/lib/siteLinks";
 
 /** A prev/next target: a concrete docs route and its title. */
@@ -31,7 +32,7 @@ export function DocsFooter({ prev, next }: DocsFooterProps) {
 					href={GITHUB_URL}
 					className="text-fg-muted inline-flex items-center gap-1.5 hover:text-accent"
 				>
-					<Icon.edit size={14} /> Edit this page on GitHub
+					<SquarePen size={14} /> Edit this page on GitHub
 				</a>
 				<span>Last updated May 28, 2026</span>
 			</div>
@@ -39,7 +40,7 @@ export function DocsFooter({ prev, next }: DocsFooterProps) {
 				{prev ? (
 					<Link to={prev.to as "/docs"} className={card}>
 						<div className={label}>
-							<Icon.chevL size={13} /> Previous
+							<ChevronLeft size={13} /> Previous
 						</div>
 						<div className={title}>{prev.title}</div>
 					</Link>
@@ -49,7 +50,7 @@ export function DocsFooter({ prev, next }: DocsFooterProps) {
 				{next ? (
 					<Link to={next.to as "/docs"} className={cx(card, "text-right")}>
 						<div className={cx(label, "justify-end")}>
-							Next <Icon.chevR size={13} />
+							Next <ChevronRight size={13} />
 						</div>
 						<div className={title}>{next.title}</div>
 					</Link>

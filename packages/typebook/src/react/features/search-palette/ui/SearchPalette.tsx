@@ -1,4 +1,10 @@
-import { Icon } from "@react/shared/ui/icon/index";
+import {
+	ChevronsUpDown,
+	CornerDownLeft,
+	FileText,
+	Hash,
+	Search,
+} from "lucide-react";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { tv } from "tailwind-variants";
 import type { SearchEntry } from "../model/types";
@@ -10,6 +16,16 @@ export interface SearchPaletteProps {
 	onClose: () => void;
 	/** Navigation callback — the palette knows nothing about your router. */
 	onNavigate: (slug: string, heading?: string) => void;
+	/** Icon in the search input. @default <Search size={19} /> */
+	searchIcon?: ReactNode;
+	/** Icon for a heading result. @default <Hash size={16} /> */
+	headingIcon?: ReactNode;
+	/** Icon for a page result. @default <FileText size={16} /> */
+	pageIcon?: ReactNode;
+	/** Icon in the per-result "enter" hint. @default <CornerDownLeft size={15} /> */
+	enterIcon?: ReactNode;
+	/** Icon in the footer "navigate" hint. @default <ChevronsUpDown size={11} /> */
+	navIcon?: ReactNode;
 }
 
 interface ScoredEntry extends SearchEntry {
@@ -55,6 +71,11 @@ export function SearchPalette({
 	index,
 	onClose,
 	onNavigate,
+	searchIcon = <Search size={19} />,
+	headingIcon = <Hash size={16} />,
+	pageIcon = <FileText size={16} />,
+	enterIcon = <CornerDownLeft size={15} />,
+	navIcon = <ChevronsUpDown size={11} />,
 }: SearchPaletteProps) {
 	const [q, setQ] = useState("");
 	const [active, setActive] = useState(0);
@@ -150,7 +171,7 @@ export function SearchPalette({
 			>
 				<div className="flex items-center gap-2.75 px-4.5 py-3.75 border-b border-border">
 					<span className="text-fg-subtle shrink-0 inline-flex">
-						<Icon.search size={19} />
+						{searchIcon}
 					</span>
 					<input
 						ref={inputRef}
@@ -189,11 +210,7 @@ export function SearchPalette({
 										onClick={() => choose(r)}
 									>
 										<span className={styles.icon()}>
-											{r.heading ? (
-												<Icon.hash size={16} />
-											) : (
-												<Icon.doc size={16} />
-											)}
+											{r.heading ? headingIcon : pageIcon}
 										</span>
 										<span className="min-w-0 flex-1">
 											<span className={styles.title()}>
@@ -205,9 +222,7 @@ export function SearchPalette({
 												</span>
 											)}
 										</span>
-										<span className={styles.enter()}>
-											<Icon.enter size={15} />
-										</span>
+										<span className={styles.enter()}>{enterIcon}</span>
 									</button>
 								);
 							})}
@@ -217,7 +232,7 @@ export function SearchPalette({
 				<div className="flex items-center gap-4 px-4 py-2.5 border-t border-border bg-bg-secondary text-[12px] text-fg-subtle">
 					<span className="flex items-center gap-1.5">
 						<kbd className={kbd({ className: "inline-flex justify-center" })}>
-							<Icon.arrowUpDown size={11} />
+							{navIcon}
 						</kbd>{" "}
 						navigate
 					</span>

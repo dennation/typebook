@@ -1,8 +1,8 @@
-import { Icon } from "@react/shared/ui/icon/index";
+import { ChevronRight } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { tv } from "tailwind-variants";
 
-const chevron = tv({
+const chevronCls = tv({
 	base: "ml-auto text-fg-subtle transition-transform duration-200",
 	variants: {
 		open: { true: "rotate-90" },
@@ -17,10 +17,15 @@ export interface AccordionItem {
 export interface AccordionProps {
 	/** The questions and answers: { q: string, a: ReactNode }. Questions double as keys, so keep them unique. */
 	items: AccordionItem[];
+	/** Indicator icon (rotates when open). @default <ChevronRight size={16} /> */
+	chevron?: ReactNode;
 }
 
 /** Single-open FAQ accordion with animated height. */
-export function Accordion({ items }: AccordionProps) {
+export function Accordion({
+	items,
+	chevron = <ChevronRight size={16} />,
+}: AccordionProps) {
 	const [open, setOpen] = useState<number | null>(null);
 	return (
 		<div className="border border-border rounded-(--radius-token) overflow-hidden">
@@ -28,6 +33,7 @@ export function Accordion({ items }: AccordionProps) {
 				<AccItem
 					key={it.q}
 					item={it}
+					chevron={chevron}
 					open={open === i}
 					onToggle={() => setOpen(open === i ? null : i)}
 				/>
@@ -38,10 +44,12 @@ export function Accordion({ items }: AccordionProps) {
 
 function AccItem({
 	item,
+	chevron,
 	open,
 	onToggle,
 }: {
 	item: AccordionItem;
+	chevron: ReactNode;
 	open: boolean;
 	onToggle: () => void;
 }) {
@@ -59,9 +67,7 @@ function AccItem({
 				aria-expanded={open}
 			>
 				{item.q}
-				<span className={chevron({ open })}>
-					<Icon.chevR size={16} />
-				</span>
+				<span className={chevronCls({ open })}>{chevron}</span>
 			</button>
 			<div
 				className="overflow-hidden transition-[height] duration-220 ease-[ease]"

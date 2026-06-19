@@ -2,8 +2,8 @@ import {
 	ARROW_CLASS,
 	buttonClass,
 	CopyCommand,
-	Icon,
 } from "@dennation/typebook/react";
+import { ChevronRight } from "lucide-react";
 import { CONTAINER } from "../shared/lib/landingLayout";
 
 export interface LandingCtaProps {
@@ -38,7 +38,7 @@ export function LandingCta({
 						<div className="flex gap-3 flex-wrap justify-center items-center">
 							<a className={buttonClass("primary", "lg")} href={docsHref}>
 								Get started free{" "}
-								<Icon.chevR size={16} className={ARROW_CLASS} />
+								<ChevronRight size={16} className={ARROW_CLASS} />
 							</a>
 							<CopyCommand cmd={command} />
 						</div>

@@ -3,13 +3,14 @@ import {
 	Callout,
 	CodeBlock,
 	H2,
-	Icon,
 	Lead,
 	P,
 	Step,
 	Steps,
 } from "@dennation/typebook/react";
+import { IconBrandReact, IconBrandTypescript } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SquareTerminal } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageInstallation() {
@@ -34,19 +35,19 @@ function PageInstallation() {
 					{
 						label: "pnpm",
 						lang: "bash",
-						icon: <Icon.terminal size={13} />,
+						icon: <SquareTerminal size={13} />,
 						code: "pnpm add @dennation/typebook",
 					},
 					{
 						label: "npm",
 						lang: "bash",
-						icon: <Icon.terminal size={13} />,
+						icon: <SquareTerminal size={13} />,
 						code: "npm install @dennation/typebook",
 					},
 					{
 						label: "yarn",
 						lang: "bash",
-						icon: <Icon.terminal size={13} />,
+						icon: <SquareTerminal size={13} />,
 						code: "yarn add @dennation/typebook",
 					},
 				]}
@@ -62,7 +63,7 @@ function PageInstallation() {
 					</P>
 					<CodeBlock
 						file="vite.config.ts"
-						icon={<Icon.ts size={14} />}
+						icon={<IconBrandTypescript size={14} />}
 						lang="tsx"
 						code={`import { typebook } from "@dennation/typebook/vite";
 import react from "@vitejs/plugin-react";
@@ -82,7 +83,7 @@ export default defineConfig({
 					</P>
 					<CodeBlock
 						file="src/pages/button.tsx"
-						icon={<Icon.react size={14} />}
+						icon={<IconBrandReact size={14} />}
 						lang="tsx"
 						code={`import { allOf, getComponentMeta } from "@dennation/typebook/react";
 import { Story, Variants } from "@dennation/typebook/react";

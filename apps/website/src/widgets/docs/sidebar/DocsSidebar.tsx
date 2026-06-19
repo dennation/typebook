@@ -1,6 +1,10 @@
 import { Menu } from "@dennation/menu/react";
-import { Icon } from "@dennation/typebook/react";
-import { COMPONENTS, GETTING_STARTED, GUIDES } from "../../../entities/docs/nav";
+import { Book, Layers, Rocket } from "lucide-react";
+import {
+	COMPONENTS,
+	GETTING_STARTED,
+	GUIDES,
+} from "../../../entities/docs/nav";
 import { SidebarSection } from "./SidebarSection";
 import { SidebarShell } from "./SidebarShell";
 import { sidebarMenu } from "./sidebarMenu";
@@ -18,13 +22,13 @@ export interface DocsSidebarProps {
 export function DocsSidebar({ open, onClose }: DocsSidebarProps) {
 	return (
 		<SidebarShell open={open} onClose={onClose}>
-			<SidebarSection icon={<Icon.rocket size={14} />} label="Getting Started">
+			<SidebarSection icon={<Rocket size={14} />} label="Getting Started">
 				<Menu menu={GETTING_STARTED} components={sidebarMenu} />
 			</SidebarSection>
-			<SidebarSection icon={<Icon.book size={14} />} label="Guides">
+			<SidebarSection icon={<Book size={14} />} label="Guides">
 				<Menu menu={GUIDES} components={sidebarMenu} />
 			</SidebarSection>
-			<SidebarSection icon={<Icon.layers size={14} />} label="Components">
+			<SidebarSection icon={<Layers size={14} />} label="Components">
 				<Menu menu={COMPONENTS} components={sidebarMenu} />
 			</SidebarSection>
 		</SidebarShell>

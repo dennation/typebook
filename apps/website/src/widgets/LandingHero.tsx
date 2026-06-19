@@ -3,8 +3,18 @@ import {
 	buttonClass,
 	CopyCommand,
 	cx,
-	Icon,
 } from "@dennation/typebook/react";
+import {
+	Box,
+	ChevronRight,
+	CornerDownLeft,
+	Hash,
+	Link2,
+	Rocket,
+	Search,
+	TriangleAlert,
+	Zap,
+} from "lucide-react";
 import { CONTAINER } from "../shared/lib/landingLayout";
 
 const MINI_IT =
@@ -49,7 +59,7 @@ export function LandingHero({
 					</span>
 					<span>Instant ⌘K search is here</span>
 					<span className="text-fg-subtle inline-flex">
-						<Icon.chevR size={13} />
+						<ChevronRight size={13} />
 					</span>
 				</div>
 				<h1 className="text-[clamp(40px,6.4vw,72px)] font-[680] tracking-[-0.035em] leading-[1.02] m-0 mb-5.5 max-w-[16ch] text-balance">
@@ -69,22 +79,22 @@ export function LandingHero({
 				</p>
 				<div className="flex items-center gap-3 flex-wrap justify-center mb-5.5">
 					<a className={buttonClass("primary", "lg")} href={docsHref}>
-						Read the docs <Icon.chevR size={16} className={ARROW_CLASS} />
+						Read the docs <ChevronRight size={16} className={ARROW_CLASS} />
 					</a>
 					<CopyCommand cmd={command} />
 				</div>
 				<div className="flex items-center gap-3.5 text-[13px] text-fg-subtle mt-1 flex-wrap justify-center">
 					<span className="text-[12px] tracking-[0.03em]">Drops into</span>
 					<span className="inline-flex items-center gap-1.75 text-fg-muted font-medium">
-						<Icon.box size={14} /> Next.js
+						<Box size={14} /> Next.js
 					</span>
 					<span className="w-0.75 h-0.75 rounded-[99px] bg-border-strong" />
 					<span className="inline-flex items-center gap-1.75 text-fg-muted font-medium">
-						<Icon.zap size={14} /> Vite
+						<Zap size={14} /> Vite
 					</span>
 					<span className="w-0.75 h-0.75 rounded-[99px] bg-border-strong" />
 					<span className="inline-flex items-center gap-1.75 text-fg-muted font-medium">
-						<Icon.rocket size={14} /> Astro
+						<Rocket size={14} /> Astro
 					</span>
 				</div>
 
@@ -97,7 +107,7 @@ export function LandingHero({
 								<i className="w-2.75 h-2.75 rounded-[99px] bg-border-strong not-italic" />
 							</div>
 							<span className="mx-auto font-mono text-[11.5px] text-fg-subtle bg-bg border border-border rounded-[7px] px-4 py-1 inline-flex items-center gap-1.75">
-								<Icon.link size={11} />
+								<Link2 size={11} />
 								acme.dev/docs/components/callout
 							</span>
 						</div>
@@ -105,7 +115,7 @@ export function LandingHero({
 							<aside className="border-r border-border px-3.5 py-5 flex flex-col gap-4.5 bg-bg max-[620px]:hidden">
 								<div className="flex flex-col gap-1.25">
 									<div className="text-[10px] font-semibold tracking-[0.07em] uppercase text-fg-subtle px-2 mb-0.75 flex items-center gap-1.75">
-										<Icon.rocket size={12} /> Getting Started
+										<Rocket size={12} /> Getting Started
 									</div>
 									<div className={MINI_IT}>
 										<span className={DOT} />
@@ -122,7 +132,7 @@ export function LandingHero({
 								</div>
 								<div className="flex flex-col gap-1.25">
 									<div className="text-[10px] font-semibold tracking-[0.07em] uppercase text-fg-subtle px-2 mb-0.75 flex items-center gap-1.75">
-										<Icon.box size={12} /> Components
+										<Box size={12} /> Components
 									</div>
 									<div className="flex items-center gap-2 text-[12.5px] px-2 py-1.25 rounded-md bg-accent-soft text-accent font-medium">
 										<span className="w-1 h-1 rounded-[99px] bg-current" />
@@ -152,7 +162,7 @@ export function LandingHero({
 								</p>
 								<div className="flex gap-2.75 px-3.75 py-3.25 rounded-[9px] text-[13px] leading-[1.5] border border-[color-mix(in_oklch,oklch(0.68_0.15_70)_35%,var(--border))] bg-[color-mix(in_oklch,oklch(0.68_0.15_70)_9%,var(--bg))] mt-1">
 									<span className="shrink-0 mt-px [color:oklch(0.68_0.15_70)]">
-										<Icon.warn size={17} />
+										<TriangleAlert size={17} />
 									</span>
 									<span>
 										<span className="font-semibold text-fg block mb-0.5">
@@ -178,7 +188,7 @@ export function LandingHero({
 					<div className="absolute z-3 -right-2 -bottom-8.5 w-[min(360px,76vw)] bg-bg border border-border-strong rounded-[14px] shadow-lg overflow-hidden animate-[floaty_6s_ease-in-out_infinite] motion-reduce:animate-none max-[620px]:hidden">
 						<div className="flex items-center gap-2.5 px-3.75 py-3.25 border-b border-border">
 							<span className="text-fg-subtle shrink-0 inline-flex">
-								<Icon.search size={16} />
+								<Search size={16} />
 							</span>
 							<span className="text-[14.5px] relative whitespace-nowrap overflow-hidden">
 								<span className="text-fg">callout</span>
@@ -191,18 +201,18 @@ export function LandingHero({
 						<div className="p-1.75 flex flex-col gap-0.5">
 							<div className="flex items-center gap-2.75 px-2.75 py-2.25 rounded-lg bg-accent-soft">
 								<span className="text-accent shrink-0 inline-flex">
-									<Icon.box size={15} />
+									<Box size={15} />
 								</span>
 								<span className="text-[13px] font-medium text-accent">
 									Callout
 								</span>
 								<span className="ml-auto text-accent inline-flex">
-									<Icon.enter size={14} />
+									<CornerDownLeft size={14} />
 								</span>
 							</div>
 							<div className="flex items-center gap-2.75 px-2.75 py-2.25 rounded-lg">
 								<span className="text-fg-subtle shrink-0 inline-flex">
-									<Icon.hash size={15} />
+									<Hash size={15} />
 								</span>
 								<span className="text-[13px] font-medium text-fg">
 									Callout props

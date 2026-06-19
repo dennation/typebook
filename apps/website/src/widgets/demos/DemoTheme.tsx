@@ -1,4 +1,5 @@
-import { cx, Icon } from "@dennation/typebook/react";
+import { cx } from "@dennation/typebook/react";
+import { Moon } from "lucide-react";
 import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses";
 
 const CARD =
@@ -16,7 +17,7 @@ export function DemoTheme() {
 			</span>
 			<div className="absolute right-4 top-4 z-4 w-11.5 h-6.5 rounded-[99px] bg-bg-tertiary border border-border">
 				<div className="absolute top-0.5 left-0.5 w-5 h-5 rounded-[99px] bg-accent grid place-items-center text-accent-fg animate-[thKnob_8s_ease_infinite] motion-reduce:animate-none">
-					<Icon.moon size={11} />
+					<Moon size={11} />
 				</div>
 			</div>
 			<div className="relative w-full max-w-80 aspect-[1.45]">

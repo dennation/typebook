@@ -5,7 +5,6 @@ import {
 	DocCard,
 	getComponentMeta,
 	H2,
-	Icon,
 	Lead,
 	P,
 	PropsReference,
@@ -13,6 +12,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Box, Layers } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 const callout = getComponentMeta(Callout);
@@ -70,13 +70,13 @@ function PageCallout() {
 			<H2>Related</H2>
 			<Cards>
 				<DocCard
-					icon={<Icon.box size={20} />}
+					icon={<Box size={20} />}
 					title="CodeBlock"
 					desc="Tabs, line highlights and copy."
 					onClick={() => navigate({ to: "/docs/components/code-block" })}
 				/>
 				<DocCard
-					icon={<Icon.layers size={20} />}
+					icon={<Layers size={20} />}
 					title="Tabs"
 					desc="Switch between content panels."
 					onClick={() => navigate({ to: "/docs/components/tabs" })}

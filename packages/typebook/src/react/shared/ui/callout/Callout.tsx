@@ -1,14 +1,20 @@
-import { Icon, type IconProps } from "@react/shared/ui/icon/index";
+import {
+	CircleCheck,
+	CircleX,
+	Info,
+	type LucideIcon,
+	TriangleAlert,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";
 
 export type CalloutType = "info" | "warning" | "danger" | "success";
 
-const CALLOUT_ICON: Record<CalloutType, (p: IconProps) => ReactNode> = {
-	info: Icon.info,
-	warning: Icon.warn,
-	danger: Icon.danger,
-	success: Icon.ok,
+const CALLOUT_ICON: Record<CalloutType, LucideIcon> = {
+	info: Info,
+	warning: TriangleAlert,
+	danger: CircleX,
+	success: CircleCheck,
 };
 
 const callout = tv({
@@ -47,7 +53,6 @@ export function Callout({ type = "info", title, children }: CalloutProps) {
 	return (
 		<div className={root()}>
 			<span className={icon()}>
-
 				<Ic size={19} />
 			</span>
 			<div className={body()}>

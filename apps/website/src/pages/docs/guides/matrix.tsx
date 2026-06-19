@@ -2,11 +2,11 @@ import {
 	C,
 	CodeBlock,
 	H2,
-	Icon,
 	Lead,
 	P,
 	PropsReference,
 } from "@dennation/typebook/react";
+import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
@@ -22,7 +22,7 @@ function PageMatrix() {
 			<H2>Usage</H2>
 			<CodeBlock
 				file="src/pages/button.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				code={`import { allOf } from "@dennation/typebook/react";
 import { Matrix } from "@dennation/typebook/react";
@@ -77,7 +77,10 @@ import { Matrix } from "@dennation/typebook/react";
 			/>
 			<DocsFooter
 				prev={{ to: "/docs/guides/variants", title: "Variant grids" }}
-				next={{ to: "/docs/guides/playground", title: "Interactive playground" }}
+				next={{
+					to: "/docs/guides/playground",
+					title: "Interactive playground",
+				}}
 			/>
 		</>
 	);

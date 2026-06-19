@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { THEME_STORAGE_KEY } from "@/constants";
-import { Icon } from "../../../shared/ui/icon/index";
 
 type Theme = "light" | "dark";
 
@@ -16,6 +16,10 @@ export interface ThemeToggleProps {
 	className?: string;
 	/** Icon size in px. */
 	size?: number;
+	/** Icon shown in dark mode (click switches to light). @default <Sun size={size} /> */
+	sunIcon?: ReactNode;
+	/** Icon shown in light mode (click switches to dark). @default <Moon size={size} /> */
+	moonIcon?: ReactNode;
 }
 
 /**
@@ -23,7 +27,12 @@ export interface ThemeToggleProps {
  * localStorage. Sets the attribute on the document root so the whole page —
  * including the design tokens in theme.css — swaps through the cascade.
  */
-export function ThemeToggle({ className, size = 18 }: ThemeToggleProps) {
+export function ThemeToggle({
+	className,
+	size = 18,
+	sunIcon = <Sun size={size} />,
+	moonIcon = <Moon size={size} />,
+}: ThemeToggleProps) {
 	const [theme, setTheme] = useState<Theme>(readTheme);
 
 	// Keep state in sync if another instance (or the bootstrap script) changed it.
@@ -49,7 +58,7 @@ export function ThemeToggle({ className, size = 18 }: ThemeToggleProps) {
 			onClick={toggle}
 			aria-label="Toggle theme"
 		>
-			{theme === "dark" ? <Icon.sun size={size} /> : <Icon.moon size={size} />}
+			{theme === "dark" ? sunIcon : moonIcon}
 		</button>
 	);
 }
