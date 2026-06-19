@@ -1,4 +1,3 @@
-import { useReveal } from "../shared/lib/useReveal";
 import { LandingCompare } from "./LandingCompare";
 import { LandingCta } from "./LandingCta";
 import { LandingFeatures } from "./LandingFeatures";
@@ -16,7 +15,6 @@ export interface LandingProps {
 /** The full Typebok marketing landing page, composed from its sections.
     The site header is rendered by the root layout. */
 export function Landing({ docsHref = "#", command }: LandingProps) {
-	useReveal();
 	return (
 		<div>
 			<main>
