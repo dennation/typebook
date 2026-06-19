@@ -16,10 +16,21 @@ const ORDER_UNSPECIFIED = Number.MAX_SAFE_INTEGER;
  */
 type MenuKeys<T> = Extract<keyof T, string>;
 
+/**
+ * Meta-opaque views for the internal pipeline: the runtime never inspects `meta`
+ * (it just rides through), so the resolver works against an `unknown`-meta shape
+ * and the public result is cast back to `Menu<M>`. (`MenuSlot`'s `meta` makes the
+ * item types contravariant in `M`, so threading `M` through every helper would
+ * fight variance for no gain.) With `unknown`, `MetaField` makes `meta` optional,
+ * so a node with or without it is assignable here.
+ */
+type LooseInput = MenuItemInput<string, unknown>;
+type LooseNode = MenuItem<unknown>;
+
 /** An output node paired with everything needed to place it in the tree. */
 interface PlacedNode {
 	key: string;
-	node: MenuItem;
+	node: LooseNode;
 	/** Key of the parent entry, or `undefined` for a top-level entry. */
 	parentKey: string | undefined;
 	/** Resolved sort order; {@link ORDER_UNSPECIFIED} when none was given. */
@@ -43,11 +54,25 @@ interface PlacedNode {
  *
  * `parent` is type-checked against `keyof` the input — including route paths that
  * flow in from a router adapter spread.
+ *
+ * `M` types the opaque per-item `meta`. It's the **first** type parameter so it
+ * can be given explicitly (`defineMenu<MyMeta>(…)`) while `T` is still inferred
+ * from the argument; left off, it defaults to `never` — the menu has no usable
+ * `meta`. With a type, `meta` is that type everywhere — required by default, or
+ * optional if the type admits `undefined` (`defineMenu<MyMeta | undefined>`). It
+ * passes through verbatim; `defineMenu` never reads or synthesizes it. Either way
+ * `parent` stays checked against the inferred keys.
  */
 export function defineMenu<
-	const T extends Record<string, MenuItemInput<MenuKeys<T>> | undefined>,
->(input: T): Menu {
-	const placed = definedEntries(input).map(toPlacedNode);
+	M = never,
+	const T extends Record<
+		string,
+		MenuItemInput<MenuKeys<T>, M> | undefined
+	> = Record<string, MenuItemInput<string, M>>,
+>(input: T): Menu<M> {
+	const placed = definedEntries(input as unknown as MenuInput<unknown>).map(
+		toPlacedNode,
+	);
 	const nodeByKey = new Map(placed.map((entry) => [entry.key, entry.node]));
 
 	// Split entries into roots and per-parent buckets. An entry whose `parent`
@@ -73,7 +98,7 @@ export function defineMenu<
 		if (parentNode) parentNode.items = toSortedNodes(children);
 	}
 
-	return toSortedNodes(roots);
+	return toSortedNodes(roots) as unknown as Menu<M>;
 }
 
 /**
@@ -82,21 +107,22 @@ export function defineMenu<
  * dropping them keeps the keyed input composable via spread.
  */
 function definedEntries(
-	input: Record<string, MenuItemInput | undefined>,
-): [string, MenuItemInput][] {
+	input: Record<string, LooseInput | undefined>,
+): [string, LooseInput][] {
 	return Object.entries(input).filter(
-		(entry): entry is [string, MenuItemInput] => entry[1] != null,
+		(entry): entry is [string, LooseInput] => entry[1] != null,
 	);
 }
 
 /** Build the output node for one input entry and capture its placement metadata. */
 function toPlacedNode(
-	[key, value]: [string, MenuItemInput],
+	[key, value]: [string, LooseInput],
 	index: number,
 ): PlacedNode {
 	const { href, parent, order, ...fields } = value;
 	const resolvedHref = resolveHref(key, href);
-	const node: MenuItem = {
+	// `meta` (when present) rides through in `...fields` untouched.
+	const node: LooseNode = {
 		...fields,
 		...(resolvedHref != null && { href: resolvedHref }),
 	};
@@ -129,7 +155,7 @@ function appendChild(
 }
 
 /** Sort siblings by `order`, then by authored position, returning their nodes. */
-function toSortedNodes(entries: PlacedNode[]): MenuItem[] {
+function toSortedNodes(entries: PlacedNode[]): LooseNode[] {
 	return [...entries]
 		.sort((a, b) => a.order - b.order || a.index - b.index)
 		.map((entry) => entry.node);

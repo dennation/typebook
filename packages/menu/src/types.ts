@@ -9,16 +9,37 @@ export interface MenuItemState {
 }
 
 /** Render custom JSX before/after a menu item (e.g. a divider or section heading). */
-export type MenuSlot = (item: MenuItem, state: MenuItemState) => ReactNode;
+export type MenuSlot<M = never> = (
+	item: MenuItem<M>,
+	state: MenuItemState,
+) => ReactNode;
 
 /**
- * Fields shared by the stored {@link MenuItem} and the input {@link MenuItemInput}.
+ * The opaque per-item metadata field, derived from the meta type `M` — used
+ * **identically** on input and output (whatever `M` you give is what you get,
+ * everywhere). `[M]` wrappers stop the conditional distributing over a union.
+ *
+ * - `M = never` (no meta type given, the default): no usable `meta` (`undefined`).
+ * - `undefined` is assignable to `M` (e.g. `Foo | undefined`): `meta` is
+ *   **optional** — that's how a consumer opts into omittable meta.
+ * - otherwise: `meta` is **required** and typed `M`, so the consumer's `Item`
+ *   reads `item.meta.x` with no optional chaining.
+ */
+type MetaField<M> = [M] extends [never]
+	? { meta?: undefined }
+	: undefined extends M
+		? { meta?: M }
+		: { meta: M };
+
+/**
+ * Fields shared by the stored {@link MenuItem} and the input {@link MenuItemInput}
+ * — everything except `meta` (added via {@link MetaField} on each).
  *
  * Note there is no `match`/`active`: the `<Menu>` renderer is router-agnostic and
  * knows nothing about the active path. Active-state matching lives entirely in the
  * consumer's `Item` component, which talks to its own router.
  */
-export interface MenuItemBase {
+export interface MenuItemBase<M = never> {
 	title: string;
 	icon?: ReactNode;
 	/** Initial expanded state when the item has children. Default `true`. */
@@ -31,25 +52,29 @@ export interface MenuItemBase {
 	 */
 	collapsible?: boolean;
 	/** Custom JSX rendered before the item. */
-	before?: MenuSlot;
+	before?: MenuSlot<M>;
 	/** Custom JSX rendered after the item. */
-	after?: MenuSlot;
+	after?: MenuSlot<M>;
 }
 
 /**
  * A single, normalized navigation entry — the renderer's model. A node with
  * `items` is a (collapsible) section, one with `href` is a link, both → a
  * clickable section. Built by {@link defineMenu} from the keyed {@link MenuInput}.
+ *
+ * `meta` is the same type as on the input (see {@link MetaField}): required when
+ * `M` is a plain type, optional when `M` admits `undefined`.
  */
-export interface MenuItem extends MenuItemBase {
-	/** Link target — internal route or external URL. Absent → pure container. */
-	href?: string;
-	/** Child entries → renders as a collapsible section. */
-	items?: MenuItem[];
-}
+export type MenuItem<M = never> = MenuItemBase<M> &
+	MetaField<M> & {
+		/** Link target — internal route or external URL. Absent → pure container. */
+		href?: string;
+		/** Child entries → renders as a collapsible section. */
+		items?: MenuItem<M>[];
+	};
 
 /** Stored, normalized navigation tree consumed by the renderer. */
-export type Menu = MenuItem[];
+export type Menu<M = never> = MenuItem<M>[];
 
 /**
  * Authoring/adapter *input* value. The {@link MenuInput} is an **object keyed by
@@ -62,18 +87,19 @@ export type Menu = MenuItem[];
  * `Parent` is the union of sibling keys allowed for `parent`; {@link defineMenu}
  * infers it (`keyof` the input, including route paths from an adapter spread).
  */
-export interface MenuItemInput<Parent extends string = string>
-	extends MenuItemBase {
-	/**
-	 * Link target. Defaults to the entry's key. Set `false` for a non-navigable
-	 * container whose key is just an id.
-	 */
-	href?: string | false;
-	/** Key of the parent entry. Absent → top level. */
-	parent?: Parent;
-	/** Sort hint among siblings (lower first). Stripped from the output. */
-	order?: number;
-}
+export type MenuItemInput<Parent extends string = string, M = never> =
+	MenuItemBase<M> &
+		MetaField<M> & {
+			/**
+			 * Link target. Defaults to the entry's key. Set `false` for a
+			 * non-navigable container whose key is just an id.
+			 */
+			href?: string | false;
+			/** Key of the parent entry. Absent → top level. */
+			parent?: Parent;
+			/** Sort hint among siblings (lower first). Stripped from the output. */
+			order?: number;
+		};
 
 /** Input accepted by {@link defineMenu}: an object keyed by `href`/id. */
-export type MenuInput = Record<string, MenuItemInput>;
+export type MenuInput<M = never> = Record<string, MenuItemInput<string, M>>;

@@ -5,7 +5,7 @@ import type {
 } from "@dennation/menu/react";
 import { cx } from "@dennation/typebook/react";
 import { Link } from "@tanstack/react-router";
-import { NEW_PAGES } from "../../../entities/docs/nav";
+import type { DocsMeta } from "../../../entities/docs/nav";
 
 /*
  * The `@dennation/menu` render components for the docs sidebar. The renderer
@@ -23,7 +23,7 @@ const badge =
 	"ml-auto text-[10px] font-mono px-1.5 py-px rounded-[99px] font-medium bg-accent-soft text-accent border border-accent-soft-border";
 
 /** A single navigation link. Active highlight comes from the router. */
-function Item({ item: entry }: MenuItemProps) {
+function Item({ item: entry }: MenuItemProps<DocsMeta | undefined>) {
 	const href = entry.href;
 	if (!href) return null;
 	return (
@@ -39,7 +39,9 @@ function Item({ item: entry }: MenuItemProps) {
 				<>
 					<span className={cx(dot, isActive ? "opacity-100" : "opacity-30")} />
 					{entry.title}
-					{NEW_PAGES.has(href) && <span className={badge}>new</span>}
+					{entry.meta?.badge && (
+						<span className={badge}>{entry.meta.badge}</span>
+					)}
 				</>
 			)}
 		</Link>
@@ -51,4 +53,7 @@ function Container({ children }: MenuContainerProps) {
 	return <div className="flex flex-col gap-px">{children}</div>;
 }
 
-export const sidebarMenu: MenuComponents = { Container, Item };
+export const sidebarMenu: MenuComponents<DocsMeta | undefined> = {
+	Container,
+	Item,
+};
