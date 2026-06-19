@@ -387,8 +387,13 @@ apps/website/
       SiteHeader.tsx                          — unified sticky header (nav, search, theme, CTA)
       Landing.tsx                             — composes the landing sections
       SiteFooter.tsx
-      LandingHero.tsx, LandingFeatures.tsx, LandingCompare.tsx, LandingStats.tsx, LandingCta.tsx
-      demos/{DemoVariants,DemoTree,DemoTheme,DemoMdx}.tsx + demoClasses.ts   — looping feature "gifs"
+      LandingHero.tsx        — type-driven killer feature first: code + the same code rendered live (<Variants>)
+      LandingHowItWorks.tsx  — the build-time injection in 3 steps + an authored→emitted "you write / bundler emits" panel
+      LandingFeatures.tsx    — the four storybook widgets rendering LIVE on the page (<Variants>/<Matrix>/<Playground>/<Snippet>)
+      LandingTypeSafety.tsx  — compile-time guarantees (allOf typo, missing required prop) shown as TS errors
+      LandingBundlers.tsx, LandingBatteries.tsx, LandingCompare.tsx (vs Storybook), LandingStats.tsx, LandingCta.tsx
+      demos/{DemoButton.tsx, demoMeta.ts}     — a real demo component + its getComponentMeta() handle; the plugin
+                                                injects DemoButton's prop types so the landing's live widgets have real axes
       docs/
         DocsShell.tsx                         — /docs layout shell: DocsSidebar + <Outlet/> + DocsToc, current slug from useMatches()
         DocsFooter.tsx                        — per-page footer: "edit on GitHub" + prev/next as router <Link>s (props authored on each page)

@@ -29,11 +29,12 @@ export function LandingCta({
 							T
 						</span>
 						<h2 className="text-[clamp(30px,4.4vw,46px)] font-[670] tracking-[-0.03em] leading-[1.05] m-0 mb-4 text-balance">
-							Ship docs you're proud of
+							Let your types tell the story
 						</h2>
 						<p className="text-[17px] text-fg-muted m-0 mb-8 max-w-[48ch] leading-[1.6]">
-							Scaffold a complete documentation site in one command. No design
-							work, no boilerplate, no lock-in.
+							Add one plugin, register a component, and render every variant
+							from the types you already wrote. No stories, no registry, no
+							lock-in.
 						</p>
 						<div className="flex gap-3 flex-wrap justify-center items-center">
 							<a className={buttonClass("primary", "lg")} href={docsHref}>

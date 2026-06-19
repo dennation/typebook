@@ -34,8 +34,8 @@ export function SiteFooter({ docsHref = "#" }: SiteFooterProps) {
 							Typebok
 						</a>
 						<p className="text-[13.5px] text-fg-muted leading-[1.6] max-w-[30ch] m-0">
-							The content-first documentation framework for React. Open source,
-							MIT licensed.
+							The React component documentation library that renders your
+							stories from types. Open source, MIT licensed.
 						</p>
 					</div>
 					{COLS.map((c) => (

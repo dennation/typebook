@@ -1,8 +1,12 @@
+import { LandingBatteries } from "./LandingBatteries";
+import { LandingBundlers } from "./LandingBundlers";
 import { LandingCompare } from "./LandingCompare";
 import { LandingCta } from "./LandingCta";
 import { LandingFeatures } from "./LandingFeatures";
 import { LandingHero } from "./LandingHero";
+import { LandingHowItWorks } from "./LandingHowItWorks";
 import { LandingStats } from "./LandingStats";
+import { LandingTypeSafety } from "./LandingTypeSafety";
 import { SiteFooter } from "./SiteFooter";
 
 export interface LandingProps {
@@ -19,7 +23,11 @@ export function Landing({ docsHref = "#", command }: LandingProps) {
 		<div>
 			<main>
 				<LandingHero docsHref={docsHref} command={command} />
+				<LandingHowItWorks />
 				<LandingFeatures />
+				<LandingTypeSafety />
+				<LandingBundlers />
+				<LandingBatteries />
 				<LandingCompare />
 				<LandingStats />
 				<LandingCta docsHref={docsHref} command={command} />

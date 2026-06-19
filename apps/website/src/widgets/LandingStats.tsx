@@ -3,35 +3,25 @@ import { CONTAINER } from "../shared/lib/landingLayout";
 
 const ITEMS: { num: ReactNode; lbl: string }[] = [
 	{
-		num: (
-			<>
-				<span>4.2</span>
-				<span className="text-accent">kb</span>
-			</>
-		),
-		lbl: "Runtime JS shipped to readers, gzipped",
+		num: <span>7</span>,
+		lbl: "Bundlers, one typebook() plugin — Vite to Farm",
 	},
 	{
 		num: <span>0</span>,
-		lbl: "Config files needed to get a working site",
+		lbl: "Story files or registries to keep in sync",
+	},
+	{
+		num: <span>1</span>,
+		lbl: "Handle behind Story, Variants, Matrix & Playground",
 	},
 	{
 		num: (
 			<>
 				<span>100</span>
-				<span className="text-accent">/100</span>
+				<span className="text-accent">%</span>
 			</>
 		),
-		lbl: "Lighthouse performance on the starter",
-	},
-	{
-		num: (
-			<>
-				<span>30</span>
-				<span className="text-accent">s</span>
-			</>
-		),
-		lbl: "From empty folder to live docs page",
+		lbl: "Type-safe — props, axes and values checked",
 	},
 ];
 

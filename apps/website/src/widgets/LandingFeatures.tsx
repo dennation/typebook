@@ -1,15 +1,27 @@
-import { cx } from "@dennation/typebook/react";
-import { Box, Check, Layers, LayoutGrid, Palette } from "lucide-react";
+import {
+	allOf,
+	cx,
+	Matrix,
+	Playground,
+	Snippet,
+	Variants,
+} from "@dennation/typebook/react";
+import {
+	Check,
+	Code2,
+	Grid3x3,
+	LayoutGrid,
+	SlidersHorizontal,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { CONTAINER, SECTION_PAD } from "../shared/lib/landingLayout";
 import { SectionHead } from "../shared/ui/SectionHead";
-import { DemoMdx } from "./demos/DemoMdx";
-import { DemoTheme } from "./demos/DemoTheme";
-import { DemoTree } from "./demos/DemoTree";
-import { DemoVariants } from "./demos/DemoVariants";
+import { DemoButton } from "./demos/DemoButton";
+import { demoButton } from "./demos/demoMeta";
 
 interface Feature {
 	icon: ReactNode;
+	call: string;
 	demo: ReactNode;
 	flip: boolean;
 	title: string;
@@ -20,119 +32,155 @@ interface Feature {
 const FEATURES: Feature[] = [
 	{
 		icon: <LayoutGrid size={22} />,
-		demo: <DemoVariants />,
+		call: 'allOf(button, "variant")',
+		demo: (
+			<Variants
+				of={demoButton}
+				items={allOf(demoButton, "variant")}
+				columns={2}
+			/>
+		),
 		flip: false,
-		title: "Variant grids from your types",
-		body: "Register a component once — the bundler plugin reads its prop types through the TypeScript compiler and renders every size, state and combination. No stories to hand-write, no fixtures to keep in sync.",
+		title: "Grids that grow with your types",
+		body: "allOf() reads a prop's literal-union (or boolean) type straight from the handle. Add a value to the union and the grid grows by itself — no row to add, no fixture to update.",
 		list: [
 			{
-				id: "types",
+				id: "union",
 				text: (
 					<>
-						Props extracted from <b>TypeScript types</b>
+						Every value of a <b>union</b>, automatically
 					</>
 				),
 			},
 			{
-				id: "axes",
+				id: "bool",
 				text: (
 					<>
-						Stories, <b>variant grids</b> and matrices
+						Booleans render their <b>true / false</b> states
 					</>
 				),
 			},
-			{ id: "playground", text: <>Live playground from the same handle</> },
+			{
+				id: "explicit",
+				text: (
+					<>
+						Or list values by hand with <b>values()</b>
+					</>
+				),
+			},
 		],
 	},
 	{
-		icon: <Layers size={22} />,
-		demo: <DemoTree />,
+		icon: <Grid3x3 size={22} />,
+		call: "x={variant} y={[size]}",
+		demo: (
+			<Matrix
+				of={demoButton}
+				x={allOf(demoButton, "variant")}
+				y={[allOf(demoButton, "size")]}
+			/>
+		),
 		flip: true,
-		title: "Your folders are the navigation",
-		body: "Drop Markdown files into directories and the sidebar builds itself. A tiny meta.json sets order, labels and icons when you want control.",
+		title: "See every combination at once",
+		body: "<Matrix> renders the cross-product of two axes as a labeled table — variant against size, state against tone — so a regression in one corner is impossible to miss.",
 		list: [
 			{
-				id: "folders",
+				id: "cross",
 				text: (
 					<>
-						Folders become <b>groups</b>, files become <b>pages</b>
+						Two type-driven axes, <b>cross-multiplied</b>
 					</>
 				),
 			},
-			{ id: "no-config", text: <>No route config, no manual nav arrays</> },
 			{
-				id: "reorder",
+				id: "labels",
 				text: (
 					<>
-						Reorder with one <b>meta.json</b>
+						Rows and columns <b>labeled</b> from the values
 					</>
 				),
 			},
+			{ id: "review", text: <>Catch the broken corner at a glance</> },
 		],
 	},
 	{
-		icon: <Palette size={22} />,
-		demo: <DemoTheme />,
+		icon: <SlidersHorizontal size={22} />,
+		call: "<Playground of={button} />",
+		demo: <Playground of={demoButton} />,
 		flip: false,
-		title: "Themeable down to the token",
-		body: "Every color, radius and font is a CSS variable. Change the accent, restyle a single component, or override the whole system from one stylesheet. Dark mode is built in.",
+		title: "An interactive playground, for free",
+		body: "The same handle drives a live editor: a control for every prop, inferred from its type — dropdowns for unions, toggles for booleans, inputs for strings. No config, no story file.",
 		list: [
 			{
-				id: "dark-mode",
+				id: "controls",
 				text: (
 					<>
-						System-aware <b>dark mode</b>, zero setup
+						Controls inferred from each <b>prop type</b>
 					</>
 				),
 			},
+			{ id: "live", text: <>The preview updates as you change props</> },
 			{
-				id: "recolor",
+				id: "same",
 				text: (
 					<>
-						Recolor with <b>one</b> CSS variable
+						Driven by the <b>same handle</b> as the grids
 					</>
 				),
 			},
-			{ id: "restyle", text: <>Restyle any component freely</> },
 		],
 	},
 	{
-		icon: <Box size={22} />,
-		demo: <DemoMdx />,
+		icon: <Code2 size={22} />,
+		call: "<Snippet>{() => …}</Snippet>",
+		demo: (
+			<Snippet name="button-group.tsx">
+				{() => (
+					<div className="flex flex-wrap items-center gap-2.5">
+						<DemoButton size="sm">Small</DemoButton>
+						<DemoButton size="md" tone="success">
+							Save
+						</DemoButton>
+						<DemoButton variant="outline" tone="danger">
+							Delete
+						</DemoButton>
+						<DemoButton variant="ghost" pill>
+							More
+						</DemoButton>
+					</div>
+				)}
+			</Snippet>
+		),
 		flip: true,
-		title: "Rich components, plain Markdown",
-		body: "Callouts, tabs, steps, props tables and cards ship ready to use. Write them as MDX, or use GitHub-flavored shorthand — both compile to the same polished output.",
+		title: "Live examples that show their real source",
+		body: "Write a hand-crafted example as an inline component — it renders live. At build time the plugin slices the exact source of its body and injects it, so “Show source” reveals the real code, not a reconstruction.",
 		list: [
 			{
-				id: "components",
+				id: "real",
 				text: (
 					<>
-						Callouts, tabs, steps, cards & <b>props tables</b>
+						The shown source is your <b>exact code</b>
 					</>
 				),
 			},
-			{ id: "code", text: <>Highlighted code with copy & line marks</> },
+			{ id: "hooks", text: <>Use state and hooks inside the example</> },
 			{
-				id: "shorthand",
-				text: (
-					<>
-						Components or <b>{"> [!NOTE]"}</b> shorthand
-					</>
-				),
+				id: "norehydrate",
+				text: <>No copy-paste drift between demo and code</>,
 			},
 		],
 	},
 ];
 
-/** Landing "Why Typebok" feature grid with looping demos. */
+/** Landing "killer features" grid — every demo is a real Typebok widget rendering live. */
 export function LandingFeatures() {
 	return (
 		<section className={SECTION_PAD} id="features">
 			<div className={CONTAINER}>
 				<SectionHead
-					kicker="Why Typebok"
-					title="Everything a docs site needs, nothing it doesn't"
-					sub="The polish you'd build by hand — stories, navigation, theming and components — working out of the box, on top of the types you already write."
+					kicker="What you get"
+					title="One handle. Four ways to render it."
+					sub="Every panel below is the real library running on this page — not a screenshot, not a mockup. The same getComponentMeta() handle drives all four."
 				/>
 				<div className="flex flex-col gap-24">
 					{FEATURES.map((f) => (
@@ -170,7 +218,22 @@ export function LandingFeatures() {
 								</ul>
 							</div>
 							<div className={cx("min-w-0", f.flip && "min-[861px]:order-1")}>
-								{f.demo}
+								<div className="rounded-[14px] border border-border bg-bg-secondary shadow-md overflow-hidden">
+									<div className="flex items-center gap-2 h-9.5 px-3.75 border-b border-border bg-bg">
+										<span className="flex gap-1.5">
+											<i className="w-2.25 h-2.25 rounded-[99px] bg-border-strong not-italic" />
+											<i className="w-2.25 h-2.25 rounded-[99px] bg-border-strong not-italic" />
+										</span>
+										<code className="ml-1 font-mono text-[11.5px] text-fg-muted">
+											{f.call}
+										</code>
+										<span className="ml-auto flex items-center gap-1.5 text-[10.5px] text-fg-subtle">
+											<span className="w-1.5 h-1.5 rounded-[99px] bg-[oklch(0.6_0.2_145)] animate-[rec_1.6s_ease-in-out_infinite] motion-reduce:animate-none" />
+											live
+										</span>
+									</div>
+									<div className="p-5 overflow-x-auto">{f.demo}</div>
+								</div>
 							</div>
 						</div>
 					))}

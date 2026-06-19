@@ -6,9 +6,9 @@ import { SectionHead } from "../shared/ui/SectionHead";
 
 const COLS: { name: string; tag: string; own?: boolean }[] = [
 	{ name: "Typebok", tag: "this", own: true },
-	{ name: "Nextra", tag: "MDX + Next" },
-	{ name: "Docusaurus", tag: "React" },
-	{ name: "Mintlify", tag: "hosted SaaS" },
+	{ name: "Storybook", tag: "stories" },
+	{ name: "react-docgen", tag: "props only" },
+	{ name: "Docusaurus", tag: "MDX docs" },
 ];
 
 const Y = (
@@ -27,31 +27,39 @@ const P = (t: string) => (
 
 const ROWS: { f: string; s: string; v: ReactNode[] }[] = [
 	{
-		f: "Write in Markdown / MDX",
-		s: "No proprietary authoring format",
-		v: [Y, Y, Y, Y],
-	},
-	{
-		f: "Filesystem-driven sidebar",
-		s: "Folders map to navigation",
-		v: [Y, Y, P("partial"), N],
-	},
-	{
-		f: "Props tables from types",
-		s: "Extracted by the TS compiler",
+		f: "Variants from TS types",
+		s: "No .stories files to hand-write",
 		v: [Y, N, N, N],
 	},
 	{
-		f: "Token-level theming",
-		s: "Restyle from one CSS file",
-		v: [Y, P("limited"), Y, P("limited")],
+		f: "Auto grids & matrices",
+		s: "Cross-product from unions",
+		v: [Y, P("manual"), N, N],
 	},
-	{ f: "Self-host, no lock-in", s: "Your repo, your CDN", v: [Y, Y, Y, N] },
-	{ f: "Free & open source", s: "MIT licensed", v: [Y, Y, Y, N] },
 	{
-		f: "Ships components",
-		s: "Callouts, tabs, steps, cards",
-		v: [Y, P("basic"), P("basic"), Y],
+		f: "Interactive playground",
+		s: "Controls inferred, zero config",
+		v: [Y, P("addon"), N, N],
+	},
+	{
+		f: "Zero runtime metadata",
+		s: "Props are static literals",
+		v: [Y, N, N, P("n/a")],
+	},
+	{
+		f: "Exact snippet source",
+		s: "Sliced from your code at build",
+		v: [Y, P("partial"), N, N],
+	},
+	{
+		f: "Every bundler",
+		s: "One unplugin factory",
+		v: [Y, P("limited"), Y, N],
+	},
+	{
+		f: "Ships a docs kit",
+		s: "Callouts, tabs, sidebar, toc…",
+		v: [Y, N, N, P("basic")],
 	},
 ];
 
@@ -73,8 +81,8 @@ export function LandingCompare() {
 			<div className={CONTAINER}>
 				<SectionHead
 					kicker="How it compares"
-					title="Familiar power, without the trade-offs"
-					sub="Keep the authoring comfort of Markdown and the design control of components — self-hosted, open source, and free."
+					title="Stories, without the Storybook tax"
+					sub="No story files to maintain, no registry to wire, no runtime to ship. Your component's types are the single source of truth."
 				/>
 				<div className="overflow-x-auto reveal">
 					<table className="w-full border-separate border-spacing-0 min-w-180 bg-bg border border-border rounded-[14px] overflow-hidden shadow-md">
