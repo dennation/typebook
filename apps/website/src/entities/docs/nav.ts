@@ -34,6 +34,7 @@ export const GUIDES = defineMenu<DocsMeta | undefined>({
 	"/docs/guides/matrix": { title: "Prop matrices" },
 	"/docs/guides/playground": { title: "Interactive playground" },
 	"/docs/guides/snippet": { title: "Live snippets" },
+	"/docs/guides/icons": { title: "Icons" },
 });
 
 export const COMPONENTS = defineMenu<DocsMeta | undefined>({
@@ -50,7 +51,6 @@ export const COMPONENTS = defineMenu<DocsMeta | undefined>({
 	"/docs/components/copy-command": { title: "CopyCommand" },
 	"/docs/components/layout": { title: "Layout" },
 	"/docs/components/button": { title: "Button" },
-	"/docs/components/icon": { title: "Icon" },
 	"/docs/components/theme-toggle": { title: "ThemeToggle" },
 	"/docs/components/error-boundary": { title: "ErrorBoundary" },
 });
@@ -137,6 +137,12 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		desc: "Live example with a show-source toggle",
 	},
 	{
+		slug: "guides/icons",
+		title: "Icons",
+		section: "Guides",
+		desc: "Bring your own icons — recommended lucide-react and Tabler",
+	},
+	{
 		slug: "components/callout",
 		title: "Callout",
 		section: "Components",
@@ -220,12 +226,6 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		title: "Button",
 		section: "Components",
 		desc: 'Call-to-action primitive with variants, sizes and as="a"',
-	},
-	{
-		slug: "components/icon",
-		title: "Icon",
-		section: "Components",
-		desc: "Namespace of lightweight stroke icons (currentColor)",
 	},
 	{
 		slug: "components/theme-toggle",

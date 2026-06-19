@@ -99,7 +99,7 @@ import { ChevronRight } from "lucide-react";
 			/>
 			<DocsFooter
 				prev={{ to: "/docs/components/layout", title: "Layout" }}
-				next={{ to: "/docs/components/icon", title: "Icon" }}
+				next={{ to: "/docs/components/theme-toggle", title: "ThemeToggle" }}
 			/>
 		</>
 	);

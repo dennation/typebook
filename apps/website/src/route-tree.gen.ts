@@ -18,6 +18,7 @@ import { Route as DocsGuidesStoryRouteImport } from './pages/docs/guides/story'
 import { Route as DocsGuidesSnippetRouteImport } from './pages/docs/guides/snippet'
 import { Route as DocsGuidesPlaygroundRouteImport } from './pages/docs/guides/playground'
 import { Route as DocsGuidesMatrixRouteImport } from './pages/docs/guides/matrix'
+import { Route as DocsGuidesIconsRouteImport } from './pages/docs/guides/icons'
 import { Route as DocsGettingStartedQuickStartRouteImport } from './pages/docs/getting-started/quick-start'
 import { Route as DocsGettingStartedIntroductionRouteImport } from './pages/docs/getting-started/introduction'
 import { Route as DocsGettingStartedInstallationRouteImport } from './pages/docs/getting-started/installation'
@@ -29,7 +30,6 @@ import { Route as DocsComponentsSearchRouteImport } from './pages/docs/component
 import { Route as DocsComponentsProseRouteImport } from './pages/docs/components/prose'
 import { Route as DocsComponentsNavigationRouteImport } from './pages/docs/components/navigation'
 import { Route as DocsComponentsLayoutRouteImport } from './pages/docs/components/layout'
-import { Route as DocsComponentsIconRouteImport } from './pages/docs/components/icon'
 import { Route as DocsComponentsErrorBoundaryRouteImport } from './pages/docs/components/error-boundary'
 import { Route as DocsComponentsCopyCommandRouteImport } from './pages/docs/components/copy-command'
 import { Route as DocsComponentsCodeBlockRouteImport } from './pages/docs/components/code-block'
@@ -81,6 +81,11 @@ const DocsGuidesPlaygroundRoute = DocsGuidesPlaygroundRouteImport.update({
 const DocsGuidesMatrixRoute = DocsGuidesMatrixRouteImport.update({
   id: '/guides/matrix',
   path: '/guides/matrix',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsGuidesIconsRoute = DocsGuidesIconsRouteImport.update({
+  id: '/guides/icons',
+  path: '/guides/icons',
   getParentRoute: () => DocsRouteRoute,
 } as any)
 const DocsGettingStartedQuickStartRoute =
@@ -143,11 +148,6 @@ const DocsComponentsLayoutRoute = DocsComponentsLayoutRouteImport.update({
   path: '/components/layout',
   getParentRoute: () => DocsRouteRoute,
 } as any)
-const DocsComponentsIconRoute = DocsComponentsIconRouteImport.update({
-  id: '/components/icon',
-  path: '/components/icon',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
 const DocsComponentsErrorBoundaryRoute =
   DocsComponentsErrorBoundaryRouteImport.update({
     id: '/components/error-boundary',
@@ -197,7 +197,6 @@ export interface FileRoutesByFullPath {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
-  '/docs/components/icon': typeof DocsComponentsIconRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
@@ -209,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
+  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/guides/matrix': typeof DocsGuidesMatrixRoute
   '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
   '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
@@ -226,7 +226,6 @@ export interface FileRoutesByTo {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
-  '/docs/components/icon': typeof DocsComponentsIconRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
@@ -238,6 +237,7 @@ export interface FileRoutesByTo {
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
+  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/guides/matrix': typeof DocsGuidesMatrixRoute
   '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
   '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
@@ -257,7 +257,6 @@ export interface FileRoutesById {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
-  '/docs/components/icon': typeof DocsComponentsIconRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
@@ -269,6 +268,7 @@ export interface FileRoutesById {
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
+  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/guides/matrix': typeof DocsGuidesMatrixRoute
   '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
   '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
@@ -289,7 +289,6 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
-    | '/docs/components/icon'
     | '/docs/components/layout'
     | '/docs/components/navigation'
     | '/docs/components/prose'
@@ -301,6 +300,7 @@ export interface FileRouteTypes {
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
+    | '/docs/guides/icons'
     | '/docs/guides/matrix'
     | '/docs/guides/playground'
     | '/docs/guides/snippet'
@@ -318,7 +318,6 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
-    | '/docs/components/icon'
     | '/docs/components/layout'
     | '/docs/components/navigation'
     | '/docs/components/prose'
@@ -330,6 +329,7 @@ export interface FileRouteTypes {
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
+    | '/docs/guides/icons'
     | '/docs/guides/matrix'
     | '/docs/guides/playground'
     | '/docs/guides/snippet'
@@ -348,7 +348,6 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
-    | '/docs/components/icon'
     | '/docs/components/layout'
     | '/docs/components/navigation'
     | '/docs/components/prose'
@@ -360,6 +359,7 @@ export interface FileRouteTypes {
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
+    | '/docs/guides/icons'
     | '/docs/guides/matrix'
     | '/docs/guides/playground'
     | '/docs/guides/snippet'
@@ -436,6 +436,13 @@ declare module '@tanstack/react-router' {
       path: '/guides/matrix'
       fullPath: '/docs/guides/matrix'
       preLoaderRoute: typeof DocsGuidesMatrixRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/guides/icons': {
+      id: '/docs/guides/icons'
+      path: '/guides/icons'
+      fullPath: '/docs/guides/icons'
+      preLoaderRoute: typeof DocsGuidesIconsRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/getting-started/quick-start': {
@@ -515,13 +522,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsComponentsLayoutRouteImport
       parentRoute: typeof DocsRouteRoute
     }
-    '/docs/components/icon': {
-      id: '/docs/components/icon'
-      path: '/components/icon'
-      fullPath: '/docs/components/icon'
-      preLoaderRoute: typeof DocsComponentsIconRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
     '/docs/components/error-boundary': {
       id: '/docs/components/error-boundary'
       path: '/components/error-boundary'
@@ -583,7 +583,6 @@ interface DocsRouteRouteChildren {
   DocsComponentsCodeBlockRoute: typeof DocsComponentsCodeBlockRoute
   DocsComponentsCopyCommandRoute: typeof DocsComponentsCopyCommandRoute
   DocsComponentsErrorBoundaryRoute: typeof DocsComponentsErrorBoundaryRoute
-  DocsComponentsIconRoute: typeof DocsComponentsIconRoute
   DocsComponentsLayoutRoute: typeof DocsComponentsLayoutRoute
   DocsComponentsNavigationRoute: typeof DocsComponentsNavigationRoute
   DocsComponentsProseRoute: typeof DocsComponentsProseRoute
@@ -595,6 +594,7 @@ interface DocsRouteRouteChildren {
   DocsGettingStartedInstallationRoute: typeof DocsGettingStartedInstallationRoute
   DocsGettingStartedIntroductionRoute: typeof DocsGettingStartedIntroductionRoute
   DocsGettingStartedQuickStartRoute: typeof DocsGettingStartedQuickStartRoute
+  DocsGuidesIconsRoute: typeof DocsGuidesIconsRoute
   DocsGuidesMatrixRoute: typeof DocsGuidesMatrixRoute
   DocsGuidesPlaygroundRoute: typeof DocsGuidesPlaygroundRoute
   DocsGuidesSnippetRoute: typeof DocsGuidesSnippetRoute
@@ -612,7 +612,6 @@ const DocsRouteRouteChildren: DocsRouteRouteChildren = {
   DocsComponentsCodeBlockRoute: DocsComponentsCodeBlockRoute,
   DocsComponentsCopyCommandRoute: DocsComponentsCopyCommandRoute,
   DocsComponentsErrorBoundaryRoute: DocsComponentsErrorBoundaryRoute,
-  DocsComponentsIconRoute: DocsComponentsIconRoute,
   DocsComponentsLayoutRoute: DocsComponentsLayoutRoute,
   DocsComponentsNavigationRoute: DocsComponentsNavigationRoute,
   DocsComponentsProseRoute: DocsComponentsProseRoute,
@@ -624,6 +623,7 @@ const DocsRouteRouteChildren: DocsRouteRouteChildren = {
   DocsGettingStartedInstallationRoute: DocsGettingStartedInstallationRoute,
   DocsGettingStartedIntroductionRoute: DocsGettingStartedIntroductionRoute,
   DocsGettingStartedQuickStartRoute: DocsGettingStartedQuickStartRoute,
+  DocsGuidesIconsRoute: DocsGuidesIconsRoute,
   DocsGuidesMatrixRoute: DocsGuidesMatrixRoute,
   DocsGuidesPlaygroundRoute: DocsGuidesPlaygroundRoute,
   DocsGuidesSnippetRoute: DocsGuidesSnippetRoute,
