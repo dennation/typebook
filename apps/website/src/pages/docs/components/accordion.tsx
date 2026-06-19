@@ -9,7 +9,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 const accordion = getComponentMeta(Accordion);
 
@@ -48,13 +48,13 @@ function PageAccordion() {
 			<H2>Props</H2>
 			<PropsReference props={propsToRows(accordion.props)} />
 			<DocsFooter
-				prev={{ to: "/docs/cards", title: "Cards" }}
-				next={{ to: "/docs/tables", title: "Tables" }}
+				prev={{ to: "/docs/components/cards", title: "Cards" }}
+				next={{ to: "/docs/components/tables", title: "Tables" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/accordion")({
+export const Route = createFileRoute("/docs/components/accordion")({
 	component: PageAccordion,
 });

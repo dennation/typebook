@@ -9,7 +9,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 const NAMES = [
 	"search",
@@ -124,11 +124,13 @@ function PageIcon() {
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/button", title: "Button" }}
-				next={{ to: "/docs/theme-toggle", title: "ThemeToggle" }}
+				prev={{ to: "/docs/components/button", title: "Button" }}
+				next={{ to: "/docs/components/theme-toggle", title: "ThemeToggle" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/icon")({ component: PageIcon });
+export const Route = createFileRoute("/docs/components/icon")({
+	component: PageIcon,
+});

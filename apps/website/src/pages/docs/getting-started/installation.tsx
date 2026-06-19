@@ -10,7 +10,7 @@ import {
 	Steps,
 } from "@dennation/typebook/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageInstallation() {
 	return (
@@ -101,7 +101,7 @@ const button = getComponentMeta(Button, {
 						The storybook UI injects its CSS through <C>{"<Layout>"}</C>. If you
 						render your own pages instead, import the shared <C>theme.css</C>{" "}
 						tokens and <C>@source</C>-scan the package — see{" "}
-						<Link to="/docs/theming">Theming</Link>.
+						<Link to="/docs/guides/theming">Theming</Link>.
 					</P>
 				</Step>
 			</Steps>
@@ -112,13 +112,16 @@ const button = getComponentMeta(Button, {
 				<C>props</C> is simply empty until a build runs.
 			</Callout>
 			<DocsFooter
-				prev={{ to: "/docs/introduction", title: "Introduction" }}
-				next={{ to: "/docs/quick-start", title: "Quick Start" }}
+				prev={{
+					to: "/docs/getting-started/introduction",
+					title: "Introduction",
+				}}
+				next={{ to: "/docs/getting-started/quick-start", title: "Quick Start" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/installation")({
+export const Route = createFileRoute("/docs/getting-started/installation")({
 	component: PageInstallation,
 });

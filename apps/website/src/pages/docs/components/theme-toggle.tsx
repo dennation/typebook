@@ -9,7 +9,7 @@ import {
 	ThemeToggle,
 } from "@dennation/typebook/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageThemeToggle() {
 	return (
@@ -32,8 +32,9 @@ function PageThemeToggle() {
 			<H2>Usage</H2>
 			<P>
 				The button renders a sun/moon icon for the current theme — style it
-				through <C>className</C>. See <Link to="/docs/theming">Theming</Link>{" "}
-				for the token system it drives.
+				through <C>className</C>. See{" "}
+				<Link to="/docs/guides/theming">Theming</Link> for the token system it
+				drives.
 			</P>
 			<CodeBlock
 				lang="tsx"
@@ -59,13 +60,13 @@ function PageThemeToggle() {
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/icon", title: "Icon" }}
-				next={{ to: "/docs/error-boundary", title: "ErrorBoundary" }}
+				prev={{ to: "/docs/components/icon", title: "Icon" }}
+				next={{ to: "/docs/components/error-boundary", title: "ErrorBoundary" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/theme-toggle")({
+export const Route = createFileRoute("/docs/components/theme-toggle")({
 	component: PageThemeToggle,
 });

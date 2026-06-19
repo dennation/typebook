@@ -8,7 +8,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageTables() {
 	return (
@@ -92,11 +92,13 @@ function PageTables() {
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/accordion", title: "Accordion" }}
-				next={{ to: "/docs/prose", title: "Prose" }}
+				prev={{ to: "/docs/components/accordion", title: "Accordion" }}
+				next={{ to: "/docs/components/prose", title: "Prose" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/tables")({ component: PageTables });
+export const Route = createFileRoute("/docs/components/tables")({
+	component: PageTables,
+});

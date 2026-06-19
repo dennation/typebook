@@ -9,7 +9,7 @@ import {
 	P,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageTheming() {
 	return (
@@ -101,13 +101,13 @@ function PageTheming() {
 				highlights — follows.
 			</Callout>
 			<DocsFooter
-				prev={{ to: "/docs/quick-start", title: "Quick Start" }}
-				next={{ to: "/docs/story", title: "Story" }}
+				prev={{ to: "/docs/getting-started/quick-start", title: "Quick Start" }}
+				next={{ to: "/docs/storybook/story", title: "Story" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/theming")({
+export const Route = createFileRoute("/docs/guides/theming")({
 	component: PageTheming,
 });

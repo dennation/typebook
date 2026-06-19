@@ -13,7 +13,7 @@ import {
 	propsToRows,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 const breadcrumbs = getComponentMeta(Breadcrumbs);
 const prevNextNav = getComponentMeta(PrevNextNav);
@@ -92,13 +92,13 @@ function PageNavigation() {
 				TanStack Router <C>&lt;Link&gt;</C>; yours can render anything.
 			</Callout>
 			<DocsFooter
-				prev={{ to: "/docs/search", title: "Search" }}
-				next={{ to: "/docs/copy-command", title: "CopyCommand" }}
+				prev={{ to: "/docs/components/search", title: "Search" }}
+				next={{ to: "/docs/components/copy-command", title: "CopyCommand" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/navigation")({
+export const Route = createFileRoute("/docs/components/navigation")({
 	component: PageNavigation,
 });

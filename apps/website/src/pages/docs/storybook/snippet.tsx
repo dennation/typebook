@@ -9,7 +9,7 @@ import {
 	PropsReference,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageSnippet() {
 	return (
@@ -90,13 +90,13 @@ function PageSnippet() {
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/playground", title: "Playground" }}
-				next={{ to: "/docs/callout", title: "Callout" }}
+				prev={{ to: "/docs/storybook/playground", title: "Playground" }}
+				next={{ to: "/docs/components/callout", title: "Callout" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/snippet")({
+export const Route = createFileRoute("/docs/storybook/snippet")({
 	component: PageSnippet,
 });

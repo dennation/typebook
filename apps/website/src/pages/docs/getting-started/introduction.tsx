@@ -10,7 +10,7 @@ import {
 	P,
 } from "@dennation/typebook/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageIntroduction() {
 	const navigate = useNavigate();
@@ -82,20 +82,25 @@ const button = getComponentMeta(Button, {
 					icon={<Icon.rocket size={20} />}
 					title="Installation"
 					desc="Add the package and wire the bundler plugin."
-					onClick={() => navigate({ to: "/docs/installation" })}
+					onClick={() => navigate({ to: "/docs/getting-started/installation" })}
 				/>
 				<DocCard
 					icon={<Icon.book size={20} />}
 					title="Quick Start"
 					desc="From getComponentMeta() to a rendered story."
-					onClick={() => navigate({ to: "/docs/quick-start" })}
+					onClick={() => navigate({ to: "/docs/getting-started/quick-start" })}
 				/>
 			</Cards>
-			<DocsFooter next={{ to: "/docs/installation", title: "Installation" }} />
+			<DocsFooter
+				next={{
+					to: "/docs/getting-started/installation",
+					title: "Installation",
+				}}
+			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/introduction")({
+export const Route = createFileRoute("/docs/getting-started/introduction")({
 	component: PageIntroduction,
 });

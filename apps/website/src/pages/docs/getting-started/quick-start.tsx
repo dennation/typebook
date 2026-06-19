@@ -9,7 +9,7 @@ import {
 	P,
 } from "@dennation/typebook/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageQuickStart() {
 	return (
@@ -17,7 +17,8 @@ function PageQuickStart() {
 			<Lead>
 				From a component to a documented page in three moves: register it, let
 				the plugin extract its props, render its stories. This assumes the{" "}
-				<Link to="/docs/installation">installation</Link> is done.
+				<Link to="/docs/getting-started/installation">installation</Link> is
+				done.
 			</Lead>
 
 			<H2>Register a component</H2>
@@ -92,17 +93,20 @@ import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 				]}
 			/>
 			<P>
-				Continue with <Link to="/docs/story">Story</Link> for the full prop
-				reference of each story component.
+				Continue with <Link to="/docs/storybook/story">Story</Link> for the full
+				prop reference of each story component.
 			</P>
 			<DocsFooter
-				prev={{ to: "/docs/installation", title: "Installation" }}
-				next={{ to: "/docs/theming", title: "Theming" }}
+				prev={{
+					to: "/docs/getting-started/installation",
+					title: "Installation",
+				}}
+				next={{ to: "/docs/guides/theming", title: "Theming" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/quick-start")({
+export const Route = createFileRoute("/docs/getting-started/quick-start")({
 	component: PageQuickStart,
 });

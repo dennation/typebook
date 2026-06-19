@@ -12,7 +12,7 @@ import {
 	propsToRows,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 const codeBlock = getComponentMeta(CodeBlock);
 
@@ -75,13 +75,13 @@ function PageCodeBlock() {
 				preloaded with the engine, others fetch their grammar on demand.
 			</Callout>
 			<DocsFooter
-				prev={{ to: "/docs/callout", title: "Callout" }}
-				next={{ to: "/docs/tabs", title: "Tabs" }}
+				prev={{ to: "/docs/components/callout", title: "Callout" }}
+				next={{ to: "/docs/components/tabs", title: "Tabs" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/code-block")({
+export const Route = createFileRoute("/docs/components/code-block")({
 	component: PageCodeBlock,
 });

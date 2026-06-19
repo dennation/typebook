@@ -8,7 +8,7 @@ import {
 	PropsReference,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageVariants() {
 	return (
@@ -83,13 +83,13 @@ import { Variants } from "@dennation/typebook/react";
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/story", title: "Story" }}
-				next={{ to: "/docs/matrix", title: "Matrix" }}
+				prev={{ to: "/docs/storybook/story", title: "Story" }}
+				next={{ to: "/docs/storybook/matrix", title: "Matrix" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/variants")({
+export const Route = createFileRoute("/docs/storybook/variants")({
 	component: PageVariants,
 });

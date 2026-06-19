@@ -11,7 +11,7 @@ import {
 	Ul,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PagePlayground() {
 	return (
@@ -72,13 +72,13 @@ function PagePlayground() {
 				objects) are shown read-only with their type.
 			</P>
 			<DocsFooter
-				prev={{ to: "/docs/matrix", title: "Matrix" }}
-				next={{ to: "/docs/snippet", title: "Snippet" }}
+				prev={{ to: "/docs/storybook/matrix", title: "Matrix" }}
+				next={{ to: "/docs/storybook/snippet", title: "Snippet" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/playground")({
+export const Route = createFileRoute("/docs/storybook/playground")({
 	component: PagePlayground,
 });

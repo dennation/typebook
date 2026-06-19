@@ -10,11 +10,11 @@ import { GITHUB_URL } from "../../shared/lib/siteLinks";
 import { useShell } from "../layout/ShellContext";
 import { DocsSidebar } from "./sidebar/DocsSidebar";
 
-/** Current docs slug from the matched leaf route (`/docs/<slug>`). */
+/** Current docs slug from the matched leaf route (`/docs/<section>/<slug>`). */
 function useCurrentSlug(): string {
 	const matches = useMatches();
 	const leafId = matches[matches.length - 1]?.routeId ?? "";
-	return leafId.split("/").pop() || DEFAULT_DOCS_SLUG;
+	return leafId.replace(/^\/docs\/?/, "") || DEFAULT_DOCS_SLUG;
 }
 
 /**
