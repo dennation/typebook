@@ -83,7 +83,7 @@ function PageCallout() {
 				/>
 			</Cards>
 			<DocsFooter
-				prev={{ to: "/docs/storybook/snippet", title: "Snippet" }}
+				prev={{ to: "/docs/guides/snippet", title: "Live snippets" }}
 				next={{ to: "/docs/components/code-block", title: "CodeBlock" }}
 			/>
 		</>

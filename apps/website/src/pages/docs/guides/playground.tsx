@@ -72,13 +72,13 @@ function PagePlayground() {
 				objects) are shown read-only with their type.
 			</P>
 			<DocsFooter
-				prev={{ to: "/docs/storybook/matrix", title: "Matrix" }}
-				next={{ to: "/docs/storybook/snippet", title: "Snippet" }}
+				prev={{ to: "/docs/guides/matrix", title: "Prop matrices" }}
+				next={{ to: "/docs/guides/snippet", title: "Live snippets" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/storybook/playground")({
+export const Route = createFileRoute("/docs/guides/playground")({
 	component: PagePlayground,
 });

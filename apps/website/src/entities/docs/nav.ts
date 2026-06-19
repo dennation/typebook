@@ -16,16 +16,13 @@ export const GETTING_STARTED = defineMenu({
 	"/docs/getting-started/quick-start": { title: "Quick Start" },
 });
 
-export const STORYBOOK = defineMenu({
-	"/docs/storybook/story": { title: "Story" },
-	"/docs/storybook/variants": { title: "Variants" },
-	"/docs/storybook/matrix": { title: "Matrix" },
-	"/docs/storybook/playground": { title: "Playground" },
-	"/docs/storybook/snippet": { title: "Snippet" },
-});
-
 export const GUIDES = defineMenu({
 	"/docs/guides/theming": { title: "Theming" },
+	"/docs/guides/story": { title: "Rendering stories" },
+	"/docs/guides/variants": { title: "Variant grids" },
+	"/docs/guides/matrix": { title: "Prop matrices" },
+	"/docs/guides/playground": { title: "Interactive playground" },
+	"/docs/guides/snippet": { title: "Live snippets" },
 });
 
 export const COMPONENTS = defineMenu({
@@ -50,7 +47,6 @@ export const COMPONENTS = defineMenu({
 /** Sidebar sections, paired with their label for breadcrumb/title lookup. */
 export const SECTIONS: { label: string; menu: Menu }[] = [
 	{ label: "Getting Started", menu: GETTING_STARTED },
-	{ label: "Storybook", menu: STORYBOOK },
 	{ label: "Guides", menu: GUIDES },
 	{ label: "Components", menu: COMPONENTS },
 ];
@@ -103,33 +99,33 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		desc: "OKLCH design tokens, dark mode, ThemeToggle",
 	},
 	{
-		slug: "storybook/story",
-		title: "Story",
-		section: "Storybook",
+		slug: "guides/story",
+		title: "Rendering stories",
+		section: "Guides",
 		desc: "Render a single component variant",
 	},
 	{
-		slug: "storybook/variants",
-		title: "Variants",
-		section: "Storybook",
+		slug: "guides/variants",
+		title: "Variant grids",
+		section: "Guides",
 		desc: "A grid of variants along one prop axis",
 	},
 	{
-		slug: "storybook/matrix",
-		title: "Matrix",
-		section: "Storybook",
+		slug: "guides/matrix",
+		title: "Prop matrices",
+		section: "Guides",
 		desc: "Cross-product table of two prop axes",
 	},
 	{
-		slug: "storybook/playground",
-		title: "Playground",
-		section: "Storybook",
+		slug: "guides/playground",
+		title: "Interactive playground",
+		section: "Guides",
 		desc: "Interactive props editor with live preview",
 	},
 	{
-		slug: "storybook/snippet",
-		title: "Snippet",
-		section: "Storybook",
+		slug: "guides/snippet",
+		title: "Live snippets",
+		section: "Guides",
 		desc: "Live example with a show-source toggle",
 	},
 	{

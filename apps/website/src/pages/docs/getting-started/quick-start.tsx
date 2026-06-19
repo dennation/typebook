@@ -93,8 +93,8 @@ import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 				]}
 			/>
 			<P>
-				Continue with <Link to="/docs/storybook/story">Story</Link> for the full
-				prop reference of each story component.
+				Continue with <Link to="/docs/guides/story">Rendering stories</Link> for
+				the full prop reference of each story component.
 			</P>
 			<DocsFooter
 				prev={{

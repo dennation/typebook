@@ -83,13 +83,13 @@ import { Variants } from "@dennation/typebook/react";
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/storybook/story", title: "Story" }}
-				next={{ to: "/docs/storybook/matrix", title: "Matrix" }}
+				prev={{ to: "/docs/guides/story", title: "Rendering stories" }}
+				next={{ to: "/docs/guides/matrix", title: "Prop matrices" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/storybook/variants")({
+export const Route = createFileRoute("/docs/guides/variants")({
 	component: PageVariants,
 });
