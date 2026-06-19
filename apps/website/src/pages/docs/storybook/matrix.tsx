@@ -8,7 +8,7 @@ import {
 	PropsReference,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageMatrix() {
 	return (
@@ -76,11 +76,13 @@ import { Matrix } from "@dennation/typebook/react";
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/variants", title: "Variants" }}
-				next={{ to: "/docs/playground", title: "Playground" }}
+				prev={{ to: "/docs/storybook/variants", title: "Variants" }}
+				next={{ to: "/docs/storybook/playground", title: "Playground" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/matrix")({ component: PageMatrix });
+export const Route = createFileRoute("/docs/storybook/matrix")({
+	component: PageMatrix,
+});

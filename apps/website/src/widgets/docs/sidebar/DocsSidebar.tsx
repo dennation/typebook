@@ -3,6 +3,7 @@ import { Icon } from "@dennation/typebook/react";
 import {
 	COMPONENTS,
 	GETTING_STARTED,
+	GUIDES,
 	STORYBOOK,
 } from "../../../entities/docs/nav";
 import { SidebarSection } from "./SidebarSection";
@@ -27,6 +28,9 @@ export function DocsSidebar({ open, onClose }: DocsSidebarProps) {
 			</SidebarSection>
 			<SidebarSection icon={<Icon.box size={14} />} label="Storybook">
 				<Menu menu={STORYBOOK} components={sidebarMenu} />
+			</SidebarSection>
+			<SidebarSection icon={<Icon.book size={14} />} label="Guides">
+				<Menu menu={GUIDES} components={sidebarMenu} />
 			</SidebarSection>
 			<SidebarSection icon={<Icon.layers size={14} />} label="Components">
 				<Menu menu={COMPONENTS} components={sidebarMenu} />

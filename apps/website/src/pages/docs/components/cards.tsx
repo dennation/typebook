@@ -12,7 +12,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 const docCard = getComponentMeta(DocCard);
 
@@ -34,13 +34,15 @@ function PageCards() {
 							icon={<Icon.zap size={20} />}
 							title="Quick Start"
 							desc="From zero to a documented component."
-							onClick={() => navigate({ to: "/docs/quick-start" })}
+							onClick={() =>
+								navigate({ to: "/docs/getting-started/quick-start" })
+							}
 						/>
 						<DocCard
 							icon={<Icon.search size={20} />}
 							title="Search"
 							desc="Jump to the SearchPalette docs."
-							onClick={() => navigate({ to: "/docs/search" })}
+							onClick={() => navigate({ to: "/docs/components/search" })}
 						/>
 					</Cards>
 				)}
@@ -52,11 +54,13 @@ function PageCards() {
 				<C>Cards</C> itself takes only <C>children</C>.
 			</P>
 			<DocsFooter
-				prev={{ to: "/docs/steps", title: "Steps" }}
-				next={{ to: "/docs/accordion", title: "Accordion" }}
+				prev={{ to: "/docs/components/steps", title: "Steps" }}
+				next={{ to: "/docs/components/accordion", title: "Accordion" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/cards")({ component: PageCards });
+export const Route = createFileRoute("/docs/components/cards")({
+	component: PageCards,
+});

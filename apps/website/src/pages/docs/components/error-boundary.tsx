@@ -9,7 +9,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function Boom(): never {
 	throw new Error("Something went wrong rendering this component.");
@@ -68,11 +68,13 @@ function PageErrorBoundary() {
 					},
 				]}
 			/>
-			<DocsFooter prev={{ to: "/docs/theme-toggle", title: "ThemeToggle" }} />
+			<DocsFooter
+				prev={{ to: "/docs/components/theme-toggle", title: "ThemeToggle" }}
+			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/error-boundary")({
+export const Route = createFileRoute("/docs/components/error-boundary")({
 	component: PageErrorBoundary,
 });

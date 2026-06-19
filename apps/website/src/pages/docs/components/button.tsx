@@ -10,7 +10,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageButton() {
 	return (
@@ -97,11 +97,13 @@ function PageButton() {
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/layout", title: "Layout" }}
-				next={{ to: "/docs/icon", title: "Icon" }}
+				prev={{ to: "/docs/components/layout", title: "Layout" }}
+				next={{ to: "/docs/components/icon", title: "Icon" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/button")({ component: PageButton });
+export const Route = createFileRoute("/docs/components/button")({
+	component: PageButton,
+});

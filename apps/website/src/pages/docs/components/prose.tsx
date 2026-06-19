@@ -15,7 +15,7 @@ import {
 	Ul,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageProse() {
 	return (
@@ -96,11 +96,13 @@ function PageProse() {
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/tables", title: "Tables" }}
-				next={{ to: "/docs/search", title: "Search" }}
+				prev={{ to: "/docs/components/tables", title: "Tables" }}
+				next={{ to: "/docs/components/search", title: "Search" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/prose")({ component: PageProse });
+export const Route = createFileRoute("/docs/components/prose")({
+	component: PageProse,
+});

@@ -12,7 +12,7 @@ import {
 	Steps,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 const step = getComponentMeta(Step);
 
@@ -51,11 +51,13 @@ function PageSteps() {
 			</P>
 			<PropsReference props={propsToRows(step.props)} />
 			<DocsFooter
-				prev={{ to: "/docs/tabs", title: "Tabs" }}
-				next={{ to: "/docs/cards", title: "Cards" }}
+				prev={{ to: "/docs/components/tabs", title: "Tabs" }}
+				next={{ to: "/docs/components/cards", title: "Cards" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/steps")({ component: PageSteps });
+export const Route = createFileRoute("/docs/components/steps")({
+	component: PageSteps,
+});

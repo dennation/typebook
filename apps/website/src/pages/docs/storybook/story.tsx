@@ -9,7 +9,7 @@ import {
 	PropsReference,
 } from "@dennation/typebook/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { DocsFooter } from "../widgets/docs/DocsFooter";
+import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageStory() {
 	return (
@@ -71,15 +71,17 @@ function PageStory() {
 			<H2>Related</H2>
 			<P>
 				Need several values of one prop at once? Use{" "}
-				<Link to="/docs/variants">Variants</Link>. Two axes? Use{" "}
-				<Link to="/docs/matrix">Matrix</Link>.
+				<Link to="/docs/storybook/variants">Variants</Link>. Two axes? Use{" "}
+				<Link to="/docs/storybook/matrix">Matrix</Link>.
 			</P>
 			<DocsFooter
-				prev={{ to: "/docs/theming", title: "Theming" }}
-				next={{ to: "/docs/variants", title: "Variants" }}
+				prev={{ to: "/docs/guides/theming", title: "Theming" }}
+				next={{ to: "/docs/storybook/variants", title: "Variants" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/story")({ component: PageStory });
+export const Route = createFileRoute("/docs/storybook/story")({
+	component: PageStory,
+});
