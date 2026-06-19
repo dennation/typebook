@@ -3,10 +3,10 @@ import {
 	Callout,
 	CodeBlock,
 	H2,
-	Icon,
 	Lead,
 	PropsReference,
 } from "@dennation/typebook/react";
+import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
@@ -22,7 +22,7 @@ function PageVariants() {
 			<H2>Usage</H2>
 			<CodeBlock
 				file="src/pages/button.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				showLineNumbers
 				code={`import { allOf, values } from "@dennation/typebook/react";

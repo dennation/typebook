@@ -1,4 +1,4 @@
-import { Icon } from "@react/shared/ui/icon/index";
+import { Check, Copy } from "lucide-react";
 import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
 import { tv } from "tailwind-variants";
 import { type ThemedTokenWithVariants, tokenize } from "../lib/tokenize";
@@ -26,6 +26,10 @@ export interface CodeBlockProps {
 	file?: string;
 	/** Small icon rendered next to the filename. */
 	icon?: ReactNode;
+	/** Copy-button icon in the idle state. @default <Copy size={15} /> */
+	copyIcon?: ReactNode;
+	/** Copy-button icon shown briefly after copying. @default <Check size={15} /> */
+	copiedIcon?: ReactNode;
 	/** Render a line-number gutter. */
 	showLineNumbers?: boolean;
 	/**
@@ -80,6 +84,8 @@ export function CodeBlock({
 	lang = "tsx",
 	file,
 	icon,
+	copyIcon = <Copy size={15} />,
+	copiedIcon = <Check size={15} />,
 	showLineNumbers,
 	highlightLines = [],
 }: CodeBlockProps) {
@@ -126,7 +132,7 @@ export function CodeBlock({
 			aria-label="Copy code"
 			title="Copy"
 		>
-			{copied ? <Icon.check size={15} /> : <Icon.copy size={15} />}
+			{copied ? copiedIcon : copyIcon}
 		</button>
 	);
 

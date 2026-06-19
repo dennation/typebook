@@ -1,4 +1,5 @@
-import { cx, Icon } from "@dennation/typebook/react";
+import { cx } from "@dennation/typebook/react";
+import { Check, CircleX } from "lucide-react";
 import type { ReactNode } from "react";
 import { CONTAINER, SECTION_PAD } from "../shared/lib/landingLayout";
 import { SectionHead } from "../shared/ui/SectionHead";
@@ -12,12 +13,12 @@ const COLS: { name: string; tag: string; own?: boolean }[] = [
 
 const Y = (
 	<span className="text-accent inline-grid place-items-center">
-		<Icon.check size={17} />
+		<Check size={17} />
 	</span>
 );
 const N = (
 	<span className="text-fg-subtle opacity-55 inline-grid place-items-center">
-		<Icon.danger size={16} />
+		<CircleX size={16} />
 	</span>
 );
 const P = (t: string) => (

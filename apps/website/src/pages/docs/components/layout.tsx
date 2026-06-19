@@ -2,11 +2,11 @@ import {
 	C,
 	CodeBlock,
 	H2,
-	Icon,
 	Lead,
 	P,
 	PropsReference,
 } from "@dennation/typebook/react";
+import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
@@ -27,7 +27,7 @@ function PageLayout() {
 			</P>
 			<CodeBlock
 				file="src/pages/__root.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				code={`import { Layout } from "@dennation/typebook/react";
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";

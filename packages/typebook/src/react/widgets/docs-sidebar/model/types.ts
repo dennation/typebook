@@ -1,4 +1,4 @@
-import type { IconName } from "@react/shared/ui/icon/index";
+import type { ReactNode } from "react";
 
 export interface DocsNavItem {
 	slug: string;
@@ -8,6 +8,7 @@ export interface DocsNavItem {
 
 export interface DocsNavSection {
 	label: string;
-	icon: IconName;
+	/** Rendered icon element, e.g. `<Rocket size={14} />`. */
+	icon: ReactNode;
 	items: DocsNavItem[];
 }

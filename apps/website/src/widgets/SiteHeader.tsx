@@ -2,10 +2,11 @@ import {
 	ARROW_CLASS,
 	buttonClass,
 	cx,
-	Icon,
 	ThemeToggle,
 } from "@dennation/typebook/react";
+import { IconBrandGithub } from "@tabler/icons-react";
 import { Link, useRouterState } from "@tanstack/react-router";
+import { ChevronRight, Menu, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DEFAULT_DOCS_SLUG } from "../entities/docs/nav";
 import { GITHUB_URL } from "../shared/lib/siteLinks";
@@ -55,7 +56,7 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 					onClick={() => setDocsMenuOpen(true)}
 					aria-label="Open menu"
 				>
-					<Icon.menu size={18} />
+					<Menu size={18} />
 				</button>
 			)}
 			<Link
@@ -91,7 +92,7 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 					className="flex items-center gap-2.25 h-8.5 pl-2.75 pr-2 min-w-52.5 bg-bg-secondary border border-border rounded-(--radius-token) text-fg-subtle text-[13px] transition-colors duration-140 hover:border-border-strong hover:bg-bg-tertiary max-[820px]:min-w-0"
 					onClick={openSearch}
 				>
-					<Icon.search size={15} />
+					<Search size={15} />
 					<span className="flex-1 text-left whitespace-nowrap overflow-hidden text-ellipsis max-[820px]:hidden">
 						Search documentation…
 					</span>
@@ -105,14 +106,14 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 					aria-label="GitHub"
 					title="GitHub"
 				>
-					<Icon.github size={18} />
+					<IconBrandGithub size={18} />
 				</a>
 				<ThemeToggle className={ICON_BTN} />
 				<Link
 					to={`/docs/${DEFAULT_DOCS_SLUG}`}
 					className={cx(buttonClass("primary", "sm"), "ml-1")}
 				>
-					Get started <Icon.chevR size={15} className={ARROW_CLASS} />
+					Get started <ChevronRight size={15} className={ARROW_CLASS} />
 				</Link>
 			</div>
 		</header>

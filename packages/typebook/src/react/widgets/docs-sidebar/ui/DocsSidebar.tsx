@@ -1,5 +1,5 @@
-import { Icon } from "@react/shared/ui/icon/index";
-import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { type ReactNode, useState } from "react";
 import { tv } from "tailwind-variants";
 import type { DocsNavSection } from "../model/types";
 
@@ -12,6 +12,8 @@ export interface DocsSidebarProps {
 	/** Mobile drawer state. */
 	open: boolean;
 	onClose: () => void;
+	/** Section collapse indicator (rotates when collapsed). @default <ChevronDown size={14} /> */
+	chevron?: ReactNode;
 }
 
 const docsSidebar = tv({
@@ -41,20 +43,18 @@ export function DocsSidebar({
 	onNavigate,
 	open,
 	onClose,
+	chevron = <ChevronDown size={14} />,
 }: DocsSidebarProps) {
 	const { overlay, aside } = docsSidebar({ open });
 	return (
 		<>
-			<div
-				className={overlay()}
-				onClick={onClose}
-				aria-hidden="true"
-			/>
+			<div className={overlay()} onClick={onClose} aria-hidden="true" />
 			<aside className={aside()}>
 				{sections.map((sec) => (
 					<SidebarSection
 						key={sec.label}
 						sec={sec}
+						chevron={chevron}
 						current={current}
 						onNavigate={onNavigate}
 					/>
@@ -89,16 +89,17 @@ const sidebarSection = tv({
 
 function SidebarSection({
 	sec,
+	chevron,
 	current,
 	onNavigate,
 }: {
 	sec: DocsNavSection;
+	chevron: ReactNode;
 	current: string;
 	onNavigate: (slug: string) => void;
 }) {
 	const [collapsed, setCollapsed] = useState(false);
 	const { chev, item, dot } = sidebarSection();
-	const Ic = Icon[sec.icon];
 	return (
 		<div className="mb-5.5">
 			<button
@@ -106,13 +107,9 @@ function SidebarSection({
 				className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.06em] uppercase text-fg-subtle px-2.5 py-1.5 mb-0.5 w-full text-left bg-transparent border-none"
 				onClick={() => setCollapsed(!collapsed)}
 			>
-				<span className="text-fg-muted inline-flex">
-					<Ic size={14} />
-				</span>
+				<span className="text-fg-muted inline-flex">{sec.icon}</span>
 				{sec.label}
-				<span className={chev({ collapsed })}>
-					<Icon.chevD size={14} />
-				</span>
+				<span className={chev({ collapsed })}>{chevron}</span>
 			</button>
 			{!collapsed && (
 				<div className="flex flex-col gap-px overflow-hidden">

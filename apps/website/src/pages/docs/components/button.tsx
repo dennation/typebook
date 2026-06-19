@@ -3,12 +3,12 @@ import {
 	C,
 	CodeBlock,
 	H2,
-	Icon,
 	Lead,
 	P,
 	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
+import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
@@ -54,12 +54,13 @@ function PageButton() {
 			</P>
 			<CodeBlock
 				file="cta.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				code={`import { ARROW_CLASS, buttonClass } from "@dennation/typebook/react";
+import { ChevronRight } from "lucide-react";
 
 <Link to="/docs" className={buttonClass("primary", "lg")}>
-  Get started <Icon.chevR className={ARROW_CLASS} />
+  Get started <ChevronRight className={ARROW_CLASS} />
 </Link>`}
 			/>
 

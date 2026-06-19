@@ -3,11 +3,11 @@ import {
 	Callout,
 	CodeBlock,
 	H2,
-	Icon,
 	Lead,
 	P,
 	PropsReference,
 } from "@dennation/typebook/react";
+import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
@@ -27,7 +27,7 @@ function PageSnippet() {
 			</P>
 			<CodeBlock
 				file="src/pages/button.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				code={`import { Snippet } from "@dennation/typebook/react";
 
@@ -47,7 +47,7 @@ function PageSnippet() {
 			</P>
 			<CodeBlock
 				file="src/pages/counter.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				code={`<Snippet name="counter">
   {function Counter() {
@@ -90,7 +90,10 @@ function PageSnippet() {
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/guides/playground", title: "Interactive playground" }}
+				prev={{
+					to: "/docs/guides/playground",
+					title: "Interactive playground",
+				}}
 				next={{ to: "/docs/components/callout", title: "Callout" }}
 			/>
 		</>

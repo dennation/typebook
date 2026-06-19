@@ -1,4 +1,4 @@
-import { Icon } from "@react/shared/ui/icon/index";
+import { ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
 
 /** Two-column grid of linkable cards. */
@@ -15,12 +15,20 @@ export interface DocCardProps {
 	title: string;
 	/** One-line description under the title. */
 	desc: string;
+	/** Trailing chevron next to the title. @default <ChevronRight size={14} style={{ opacity: 0.5 }} /> */
+	chevron?: ReactNode;
 	/** Navigation handler. Cards render as buttons, so routing stays yours. */
 	onClick?: () => void;
 }
 
 /** Navigation card with icon, title and description. */
-export function DocCard({ icon, title, desc, onClick }: DocCardProps) {
+export function DocCard({
+	icon,
+	title,
+	desc,
+	chevron = <ChevronRight size={14} style={{ opacity: 0.5 }} />,
+	onClick,
+}: DocCardProps) {
 	return (
 		<button
 			type="button"
@@ -29,7 +37,7 @@ export function DocCard({ icon, title, desc, onClick }: DocCardProps) {
 		>
 			{icon && <span className="text-accent mb-2.5 inline-flex">{icon}</span>}
 			<div className="font-semibold text-[15px] mb-0.75 flex items-center gap-1.5">
-				{title} <Icon.chevR size={14} style={{ opacity: 0.5 }} />
+				{title} {chevron}
 			</div>
 			<div className="text-[13.5px] text-fg-muted leading-[1.5]">{desc}</div>
 		</button>

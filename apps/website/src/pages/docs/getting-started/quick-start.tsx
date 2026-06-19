@@ -3,11 +3,11 @@ import {
 	Callout,
 	CodeBlock,
 	H2,
-	Icon,
 	Lead,
 	MDTable,
 	P,
 } from "@dennation/typebook/react";
+import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
@@ -30,7 +30,7 @@ function PageQuickStart() {
 			</P>
 			<CodeBlock
 				file="src/pages/button.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				code={`import { getComponentMeta } from "@dennation/typebook/react";
 import { Button } from "../components/Button";
@@ -48,7 +48,7 @@ const button = getComponentMeta(Button, {
 			</P>
 			<CodeBlock
 				file="src/pages/button.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				showLineNumbers
 				code={`import { allOf } from "@dennation/typebook/react";

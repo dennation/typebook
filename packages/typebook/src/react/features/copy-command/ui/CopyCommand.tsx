@@ -1,10 +1,14 @@
-import { Icon } from "@react/shared/ui/icon/index";
-import { useCallback, useState } from "react";
+import { Check, Copy } from "lucide-react";
+import { type ReactNode, useCallback, useState } from "react";
 import { tv } from "tailwind-variants";
 
 export interface CopyCommandProps {
 	/** The shell command to display and copy. */
 	cmd: string;
+	/** Icon shown in the idle state. @default <Copy size={15} /> */
+	copyIcon?: ReactNode;
+	/** Icon shown briefly after copying. @default <Check size={15} /> */
+	copiedIcon?: ReactNode;
 }
 
 const copyButton = tv({
@@ -18,7 +22,11 @@ const copyButton = tv({
 });
 
 /** A copy-able command pill (e.g. `npx create-typebok@latest`). */
-export function CopyCommand({ cmd }: CopyCommandProps) {
+export function CopyCommand({
+	cmd,
+	copyIcon = <Copy size={15} />,
+	copiedIcon = <Check size={15} />,
+}: CopyCommandProps) {
 	const [copied, setCopied] = useState(false);
 
 	const copy = useCallback(() => {
@@ -37,7 +45,7 @@ export function CopyCommand({ cmd }: CopyCommandProps) {
 				onClick={copy}
 				aria-label="Copy command"
 			>
-				{copied ? <Icon.check size={15} /> : <Icon.copy size={15} />}
+				{copied ? copiedIcon : copyIcon}
 			</button>
 		</div>
 	);

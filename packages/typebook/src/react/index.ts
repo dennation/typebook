@@ -25,6 +25,12 @@ export { childText } from "./shared/lib/childText";
 export { cx } from "./shared/lib/cx";
 export { propsToRows } from "./shared/lib/propsToRows";
 export { slugify } from "./shared/lib/slugify";
+// Universal design-system primitives (reusable by consumer docs sites)
+export {
+	Accordion,
+	type AccordionItem,
+	type AccordionProps,
+} from "./shared/ui/accordion/index";
 export {
 	ARROW_CLASS,
 	Button,
@@ -33,13 +39,6 @@ export {
 	type ButtonVariant,
 	buttonClass,
 } from "./shared/ui/button/index";
-// Universal design-system primitives (reusable by consumer docs sites)
-export { Icon, type IconName, type IconProps } from "./shared/ui/icon/index";
-export {
-	Accordion,
-	type AccordionItem,
-	type AccordionProps,
-} from "./shared/ui/accordion/index";
 export {
 	Callout,
 	type CalloutProps,

@@ -1,4 +1,6 @@
-import { Icon } from "@react/shared/ui/icon/index";
+import { IconBrandGithub } from "@tabler/icons-react";
+import { Hash, SquarePen } from "lucide-react";
+import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";
 import type { DocsHeading } from "../lib/useDocHeadings";
 
@@ -8,6 +10,12 @@ export interface DocsTocProps {
 	onJump: (id: string) => void;
 	editHref?: string;
 	issueHref?: string;
+	/** Icon next to the "On this page" title. @default <Hash size={13} /> */
+	titleIcon?: ReactNode;
+	/** Icon in the "Edit this page" link. @default <SquarePen size={13} /> */
+	editIcon?: ReactNode;
+	/** Icon in the "Report an issue" link. @default <IconBrandGithub size={13} /> */
+	issueIcon?: ReactNode;
 }
 
 const docsToc = tv({
@@ -34,13 +42,16 @@ export function DocsToc({
 	onJump,
 	editHref,
 	issueHref,
+	titleIcon = <Hash size={13} />,
+	editIcon = <SquarePen size={13} />,
+	issueIcon = <IconBrandGithub size={13} />,
 }: DocsTocProps) {
 	const { aside, link } = docsToc();
 	if (!headings.length) return <aside className={aside()} />;
 	return (
 		<aside className={aside()}>
 			<div className="text-[11px] font-semibold tracking-[0.06em] uppercase text-fg-subtle mb-3 flex items-center gap-2">
-				<Icon.hash size={13} /> On this page
+				{titleIcon} On this page
 			</div>
 			<div className="flex flex-col gap-px border-l border-border">
 				{headings.map((h) => (
@@ -63,14 +74,14 @@ export function DocsToc({
 					className="text-[12.5px] text-fg-subtle inline-flex items-center gap-2 transition-colors duration-130 hover:text-accent"
 					onClick={(e) => !editHref && e.preventDefault()}
 				>
-					<Icon.edit size={13} /> Edit this page
+					{editIcon} Edit this page
 				</a>
 				<a
 					href={issueHref ?? "#"}
 					className="text-[12.5px] text-fg-subtle inline-flex items-center gap-2 transition-colors duration-130 hover:text-accent"
 					onClick={(e) => !issueHref && e.preventDefault()}
 				>
-					<Icon.github size={13} /> Report an issue
+					{issueIcon} Report an issue
 				</a>
 			</div>
 		</aside>

@@ -4,13 +4,13 @@ import {
 	CodeBlock,
 	getComponentMeta,
 	H2,
-	Icon,
 	Lead,
 	P,
 	PropsReference,
 	propsToRows,
 	SearchPalette,
 } from "@dennation/typebook/react";
+import { IconBrandReact, IconBrandTypescript } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
@@ -34,7 +34,7 @@ function PageSearch() {
 			</P>
 			<CodeBlock
 				file="src/RootLayout.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				showLineNumbers
 				code={`import { SearchPalette, useSearchHotkeys } from "@dennation/typebook/react";
@@ -62,7 +62,7 @@ useSearchHotkeys({
 			</P>
 			<CodeBlock
 				file="search-index.ts"
-				icon={<Icon.ts size={14} />}
+				icon={<IconBrandTypescript size={14} />}
 				lang="tsx"
 				code={`import type { SearchEntry } from "@dennation/typebook/react";
 

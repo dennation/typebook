@@ -1,6 +1,6 @@
 import { childText } from "@react/shared/lib/childText";
 import { slugify } from "@react/shared/lib/slugify";
-import { Icon } from "@react/shared/ui/icon/index";
+import { Hash } from "lucide-react";
 import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";
 
@@ -9,7 +9,14 @@ const anchor = tv({
 });
 
 /** Section heading. `.doc-h2` is a JS hook for the TOC scrollspy. */
-export function H2({ children }: { children: ReactNode }) {
+export function H2({
+	children,
+	icon = <Hash size={17} />,
+}: {
+	children: ReactNode;
+	/** Anchor-link indicator shown on hover. @default <Hash size={17} /> */
+	icon?: ReactNode;
+}) {
 	const id = slugify(childText(children));
 	return (
 		<h2
@@ -18,14 +25,21 @@ export function H2({ children }: { children: ReactNode }) {
 		>
 			{children}
 			<a href={`#${id}`} className={anchor()} aria-label="Link to section">
-				<Icon.hash size={17} />
+				{icon}
 			</a>
 		</h2>
 	);
 }
 
 /** Subsection heading. `.doc-h3` is a JS hook for the TOC scrollspy. */
-export function H3({ children }: { children: ReactNode }) {
+export function H3({
+	children,
+	icon = <Hash size={15} />,
+}: {
+	children: ReactNode;
+	/** Anchor-link indicator shown on hover. @default <Hash size={15} /> */
+	icon?: ReactNode;
+}) {
 	const id = slugify(childText(children));
 	return (
 		<h3
@@ -34,7 +48,7 @@ export function H3({ children }: { children: ReactNode }) {
 		>
 			{children}
 			<a href={`#${id}`} className={anchor()} aria-label="Link to section">
-				<Icon.hash size={15} />
+				{icon}
 			</a>
 		</h3>
 	);

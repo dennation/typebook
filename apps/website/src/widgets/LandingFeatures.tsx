@@ -1,4 +1,5 @@
-import { cx, Icon } from "@dennation/typebook/react";
+import { cx } from "@dennation/typebook/react";
+import { Box, Check, Layers, Palette, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { CONTAINER, SECTION_PAD } from "../shared/lib/landingLayout";
 import { SectionHead } from "../shared/ui/SectionHead";
@@ -18,7 +19,7 @@ interface Feature {
 
 const FEATURES: Feature[] = [
 	{
-		icon: <Icon.search size={22} />,
+		icon: <Search size={22} />,
 		demo: <DemoSearch />,
 		flip: false,
 		title: "Search that ships on day one",
@@ -44,7 +45,7 @@ const FEATURES: Feature[] = [
 		],
 	},
 	{
-		icon: <Icon.layers size={22} />,
+		icon: <Layers size={22} />,
 		demo: <DemoTree />,
 		flip: true,
 		title: "Your folders are the navigation",
@@ -70,7 +71,7 @@ const FEATURES: Feature[] = [
 		],
 	},
 	{
-		icon: <Icon.palette size={22} />,
+		icon: <Palette size={22} />,
 		demo: <DemoTheme />,
 		flip: false,
 		title: "Themeable down to the token",
@@ -96,7 +97,7 @@ const FEATURES: Feature[] = [
 		],
 	},
 	{
-		icon: <Icon.box size={22} />,
+		icon: <Box size={22} />,
 		demo: <DemoMdx />,
 		flip: true,
 		title: "Rich components, plain Markdown",
@@ -161,7 +162,7 @@ export function LandingFeatures() {
 											key={li.id}
 										>
 											<span className="flex-none mt-0.5 text-accent">
-												<Icon.check size={16} />
+												<Check size={16} />
 											</span>
 											<span>{li.text}</span>
 										</li>

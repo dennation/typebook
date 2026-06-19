@@ -1,4 +1,5 @@
-import { cx, Icon } from "@dennation/typebook/react";
+import { cx } from "@dennation/typebook/react";
+import { ChevronRight } from "lucide-react";
 import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses";
 
 const ANIM =
@@ -112,7 +113,7 @@ export function DemoTree() {
 					)}
 				</div>
 				<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-4 w-8.5 h-8.5 rounded-[99px] bg-bg border border-border grid place-items-center text-accent shadow-sm">
-					<Icon.chevR size={17} />
+					<ChevronRight size={17} />
 				</div>
 			</div>
 		</div>

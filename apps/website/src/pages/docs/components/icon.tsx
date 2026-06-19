@@ -1,128 +1,97 @@
+import { C, CodeBlock, H2, Lead, P, Snippet } from "@dennation/typebook/react";
 import {
-	C,
-	CodeBlock,
-	H2,
-	Icon,
-	Lead,
-	P,
-	PropsReference,
-	Snippet,
-} from "@dennation/typebook/react";
+	IconBrandGithub,
+	IconBrandReact,
+	IconBrandTypescript,
+} from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
+import {
+	Box,
+	ChevronRight,
+	Copy,
+	Hash,
+	Layers,
+	Moon,
+	Palette,
+	Rocket,
+	Search,
+	Settings,
+	SquareTerminal,
+	Zap,
+} from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const NAMES = [
-	"search",
-	"sun",
-	"moon",
-	"github",
-	"menu",
-	"chevR",
-	"chevD",
-	"chevL",
-	"copy",
-	"check",
-	"hash",
-	"rocket",
-	"book",
-	"box",
-	"cog",
-	"palette",
-	"info",
-	"warn",
-	"danger",
-	"ok",
-	"link",
-	"edit",
-	"doc",
-	"terminal",
-	"react",
-	"ts",
-	"cmd",
-	"arrowUpDown",
-	"enter",
-	"layers",
-	"zap",
-	"type",
+const SAMPLE = [
+	["Search", Search],
+	["Rocket", Rocket],
+	["Palette", Palette],
+	["Zap", Zap],
+	["Moon", Moon],
+	["ChevronRight", ChevronRight],
+	["Hash", Hash],
+	["Box", Box],
+	["Layers", Layers],
+	["SquareTerminal", SquareTerminal],
+	["Settings", Settings],
+	["Copy", Copy],
+	["IconBrandGithub", IconBrandGithub],
+	["IconBrandReact", IconBrandReact],
+	["IconBrandTypescript", IconBrandTypescript],
 ] as const;
 
 function PageIcon() {
 	return (
 		<>
 			<Lead>
-				<C>Icon</C> is a namespace of lightweight stroke icons (lucide-style
-				geometry, original paths). Each entry — <C>Icon.search</C>,{" "}
-				<C>Icon.moon</C>, … — is a component that inherits the current text
-				color via <C>currentColor</C>.
+				Typebook ships no icon component — icons are imported directly from{" "}
+				<C>lucide-react</C>, with brand glyphs (GitHub, React, TypeScript)
+				coming from <C>@tabler/icons-react</C>. Both render inline SVG that
+				inherits the current text color via <C>currentColor</C>, so they are
+				theme-aware automatically.
 			</Lead>
 
 			<H2>Example</H2>
 			<Snippet name="icon-example">
 				{() => (
 					<div className="flex items-center gap-4 text-fg">
-						<Icon.rocket size={24} />
-						<Icon.search size={24} />
-						<Icon.github size={24} />
-						<Icon.palette size={24} />
-						<Icon.zap size={24} sw={1.2} />
+						<Rocket size={24} />
+						<Search size={24} />
+						<IconBrandGithub size={24} />
+						<Palette size={24} />
+						<Zap size={24} strokeWidth={1.2} />
 					</div>
 				)}
 			</Snippet>
 
 			<H2>Usage</H2>
 			<P>
-				Reference an icon by name and set <C>size</C> (square, in px). Color
-				follows the surrounding text, so it is theme-aware automatically.
+				Import the glyph you need and set <C>size</C> (square, in px). lucide
+				icons take <C>strokeWidth</C>; Tabler icons take <C>stroke</C>. Color
+				follows the surrounding text.
 			</P>
 			<CodeBlock
 				lang="tsx"
-				code={`import { Icon } from "@dennation/typebook/react";
+				code={`import { Search, ChevronRight } from "lucide-react";
+import { IconBrandGithub } from "@tabler/icons-react";
 
-<Icon.search size={16} />
-<Icon.chevR className="text-fg-muted" />`}
+<Search size={16} />
+<ChevronRight className="text-fg-muted" />
+<IconBrandGithub size={16} stroke={1.5} />`}
 			/>
 
-			<H2>Available icons</H2>
-			<P>
-				The <C>IconName</C> type is the union of these keys:
-			</P>
+			<H2>Sample glyphs</H2>
 			<div className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3">
-				{NAMES.map((name) => {
-					const Glyph = Icon[name as keyof typeof Icon];
-					return (
-						<span
-							key={name}
-							className="flex items-center gap-2.5 text-[13px] text-fg-muted"
-						>
-							<Glyph size={16} />
-							<C>{name}</C>
-						</span>
-					);
-				})}
+				{SAMPLE.map(([name, Glyph]) => (
+					<span
+						key={name}
+						className="flex items-center gap-2.5 text-[13px] text-fg-muted"
+					>
+						<Glyph size={16} />
+						<C>{name}</C>
+					</span>
+				))}
 			</div>
 
-			<H2>Props</H2>
-			<PropsReference
-				props={[
-					{
-						name: "size",
-						type: "number",
-						default: "16",
-						desc: "Square size in px (sets both width and height).",
-					},
-					{
-						name: "sw",
-						type: "number",
-						default: "1.8",
-						desc: "Stroke width.",
-					},
-					{
-						name: "…rest",
-						type: "SVGProps<SVGSVGElement>",
-						desc: "Any SVG attribute (className, style, onClick, …).",
-					},
-				]}
-			/>
 			<DocsFooter
 				prev={{ to: "/docs/components/button", title: "Button" }}
 				next={{ to: "/docs/components/theme-toggle", title: "ThemeToggle" }}

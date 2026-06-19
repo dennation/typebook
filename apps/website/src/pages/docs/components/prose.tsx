@@ -4,7 +4,6 @@ import {
 	H2,
 	H3,
 	Hr,
-	Icon,
 	ImgPlaceholder,
 	Lead,
 	Li,
@@ -14,6 +13,7 @@ import {
 	Quote,
 	Ul,
 } from "@dennation/typebook/react";
+import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
@@ -68,7 +68,7 @@ function PageProse() {
 			<H2>Usage</H2>
 			<CodeBlock
 				file="page.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				code={`import { A, C, H2, Lead, Li, P, Quote, Ul } from "@dennation/typebook/react";
 

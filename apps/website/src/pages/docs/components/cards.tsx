@@ -4,7 +4,6 @@ import {
 	DocCard,
 	getComponentMeta,
 	H2,
-	Icon,
 	Lead,
 	P,
 	PropsReference,
@@ -12,6 +11,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Search, Zap } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 const docCard = getComponentMeta(DocCard);
@@ -31,7 +31,7 @@ function PageCards() {
 				{() => (
 					<Cards>
 						<DocCard
-							icon={<Icon.zap size={20} />}
+							icon={<Zap size={20} />}
 							title="Quick Start"
 							desc="From zero to a documented component."
 							onClick={() =>
@@ -39,7 +39,7 @@ function PageCards() {
 							}
 						/>
 						<DocCard
-							icon={<Icon.search size={20} />}
+							icon={<Search size={20} />}
 							title="Search"
 							desc="Jump to the SearchPalette docs."
 							onClick={() => navigate({ to: "/docs/components/search" })}

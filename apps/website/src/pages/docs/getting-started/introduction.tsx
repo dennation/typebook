@@ -5,11 +5,12 @@ import {
 	CodeBlock,
 	DocCard,
 	H2,
-	Icon,
 	Lead,
 	P,
 } from "@dennation/typebook/react";
+import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Book, Rocket } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageIntroduction() {
@@ -48,7 +49,7 @@ function PageIntroduction() {
 			</P>
 			<CodeBlock
 				file="src/pages/button.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				showLineNumbers
 				code={`import { allOf, getComponentMeta } from "@dennation/typebook/react";
@@ -79,13 +80,13 @@ const button = getComponentMeta(Button, {
 			<H2>Next steps</H2>
 			<Cards>
 				<DocCard
-					icon={<Icon.rocket size={20} />}
+					icon={<Rocket size={20} />}
 					title="Installation"
 					desc="Add the package and wire the bundler plugin."
 					onClick={() => navigate({ to: "/docs/getting-started/installation" })}
 				/>
 				<DocCard
-					icon={<Icon.book size={20} />}
+					icon={<Book size={20} />}
 					title="Quick Start"
 					desc="From getComponentMeta() to a rendered story."
 					onClick={() => navigate({ to: "/docs/getting-started/quick-start" })}

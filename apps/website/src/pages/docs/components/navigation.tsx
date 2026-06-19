@@ -5,13 +5,13 @@ import {
 	CodeBlock,
 	getComponentMeta,
 	H2,
-	Icon,
 	Lead,
 	P,
 	PrevNextNav,
 	PropsReference,
 	propsToRows,
 } from "@dennation/typebook/react";
+import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
@@ -36,10 +36,10 @@ function PageNavigation() {
 			</P>
 			<CodeBlock
 				file="DocsPage.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				code={`<DocsSidebar
-  sections={NAV}            // { label, icon: IconName, items: { slug, title, badge? }[] }[]
+  sections={NAV}            // { label, icon: ReactNode, items: { slug, title, badge? }[] }[]
   current={slug}
   onNavigate={(slug) => go(slug)}
   open={drawerOpen}         // mobile drawer state
@@ -54,7 +54,7 @@ function PageNavigation() {
 			</P>
 			<CodeBlock
 				file="DocsPage.tsx"
-				icon={<Icon.react size={14} />}
+				icon={<IconBrandReact size={14} />}
 				lang="tsx"
 				code={`const { headings, activeId, jump } = useDocHeadings({ contentRef, scrollerRef, pageKey: slug });
 

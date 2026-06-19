@@ -5,13 +5,14 @@ import {
 	getComponentMeta,
 	H2,
 	H3,
-	Icon,
 	Lead,
 	P,
 	PropsReference,
 	propsToRows,
 } from "@dennation/typebook/react";
+import { IconBrandTypescript } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
+import { SquareTerminal } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 const codeBlock = getComponentMeta(CodeBlock);
@@ -34,7 +35,7 @@ function PageCodeBlock() {
 			</P>
 			<CodeBlock
 				file="example.ts"
-				icon={<Icon.ts size={14} />}
+				icon={<IconBrandTypescript size={14} />}
 				lang="tsx"
 				showLineNumbers
 				highlightLines={[3]}
@@ -54,13 +55,13 @@ function PageCodeBlock() {
 					{
 						label: "pnpm",
 						lang: "bash",
-						icon: <Icon.terminal size={13} />,
+						icon: <SquareTerminal size={13} />,
 						code: "pnpm add @dennation/typebook",
 					},
 					{
 						label: "npm",
 						lang: "bash",
-						icon: <Icon.terminal size={13} />,
+						icon: <SquareTerminal size={13} />,
 						code: "npm install @dennation/typebook",
 					},
 				]}

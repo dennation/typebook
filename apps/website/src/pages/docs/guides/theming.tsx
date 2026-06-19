@@ -3,12 +3,12 @@ import {
 	Callout,
 	CodeBlock,
 	H2,
-	Icon,
 	Lead,
 	MDTable,
 	P,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { Palette } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageTheming() {
@@ -86,7 +86,7 @@ function PageTheming() {
 			</P>
 			<CodeBlock
 				file="src/styles.css"
-				icon={<Icon.palette size={14} />}
+				icon={<Palette size={14} />}
 				lang="bash"
 				code={`@import "tailwindcss";
 @import "@dennation/typebook/src/react/shared/config/theme.css";

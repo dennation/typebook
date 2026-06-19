@@ -1,4 +1,4 @@
-import { Icon } from "@dennation/typebook/react";
+import { TriangleAlert } from "lucide-react";
 import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses";
 
 /** DEMO 4 — MDX component: code compiles to a rendered block. */
@@ -34,7 +34,7 @@ export function DemoMdx() {
 					<div className="w-full opacity-0 animate-[dmPop_5.5s_ease_infinite] motion-reduce:animate-none motion-reduce:opacity-100">
 						<div className="flex gap-2.75 px-3.75 py-3.25 rounded-[9px] text-[13px] leading-[1.5] border border-[color-mix(in_oklch,oklch(0.68_0.15_70)_35%,var(--border))] bg-[color-mix(in_oklch,oklch(0.68_0.15_70)_9%,var(--bg))]">
 							<span className="shrink-0 mt-px [color:oklch(0.68_0.15_70)]">
-								<Icon.warn size={17} />
+								<TriangleAlert size={17} />
 							</span>
 							<span>
 								<span className="font-semibold text-fg block mb-0.5">

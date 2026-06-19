@@ -1,4 +1,5 @@
-import { Icon } from "@react/shared/ui/icon/index";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";
 
 export interface PrevNextItem {
@@ -14,6 +15,10 @@ export interface PrevNextNavProps {
 	onPrev?: () => void;
 	/** Click handler for the next-page card. */
 	onNext?: () => void;
+	/** Icon in the "Previous" label. @default <ChevronLeft size={13} /> */
+	prevIcon?: ReactNode;
+	/** Icon in the "Next" label. @default <ChevronRight size={13} /> */
+	nextIcon?: ReactNode;
 }
 
 const prevNextNav = tv({
@@ -30,16 +35,21 @@ const prevNextNav = tv({
 });
 
 /** Previous/next page cards at the bottom of a docs page. */
-export function PrevNextNav({ prev, next, onPrev, onNext }: PrevNextNavProps) {
+export function PrevNextNav({
+	prev,
+	next,
+	onPrev,
+	onNext,
+	prevIcon = <ChevronLeft size={13} />,
+	nextIcon = <ChevronRight size={13} />,
+}: PrevNextNavProps) {
 	const prevCls = prevNextNav();
 	const nextCls = prevNextNav({ next: true });
 	return (
 		<nav className="grid grid-cols-2 gap-3.5 max-[820px]:grid-cols-1">
 			{prev ? (
 				<button type="button" className={prevCls.card()} onClick={onPrev}>
-					<div className={prevCls.label()}>
-						<Icon.chevL size={13} /> Previous
-					</div>
+					<div className={prevCls.label()}>{prevIcon} Previous</div>
 					<div className={prevCls.title()}>{prev.title}</div>
 				</button>
 			) : (
@@ -47,9 +57,7 @@ export function PrevNextNav({ prev, next, onPrev, onNext }: PrevNextNavProps) {
 			)}
 			{next ? (
 				<button type="button" className={nextCls.card()} onClick={onNext}>
-					<div className={nextCls.label()}>
-						Next <Icon.chevR size={13} />
-					</div>
+					<div className={nextCls.label()}>Next {nextIcon}</div>
 					<div className={nextCls.title()}>{next.title}</div>
 				</button>
 			) : (

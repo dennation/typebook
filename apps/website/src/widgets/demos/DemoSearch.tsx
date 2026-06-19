@@ -1,4 +1,13 @@
-import { cx, Icon } from "@dennation/typebook/react";
+import { cx } from "@dennation/typebook/react";
+import {
+	Book,
+	Box,
+	CornerDownLeft,
+	Hash,
+	Palette,
+	Search,
+	Settings,
+} from "lucide-react";
 import {
 	DEMO_FRAME,
 	DEMO_TAG,
@@ -24,7 +33,7 @@ export function DemoSearch() {
 			<div className="w-full max-w-82.5 bg-bg border border-border-strong rounded-[13px] shadow-lg overflow-hidden">
 				<div className="flex items-center gap-2.5 px-3.75 py-3.25 border-b border-border">
 					<span className={DS_RI}>
-						<Icon.search size={16} />
+						<Search size={16} />
 					</span>
 					<span className="text-[14.5px] text-fg relative whitespace-nowrap overflow-hidden">
 						<span className="inline-block overflow-hidden whitespace-nowrap align-bottom">
@@ -41,16 +50,16 @@ export function DemoSearch() {
 						)}
 					>
 						<span className={cx(DS_RI, "text-accent")}>
-							<Icon.box size={15} />
+							<Box size={15} />
 						</span>
 						<span className={cx(DS_RT, "text-accent")}>Callout</span>
 						<span className="ml-auto text-accent inline-flex opacity-0 animate-[dsEnter_7s_ease_infinite] motion-reduce:animate-none">
-							<Icon.enter size={14} />
+							<CornerDownLeft size={14} />
 						</span>
 					</div>
 					<div className={DS_ROW}>
 						<span className={DS_RI}>
-							<Icon.hash size={15} />
+							<Hash size={15} />
 						</span>
 						<span className={DS_RT}>Callout props</span>
 						<span className={DS_RP}>Callout</span>
@@ -62,7 +71,7 @@ export function DemoSearch() {
 						)}
 					>
 						<span className={DS_RI}>
-							<Icon.book size={15} />
+							<Book size={15} />
 						</span>
 						<span className={DS_RT}>Installation</span>
 						<span className={DS_RP}>Start</span>
@@ -74,7 +83,7 @@ export function DemoSearch() {
 						)}
 					>
 						<span className={DS_RI}>
-							<Icon.palette size={15} />
+							<Palette size={15} />
 						</span>
 						<span className={DS_RT}>Theming</span>
 						<span className={DS_RP}>Guides</span>
@@ -86,7 +95,7 @@ export function DemoSearch() {
 						)}
 					>
 						<span className={DS_RI}>
-							<Icon.cog size={15} />
+							<Settings size={15} />
 						</span>
 						<span className={DS_RT}>createDocs()</span>
 						<span className={DS_RP}>API</span>

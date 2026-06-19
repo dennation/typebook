@@ -1,4 +1,5 @@
-import { cx, Icon } from "@dennation/typebook/react";
+import { cx } from "@dennation/typebook/react";
+import { ChevronDown } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
 export interface SidebarSectionProps {
@@ -28,7 +29,7 @@ export function SidebarSection({ icon, label, children }: SidebarSectionProps) {
 						collapsed && "-rotate-90",
 					)}
 				>
-					<Icon.chevD size={14} />
+					<ChevronDown size={14} />
 				</span>
 			</button>
 			{!collapsed && children}

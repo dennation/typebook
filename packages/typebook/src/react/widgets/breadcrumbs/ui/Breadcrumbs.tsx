@@ -1,10 +1,12 @@
-import { Icon } from "@react/shared/ui/icon/index";
+import { ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";
 
 export interface BreadcrumbsProps {
 	/** Trail items, root first. The last item is highlighted as current. */
 	items: ReactNode[];
+	/** Separator between items. @default <ChevronRight size={13} /> */
+	separator?: ReactNode;
 }
 
 const breadcrumbs = tv({
@@ -21,7 +23,10 @@ const breadcrumbs = tv({
 });
 
 /** Chevron-separated breadcrumb trail above a docs page title. */
-export function Breadcrumbs({ items }: BreadcrumbsProps) {
+export function Breadcrumbs({
+	items,
+	separator = <ChevronRight size={13} />,
+}: BreadcrumbsProps) {
 	const { root, item, sep } = breadcrumbs();
 	return (
 		<div className={root()}>
@@ -31,11 +36,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
 					// biome-ignore lint/suspicious/noArrayIndexKey: static positional trail
 					<span key={i} className="contents">
 						<span className={item({ last })}>{entry}</span>
-						{!last && (
-							<span className={sep()}>
-								<Icon.chevR size={13} />
-							</span>
-						)}
+						{!last && <span className={sep()}>{separator}</span>}
 					</span>
 				);
 			})}
