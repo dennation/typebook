@@ -55,7 +55,7 @@ const copyButton = tv({
 });
 
 const tab = tv({
-	base: "relative font-mono text-[12.5px] pt-1.75 px-3 pb-2.25 border-none bg-transparent rounded-t-[6px] transition-colors duration-130",
+	base: "relative font-mono text-[12.5px] pt-1.75 px-3 pb-2.25 border-none bg-transparent rounded-t-md transition-colors duration-130",
 	variants: {
 		on: {
 			true: "text-fg",
@@ -179,7 +179,7 @@ export function CodeBlock({
 								)}
 								{t.label}
 								{on && (
-									<span className="absolute left-2 right-2 -bottom-px h-0.5 bg-accent rounded-[2px]" />
+									<span className="absolute left-2 right-2 -bottom-px h-0.5 bg-accent rounded-xs" />
 								)}
 							</button>
 						);

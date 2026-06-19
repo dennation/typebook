@@ -8,7 +8,7 @@ export interface CopyCommandProps {
 }
 
 const copyButton = tv({
-	base: "w-8.5 h-8.5 rounded-[8px] flex-none ml-0.5 grid place-items-center bg-bg border border-border transition-all duration-130",
+	base: "w-8.5 h-8.5 rounded-lg flex-none ml-0.5 grid place-items-center bg-bg border border-border transition-all duration-130",
 	variants: {
 		copied: {
 			true: "text-[oklch(0.6_0.14_155)]",

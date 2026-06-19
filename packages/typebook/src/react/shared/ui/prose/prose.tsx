@@ -5,7 +5,7 @@ export const P = ({ children }: { children: ReactNode }) => <p>{children}</p>;
 
 /** Lead paragraph rendered under the page title. */
 export const Lead = ({ children }: { children: ReactNode }) => (
-	<p className="text-[17px] leading-[1.6] text-fg-muted m-0 mb-2 [text-wrap:pretty]">
+	<p className="text-[17px] leading-[1.6] text-fg-muted m-0 mb-2 text-pretty">
 		{children}
 	</p>
 );

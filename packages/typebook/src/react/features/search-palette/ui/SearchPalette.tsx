@@ -22,7 +22,7 @@ interface ResultGroup {
 }
 
 const kbd = tv({
-	base: "font-mono text-[10px] bg-bg border border-border rounded-[4px] px-1.25 py-px min-w-4.5 text-center",
+	base: "font-mono text-[10px] bg-bg border border-border rounded-sm px-1.25 py-px min-w-4.5 text-center",
 });
 
 const result = tv({

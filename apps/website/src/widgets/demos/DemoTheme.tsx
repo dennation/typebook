@@ -2,10 +2,10 @@ import { cx, Icon } from "@dennation/typebook/react";
 import { DEMO_FRAME, DEMO_TAG, REC_DOT } from "./demoClasses";
 
 const CARD =
-	"absolute inset-0 rounded-[12px] border p-5 flex flex-col gap-3 shadow-md";
+	"absolute inset-0 rounded-xl border p-5 flex flex-col gap-3 shadow-md";
 const BAR = "h-2.25 rounded-[99px]";
 const CHIP =
-	"mt-auto h-7.5 w-27.5 rounded-[8px] grid place-items-center text-[11.5px] font-semibold text-white animate-[thHue_8s_linear_infinite] motion-reduce:animate-none";
+	"mt-auto h-7.5 w-27.5 rounded-lg grid place-items-center text-[11.5px] font-semibold text-white animate-[thHue_8s_linear_infinite] motion-reduce:animate-none";
 
 /** DEMO 3 — Theming: dark mode + accent, crossfade loop. */
 export function DemoTheme() {
