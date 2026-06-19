@@ -294,17 +294,25 @@ button {
 		margin-top: 12px;
 	}
 
-	/* Scroll-reveal — JS toggles `.in` via IntersectionObserver. */
-	.reveal {
-		opacity: 0;
-		transform: translateY(18px);
-		transition:
-			opacity 0.6s cubic-bezier(0.2, 0.7, 0.3, 1),
-			transform 0.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+	/* Scroll-reveal — native CSS scroll-driven animation, no JS.
+	   Guarded by @supports: browsers without animation-timeline render the
+	   element in its final state (fully visible, no animation). */
+	@supports (animation-timeline: view()) {
+		.reveal {
+			animation: reveal-in linear both;
+			animation-timeline: view();
+			animation-range: entry 0% entry 40%;
+		}
 	}
-	.reveal.in {
-		opacity: 1;
-		transform: none;
+	@keyframes reveal-in {
+		from {
+			opacity: 0;
+			transform: translateY(18px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
 	}
 
 	/* Checkered preview canvas (used by the storybook <Preview>). */
@@ -490,11 +498,9 @@ button {
 	}
 }
 
-/* Reduced motion honors the scroll-reveal */
+/* Reduced motion disables the scroll-reveal animation entirely */
 @media (prefers-reduced-motion: reduce) {
 	.reveal {
-		opacity: 1 !important;
-		transform: none !important;
-		transition: none !important;
+		animation: none !important;
 	}
 }
