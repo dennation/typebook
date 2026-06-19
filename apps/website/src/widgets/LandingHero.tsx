@@ -8,7 +8,7 @@ import {
 import { CONTAINER } from "../shared/lib/landingLayout";
 
 const MINI_IT =
-	"flex items-center gap-2 text-[12.5px] text-fg-muted px-2 py-1.25 rounded-[6px]";
+	"flex items-center gap-2 text-[12.5px] text-fg-muted px-2 py-1.25 rounded-md";
 const DOT = "w-1 h-1 rounded-[99px] bg-current opacity-35";
 
 const HeroBg = () => (
@@ -52,14 +52,14 @@ export function LandingHero({
 						<Icon.chevR size={13} />
 					</span>
 				</div>
-				<h1 className="text-[clamp(40px,6.4vw,72px)] font-[680] tracking-[-0.035em] leading-[1.02] m-0 mb-5.5 max-w-[16ch] [text-wrap:balance]">
+				<h1 className="text-[clamp(40px,6.4vw,72px)] font-[680] tracking-[-0.035em] leading-[1.02] m-0 mb-5.5 max-w-[16ch] text-balance">
 					Docs your readers{" "}
 					<span className="bg-[linear-gradient(110deg,var(--accent),oklch(0.62_0.17_320))] bg-clip-text text-transparent">
 						actually finish
 					</span>
 					.
 				</h1>
-				<p className="text-[clamp(17px,2.1vw,20px)] leading-[1.6] text-fg-muted m-0 mb-9 max-w-[56ch] [text-wrap:pretty]">
+				<p className="text-[clamp(17px,2.1vw,20px)] leading-[1.6] text-fg-muted m-0 mb-9 max-w-[56ch] text-pretty">
 					Typebok is a content-first documentation framework for React. Write
 					plain
 					<strong className="text-fg font-semibold"> Markdown or MDX</strong> —
@@ -124,7 +124,7 @@ export function LandingHero({
 									<div className="text-[10px] font-semibold tracking-[0.07em] uppercase text-fg-subtle px-2 mb-0.75 flex items-center gap-1.75">
 										<Icon.box size={12} /> Components
 									</div>
-									<div className="flex items-center gap-2 text-[12.5px] px-2 py-1.25 rounded-[6px] bg-accent-soft text-accent font-medium">
+									<div className="flex items-center gap-2 text-[12.5px] px-2 py-1.25 rounded-md bg-accent-soft text-accent font-medium">
 										<span className="w-1 h-1 rounded-[99px] bg-current" />
 										Callout
 									</div>
@@ -189,7 +189,7 @@ export function LandingHero({
 							</span>
 						</div>
 						<div className="p-1.75 flex flex-col gap-0.5">
-							<div className="flex items-center gap-2.75 px-2.75 py-2.25 rounded-[8px] bg-accent-soft">
+							<div className="flex items-center gap-2.75 px-2.75 py-2.25 rounded-lg bg-accent-soft">
 								<span className="text-accent shrink-0 inline-flex">
 									<Icon.box size={15} />
 								</span>
@@ -200,7 +200,7 @@ export function LandingHero({
 									<Icon.enter size={14} />
 								</span>
 							</div>
-							<div className="flex items-center gap-2.75 px-2.75 py-2.25 rounded-[8px]">
+							<div className="flex items-center gap-2.75 px-2.75 py-2.25 rounded-lg">
 								<span className="text-fg-subtle shrink-0 inline-flex">
 									<Icon.hash size={15} />
 								</span>

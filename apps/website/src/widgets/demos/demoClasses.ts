@@ -10,7 +10,7 @@ export const REC_DOT =
 	"w-1.75 h-1.75 rounded-[99px] bg-[oklch(0.6_0.2_25)] animate-[rec_1.6s_ease-in-out_infinite] motion-reduce:animate-none";
 
 export const DS_ROW =
-	"flex items-center gap-2.75 px-2.75 py-2.25 rounded-[8px] overflow-hidden";
+	"flex items-center gap-2.75 px-2.75 py-2.25 rounded-lg overflow-hidden";
 export const DS_RI = "text-fg-subtle shrink-0 inline-flex";
 export const DS_RT = "text-[13px] font-medium text-fg";
 export const DS_RP = "text-[11px] text-fg-subtle ml-auto font-mono";

@@ -145,13 +145,13 @@ export function LandingFeatures() {
 									f.flip && "min-[861px]:order-2",
 								)}
 							>
-								<div className="w-11.5 h-11.5 rounded-[12px] grid place-items-center bg-accent-soft text-accent border border-accent-soft-border mb-5">
+								<div className="w-11.5 h-11.5 rounded-xl grid place-items-center bg-accent-soft text-accent border border-accent-soft-border mb-5">
 									{f.icon}
 								</div>
 								<h3 className="text-[26px] font-[640] tracking-[-0.025em] leading-[1.15] m-0 mb-3">
 									{f.title}
 								</h3>
-								<p className="text-[16px] leading-[1.65] text-fg-muted m-0 mb-4.5 [text-wrap:pretty]">
+								<p className="text-[16px] leading-[1.65] text-fg-muted m-0 mb-4.5 text-pretty">
 									{f.body}
 								</p>
 								<ul className="flex flex-col gap-3.5 m-0 p-0 list-none [&_b]:text-fg [&_b]:font-semibold">

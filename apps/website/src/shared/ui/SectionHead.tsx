@@ -16,10 +16,10 @@ export function SectionHead({ kicker, title, sub }: SectionHeadProps) {
 			<div className="inline-flex items-center gap-2 font-mono text-[12px] font-semibold tracking-[0.04em] text-accent uppercase mb-4">
 				{kicker}
 			</div>
-			<h2 className="text-[clamp(30px,4vw,42px)] font-[660] tracking-[-0.03em] leading-[1.08] m-0 mb-4 [text-wrap:balance]">
+			<h2 className="text-[clamp(30px,4vw,42px)] font-[660] tracking-[-0.03em] leading-[1.08] m-0 mb-4 text-balance">
 				{title}
 			</h2>
-			<p className="text-[17px] leading-[1.6] text-fg-muted m-0 [text-wrap:pretty]">
+			<p className="text-[17px] leading-[1.6] text-fg-muted m-0 text-pretty">
 				{sub}
 			</p>
 		</div>

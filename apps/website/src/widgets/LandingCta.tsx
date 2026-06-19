@@ -28,7 +28,7 @@ export function LandingCta({
 						<span className="w-12 h-12 rounded-[13px] bg-fg text-bg grid place-items-center font-mono font-semibold text-[24px] mb-6">
 							T
 						</span>
-						<h2 className="text-[clamp(30px,4.4vw,46px)] font-[670] tracking-[-0.03em] leading-[1.05] m-0 mb-4 [text-wrap:balance]">
+						<h2 className="text-[clamp(30px,4.4vw,46px)] font-[670] tracking-[-0.03em] leading-[1.05] m-0 mb-4 text-balance">
 							Ship docs you're proud of
 						</h2>
 						<p className="text-[17px] text-fg-muted m-0 mb-8 max-w-[48ch] leading-[1.6]">

@@ -99,7 +99,7 @@ export function DemoTree() {
 						) : (
 							<div
 								className={cx(
-									"flex items-center gap-2 text-[12.5px] text-fg-muted px-2 py-1.25 rounded-[6px] opacity-0",
+									"flex items-center gap-2 text-[12.5px] text-fg-muted px-2 py-1.25 rounded-md opacity-0",
 									ANIM,
 								)}
 								key={r.t}
