@@ -23,7 +23,7 @@ const badge =
 	"ml-auto text-[10px] font-mono px-1.5 py-px rounded-[99px] font-medium bg-accent-soft text-accent border border-accent-soft-border";
 
 /** A single navigation link. Active highlight comes from the router. */
-function Item({ item: entry }: MenuItemProps<DocsMeta>) {
+function Item({ item: entry }: MenuItemProps<DocsMeta | undefined>) {
 	const href = entry.href;
 	if (!href) return null;
 	return (
@@ -39,7 +39,9 @@ function Item({ item: entry }: MenuItemProps<DocsMeta>) {
 				<>
 					<span className={cx(dot, isActive ? "opacity-100" : "opacity-30")} />
 					{entry.title}
-					{entry.meta.badge && <span className={badge}>{entry.meta.badge}</span>}
+					{entry.meta?.badge && (
+						<span className={badge}>{entry.meta.badge}</span>
+					)}
 				</>
 			)}
 		</Link>
@@ -51,4 +53,7 @@ function Container({ children }: MenuContainerProps) {
 	return <div className="flex flex-col gap-px">{children}</div>;
 }
 
-export const sidebarMenu: MenuComponents<DocsMeta> = { Container, Item };
+export const sidebarMenu: MenuComponents<DocsMeta | undefined> = {
+	Container,
+	Item,
+};

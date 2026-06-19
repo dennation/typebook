@@ -11,22 +11,23 @@ import type { SearchEntry } from "@dennation/typebook/react";
  */
 
 /**
- * Per-item metadata carried on every docs menu node (see `@dennation/menu`'s
- * generic `meta`). Drives the sidebar's decorations; the renderer ignores it,
- * `sidebarMenu`'s `Item` reads it.
+ * Per-item metadata carried on docs menu nodes (see `@dennation/menu`'s generic
+ * `meta`). Drives the sidebar's decorations; the renderer ignores it,
+ * `sidebarMenu`'s `Item` reads it. Used as `DocsMeta | undefined` so `meta` is
+ * **optional per item** — most pages carry none.
  */
 export interface DocsMeta {
 	/** Sidebar badge label shown after the title, e.g. `"new"`. */
 	badge?: string;
 }
 
-export const GETTING_STARTED = defineMenu<DocsMeta>({
+export const GETTING_STARTED = defineMenu<DocsMeta | undefined>({
 	"/docs/getting-started/introduction": { title: "Introduction" },
 	"/docs/getting-started/installation": { title: "Installation" },
 	"/docs/getting-started/quick-start": { title: "Quick Start" },
 });
 
-export const GUIDES = defineMenu<DocsMeta>({
+export const GUIDES = defineMenu<DocsMeta | undefined>({
 	"/docs/guides/theming": { title: "Theming" },
 	"/docs/guides/story": { title: "Rendering stories" },
 	"/docs/guides/variants": { title: "Variant grids" },
@@ -35,7 +36,7 @@ export const GUIDES = defineMenu<DocsMeta>({
 	"/docs/guides/snippet": { title: "Live snippets" },
 });
 
-export const COMPONENTS = defineMenu<DocsMeta>({
+export const COMPONENTS = defineMenu<DocsMeta | undefined>({
 	"/docs/components/callout": { title: "Callout" },
 	"/docs/components/code-block": { title: "CodeBlock" },
 	"/docs/components/tabs": { title: "Tabs" },
@@ -55,7 +56,7 @@ export const COMPONENTS = defineMenu<DocsMeta>({
 });
 
 /** Sidebar sections, paired with their label for breadcrumb/title lookup. */
-export const SECTIONS: { label: string; menu: Menu<DocsMeta> }[] = [
+export const SECTIONS: { label: string; menu: Menu<DocsMeta | undefined> }[] = [
 	{ label: "Getting Started", menu: GETTING_STARTED },
 	{ label: "Guides", menu: GUIDES },
 	{ label: "Components", menu: COMPONENTS },
