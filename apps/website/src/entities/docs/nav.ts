@@ -10,13 +10,23 @@ import type { SearchEntry } from "@dennation/typebook/react";
  * hand-curated list.
  */
 
-export const GETTING_STARTED = defineMenu({
+/**
+ * Per-item metadata carried on every docs menu node (see `@dennation/menu`'s
+ * generic `meta`). Drives the sidebar's decorations; the renderer ignores it,
+ * `sidebarMenu`'s `Item` reads it.
+ */
+export interface DocsMeta {
+	/** Sidebar badge label shown after the title, e.g. `"new"`. */
+	badge?: string;
+}
+
+export const GETTING_STARTED = defineMenu<DocsMeta>({
 	"/docs/getting-started/introduction": { title: "Introduction" },
 	"/docs/getting-started/installation": { title: "Installation" },
 	"/docs/getting-started/quick-start": { title: "Quick Start" },
 });
 
-export const GUIDES = defineMenu({
+export const GUIDES = defineMenu<DocsMeta>({
 	"/docs/guides/theming": { title: "Theming" },
 	"/docs/guides/story": { title: "Rendering stories" },
 	"/docs/guides/variants": { title: "Variant grids" },
@@ -25,7 +35,7 @@ export const GUIDES = defineMenu({
 	"/docs/guides/snippet": { title: "Live snippets" },
 });
 
-export const COMPONENTS = defineMenu({
+export const COMPONENTS = defineMenu<DocsMeta>({
 	"/docs/components/callout": { title: "Callout" },
 	"/docs/components/code-block": { title: "CodeBlock" },
 	"/docs/components/tabs": { title: "Tabs" },
@@ -34,7 +44,7 @@ export const COMPONENTS = defineMenu({
 	"/docs/components/accordion": { title: "Accordion" },
 	"/docs/components/tables": { title: "Tables" },
 	"/docs/components/prose": { title: "Prose" },
-	"/docs/components/search": { title: "Search" },
+	"/docs/components/search": { title: "Search", meta: { badge: "new" } },
 	"/docs/components/navigation": { title: "Navigation" },
 	"/docs/components/copy-command": { title: "CopyCommand" },
 	"/docs/components/layout": { title: "Layout" },
@@ -45,14 +55,11 @@ export const COMPONENTS = defineMenu({
 });
 
 /** Sidebar sections, paired with their label for breadcrumb/title lookup. */
-export const SECTIONS: { label: string; menu: Menu }[] = [
+export const SECTIONS: { label: string; menu: Menu<DocsMeta> }[] = [
 	{ label: "Getting Started", menu: GETTING_STARTED },
 	{ label: "Guides", menu: GUIDES },
 	{ label: "Components", menu: COMPONENTS },
 ];
-
-/** Hrefs whose sidebar item shows a "new" badge. */
-export const NEW_PAGES = new Set<string>(["/docs/components/search"]);
 
 export const DEFAULT_DOCS_SLUG = "getting-started/introduction";
 
