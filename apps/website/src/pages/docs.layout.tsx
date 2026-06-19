@@ -1,5 +1,4 @@
 import {
-	A,
 	C,
 	CodeBlock,
 	H2,
@@ -8,11 +7,10 @@ import {
 	P,
 	PropsReference,
 } from "@dennation/typebook/react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useDocsGo } from "../widgets/docs/useDocsGo";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PageLayout() {
-	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
@@ -47,8 +45,8 @@ function RootComponent() {
 
 			<P>
 				<C>Layout</C> reads the current theme through the package's theme
-				entity, so a <A onClick={() => go("theme-toggle")}>ThemeToggle</A>{" "}
-				placed anywhere inside swaps the whole page through the cascade. Pass{" "}
+				entity, so a <Link to="/docs/theme-toggle">ThemeToggle</Link> placed
+				anywhere inside swaps the whole page through the cascade. Pass{" "}
 				<C>theme</C> to pin a page to a fixed theme regardless of the user's
 				choice.
 			</P>
@@ -73,6 +71,10 @@ function RootComponent() {
 						desc: "Pin the page to a fixed theme instead of following the user's preference.",
 					},
 				]}
+			/>
+			<DocsFooter
+				prev={{ to: "/docs/copy-command", title: "CopyCommand" }}
+				next={{ to: "/docs/button", title: "Button" }}
 			/>
 		</>
 	);

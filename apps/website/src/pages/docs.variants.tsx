@@ -8,6 +8,7 @@ import {
 	PropsReference,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PageVariants() {
 	return (
@@ -80,6 +81,10 @@ import { Variants } from "@dennation/typebook/react";
 						desc: "Render each variant inside an iframe.",
 					},
 				]}
+			/>
+			<DocsFooter
+				prev={{ to: "/docs/story", title: "Story" }}
+				next={{ to: "/docs/matrix", title: "Matrix" }}
 			/>
 		</>
 	);

@@ -10,6 +10,7 @@ import {
 	Tabs,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 const tabs = getComponentMeta(Tabs);
 
@@ -45,6 +46,10 @@ function PageTabs() {
 
 			<H2>Props</H2>
 			<PropsReference props={propsToRows(tabs.props)} />
+			<DocsFooter
+				prev={{ to: "/docs/code-block", title: "CodeBlock" }}
+				next={{ to: "/docs/steps", title: "Steps" }}
+			/>
 		</>
 	);
 }

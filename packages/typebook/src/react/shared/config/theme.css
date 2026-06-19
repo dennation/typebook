@@ -225,6 +225,21 @@ button {
 	.doc-prose ul li::marker {
 		content: "–  ";
 	}
+	/* Inline prose links — scoped to running text so block-level link cards
+	   (prev/next footer, doc cards) keep their own styling. */
+	.doc-prose :is(p, li, blockquote) a {
+		color: var(--accent);
+		font-weight: 500;
+		text-decoration: underline;
+		text-decoration-color: var(--accent-soft-border);
+		text-underline-offset: 3px;
+	}
+	.doc-prose :is(p, li, blockquote) a:hover {
+		text-decoration-color: var(--accent);
+	}
+	.doc-prose :is(p, li, blockquote) a .inline-code {
+		color: var(--accent);
+	}
 
 	/* Steps — numbered procedure built on CSS counters + connector line
 	   (both pseudo-element only). */

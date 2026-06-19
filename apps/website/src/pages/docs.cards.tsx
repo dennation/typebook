@@ -11,13 +11,13 @@ import {
 	propsToRows,
 	Snippet,
 } from "@dennation/typebook/react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useDocsGo } from "../widgets/docs/useDocsGo";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 const docCard = getComponentMeta(DocCard);
 
 function PageCards() {
-	const go = useDocsGo();
+	const navigate = useNavigate();
 	return (
 		<>
 			<Lead>
@@ -34,13 +34,13 @@ function PageCards() {
 							icon={<Icon.zap size={20} />}
 							title="Quick Start"
 							desc="From zero to a documented component."
-							onClick={() => go("quick-start")}
+							onClick={() => navigate({ to: "/docs/quick-start" })}
 						/>
 						<DocCard
 							icon={<Icon.search size={20} />}
 							title="Search"
 							desc="Jump to the SearchPalette docs."
-							onClick={() => go("search")}
+							onClick={() => navigate({ to: "/docs/search" })}
 						/>
 					</Cards>
 				)}
@@ -51,6 +51,10 @@ function PageCards() {
 			<P>
 				<C>Cards</C> itself takes only <C>children</C>.
 			</P>
+			<DocsFooter
+				prev={{ to: "/docs/steps", title: "Steps" }}
+				next={{ to: "/docs/accordion", title: "Accordion" }}
+			/>
 		</>
 	);
 }

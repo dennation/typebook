@@ -1,5 +1,4 @@
 import {
-	A,
 	C,
 	CodeBlock,
 	H2,
@@ -16,6 +15,7 @@ import {
 	Ul,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PageProse() {
 	return (
@@ -54,7 +54,7 @@ function PageProse() {
 			<H3>Inline</H3>
 			<P>
 				Inline code like <C>useDocHeadings()</C> uses the <C>.inline-code</C>{" "}
-				theme class; <A href="https://github.com/dennation/typebook">links</A>{" "}
+				theme class; <a href="https://github.com/dennation/typebook">links</a>{" "}
 				carry the accent color and an offset underline. <C>A</C> takes an{" "}
 				<C>onClick</C> for in-app navigation instead of a hard <C>href</C>.
 			</P>
@@ -94,6 +94,10 @@ function PageProse() {
 						"Hatched stand-in with a label and optional height",
 					],
 				]}
+			/>
+			<DocsFooter
+				prev={{ to: "/docs/tables", title: "Tables" }}
+				next={{ to: "/docs/search", title: "Search" }}
 			/>
 		</>
 	);

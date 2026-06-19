@@ -1,5 +1,4 @@
 import {
-	A,
 	C,
 	Callout,
 	CodeBlock,
@@ -9,17 +8,16 @@ import {
 	MDTable,
 	P,
 } from "@dennation/typebook/react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useDocsGo } from "../widgets/docs/useDocsGo";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PageQuickStart() {
-	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
 				From a component to a documented page in three moves: register it, let
 				the plugin extract its props, render its stories. This assumes the{" "}
-				<A onClick={() => go("installation")}>installation</A> is done.
+				<Link to="/docs/installation">installation</Link> is done.
 			</Lead>
 
 			<H2>Register a component</H2>
@@ -94,9 +92,13 @@ import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 				]}
 			/>
 			<P>
-				Continue with <A onClick={() => go("story")}>Story</A> for the full prop
+				Continue with <Link to="/docs/story">Story</Link> for the full prop
 				reference of each story component.
 			</P>
+			<DocsFooter
+				prev={{ to: "/docs/installation", title: "Installation" }}
+				next={{ to: "/docs/theming", title: "Theming" }}
+			/>
 		</>
 	);
 }

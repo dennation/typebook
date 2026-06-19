@@ -12,13 +12,13 @@ import {
 	propsToRows,
 	Snippet,
 } from "@dennation/typebook/react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useDocsGo } from "../widgets/docs/useDocsGo";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 const callout = getComponentMeta(Callout);
 
 function PageCallout() {
-	const go = useDocsGo();
+	const navigate = useNavigate();
 	return (
 		<>
 			<Lead>
@@ -73,15 +73,19 @@ function PageCallout() {
 					icon={<Icon.box size={20} />}
 					title="CodeBlock"
 					desc="Tabs, line highlights and copy."
-					onClick={() => go("code-block")}
+					onClick={() => navigate({ to: "/docs/code-block" })}
 				/>
 				<DocCard
 					icon={<Icon.layers size={20} />}
 					title="Tabs"
 					desc="Switch between content panels."
-					onClick={() => go("tabs")}
+					onClick={() => navigate({ to: "/docs/tabs" })}
 				/>
 			</Cards>
+			<DocsFooter
+				prev={{ to: "/docs/snippet", title: "Snippet" }}
+				next={{ to: "/docs/code-block", title: "CodeBlock" }}
+			/>
 		</>
 	);
 }

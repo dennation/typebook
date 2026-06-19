@@ -9,6 +9,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 const NAMES = [
 	"search",
@@ -121,6 +122,10 @@ function PageIcon() {
 						desc: "Any SVG attribute (className, style, onClick, …).",
 					},
 				]}
+			/>
+			<DocsFooter
+				prev={{ to: "/docs/button", title: "Button" }}
+				next={{ to: "/docs/theme-toggle", title: "ThemeToggle" }}
 			/>
 		</>
 	);

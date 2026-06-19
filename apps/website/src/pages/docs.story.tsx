@@ -1,5 +1,4 @@
 import {
-	A,
 	C,
 	Callout,
 	CodeBlock,
@@ -9,11 +8,10 @@ import {
 	P,
 	PropsReference,
 } from "@dennation/typebook/react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useDocsGo } from "../widgets/docs/useDocsGo";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PageStory() {
-	const go = useDocsGo();
 	return (
 		<>
 			<Lead>
@@ -73,9 +71,13 @@ function PageStory() {
 			<H2>Related</H2>
 			<P>
 				Need several values of one prop at once? Use{" "}
-				<A onClick={() => go("variants")}>Variants</A>. Two axes? Use{" "}
-				<A onClick={() => go("matrix")}>Matrix</A>.
+				<Link to="/docs/variants">Variants</Link>. Two axes? Use{" "}
+				<Link to="/docs/matrix">Matrix</Link>.
 			</P>
+			<DocsFooter
+				prev={{ to: "/docs/theming", title: "Theming" }}
+				next={{ to: "/docs/variants", title: "Variants" }}
+			/>
 		</>
 	);
 }

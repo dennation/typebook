@@ -9,6 +9,7 @@ import {
 	P,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PageTheming() {
 	return (
@@ -99,6 +100,10 @@ function PageTheming() {
 				accent-colored surface — buttons, links, the active sidebar item, search
 				highlights — follows.
 			</Callout>
+			<DocsFooter
+				prev={{ to: "/docs/quick-start", title: "Quick Start" }}
+				next={{ to: "/docs/story", title: "Story" }}
+			/>
 		</>
 	);
 }

@@ -13,6 +13,7 @@ import {
 	propsToRows,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 const breadcrumbs = getComponentMeta(Breadcrumbs);
 const prevNextNav = getComponentMeta(PrevNextNav);
@@ -86,9 +87,14 @@ function PageNavigation() {
 			<PropsReference props={propsToRows(prevNextNav.props)} />
 
 			<Callout type="info" title="Bring your own router">
-				None of these components import a router. The sidebar on this site calls
-				TanStack Router's <C>navigate()</C>; yours can call anything.
+				None of these components import a router. The sidebar on this site
+				renders its items through <C>@dennation/menu</C>, whose <C>Item</C> is a
+				TanStack Router <C>&lt;Link&gt;</C>; yours can render anything.
 			</Callout>
+			<DocsFooter
+				prev={{ to: "/docs/search", title: "Search" }}
+				next={{ to: "/docs/copy-command", title: "CopyCommand" }}
+			/>
 		</>
 	);
 }

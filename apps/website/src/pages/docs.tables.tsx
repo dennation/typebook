@@ -8,6 +8,7 @@ import {
 	Snippet,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
+import { DocsFooter } from "../widgets/docs/DocsFooter";
 
 function PageTables() {
 	return (
@@ -89,6 +90,10 @@ function PageTables() {
 						),
 					},
 				]}
+			/>
+			<DocsFooter
+				prev={{ to: "/docs/accordion", title: "Accordion" }}
+				next={{ to: "/docs/prose", title: "Prose" }}
 			/>
 		</>
 	);

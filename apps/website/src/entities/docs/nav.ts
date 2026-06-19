@@ -1,84 +1,75 @@
-import type {
-	DocsNavItem,
-	DocsNavSection,
-	SearchEntry,
-} from "@dennation/typebook/react";
+import { defineMenu, type Menu } from "@dennation/menu";
+import type { SearchEntry } from "@dennation/typebook/react";
 
-/* Navigation structure + flat page order + search index for the docs. */
+/*
+ * Docs navigation data. The sidebar lays its sections out explicitly in JSX and
+ * renders each section's items through these three `@dennation/menu` menus —
+ * the single source of the page list. Breadcrumbs and the page title derive
+ * from the same menus via `pageMeta`. Prev/next links are authored explicitly
+ * on each page (see DocsFooter), not derived here. The search index is its own
+ * hand-curated list.
+ */
 
-export interface DocsFlatPage extends DocsNavItem {
-	section: string;
-}
+export const GETTING_STARTED = defineMenu({
+	"/docs/introduction": { title: "Introduction" },
+	"/docs/installation": { title: "Installation" },
+	"/docs/quick-start": { title: "Quick Start" },
+	"/docs/theming": { title: "Theming" },
+});
 
-export interface DocsPageMeta {
-	page: DocsFlatPage;
-	prev: DocsFlatPage | null;
-	next: DocsFlatPage | null;
-}
+export const STORYBOOK = defineMenu({
+	"/docs/story": { title: "Story" },
+	"/docs/variants": { title: "Variants" },
+	"/docs/matrix": { title: "Matrix" },
+	"/docs/playground": { title: "Playground" },
+	"/docs/snippet": { title: "Snippet" },
+});
 
-export const NAV: DocsNavSection[] = [
-	{
-		label: "Getting Started",
-		icon: "rocket",
-		items: [
-			{ slug: "introduction", title: "Introduction" },
-			{ slug: "installation", title: "Installation" },
-			{ slug: "quick-start", title: "Quick Start" },
-			{ slug: "theming", title: "Theming" },
-		],
-	},
-	{
-		label: "Storybook",
-		icon: "box",
-		items: [
-			{ slug: "story", title: "Story" },
-			{ slug: "variants", title: "Variants" },
-			{ slug: "matrix", title: "Matrix" },
-			{ slug: "playground", title: "Playground" },
-			{ slug: "snippet", title: "Snippet" },
-		],
-	},
-	{
-		label: "Components",
-		icon: "layers",
-		items: [
-			{ slug: "callout", title: "Callout" },
-			{ slug: "code-block", title: "CodeBlock" },
-			{ slug: "tabs", title: "Tabs" },
-			{ slug: "steps", title: "Steps" },
-			{ slug: "cards", title: "Cards" },
-			{ slug: "accordion", title: "Accordion" },
-			{ slug: "tables", title: "Tables" },
-			{ slug: "prose", title: "Prose" },
-			{ slug: "search", title: "Search", badge: "new" },
-			{ slug: "navigation", title: "Navigation" },
-			{ slug: "copy-command", title: "CopyCommand" },
-			{ slug: "layout", title: "Layout" },
-			{ slug: "button", title: "Button" },
-			{ slug: "icon", title: "Icon" },
-			{ slug: "theme-toggle", title: "ThemeToggle" },
-			{ slug: "error-boundary", title: "ErrorBoundary" },
-		],
-	},
+export const COMPONENTS = defineMenu({
+	"/docs/callout": { title: "Callout" },
+	"/docs/code-block": { title: "CodeBlock" },
+	"/docs/tabs": { title: "Tabs" },
+	"/docs/steps": { title: "Steps" },
+	"/docs/cards": { title: "Cards" },
+	"/docs/accordion": { title: "Accordion" },
+	"/docs/tables": { title: "Tables" },
+	"/docs/prose": { title: "Prose" },
+	"/docs/search": { title: "Search" },
+	"/docs/navigation": { title: "Navigation" },
+	"/docs/copy-command": { title: "CopyCommand" },
+	"/docs/layout": { title: "Layout" },
+	"/docs/button": { title: "Button" },
+	"/docs/icon": { title: "Icon" },
+	"/docs/theme-toggle": { title: "ThemeToggle" },
+	"/docs/error-boundary": { title: "ErrorBoundary" },
+});
+
+/** Sidebar sections, paired with their label for breadcrumb/title lookup. */
+export const SECTIONS: { label: string; menu: Menu }[] = [
+	{ label: "Getting Started", menu: GETTING_STARTED },
+	{ label: "Storybook", menu: STORYBOOK },
+	{ label: "Components", menu: COMPONENTS },
 ];
 
-/** Flat page order for prev/next navigation and search. */
-export const FLAT: DocsFlatPage[] = NAV.flatMap((sec) =>
-	sec.items.map((it) => ({ ...it, section: sec.label })),
-);
+/** Hrefs whose sidebar item shows a "new" badge. */
+export const NEW_PAGES = new Set<string>(["/docs/search"]);
 
 export const DEFAULT_DOCS_SLUG = "introduction";
 
+/** A page's section + title, derived from the section menus (single source). */
+export interface DocsPageMeta {
+	title: string;
+	section: string;
+}
+
+/** Resolve a slug's title and section from the section menus. */
 export function pageMeta(slug: string): DocsPageMeta {
-	const idx = Math.max(
-		0,
-		FLAT.findIndex((p) => p.slug === slug),
-	);
-	return {
-		page: FLAT[idx] as DocsFlatPage,
-		prev: idx > 0 ? (FLAT[idx - 1] as DocsFlatPage) : null,
-		next: idx < FLAT.length - 1 ? (FLAT[idx + 1] as DocsFlatPage) : null,
-	};
+	const href = `/docs/${slug}`;
+	for (const { label, menu } of SECTIONS) {
+		const item = menu.find((entry) => entry.href === href);
+		if (item) return { title: item.title, section: label };
+	}
+	return { title: slug, section: "Docs" };
 }
 
 /** Search index — pages plus representative section headings. */
