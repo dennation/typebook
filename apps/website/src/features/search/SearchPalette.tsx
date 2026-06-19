@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { tv } from "tailwind-variants";
-import type { SearchEntry } from "../model/types";
+import type { SearchEntry } from "./types";
 
 export interface SearchPaletteProps {
 	/** The search index to query. */

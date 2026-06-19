@@ -97,7 +97,7 @@ function PageProse() {
 			/>
 			<DocsFooter
 				prev={{ to: "/docs/components/tables", title: "Tables" }}
-				next={{ to: "/docs/components/search", title: "Search" }}
+				next={{ to: "/docs/components/navigation", title: "Navigation" }}
 			/>
 		</>
 	);

@@ -25,7 +25,6 @@ import { Route as DocsComponentsThemeToggleRouteImport } from './pages/docs/comp
 import { Route as DocsComponentsTabsRouteImport } from './pages/docs/components/tabs'
 import { Route as DocsComponentsTablesRouteImport } from './pages/docs/components/tables'
 import { Route as DocsComponentsStepsRouteImport } from './pages/docs/components/steps'
-import { Route as DocsComponentsSearchRouteImport } from './pages/docs/components/search'
 import { Route as DocsComponentsProseRouteImport } from './pages/docs/components/prose'
 import { Route as DocsComponentsNavigationRouteImport } from './pages/docs/components/navigation'
 import { Route as DocsComponentsLayoutRouteImport } from './pages/docs/components/layout'
@@ -122,11 +121,6 @@ const DocsComponentsStepsRoute = DocsComponentsStepsRouteImport.update({
   path: '/components/steps',
   getParentRoute: () => DocsRouteRoute,
 } as any)
-const DocsComponentsSearchRoute = DocsComponentsSearchRouteImport.update({
-  id: '/components/search',
-  path: '/components/search',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
 const DocsComponentsProseRoute = DocsComponentsProseRouteImport.update({
   id: '/components/prose',
   path: '/components/prose',
@@ -201,7 +195,6 @@ export interface FileRoutesByFullPath {
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
-  '/docs/components/search': typeof DocsComponentsSearchRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
@@ -230,7 +223,6 @@ export interface FileRoutesByTo {
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
-  '/docs/components/search': typeof DocsComponentsSearchRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
@@ -261,7 +253,6 @@ export interface FileRoutesById {
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
-  '/docs/components/search': typeof DocsComponentsSearchRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
@@ -293,7 +284,6 @@ export interface FileRouteTypes {
     | '/docs/components/layout'
     | '/docs/components/navigation'
     | '/docs/components/prose'
-    | '/docs/components/search'
     | '/docs/components/steps'
     | '/docs/components/tables'
     | '/docs/components/tabs'
@@ -322,7 +312,6 @@ export interface FileRouteTypes {
     | '/docs/components/layout'
     | '/docs/components/navigation'
     | '/docs/components/prose'
-    | '/docs/components/search'
     | '/docs/components/steps'
     | '/docs/components/tables'
     | '/docs/components/tabs'
@@ -352,7 +341,6 @@ export interface FileRouteTypes {
     | '/docs/components/layout'
     | '/docs/components/navigation'
     | '/docs/components/prose'
-    | '/docs/components/search'
     | '/docs/components/steps'
     | '/docs/components/tables'
     | '/docs/components/tabs'
@@ -487,13 +475,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsComponentsStepsRouteImport
       parentRoute: typeof DocsRouteRoute
     }
-    '/docs/components/search': {
-      id: '/docs/components/search'
-      path: '/components/search'
-      fullPath: '/docs/components/search'
-      preLoaderRoute: typeof DocsComponentsSearchRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
     '/docs/components/prose': {
       id: '/docs/components/prose'
       path: '/components/prose'
@@ -587,7 +568,6 @@ interface DocsRouteRouteChildren {
   DocsComponentsLayoutRoute: typeof DocsComponentsLayoutRoute
   DocsComponentsNavigationRoute: typeof DocsComponentsNavigationRoute
   DocsComponentsProseRoute: typeof DocsComponentsProseRoute
-  DocsComponentsSearchRoute: typeof DocsComponentsSearchRoute
   DocsComponentsStepsRoute: typeof DocsComponentsStepsRoute
   DocsComponentsTablesRoute: typeof DocsComponentsTablesRoute
   DocsComponentsTabsRoute: typeof DocsComponentsTabsRoute
@@ -616,7 +596,6 @@ const DocsRouteRouteChildren: DocsRouteRouteChildren = {
   DocsComponentsLayoutRoute: DocsComponentsLayoutRoute,
   DocsComponentsNavigationRoute: DocsComponentsNavigationRoute,
   DocsComponentsProseRoute: DocsComponentsProseRoute,
-  DocsComponentsSearchRoute: DocsComponentsSearchRoute,
   DocsComponentsStepsRoute: DocsComponentsStepsRoute,
   DocsComponentsTablesRoute: DocsComponentsTablesRoute,
   DocsComponentsTabsRoute: DocsComponentsTabsRoute,

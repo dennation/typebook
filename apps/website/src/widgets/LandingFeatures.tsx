@@ -1,12 +1,12 @@
 import { cx } from "@dennation/typebook/react";
-import { Box, Check, Layers, Palette, Search } from "lucide-react";
+import { Box, Check, Layers, LayoutGrid, Palette } from "lucide-react";
 import type { ReactNode } from "react";
 import { CONTAINER, SECTION_PAD } from "../shared/lib/landingLayout";
 import { SectionHead } from "../shared/ui/SectionHead";
 import { DemoMdx } from "./demos/DemoMdx";
-import { DemoSearch } from "./demos/DemoSearch";
 import { DemoTheme } from "./demos/DemoTheme";
 import { DemoTree } from "./demos/DemoTree";
+import { DemoVariants } from "./demos/DemoVariants";
 
 interface Feature {
 	icon: ReactNode;
@@ -19,29 +19,29 @@ interface Feature {
 
 const FEATURES: Feature[] = [
 	{
-		icon: <Search size={22} />,
-		demo: <DemoSearch />,
+		icon: <LayoutGrid size={22} />,
+		demo: <DemoVariants />,
 		flip: false,
-		title: "Search that ships on day one",
-		body: "A command palette indexes every heading and paragraph at build time. No Algolia account, no runtime service, no monthly bill — just ⌘K.",
+		title: "Variant grids from your types",
+		body: "Register a component once — the bundler plugin reads its prop types through the TypeScript compiler and renders every size, state and combination. No stories to hand-write, no fixtures to keep in sync.",
 		list: [
 			{
-				id: "fuzzy",
+				id: "types",
 				text: (
 					<>
-						Fuzzy matches <b>titles, sections and prose</b>
+						Props extracted from <b>TypeScript types</b>
 					</>
 				),
 			},
 			{
-				id: "keyboard",
+				id: "axes",
 				text: (
 					<>
-						Keyboard-driven, <b>zero</b> third-party JS
+						Stories, <b>variant grids</b> and matrices
 					</>
 				),
 			},
-			{ id: "offline", text: <>Works offline and in static exports</> },
+			{ id: "playground", text: <>Live playground from the same handle</> },
 		],
 	},
 	{
@@ -132,7 +132,7 @@ export function LandingFeatures() {
 				<SectionHead
 					kicker="Why Typebok"
 					title="Everything a docs site needs, nothing it doesn't"
-					sub="The polish you'd build by hand — search, navigation, theming and components — working out of the box, on top of files you already understand."
+					sub="The polish you'd build by hand — stories, navigation, theming and components — working out of the box, on top of the types you already write."
 				/>
 				<div className="flex flex-col gap-24">
 					{FEATURES.map((f) => (

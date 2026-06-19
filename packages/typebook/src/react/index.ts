@@ -10,13 +10,6 @@ export {
 	type CopyCommandProps,
 } from "./features/copy-command/index";
 export {
-	type SearchEntry,
-	type SearchHotkeyActions,
-	SearchPalette,
-	type SearchPaletteProps,
-	useSearchHotkeys,
-} from "./features/search-palette/index";
-export {
 	ThemeToggle,
 	type ThemeToggleProps,
 } from "./features/theme-toggle/index";
