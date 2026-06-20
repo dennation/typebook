@@ -91,6 +91,10 @@ export {
 	PrevNextNav,
 	type PrevNextNavProps,
 } from "./widgets/prev-next-nav/index";
-export { Snippet, type SnippetProps } from "./widgets/snippet/index";
+export {
+	Snippet,
+	type SnippetProps,
+	type SnippetRenderProps,
+} from "./widgets/snippet/index";
 export { Story, type StoryProps } from "./widgets/story/index";
 export { Variants, type VariantsProps } from "./widgets/variants/index";

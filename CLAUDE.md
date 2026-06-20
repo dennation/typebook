@@ -184,10 +184,18 @@ import { Snippet } from '@dennation/typebook/react'
     return <Button onClick={() => setN(n + 1)}>Count: {n}</Button>
   }}
 </Snippet>
+
+// reference an example declared elsewhere (this file or an import) via `source={ref}` —
+// `children` becomes a layout render-prop deciding WHERE/HOW preview + source appear
+<Snippet source={ButtonDemo}>
+  {({ preview, source }) => (
+    <div className="grid grid-cols-2 gap-4">{preview}{source}</div>
+  )}
+</Snippet>
 ```
 
-- **The child is an inline function component, not raw JSX** — `children: () => ReactNode`. At runtime `<Snippet>` renders it as `<Demo/>` (so hooks work); the shown source is the **function body**.
-- At build time the plugin's `transform` hook parses each module with **oxc-parser** and finds every `<Snippet>` element (imported from `@dennation/typebook/react`), slices the inline function's body 1:1 from the source (block body → between the braces; expression body → the expression, parens unwrapped), dedents it, and **injects it as a `__snippetSource` prop** on that same element. The child must be an **inline** function literal — a bare reference (`{Component}`) or raw JSX can't be sliced and raises a build error (`SnippetNotInlineError`, thrown from `core/transform.ts`).
+- **Two ways to give the example.** Either an **inline** function child (`children: () => ReactNode`; rendered as `<Demo/>` so hooks work, shown source = the function body), or a **`source={ref}` reference** to a function component declared elsewhere (same file or imported). With `source`, `children` is an optional **layout render-prop** `({ preview, source, code, name }) => ReactNode` (`source` is the ready `<CodeBlock>`, `code` the raw text) — omit it for the default card. The default card's "show source" toggle is purely presentational and lives in the card, not in any core.
+- At build time the plugin's `transform` hook parses each module with **oxc-parser** and finds every `<Snippet>` element (imported from `@dennation/typebook/react`). For an **inline** child it slices the function's body 1:1 from the source (block body → between the braces; expression body → the expression, parens unwrapped), dedents it, and **injects it as a `__snippetSource` prop**. For a **`source={ref}`** it records the identifier and hands it to the **TypeScript client** (`ts-client.getSnippetSource`), which resolves the binding through the warm program — following an import alias into **another module** — to its declaration and slices that function's body the same way; the resolved file is returned so the plugin registers it via `addWatchFile` (editing the referenced module re-injects here). An inline child that is **not** a function literal (a bare reference `{Component}` or raw JSX) and has **no** `source` raises a build error (`SnippetNotInlineError`, thrown from `core/transform.ts`). The shared slicing helpers live in `core/source-slice.ts` (used by both the oxc scanner and the TS client).
 - `name` is **optional** — a display label shown as the filename above the revealed source. It is no longer an identity key (there's no map), so it needn't be unique and there's no `DuplicateSnippetError`.
 - At runtime the "show source" toggle reads the **injected `__snippetSource` prop** (no context, no `snippets.gen.ts`, no runtime fetch, no base-path concerns) and renders it through `<CodeBlock>`.
 - Injection runs in the universal unplugin `transform` hook, so it works in every bundler. A snippet re-injects whenever its own module is re-transformed.

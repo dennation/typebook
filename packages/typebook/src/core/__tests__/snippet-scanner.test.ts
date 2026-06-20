@@ -107,6 +107,54 @@ describe("scanSnippets — inline function child", () => {
 	});
 });
 
+describe("scanSnippets — source={ref} form", () => {
+	test("captures a source identifier (name + offset) and skips inline slicing", async () => {
+		const content = `
+				import { Snippet } from '@dennation/typebook/react'
+				import { ButtonDemo } from './demos'
+				const x = (
+					<Snippet source={ButtonDemo}>
+						{({ preview, source }) => <div>{preview}{source}</div>}
+					</Snippet>
+				)
+			`;
+		const [block] = await scan("file.tsx", content);
+
+		expect(block.sourceRef).not.toBeNull();
+		expect(block.sourceRef?.name).toBe("ButtonDemo");
+		// The offset points at the identifier inside `source={…}`.
+		expect(
+			content.slice(block.sourceRef!.offset, block.sourceRef!.offset + 10),
+		).toBe("ButtonDemo");
+		// With a source ref, the render-prop child is NOT sliced as the demo body.
+		expect(block.code).toBeNull();
+	});
+
+	test("source ref still records injectAt after the tag name", async () => {
+		const content = `
+				import { Snippet } from '@dennation/typebook/react'
+				const x = <Snippet source={Demo}>{(s) => s.preview}</Snippet>
+			`;
+		const [block] = await scan("file.tsx", content);
+
+		expect(block.sourceRef?.name).toBe("Demo");
+		expect(content.slice(block.injectAt - 7, block.injectAt)).toBe("Snippet");
+	});
+
+	test("non-identifier source (member expression) → no ref, falls back to inline child", async () => {
+		const [block] = await scan(
+			"file.tsx",
+			`
+				import { Snippet } from '@dennation/typebook/react'
+				const x = <Snippet source={demos.button}>{() => <i/>}</Snippet>
+			`,
+		);
+
+		expect(block.sourceRef).toBeNull();
+		expect(block.code).toBe("<i/>");
+	});
+});
+
 describe("scanSnippets — non-inline child → code null (a build error)", () => {
 	test("bare component reference is rejected", async () => {
 		const result = await scan(
