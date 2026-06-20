@@ -5,6 +5,11 @@ export interface PropRowData {
 	type: string;
 	required?: boolean;
 	default?: string;
+	/**
+	 * Deprecation note: `true` for a bare deprecation, or the replacement /
+	 * migration text. Renders a "Deprecated" badge and strikes through the name.
+	 */
+	deprecated?: boolean | string;
 	desc: ReactNode;
 }
 
@@ -22,12 +27,21 @@ export function PropsReference({ props }: PropsReferenceProps) {
 					key={p.name}
 				>
 					<div className="flex items-center gap-2.5 flex-wrap mb-1.5">
-						<span className="font-mono text-[13.5px] font-semibold text-fg">
+						<span
+							className={`font-mono text-[13.5px] font-semibold text-fg${
+								p.deprecated ? " line-through decoration-from-font" : ""
+							}`}
+						>
 							{p.name}
 						</span>
 						{p.required && (
 							<span className="text-[10px] font-semibold tracking-[0.04em] uppercase text-[oklch(0.6_0.19_25)] bg-[color-mix(in_oklch,oklch(0.6_0.19_25)_12%,var(--bg))] px-1.5 py-0.5 rounded-[99px]">
 								Required
+							</span>
+						)}
+						{p.deprecated && (
+							<span className="text-[10px] font-semibold tracking-[0.04em] uppercase text-fg-subtle bg-bg-tertiary px-1.5 py-0.5 rounded-[99px]">
+								Deprecated
 							</span>
 						)}
 						<span className="font-mono text-[12.5px] text-accent bg-accent-soft px-1.75 py-0.5 rounded-[5px] border border-accent-soft-border">
@@ -39,6 +53,11 @@ export function PropsReference({ props }: PropsReferenceProps) {
 							</span>
 						)}
 					</div>
+					{typeof p.deprecated === "string" && (
+						<div className="text-[13px] text-fg-subtle leading-[1.5] mb-1">
+							Deprecated: {p.deprecated}
+						</div>
+					)}
 					<div className="text-[14px] text-fg-muted leading-[1.55] [&_.inline-code]:text-[12px]">
 						{p.desc}
 					</div>

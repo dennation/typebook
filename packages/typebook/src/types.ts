@@ -31,6 +31,12 @@ export interface PropInfo {
 	 * type alias (the prose written above the field, before any `@tag` lines).
 	 */
 	description?: string;
+	/**
+	 * Set from a `@deprecated` JSDoc tag on the prop. `true` when the tag carries no
+	 * text, or the tag's text (the migration note / replacement) when it does. Absent
+	 * when the prop is not deprecated.
+	 */
+	deprecated?: boolean | string;
 }
 
 /** Props the caller must provide (required keys not covered by defaultProps) */
