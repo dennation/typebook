@@ -72,6 +72,27 @@ describe("scanSnippets — inline function child", () => {
 		expect(result[0].code).toBe("<div>\n  <span>nested</span>\n</div>");
 	});
 
+	test("expression body whose opening element starts mid-line is still dedented", async () => {
+		// Mirrors an upstream transform (e.g. TanStack Router's code-splitter) that collapses
+		// `() => (\n  <div…` into `() => <div…`, pulling the opening element onto the arrow line so
+		// the slice begins at column zero. The common indent must come from the remaining lines.
+		const result = await scan(
+			"file.tsx",
+			`
+				import { Snippet } from '@dennation/typebook/react'
+				const x = (
+					<Snippet name="midline">
+						{() => <div>
+								<span>nested</span>
+							</div>}
+					</Snippet>
+				)
+			`,
+		);
+
+		expect(result[0].code).toBe("<div>\n  <span>nested</span>\n</div>");
+	});
+
 	test("block body → statements with braces stripped (hooks example)", async () => {
 		const result = await scan(
 			"file.tsx",

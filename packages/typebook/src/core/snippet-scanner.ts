@@ -8,7 +8,7 @@ import type {
 } from "oxc-parser";
 import { NPM_REACT_PACKAGE_NAME } from "../constants";
 import { moduleExportName, type Program, walk } from "./ast";
-import { dedent, sliceWithLeadingIndent } from "./source-slice";
+import { dedent } from "./source-slice";
 
 /**
  * A single `<Snippet>…</Snippet>` element found in a file. Its source comes from one of two places:
@@ -196,5 +196,5 @@ function functionBodySource(
 	while (expr.type === "ParenthesizedExpression") {
 		expr = expr.expression;
 	}
-	return dedent(sliceWithLeadingIndent(content, expr.start, expr.end));
+	return dedent(content.slice(expr.start, expr.end));
 }
