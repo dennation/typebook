@@ -8,8 +8,8 @@ import type { MissingProps } from "@/types";
 export type StoryProps<Props extends object, Defaulted extends keyof Props> = {
 	of: ComponentMeta<Props, Defaulted>;
 	isolate?: boolean;
-	/** Optional caption shown as a header above the preview. */
-	label?: string;
+	/** Optional title shown as a header above the preview. */
+	title?: string;
 	/** Show a "show source" toggle revealing the serialized component usage (on by default). */
 	showSource?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
@@ -23,7 +23,7 @@ export function Story<
 	of,
 	props,
 	isolate,
-	label,
+	title,
 	showSource = true,
 }: StoryProps<Props, Defaulted>) {
 	const Component = of.component;
@@ -40,12 +40,12 @@ export function Story<
 
 	const preview = <Preview props={merged} render={render} isolate={isolate} />;
 
-	// No header and no source → the bare centered preview (unchanged behavior).
-	if (!label && !showSource) return preview;
+	// No header and no source → the bare centered preview.
+	if (!title && !showSource) return preview;
 
 	const source = showSource ? (
-		<SourceBlock code={componentSource(Component, merged)} name={label} />
+		<SourceBlock code={componentSource(Component, merged)} name={title} />
 	) : undefined;
 
-	return <PreviewCard preview={preview} source={source} label={label} />;
+	return <PreviewCard preview={preview} source={source} label={title} />;
 }

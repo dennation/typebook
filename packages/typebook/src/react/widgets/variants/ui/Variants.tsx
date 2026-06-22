@@ -15,8 +15,8 @@ export type VariantsProps<
 	items: VariantConfig;
 	columns?: number;
 	isolate?: boolean;
-	/** Optional caption shown above the grid. */
-	label?: string;
+	/** Optional title shown above the grid. */
+	title?: string;
 	/** Show a "show source" toggle on each cell, revealing that variant's serialized usage (on by default). */
 	showSource?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
@@ -33,7 +33,7 @@ export function Variants<
 	columns,
 	isolate,
 	showSource = true,
-	label,
+	title,
 }: VariantsProps<Props, Defaulted>) {
 	const Component = of.component;
 
@@ -67,11 +67,11 @@ export function Variants<
 		</div>
 	);
 
-	if (!label) return grid;
+	if (!title) return grid;
 
 	return (
 		<div>
-			<p className="text-sm font-medium text-fg mb-3">{label}</p>
+			<p className="text-sm font-medium text-fg mb-3">{title}</p>
 			{grid}
 		</div>
 	);

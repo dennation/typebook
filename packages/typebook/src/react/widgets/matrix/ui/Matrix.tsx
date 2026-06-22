@@ -11,8 +11,8 @@ export type MatrixProps<Props extends object, Defaulted extends keyof Props> = {
 	x: VariantConfig;
 	y: VariantConfig[];
 	isolate?: boolean;
-	/** Optional caption shown above the table. */
-	label?: string;
+	/** Optional title shown above the table. */
+	title?: string;
 	/** Show a "show source" toggle on each cell (on by default). */
 	showSource?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
@@ -28,7 +28,7 @@ export function Matrix<
 	y,
 	props,
 	isolate,
-	label,
+	title,
 	showSource = true,
 }: MatrixProps<Props, Defaulted>) {
 	const Component = of.component;
@@ -61,11 +61,11 @@ export function Matrix<
 		/>
 	);
 
-	if (!label) return table;
+	if (!title) return table;
 
 	return (
 		<div>
-			<p className="text-sm font-medium text-fg mb-3">{label}</p>
+			<p className="text-sm font-medium text-fg mb-3">{title}</p>
 			{table}
 		</div>
 	);
