@@ -2,7 +2,7 @@ import {
 	C,
 	CodeBlock,
 	getComponentMeta,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 	propsToRows,
@@ -24,7 +24,7 @@ function PageSteps() {
 				theme layer), so the markup stays minimal.
 			</Lead>
 
-			<H2>Example</H2>
+			<Heading level={2}>Example</Heading>
 			<Snippet name="steps-example">
 				{() => (
 					<Steps.Root>
@@ -48,7 +48,7 @@ function PageSteps() {
 				)}
 			</Snippet>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<p>
 				<C>Steps</C> takes only <C>children</C>. Each <C>Step</C> accepts:
 			</p>

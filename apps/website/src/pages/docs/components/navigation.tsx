@@ -4,7 +4,7 @@ import {
 	Callout,
 	CodeBlock,
 	getComponentMeta,
-	H2,
+	Heading,
 	Lead,
 	PrevNextNav,
 	PropsReference,
@@ -28,7 +28,7 @@ function PageNavigation() {
 				now.
 			</Lead>
 
-			<H2>DocsSidebar</H2>
+			<Heading level={2}>DocsSidebar</Heading>
 			<p>
 				Collapsible sections with an active-item highlight and a mobile drawer
 				(≤820px). Data comes in as <C>DocsNavSection[]</C>.
@@ -49,7 +49,7 @@ function PageNavigation() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>DocsToc</H2>
+			<Heading level={2}>DocsToc</Heading>
 			<p>
 				The "On this page" outline. Feed it headings from <C>useDocHeadings</C>{" "}
 				— the active item follows the scroll (scrollspy).
@@ -72,7 +72,7 @@ function PageNavigation() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Breadcrumbs</H2>
+			<Heading level={2}>Breadcrumbs</Heading>
 			<CodeBlock.Root>
 				<CodeBlock.Tab lang="tsx">
 					{`<Breadcrumbs items={["Docs", section, title]} />`}
@@ -80,7 +80,7 @@ function PageNavigation() {
 			</CodeBlock.Root>
 			<PropsReference props={propsToRows(breadcrumbsMeta.props)} />
 
-			<H2>PrevNextNav</H2>
+			<Heading level={2}>PrevNextNav</Heading>
 			<CodeBlock.Root>
 				<CodeBlock.Tab lang="tsx">
 					{`<PrevNextNav
@@ -99,7 +99,10 @@ function PageNavigation() {
 				TanStack Router <C>&lt;Link&gt;</C>; yours can render anything.
 			</Callout>
 			<DocsFooter
-				prev={{ to: "/docs/components/prose", title: "Prose" }}
+				prev={{
+					to: "/docs/components/image-placeholder",
+					title: "Image placeholder",
+				}}
 				next={{ to: "/docs/components/copy-command", title: "CopyCommand" }}
 			/>
 		</>

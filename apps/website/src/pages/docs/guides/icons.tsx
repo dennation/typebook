@@ -1,4 +1,11 @@
-import { A, C, CodeBlock, H2, Lead, Snippet } from "@dennation/typebook/react";
+import {
+	A,
+	C,
+	CodeBlock,
+	Heading,
+	Lead,
+	Snippet,
+} from "@dennation/typebook/react";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Palette, Rocket, Search, Zap } from "lucide-react";
@@ -16,7 +23,7 @@ function PageIcons() {
 				so they are theme-aware automatically.
 			</Lead>
 
-			<H2>Example</H2>
+			<Heading level={2}>Example</Heading>
 			<Snippet name="icon-example">
 				{() => (
 					<div className="flex items-center gap-4 text-fg">
@@ -29,7 +36,7 @@ function PageIcons() {
 				)}
 			</Snippet>
 
-			<H2>Usage</H2>
+			<Heading level={2}>Usage</Heading>
 			<p>
 				Import the glyph you need and set <C>size</C> (square, in px). lucide
 				icons take <C>strokeWidth</C>; Tabler icons take <C>stroke</C>. Color
@@ -46,7 +53,7 @@ import { IconBrandGithub } from "@tabler/icons-react";
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Stroke width</H2>
+			<Heading level={2}>Stroke width</Heading>
 			<p>
 				Both libraries default to a <C>2</C> px stroke, and that's the weight we
 				use everywhere across the docs — sidebar, header, inline glyphs — so the

@@ -2,7 +2,7 @@ import {
 	C,
 	Callout,
 	CodeBlock,
-	H2,
+	Heading,
 	Lead,
 	MDTable,
 } from "@dennation/typebook/react";
@@ -20,7 +20,7 @@ function PageTheming() {
 				variants.
 			</Lead>
 
-			<H2>Design tokens</H2>
+			<Heading level={2}>Design tokens</Heading>
 			<p>
 				The single source of truth is <C>theme.css</C> inside the package. It
 				defines the palette as variables and re-exports them into Tailwind
@@ -59,7 +59,7 @@ function PageTheming() {
 				]}
 			/>
 
-			<H2>Dark mode</H2>
+			<Heading level={2}>Dark mode</Heading>
 			<p>
 				A <C>[data-theme="dark"]</C> block overrides the same variable names.
 				Toggling is one attribute on <C>{"<html>"}</C>; the package ships{" "}
@@ -77,7 +77,7 @@ function PageTheming() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Using the tokens in your site</H2>
+			<Heading level={2}>Using the tokens in your site</Heading>
 			<p>
 				A consumer that renders its own pages (like this site) imports the
 				shared tokens and lets Tailwind scan the package sources so the

@@ -1,7 +1,7 @@
 import {
 	C,
 	getComponentMeta,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 	propsToRows,
@@ -23,7 +23,7 @@ function PageTabs() {
 				for arbitrary content.
 			</Lead>
 
-			<H2>Example</H2>
+			<Heading level={2}>Example</Heading>
 			<Snippet name="tabs-example">
 				{() => (
 					<Tabs
@@ -43,7 +43,7 @@ function PageTabs() {
 				)}
 			</Snippet>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference props={propsToRows(meta.props)} />
 			<DocsFooter
 				prev={{ to: "/docs/components/code-block", title: "CodeBlock" }}

@@ -3,8 +3,7 @@ import {
 	Callout,
 	CodeBlock,
 	getComponentMeta,
-	H2,
-	H3,
+	Heading,
 	Lead,
 	PropsReference,
 	propsToRows,
@@ -29,7 +28,7 @@ function PageCodeBlock() {
 				colors so they follow dark mode automatically.
 			</Lead>
 
-			<H2>One tab</H2>
+			<Heading level={2}>One tab</Heading>
 			<p>
 				A lone <C>CodeBlock.Tab</C> is the everyday case. Add <C>file</C> for a
 				filename label, <C>showLineNumbers</C> for a gutter, and{" "}
@@ -51,7 +50,7 @@ function PageCodeBlock() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H3>Several tabs</H3>
+			<Heading level={3}>Several tabs</Heading>
 			<p>
 				Add more <C>CodeBlock.Tab</C> children to stack variants — the classic
 				npm/pnpm/yarn switcher:
@@ -73,7 +72,7 @@ function PageCodeBlock() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Tab props</H2>
+			<Heading level={2}>Tab props</Heading>
 			<p>
 				<C>CodeBlock.Root</C> takes only its <C>CodeBlock.Tab</C> children;
 				every code option lives on the tab.

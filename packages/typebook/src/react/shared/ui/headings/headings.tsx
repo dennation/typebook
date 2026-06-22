@@ -8,48 +8,39 @@ const anchor = tv({
 	base: "opacity-0 group-hover:opacity-100 text-fg-subtle transition-opacity duration-140 font-normal",
 });
 
-/** Section heading. `.doc-h2` is a JS hook for the TOC scrollspy. */
-export function H2({
-	children,
-	icon = <Hash size={17} />,
-}: {
+const heading = tv({
+	base: "group font-semibold scroll-mt-20 flex items-center gap-2",
+	variants: {
+		level: {
+			2: "doc-h2 text-[22px] tracking-[-0.02em] leading-[1.3] mt-[calc(46px*var(--density))] mb-1 pt-1.5",
+			3: "doc-h3 text-[17px] tracking-[-0.01em] mt-[calc(34px*var(--density))] mb-0.5",
+		},
+	},
+});
+
+export interface HeadingProps {
+	/** `2` → section (`.doc-h2`), `3` → subsection (`.doc-h3`). Both are TOC scrollspy hooks. */
+	level: 2 | 3;
 	children: ReactNode;
-	/** Anchor-link indicator shown on hover. @default <Hash size={17} /> */
+	/** Anchor-link indicator shown on hover. @default a `#` glyph sized to the level. */
 	icon?: ReactNode;
-}) {
-	const id = slugify(childText(children));
-	return (
-		<h2
-			id={id}
-			className="doc-h2 group text-[22px] font-semibold tracking-[-0.02em] leading-[1.3] mt-[calc(46px*var(--density))] mb-1 pt-1.5 scroll-mt-20 flex items-center gap-2"
-		>
-			{children}
-			<a href={`#${id}`} className={anchor()} aria-label="Link to section">
-				{icon}
-			</a>
-		</h2>
-	);
 }
 
-/** Subsection heading. `.doc-h3` is a JS hook for the TOC scrollspy. */
-export function H3({
-	children,
-	icon = <Hash size={15} />,
-}: {
-	children: ReactNode;
-	/** Anchor-link indicator shown on hover. @default <Hash size={15} /> */
-	icon?: ReactNode;
-}) {
+/**
+ * Anchored docs heading. Derives an id from its text (via `slugify`), renders a
+ * hover-revealed `#` link, and carries the `.doc-h{level}` class that
+ * `useDocHeadings` collects for the table of contents.
+ */
+export function Heading({ level, children, icon }: HeadingProps) {
 	const id = slugify(childText(children));
+	const Tag = level === 2 ? "h2" : "h3";
+	const glyph = icon ?? <Hash size={level === 2 ? 17 : 15} />;
 	return (
-		<h3
-			id={id}
-			className="doc-h3 group text-[17px] font-semibold tracking-[-0.01em] mt-[calc(34px*var(--density))] mb-0.5 scroll-mt-20 flex items-center gap-2"
-		>
+		<Tag id={id} className={heading({ level })}>
 			{children}
 			<a href={`#${id}`} className={anchor()} aria-label="Link to section">
-				{icon}
+				{glyph}
 			</a>
-		</h3>
+		</Tag>
 	);
 }

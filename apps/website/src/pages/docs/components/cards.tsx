@@ -3,7 +3,7 @@ import {
 	Cards,
 	DocCard,
 	getComponentMeta,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 	propsToRows,
@@ -25,7 +25,7 @@ function PageCards() {
 				handler.
 			</Lead>
 
-			<H2>Example</H2>
+			<Heading level={2}>Example</Heading>
 			<Snippet name="cards-example">
 				{() => (
 					<Cards>
@@ -47,7 +47,7 @@ function PageCards() {
 				)}
 			</Snippet>
 
-			<H2>DocCard props</H2>
+			<Heading level={2}>DocCard props</Heading>
 			<PropsReference props={propsToRows(meta.props)} />
 			<p>
 				<C>Cards</C> itself takes only <C>children</C>.

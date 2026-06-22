@@ -4,7 +4,7 @@ import {
 	Cards,
 	DocCard,
 	getComponentMeta,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 	propsToRows,
@@ -26,7 +26,7 @@ function PageCallout() {
 				title, and a body; the intent sets the color and icon automatically.
 			</Lead>
 
-			<H2>Usage</H2>
+			<Heading level={2}>Usage</Heading>
 			<Snippet name="callout-usage">
 				{() => (
 					<Callout type="warning" title="Heads up">
@@ -35,7 +35,7 @@ function PageCallout() {
 				)}
 			</Snippet>
 
-			<H2>Intents</H2>
+			<Heading level={2}>Intents</Heading>
 			<p>
 				Four built-in intents map to semantic colors. Each picks a matching
 				icon.
@@ -55,10 +55,10 @@ function PageCallout() {
 				</Callout>
 			</div>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference props={propsToRows(meta.props)} />
 
-			<H2>Notes</H2>
+			<Heading level={2}>Notes</Heading>
 			<p>
 				Intent colors are fixed OKLCH values blended with the theme through{" "}
 				<C>color-mix()</C>, so callouts adapt to dark mode without extra
@@ -66,7 +66,7 @@ function PageCallout() {
 				for contrast.
 			</p>
 
-			<H2>Related</H2>
+			<Heading level={2}>Related</Heading>
 			<Cards>
 				<DocCard
 					icon={<Box size={20} />}

@@ -1,7 +1,7 @@
 import {
 	C,
 	CodeBlock,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 	Snippet,
@@ -20,7 +20,7 @@ function PageThemeToggle() {
 				tokens in <C>theme.css</C> — swaps through the cascade.
 			</Lead>
 
-			<H2>Example</H2>
+			<Heading level={2}>Example</Heading>
 			<p>Click to toggle the theme of this page:</p>
 			<Snippet name="theme-toggle-example">
 				{() => (
@@ -28,7 +28,7 @@ function PageThemeToggle() {
 				)}
 			</Snippet>
 
-			<H2>Usage</H2>
+			<Heading level={2}>Usage</Heading>
 			<p>
 				The button renders a sun/moon icon for the current theme — style it
 				through <C>className</C>. See{" "}
@@ -43,7 +43,7 @@ function PageThemeToggle() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference
 				props={[
 					{

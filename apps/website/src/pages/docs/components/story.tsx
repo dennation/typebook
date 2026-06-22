@@ -2,7 +2,7 @@ import {
 	C,
 	Callout,
 	CodeBlock,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 } from "@dennation/typebook/react";
@@ -19,7 +19,7 @@ function PageStory() {
 				merged with whatever you pass via <C>props</C>.
 			</Lead>
 
-			<H2>Usage</H2>
+			<Heading level={2}>Usage</Heading>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -39,7 +39,7 @@ function PageStory() {
 				<C>props</C> mandatory and demands exactly the missing keys.
 			</Callout>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference
 				props={[
 					{
@@ -70,7 +70,7 @@ function PageStory() {
 				]}
 			/>
 
-			<H2>Related</H2>
+			<Heading level={2}>Related</Heading>
 			<p>
 				Need several values of one prop at once? Use{" "}
 				<Link to="/docs/components/variants">Variants</Link>. Two axes? Use{" "}

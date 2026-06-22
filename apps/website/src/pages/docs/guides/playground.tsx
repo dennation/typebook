@@ -2,7 +2,7 @@ import {
 	C,
 	Callout,
 	CodeBlock,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 } from "@dennation/typebook/react";
@@ -19,7 +19,7 @@ function PagePlayground() {
 				TypeScript types — no manual arg configuration.
 			</Lead>
 
-			<H2>Usage</H2>
+			<Heading level={2}>Usage</Heading>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -32,7 +32,7 @@ function PagePlayground() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>What the table gives you</H2>
+			<Heading level={2}>What the table gives you</Heading>
 			<ul>
 				<li>
 					A control per prop: literal unions become selects, booleans toggles,
@@ -51,7 +51,7 @@ function PagePlayground() {
 				destructuring, and JSDoc comments.
 			</Callout>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference
 				props={[
 					{

@@ -2,7 +2,7 @@ import {
 	C,
 	Callout,
 	CodeBlock,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 } from "@dennation/typebook/react";
@@ -19,7 +19,7 @@ function PageSnippet() {
 				time, character for character, no regeneration artifacts.
 			</Lead>
 
-			<H2>Usage</H2>
+			<Heading level={2}>Usage</Heading>
 			<p>
 				The child is a <strong>component function</strong>, not raw JSX. The
 				simplest form is an inline arrow; the shown source is its body.
@@ -79,9 +79,9 @@ function PageSnippet() {
 				the source.
 			</Callout>
 
-			<H2>
+			<Heading level={2}>
 				Reference an example with <C>source</C>
-			</H2>
+			</Heading>
 			<p>
 				Sometimes the example already lives somewhere — a component in this file
 				or imported from another. Point <C>source</C> at it instead of inlining.
@@ -127,7 +127,7 @@ import { ButtonDemo } from "../demos/ButtonDemo";
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference
 				props={[
 					{

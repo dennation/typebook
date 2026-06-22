@@ -26,10 +26,14 @@ import { Route as DocsComponentsTabsRouteImport } from './pages/docs/components/
 import { Route as DocsComponentsTablesRouteImport } from './pages/docs/components/tables'
 import { Route as DocsComponentsStoryRouteImport } from './pages/docs/components/story'
 import { Route as DocsComponentsStepsRouteImport } from './pages/docs/components/steps'
-import { Route as DocsComponentsProseRouteImport } from './pages/docs/components/prose'
 import { Route as DocsComponentsNavigationRouteImport } from './pages/docs/components/navigation'
 import { Route as DocsComponentsMatrixRouteImport } from './pages/docs/components/matrix'
+import { Route as DocsComponentsLinkRouteImport } from './pages/docs/components/link'
+import { Route as DocsComponentsLeadRouteImport } from './pages/docs/components/lead'
 import { Route as DocsComponentsLayoutRouteImport } from './pages/docs/components/layout'
+import { Route as DocsComponentsInlineCodeRouteImport } from './pages/docs/components/inline-code'
+import { Route as DocsComponentsImagePlaceholderRouteImport } from './pages/docs/components/image-placeholder'
+import { Route as DocsComponentsHeadingsRouteImport } from './pages/docs/components/headings'
 import { Route as DocsComponentsErrorBoundaryRouteImport } from './pages/docs/components/error-boundary'
 import { Route as DocsComponentsCopyCommandRouteImport } from './pages/docs/components/copy-command'
 import { Route as DocsComponentsCodeBlockRouteImport } from './pages/docs/components/code-block'
@@ -127,11 +131,6 @@ const DocsComponentsStepsRoute = DocsComponentsStepsRouteImport.update({
   path: '/components/steps',
   getParentRoute: () => DocsRouteRoute,
 } as any)
-const DocsComponentsProseRoute = DocsComponentsProseRouteImport.update({
-  id: '/components/prose',
-  path: '/components/prose',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
 const DocsComponentsNavigationRoute =
   DocsComponentsNavigationRouteImport.update({
     id: '/components/navigation',
@@ -143,9 +142,36 @@ const DocsComponentsMatrixRoute = DocsComponentsMatrixRouteImport.update({
   path: '/components/matrix',
   getParentRoute: () => DocsRouteRoute,
 } as any)
+const DocsComponentsLinkRoute = DocsComponentsLinkRouteImport.update({
+  id: '/components/link',
+  path: '/components/link',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsComponentsLeadRoute = DocsComponentsLeadRouteImport.update({
+  id: '/components/lead',
+  path: '/components/lead',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
 const DocsComponentsLayoutRoute = DocsComponentsLayoutRouteImport.update({
   id: '/components/layout',
   path: '/components/layout',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsComponentsInlineCodeRoute =
+  DocsComponentsInlineCodeRouteImport.update({
+    id: '/components/inline-code',
+    path: '/components/inline-code',
+    getParentRoute: () => DocsRouteRoute,
+  } as any)
+const DocsComponentsImagePlaceholderRoute =
+  DocsComponentsImagePlaceholderRouteImport.update({
+    id: '/components/image-placeholder',
+    path: '/components/image-placeholder',
+    getParentRoute: () => DocsRouteRoute,
+  } as any)
+const DocsComponentsHeadingsRoute = DocsComponentsHeadingsRouteImport.update({
+  id: '/components/headings',
+  path: '/components/headings',
   getParentRoute: () => DocsRouteRoute,
 } as any)
 const DocsComponentsErrorBoundaryRoute =
@@ -197,10 +223,14 @@ export interface FileRoutesByFullPath {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
+  '/docs/components/headings': typeof DocsComponentsHeadingsRoute
+  '/docs/components/image-placeholder': typeof DocsComponentsImagePlaceholderRoute
+  '/docs/components/inline-code': typeof DocsComponentsInlineCodeRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
+  '/docs/components/lead': typeof DocsComponentsLeadRoute
+  '/docs/components/link': typeof DocsComponentsLinkRoute
   '/docs/components/matrix': typeof DocsComponentsMatrixRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
-  '/docs/components/prose': typeof DocsComponentsProseRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
   '/docs/components/story': typeof DocsComponentsStoryRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
@@ -226,10 +256,14 @@ export interface FileRoutesByTo {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
+  '/docs/components/headings': typeof DocsComponentsHeadingsRoute
+  '/docs/components/image-placeholder': typeof DocsComponentsImagePlaceholderRoute
+  '/docs/components/inline-code': typeof DocsComponentsInlineCodeRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
+  '/docs/components/lead': typeof DocsComponentsLeadRoute
+  '/docs/components/link': typeof DocsComponentsLinkRoute
   '/docs/components/matrix': typeof DocsComponentsMatrixRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
-  '/docs/components/prose': typeof DocsComponentsProseRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
   '/docs/components/story': typeof DocsComponentsStoryRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
@@ -257,10 +291,14 @@ export interface FileRoutesById {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
+  '/docs/components/headings': typeof DocsComponentsHeadingsRoute
+  '/docs/components/image-placeholder': typeof DocsComponentsImagePlaceholderRoute
+  '/docs/components/inline-code': typeof DocsComponentsInlineCodeRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
+  '/docs/components/lead': typeof DocsComponentsLeadRoute
+  '/docs/components/link': typeof DocsComponentsLinkRoute
   '/docs/components/matrix': typeof DocsComponentsMatrixRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
-  '/docs/components/prose': typeof DocsComponentsProseRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
   '/docs/components/story': typeof DocsComponentsStoryRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
@@ -289,10 +327,14 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
+    | '/docs/components/headings'
+    | '/docs/components/image-placeholder'
+    | '/docs/components/inline-code'
     | '/docs/components/layout'
+    | '/docs/components/lead'
+    | '/docs/components/link'
     | '/docs/components/matrix'
     | '/docs/components/navigation'
-    | '/docs/components/prose'
     | '/docs/components/steps'
     | '/docs/components/story'
     | '/docs/components/tables'
@@ -318,10 +360,14 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
+    | '/docs/components/headings'
+    | '/docs/components/image-placeholder'
+    | '/docs/components/inline-code'
     | '/docs/components/layout'
+    | '/docs/components/lead'
+    | '/docs/components/link'
     | '/docs/components/matrix'
     | '/docs/components/navigation'
-    | '/docs/components/prose'
     | '/docs/components/steps'
     | '/docs/components/story'
     | '/docs/components/tables'
@@ -348,10 +394,14 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
+    | '/docs/components/headings'
+    | '/docs/components/image-placeholder'
+    | '/docs/components/inline-code'
     | '/docs/components/layout'
+    | '/docs/components/lead'
+    | '/docs/components/link'
     | '/docs/components/matrix'
     | '/docs/components/navigation'
-    | '/docs/components/prose'
     | '/docs/components/steps'
     | '/docs/components/story'
     | '/docs/components/tables'
@@ -494,13 +544,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsComponentsStepsRouteImport
       parentRoute: typeof DocsRouteRoute
     }
-    '/docs/components/prose': {
-      id: '/docs/components/prose'
-      path: '/components/prose'
-      fullPath: '/docs/components/prose'
-      preLoaderRoute: typeof DocsComponentsProseRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
     '/docs/components/navigation': {
       id: '/docs/components/navigation'
       path: '/components/navigation'
@@ -515,11 +558,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsComponentsMatrixRouteImport
       parentRoute: typeof DocsRouteRoute
     }
+    '/docs/components/link': {
+      id: '/docs/components/link'
+      path: '/components/link'
+      fullPath: '/docs/components/link'
+      preLoaderRoute: typeof DocsComponentsLinkRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/components/lead': {
+      id: '/docs/components/lead'
+      path: '/components/lead'
+      fullPath: '/docs/components/lead'
+      preLoaderRoute: typeof DocsComponentsLeadRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
     '/docs/components/layout': {
       id: '/docs/components/layout'
       path: '/components/layout'
       fullPath: '/docs/components/layout'
       preLoaderRoute: typeof DocsComponentsLayoutRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/components/inline-code': {
+      id: '/docs/components/inline-code'
+      path: '/components/inline-code'
+      fullPath: '/docs/components/inline-code'
+      preLoaderRoute: typeof DocsComponentsInlineCodeRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/components/image-placeholder': {
+      id: '/docs/components/image-placeholder'
+      path: '/components/image-placeholder'
+      fullPath: '/docs/components/image-placeholder'
+      preLoaderRoute: typeof DocsComponentsImagePlaceholderRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/components/headings': {
+      id: '/docs/components/headings'
+      path: '/components/headings'
+      fullPath: '/docs/components/headings'
+      preLoaderRoute: typeof DocsComponentsHeadingsRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/components/error-boundary': {
@@ -583,10 +661,14 @@ interface DocsRouteRouteChildren {
   DocsComponentsCodeBlockRoute: typeof DocsComponentsCodeBlockRoute
   DocsComponentsCopyCommandRoute: typeof DocsComponentsCopyCommandRoute
   DocsComponentsErrorBoundaryRoute: typeof DocsComponentsErrorBoundaryRoute
+  DocsComponentsHeadingsRoute: typeof DocsComponentsHeadingsRoute
+  DocsComponentsImagePlaceholderRoute: typeof DocsComponentsImagePlaceholderRoute
+  DocsComponentsInlineCodeRoute: typeof DocsComponentsInlineCodeRoute
   DocsComponentsLayoutRoute: typeof DocsComponentsLayoutRoute
+  DocsComponentsLeadRoute: typeof DocsComponentsLeadRoute
+  DocsComponentsLinkRoute: typeof DocsComponentsLinkRoute
   DocsComponentsMatrixRoute: typeof DocsComponentsMatrixRoute
   DocsComponentsNavigationRoute: typeof DocsComponentsNavigationRoute
-  DocsComponentsProseRoute: typeof DocsComponentsProseRoute
   DocsComponentsStepsRoute: typeof DocsComponentsStepsRoute
   DocsComponentsStoryRoute: typeof DocsComponentsStoryRoute
   DocsComponentsTablesRoute: typeof DocsComponentsTablesRoute
@@ -612,10 +694,14 @@ const DocsRouteRouteChildren: DocsRouteRouteChildren = {
   DocsComponentsCodeBlockRoute: DocsComponentsCodeBlockRoute,
   DocsComponentsCopyCommandRoute: DocsComponentsCopyCommandRoute,
   DocsComponentsErrorBoundaryRoute: DocsComponentsErrorBoundaryRoute,
+  DocsComponentsHeadingsRoute: DocsComponentsHeadingsRoute,
+  DocsComponentsImagePlaceholderRoute: DocsComponentsImagePlaceholderRoute,
+  DocsComponentsInlineCodeRoute: DocsComponentsInlineCodeRoute,
   DocsComponentsLayoutRoute: DocsComponentsLayoutRoute,
+  DocsComponentsLeadRoute: DocsComponentsLeadRoute,
+  DocsComponentsLinkRoute: DocsComponentsLinkRoute,
   DocsComponentsMatrixRoute: DocsComponentsMatrixRoute,
   DocsComponentsNavigationRoute: DocsComponentsNavigationRoute,
-  DocsComponentsProseRoute: DocsComponentsProseRoute,
   DocsComponentsStepsRoute: DocsComponentsStepsRoute,
   DocsComponentsStoryRoute: DocsComponentsStoryRoute,
   DocsComponentsTablesRoute: DocsComponentsTablesRoute,
