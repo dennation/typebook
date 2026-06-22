@@ -65,21 +65,71 @@ function PageSnippet() {
 				through <C>CodeBlock</C>.
 			</P>
 
-			<Callout type="warning" title="Inline functions only">
-				The child must be an <strong>inline</strong> function — a bare component
-				reference (<C>{"{Counter}"}</C>) or raw JSX raises a build error, since
-				its source can't be sliced from this call site. <C>name</C> is optional;
-				it's just a label shown above the source.
+			<Callout type="warning" title="Inline child must be a function">
+				Without <C>source</C>, the child must be an <strong>inline</strong>{" "}
+				function — a bare component reference (<C>{"{Counter}"}</C>) or raw JSX
+				raises a build error, since its source can't be sliced from this call
+				site. To document an example declared elsewhere, use <C>source</C>{" "}
+				instead (below). <C>name</C> is optional; it's just a label shown above
+				the source.
 			</Callout>
+
+			<H2>
+				Reference an example with <C>source</C>
+			</H2>
+			<P>
+				Sometimes the example already lives somewhere — a component in this file
+				or imported from another. Point <C>source</C> at it instead of inlining.
+				The build resolves the reference through the TypeScript program (following
+				an import into another module), slices that function's body, and injects
+				it as the shown source.
+			</P>
+			<CodeBlock
+				file="src/pages/button.tsx"
+				icon={<IconBrandReact size={14} />}
+				lang="tsx"
+				code={`import { Snippet } from "@dennation/typebook/react";
+import { ButtonDemo } from "../demos/ButtonDemo";
+
+// default card — preview + "show source" toggle
+<Snippet source={ButtonDemo} />`}
+			/>
+			<P>
+				With <C>source</C>, <C>children</C> becomes an optional{" "}
+				<strong>layout render-prop</strong>. It receives{" "}
+				<C>{"{ preview, source, code, name }"}</C> — the live demo, the source
+				already rendered as a <C>CodeBlock</C>, the raw source text, and the{" "}
+				<C>name</C> label — so you decide where and how each appears. Omit{" "}
+				<C>children</C> for the default card.
+			</P>
+			<CodeBlock
+				file="src/pages/button.tsx"
+				icon={<IconBrandReact size={14} />}
+				lang="tsx"
+				code={`<Snippet source={ButtonDemo}>
+  {({ preview, source }) => (
+    <div className="grid grid-cols-2 gap-4">
+      {preview}
+      {source}
+    </div>
+  )}
+</Snippet>`}
+			/>
 
 			<H2>Props</H2>
 			<PropsReference
 				props={[
 					{
 						name: "children",
-						type: "() => ReactNode",
-						required: true,
-						desc: "The example as an inline function component. Rendered live; its body is the shown source.",
+						type: "(() => ReactNode) | ((slots: SnippetRenderProps) => ReactNode)",
+						required: false,
+						desc: "The example as an inline function component (rendered live; its body is the shown source) — or, alongside source, a layout render-prop receiving { preview, source, code, name }.",
+					},
+					{
+						name: "source",
+						type: "ComponentType",
+						required: false,
+						desc: "Reference to an example component declared elsewhere (this file or imported). The build slices its body as the shown source; children then acts as an optional layout render-prop.",
 					},
 					{
 						name: "name",
