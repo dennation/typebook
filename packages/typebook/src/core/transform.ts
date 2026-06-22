@@ -35,22 +35,31 @@ interface Edit {
  * - each `<Snippet>{fn}</Snippet>` element gets the sliced source of `fn`'s body
  *   injected as a `__snippetSource` prop.
  *
- * Returns the rewritten source, or `undefined` when the file contains neither (so the
- * bundler skips it untouched). Edits are applied back-to-front so earlier offsets stay
+ * Returns the rewritten source plus any files it now depends on (a `<Snippet source={ref}>`
+ * resolved into another module — the caller registers these as watch dependencies so editing
+ * the referenced file re-injects here), or `undefined` when the file contains neither marker
+ * (so the bundler skips it untouched). Edits are applied back-to-front so earlier offsets stay
  * valid; no source map is produced (the inserts are data, not user code) — matching the
  * pure-text approach fumadocs takes.
  */
+export interface TransformResult {
+	code: string;
+	/** Absolute paths this module's injected source depends on (for `addWatchFile`). */
+	watchFiles: string[];
+}
+
 export async function transformTypebook(
 	code: string,
 	filePath: string,
 	tsClient: TypeScriptClient | null,
-): Promise<string | undefined> {
+): Promise<TransformResult | undefined> {
 	const hasRegistration = mayContainMetaCall(code);
 	const hasSnippet = mayContainSnippet(code);
 	if (!hasRegistration && !hasSnippet) return undefined;
 
 	const program = await parseProgram(filePath, code);
 	const edits: Edit[] = [];
+	const watchFiles = new Set<string>();
 
 	if (hasRegistration) {
 		for (const call of scanMetaCalls(program)) {
@@ -76,18 +85,40 @@ export async function transformTypebook(
 
 	if (hasSnippet) {
 		for (const block of scanSnippets(program, code)) {
-			if (block.code === null) {
-				throw new SnippetNotInlineError(block.name, filePath);
+			let source: string;
+			if (block.sourceRef) {
+				// `source={ref}` — resolve the function across modules via the TS program and slice it.
+				const resolved =
+					tsClient &&
+					(await tsClient.getSnippetSource(
+						filePath,
+						block.sourceRef.offset,
+						code,
+					));
+				if (!resolved) {
+					console.warn(
+						LOG_PREFIX,
+						`<Snippet source={${block.sourceRef.name}}> in ${filePath}: could not resolve a function to slice; source not injected.`,
+					);
+					continue;
+				}
+				source = resolved.source;
+				watchFiles.add(resolved.file);
+			} else {
+				if (block.code === null) {
+					throw new SnippetNotInlineError(block.name, filePath);
+				}
+				source = block.code;
 			}
 			edits.push({
 				at: block.injectAt,
-				insert: ` __snippetSource={${JSON.stringify(block.code)}}`,
+				insert: ` __snippetSource={${JSON.stringify(source)}}`,
 			});
 		}
 	}
 
 	if (edits.length === 0) return undefined;
-	return applyEdits(code, edits);
+	return { code: applyEdits(code, edits), watchFiles: [...watchFiles] };
 }
 
 /** Apply insertions back-to-front so each edit's offset is unaffected by earlier ones. */

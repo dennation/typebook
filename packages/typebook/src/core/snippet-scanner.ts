@@ -8,20 +8,34 @@ import type {
 } from "oxc-parser";
 import { NPM_REACT_PACKAGE_NAME } from "../constants";
 import { moduleExportName, type Program, walk } from "./ast";
+import { dedent, sliceWithLeadingIndent } from "./source-slice";
 
 /**
- * A single `<Snippet>{fn}</Snippet>` element found in a file. Its child must be an inline
- * function component (`{() => …}` or `{function Counter() { … }}`), whose body we slice as the
- * shown source. `code` is `null` when the child is *not* an inline function (a bare reference, raw
- * JSX, or nothing) — the build turns that into a clear error rather than a silent drop.
+ * A single `<Snippet>…</Snippet>` element found in a file. Its source comes from one of two places:
+ * - an **inline** function child (`{() => …}` or `{function Counter() { … }}`) — its body is sliced
+ *   1:1 into `code` (here in the same module, by oxc);
+ * - a `source={ref}` prop pointing at a function declared elsewhere (this file or an import) —
+ *   recorded as `sourceRef`, resolved+sliced later by the TypeScript client (cross-module).
+ *
+ * `code` is `null` when the child is *not* an inline function (a bare reference, raw JSX, or
+ * nothing) **and** there is no `sourceRef` — the build turns that into a clear error. When a
+ * `sourceRef` is present the inline child is ignored (it's the layout render-prop, not the demo).
  */
 export interface SnippetBlock {
-	/** The function body, sliced 1:1 then dedented — or `null` when the child isn't an inline function. */
+	/** The inline function body, sliced 1:1 then dedented — or `null` (non-inline child, or `source` ref used). */
 	code: string | null;
+	/** A `source={ref}` identifier to resolve across modules, or `null` when the demo is inline. */
+	sourceRef: SourceRef | null;
 	/** Character offset just after the opening tag name, where `__snippetSource` is injected. */
 	injectAt: number;
 	/** Value of the optional `name` prop, used only for build-error messages. */
 	name: string | null;
+}
+
+/** A `source={Ident}` reference: the local name and the offset at which the TS client resolves it. */
+export interface SourceRef {
+	name: string;
+	offset: number;
 }
 
 const SNIPPET_COMPONENT_NAME = "Snippet";
@@ -52,8 +66,11 @@ export function scanSnippets(
 		if (node.type !== "JSXElement") return;
 		if (!isSnippetTag(node.openingElement, snippetLocalNames)) return;
 
+		const sourceRef = sourceRefAttribute(node.openingElement);
 		blocks.push({
-			code: childBodySource(node, content),
+			// With a `source={ref}` the child is the layout render-prop, not the demo — don't slice it.
+			code: sourceRef ? null : childBodySource(node, content),
+			sourceRef,
 			injectAt: node.openingElement.name.end,
 			name: nameAttribute(node.openingElement),
 		});
@@ -89,6 +106,29 @@ function isSnippetTag(
 		opening.name.type === "JSXIdentifier" &&
 		snippetLocalNames.has(opening.name.name)
 	);
+}
+
+/**
+ * Read a `source={Ident}` reference: a plain identifier pointing at the example component
+ * (declared in this file or imported). Returns its name + character offset so the TypeScript
+ * client can resolve the binding and slice its body. Returns null when `source` is absent or
+ * isn't a bare identifier (e.g. `source={a.b}` or a literal) — those fall back to the inline child.
+ */
+function sourceRefAttribute(opening: JSXOpeningElement): SourceRef | null {
+	for (const attr of opening.attributes) {
+		if (attr.type !== "JSXAttribute") continue;
+		if (attr.name.type !== "JSXIdentifier" || attr.name.name !== "source")
+			continue;
+		const value = attr.value;
+		if (
+			value?.type === "JSXExpressionContainer" &&
+			value.expression.type === "Identifier"
+		) {
+			return { name: value.expression.name, offset: value.expression.start };
+		}
+		return null;
+	}
+	return null;
 }
 
 /** Read the static string value of the `name` attribute, or null if absent/dynamic. */
@@ -157,42 +197,4 @@ function functionBodySource(
 		expr = expr.expression;
 	}
 	return dedent(sliceWithLeadingIndent(content, expr.start, expr.end));
-}
-
-/**
- * Slice `[start, end)` but, when the slice begins at the first non-whitespace token of its line,
- * extend the start back to the line's indentation. This gives {@link dedent} a uniform block: an
- * expression body like `() => (\n  <div/>\n)` otherwise starts mid-line with the first line at
- * column zero and the rest indented, defeating the common-indent calculation.
- */
-function sliceWithLeadingIndent(
-	text: string,
-	start: number,
-	end: number,
-): string {
-	const lineStart = text.lastIndexOf("\n", start - 1) + 1;
-	const from = text.slice(lineStart, start).trim() === "" ? lineStart : start;
-	return text.slice(from, end);
-}
-
-/**
- * Remove surrounding blank lines and the common leading-whitespace shared by all non-blank lines,
- * so extracted source reads as if it were authored at column zero.
- */
-function dedent(source: string): string {
-	const lines = source.replace(/\t/g, "  ").split("\n");
-
-	while (lines.length > 0 && lines[0].trim() === "") lines.shift();
-	while (lines.length > 0 && lines[lines.length - 1].trim() === "") lines.pop();
-	if (lines.length === 0) return "";
-
-	let min = Infinity;
-	for (const line of lines) {
-		if (line.trim() === "") continue;
-		const indent = line.length - line.trimStart().length;
-		if (indent < min) min = indent;
-	}
-	if (!Number.isFinite(min) || min === 0) return lines.join("\n");
-
-	return lines.map((line) => line.slice(min)).join("\n");
 }

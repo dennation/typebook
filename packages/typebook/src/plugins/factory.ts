@@ -61,7 +61,11 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 			const filePath = id.split("?")[0];
 			const tsClient = await ensureClient();
 			const out = await transformTypebook(code, filePath, tsClient);
-			return out === undefined ? undefined : { code: out, map: null };
+			if (out === undefined) return undefined;
+			// A `<Snippet source={ref}>` resolved into another module: tell the bundler this
+			// module's output depends on that file, so editing it re-runs this transform.
+			for (const file of out.watchFiles) this.addWatchFile(file);
+			return { code: out.code, map: null };
 		},
 
 		buildEnd() {

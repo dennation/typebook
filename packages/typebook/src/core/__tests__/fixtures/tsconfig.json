@@ -1,11 +1,23 @@
 {
+	// Resolve `@dennation/typebook` to SOURCE (not the built `dist`) so the TypeScript-client
+	// tests are hermetic: prop extraction reads `getComponentMeta`'s real generic signature
+	// without requiring `pnpm build` to have run first. `@/*` and `@react/*` mirror the package's
+	// own internal aliases that the source entries use.
 	"compilerOptions": {
 		"target": "ES2022",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
 		"jsx": "react-jsx",
 		"strict": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"baseUrl": ".",
+		"paths": {
+			"@dennation/typebook": ["../../../index.ts"],
+			"@dennation/typebook/react": ["../../../react/index.ts"],
+			"@/*": ["../../../*"],
+			"@react/*": ["../../../react/*"]
+		}
 	},
 	"include": ["./**/*.tsx", "./**/*.ts"]
 }

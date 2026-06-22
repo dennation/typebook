@@ -1,1 +1,5 @@
-export { Snippet, type SnippetProps } from "./ui/Snippet";
+export {
+	Snippet,
+	type SnippetProps,
+	type SnippetRenderProps,
+} from "./ui/Snippet";
