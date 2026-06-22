@@ -20,8 +20,8 @@ function PageTabs() {
 			<Lead>
 				<C>Tabs</C> switches between related panels of content with an
 				underline-style tab bar. For tabbed <em>code</em>, prefer{" "}
-				<C>CodeBlock</C>'s own <C>tabs</C> prop — this component is for
-				arbitrary content.
+				<C>CodeBlock</C>'s own <C>CodeBlock.Tab</C> children — this component is
+				for arbitrary content.
 			</Lead>
 
 			<H2>Example</H2>

@@ -1,5 +1,6 @@
 export {
 	CodeBlock,
 	type CodeBlockProps,
-	type CodeTab,
+	CodeBlockTab,
+	type CodeBlockTabProps,
 } from "./ui/CodeBlock";

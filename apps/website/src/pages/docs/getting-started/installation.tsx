@@ -30,28 +30,29 @@ function PageInstallation() {
 			</Callout>
 
 			<H2>Install the package</H2>
-			<CodeBlock
-				tabs={[
-					{
-						label: "pnpm",
-						lang: "bash",
-						icon: <SquareTerminal size={13} />,
-						code: "pnpm add @dennation/typebook",
-					},
-					{
-						label: "npm",
-						lang: "bash",
-						icon: <SquareTerminal size={13} />,
-						code: "npm install @dennation/typebook",
-					},
-					{
-						label: "yarn",
-						lang: "bash",
-						icon: <SquareTerminal size={13} />,
-						code: "yarn add @dennation/typebook",
-					},
-				]}
-			/>
+			<CodeBlock>
+				<CodeBlock.Tab
+					label="pnpm"
+					lang="bash"
+					icon={<SquareTerminal size={13} />}
+				>
+					{`pnpm add @dennation/typebook`}
+				</CodeBlock.Tab>
+				<CodeBlock.Tab
+					label="npm"
+					lang="bash"
+					icon={<SquareTerminal size={13} />}
+				>
+					{`npm install @dennation/typebook`}
+				</CodeBlock.Tab>
+				<CodeBlock.Tab
+					label="yarn"
+					lang="bash"
+					icon={<SquareTerminal size={13} />}
+				>
+					{`yarn add @dennation/typebook`}
+				</CodeBlock.Tab>
+			</CodeBlock>
 
 			<H2>Wire it up</H2>
 			<Steps>

@@ -1,20 +1,34 @@
 import { Check, Copy } from "lucide-react";
-import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
+import {
+	Children,
+	type CSSProperties,
+	isValidElement,
+	type ReactNode,
+	useEffect,
+	useState,
+} from "react";
 import { tv } from "tailwind-variants";
 import { type ThemedTokenWithVariants, tokenize } from "../lib/tokenize";
 
-export interface CodeTab {
+export interface CodeBlockTabProps {
+	/** Tab label shown in the tab bar. */
 	label: string;
-	code: string;
+	/**
+	 * Any Shiki language id (tsx, css, yaml, python, …). Grammars load on demand;
+	 * unknown ids fall back to plain text.
+	 * @default "tsx"
+	 */
 	lang?: string;
+	/** Filename shown for this tab. */
 	file?: string;
+	/** Small icon rendered next to the label. */
 	icon?: ReactNode;
+	/** The tab's code, passed as a string child (use a template literal). */
+	children: string;
 }
 
 export interface CodeBlockProps {
-	/** Tabbed variants: { label, code, lang?, file?, icon? }. */
-	tabs?: CodeTab[];
-	/** The snippet source (single-snippet form; ignored when tabs is set). */
+	/** The snippet source (single-snippet form; ignored when `<CodeBlock.Tab>` children are present). */
 	code?: string;
 	/**
 	 * Any Shiki language id (tsx, css, yaml, python, …). Grammars load on demand;
@@ -37,9 +51,45 @@ export interface CodeBlockProps {
 	 * @default []
 	 */
 	highlightLines?: number[];
+	/** One or more `<CodeBlock.Tab>` elements — tabbed variants. */
+	children?: ReactNode;
+}
+
+interface CodeTab {
+	label: string;
+	code: string;
+	lang?: string;
+	file?: string;
+	icon?: ReactNode;
 }
 
 const ITALIC = 1; // shiki FontStyle.Italic bit
+
+/**
+ * Marker for a tabbed variant. Never renders on its own — `<CodeBlock>` reads
+ * its props (and string child) to build the tab bar.
+ */
+export function CodeBlockTab(_props: CodeBlockTabProps): null {
+	return null;
+}
+CodeBlockTab.displayName = "CodeBlock.Tab";
+
+/** Pull `<CodeBlock.Tab>` children into the internal tab model. */
+function tabsFromChildren(children: ReactNode): CodeTab[] {
+	const tabs: CodeTab[] = [];
+	Children.forEach(children, (child) => {
+		if (!isValidElement(child) || child.type !== CodeBlockTab) return;
+		const {
+			label,
+			lang,
+			file,
+			icon,
+			children: code,
+		} = child.props as CodeBlockTabProps;
+		tabs.push({ label, lang, file, icon, code: code ?? "" });
+	});
+	return tabs;
+}
 
 const container = tv({
 	base: "border border-border rounded-(--radius-token) overflow-hidden bg-code-bg",
@@ -79,7 +129,6 @@ const line = tv({
 
 /** Docs code block — filename header OR tabs, copy button, line numbers. */
 export function CodeBlock({
-	tabs,
 	code,
 	lang = "tsx",
 	file,
@@ -88,10 +137,13 @@ export function CodeBlock({
 	copiedIcon = <Check size={15} />,
 	showLineNumbers,
 	highlightLines = [],
+	children,
 }: CodeBlockProps) {
-	const items: CodeTab[] = tabs ?? [
-		{ label: file || lang, lang, code: code ?? "", file, icon },
-	];
+	const tabItems = tabsFromChildren(children);
+	const hasTabs = tabItems.length > 0;
+	const items: CodeTab[] = hasTabs
+		? tabItems
+		: [{ label: file || lang, lang, code: code ?? "", file, icon }];
 	const [active, setActive] = useState(0);
 	const [copied, setCopied] = useState(false);
 	const cur = items[active] ?? (items[0] as CodeTab);
@@ -136,7 +188,6 @@ export function CodeBlock({
 		</button>
 	);
 
-	const hasTabs = !!tabs;
 	const hasHead = !hasTabs && !!file;
 
 	const renderLine = (k: number): ReactNode => {
@@ -236,3 +287,5 @@ export function CodeBlock({
 		</div>
 	);
 }
+
+CodeBlock.Tab = CodeBlockTab;
