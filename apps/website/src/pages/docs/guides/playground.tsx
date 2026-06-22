@@ -5,7 +5,6 @@ import {
 	InlineCode,
 	Lead,
 	List,
-	ListItem,
 	Paragraph,
 	PropsReference,
 } from "@dennation/typebook/react";
@@ -36,19 +35,19 @@ function PagePlayground() {
 			</CodeBlock.Root>
 
 			<Heading level={2}>What the table gives you</Heading>
-			<List>
-				<ListItem>
+			<List.Root>
+				<List.Item>
 					A control per prop: literal unions become selects, booleans toggles,
 					strings and numbers inputs
-				</ListItem>
-				<ListItem>
+				</List.Item>
+				<List.Item>
 					Search across prop names and a toggle for inherited props
-				</ListItem>
-				<ListItem>
+				</List.Item>
+				<List.Item>
 					Required props are marked; defaults and JSDoc descriptions come from
 					the registry
-				</ListItem>
-			</List>
+				</List.Item>
+			</List.Root>
 
 			<Callout type="info" title="Where the metadata comes from">
 				The table is driven by <InlineCode>PropInfo[]</InlineCode> that the

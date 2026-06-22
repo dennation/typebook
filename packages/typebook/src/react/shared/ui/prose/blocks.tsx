@@ -15,8 +15,8 @@ export const Paragraph = ({ children }: { children: ReactNode }) => (
 	<p className={`${BLOCK_GAP} text-fg text-pretty`}>{children}</p>
 );
 
-/** Ordered or unordered list. `ordered` switches `<ul>`→`<ol>` and the marker. */
-export function List({
+/** Root of a list. `ordered` switches `<ul>`→`<ol>` and the marker. */
+function ListRoot({
 	ordered = false,
 	children,
 }: {
@@ -31,11 +31,24 @@ export function List({
 		<ul className={`${base} [&>li]:marker:content-['–__']`}>{children}</ul>
 	);
 }
+ListRoot.displayName = "List.Root";
 
-/** List item; the dash/number marker comes from the parent `List`. */
-export const ListItem = ({ children }: { children: ReactNode }) => (
-	<li className="pl-1 marker:text-fg-subtle">{children}</li>
-);
+/** One item inside `<List.Root>`; the dash/number marker comes from the parent. */
+function ListItem({ children }: { children: ReactNode }) {
+	return <li className="pl-1 marker:text-fg-subtle">{children}</li>;
+}
+ListItem.displayName = "List.Item";
+
+/**
+ * Compound list: `<List.Root>` wraps one or more `<List.Item>`.
+ *
+ * ```tsx
+ * <List.Root>
+ *   <List.Item>First</List.Item>
+ * </List.Root>
+ * ```
+ */
+export const List = { Root: ListRoot, Item: ListItem };
 
 /** Accent-tinted pull quote. */
 export const Blockquote = ({ children }: { children: ReactNode }) => (

@@ -59,7 +59,6 @@ export {
 	Link,
 	type LinkProps,
 	List,
-	ListItem,
 	Paragraph,
 	Strong,
 } from "./shared/ui/prose/index";
