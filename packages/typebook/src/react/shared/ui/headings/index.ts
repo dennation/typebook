@@ -1,1 +1,1 @@
-export { H2, H3 } from "./headings";
+export { Heading, type HeadingProps } from "./headings";

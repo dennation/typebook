@@ -2,7 +2,7 @@ import {
 	C,
 	Callout,
 	CodeBlock,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 } from "@dennation/typebook/react";
@@ -19,7 +19,7 @@ function PageVariants() {
 				<C>allOf()</C>, <C>values()</C> or <C>generate()</C>.
 			</Lead>
 
-			<H2>Usage</H2>
+			<Heading level={2}>Usage</Heading>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -44,7 +44,7 @@ import { Variants } from "@dennation/typebook/react";
 				grows by itself.
 			</Callout>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference
 				props={[
 					{
@@ -86,7 +86,7 @@ import { Variants } from "@dennation/typebook/react";
 				]}
 			/>
 
-			<H2>Related</H2>
+			<Heading level={2}>Related</Heading>
 			<p>
 				One variant at a time? Use{" "}
 				<Link to="/docs/components/story">Story</Link>. Two axes crossed in a

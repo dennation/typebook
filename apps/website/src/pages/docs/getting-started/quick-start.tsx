@@ -2,7 +2,7 @@ import {
 	C,
 	Callout,
 	CodeBlock,
-	H2,
+	Heading,
 	Lead,
 	MDTable,
 } from "@dennation/typebook/react";
@@ -20,7 +20,7 @@ function PageQuickStart() {
 				done.
 			</Lead>
 
-			<H2>Register a component</H2>
+			<Heading level={2}>Register a component</Heading>
 			<p>
 				<C>getComponentMeta()</C> calls can live anywhere in{" "}
 				<C>{"src/**/*.tsx"}</C> — no special filename required and no id to
@@ -42,7 +42,7 @@ const meta = getComponentMeta(Button, {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Render stories</H2>
+			<Heading level={2}>Render stories</Heading>
 			<p>
 				Pass the handle to any story component. They are type-safe: required
 				props not covered by <C>defaultProps</C> must be supplied via{" "}
@@ -71,7 +71,7 @@ import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 				each rebuild.
 			</Callout>
 
-			<H2>What each story does</H2>
+			<Heading level={2}>What each story does</Heading>
 			<MDTable
 				head={["Component", "Renders"]}
 				rows={[

@@ -1,7 +1,7 @@
 import {
 	C,
 	CodeBlock,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 } from "@dennation/typebook/react";
@@ -18,7 +18,7 @@ function PageLayout() {
 				mount, and lays out an optional sidebar next to the scrollable content.
 			</Lead>
 
-			<H2>Usage</H2>
+			<Heading level={2}>Usage</Heading>
 			<p>
 				Wrap your route's outlet in <C>{"<Layout>"}</C> and pass a{" "}
 				<C>sidebar</C> node. With a sidebar the root becomes a two-column grid (
@@ -53,7 +53,7 @@ function RootComponent() {
 				choice.
 			</p>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference
 				props={[
 					{

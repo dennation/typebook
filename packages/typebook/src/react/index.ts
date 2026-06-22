@@ -41,7 +41,7 @@ export {
 	type CalloutType,
 } from "./shared/ui/callout/index";
 export { Cards, DocCard, type DocCardProps } from "./shared/ui/cards/index";
-export { H2, H3 } from "./shared/ui/headings/index";
+export { Heading, type HeadingProps } from "./shared/ui/headings/index";
 export { MDTable, type MDTableProps } from "./shared/ui/md-table/index";
 export { ErrorBoundary } from "./shared/ui/preview/index";
 export {

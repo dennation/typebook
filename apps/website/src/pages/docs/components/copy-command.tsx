@@ -2,7 +2,7 @@ import {
 	C,
 	CopyCommand,
 	getComponentMeta,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 	propsToRows,
@@ -22,12 +22,12 @@ function PageCopyCommand() {
 				button with a brief confirmation state.
 			</Lead>
 
-			<H2>Example</H2>
+			<Heading level={2}>Example</Heading>
 			<Snippet name="copy-command-example">
 				{() => <CopyCommand cmd="pnpm add @dennation/typebook" />}
 			</Snippet>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference props={propsToRows(meta.props)} />
 			<DocsFooter
 				prev={{ to: "/docs/components/navigation", title: "Navigation" }}

@@ -2,7 +2,7 @@ import {
 	C,
 	Callout,
 	CodeBlock,
-	H2,
+	Heading,
 	Lead,
 	Steps,
 } from "@dennation/typebook/react";
@@ -27,7 +27,7 @@ function PageInstallation() {
 				esbuild and Farm are supported.
 			</Callout>
 
-			<H2>Install the package</H2>
+			<Heading level={2}>Install the package</Heading>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					label="pnpm"
@@ -52,7 +52,7 @@ function PageInstallation() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Wire it up</H2>
+			<Heading level={2}>Wire it up</Heading>
 			<Steps.Root>
 				<Steps.Step title="Add the bundler plugin">
 					<p>

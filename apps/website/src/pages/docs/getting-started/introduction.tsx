@@ -4,7 +4,7 @@ import {
 	Cards,
 	CodeBlock,
 	DocCard,
-	H2,
+	Heading,
 	Lead,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
@@ -35,7 +35,7 @@ function PageIntroduction() {
 				reading: the sidebar is <C>DocsSidebar</C>, this note is <C>Callout</C>.
 			</Callout>
 
-			<H2>How it works</H2>
+			<Heading level={2}>How it works</Heading>
 			<p>
 				The <C>typebook()</C> bundler plugin scans your sources for{" "}
 				<C>getComponentMeta(Component)</C> calls, resolves prop types, default
@@ -64,7 +64,7 @@ const meta = getComponentMeta(Button, {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Key design decisions</H2>
+			<Heading level={2}>Key design decisions</Heading>
 			<p>
 				Metadata is <strong>injected at the call site</strong>, not emitted to a
 				registry file — data lives where it's used, with no string-id
@@ -77,7 +77,7 @@ const meta = getComponentMeta(Button, {
 				privileged.
 			</p>
 
-			<H2>Next steps</H2>
+			<Heading level={2}>Next steps</Heading>
 			<Cards>
 				<DocCard
 					icon={<Rocket size={20} />}

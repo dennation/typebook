@@ -1,6 +1,6 @@
 import {
 	C,
-	H2,
+	Heading,
 	Lead,
 	MDTable,
 	PropsReference,
@@ -19,7 +19,7 @@ function PageTables() {
 				.
 			</Lead>
 
-			<H2>MDTable</H2>
+			<Heading level={2}>MDTable</Heading>
 			<Snippet name="mdtable-example">
 				{() => (
 					<MDTable
@@ -49,7 +49,7 @@ function PageTables() {
 				]}
 			/>
 
-			<H2>PropsReference</H2>
+			<Heading level={2}>PropsReference</Heading>
 			<p>
 				One striped row per prop with the name, type badge, required marker,
 				default value and description:
@@ -92,7 +92,7 @@ function PageTables() {
 			/>
 			<DocsFooter
 				prev={{ to: "/docs/components/accordion", title: "Accordion" }}
-				next={{ to: "/docs/components/prose", title: "Prose" }}
+				next={{ to: "/docs/components/headings", title: "Headings" }}
 			/>
 		</>
 	);

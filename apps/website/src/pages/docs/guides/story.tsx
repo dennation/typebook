@@ -1,4 +1,10 @@
-import { C, Callout, CodeBlock, H2, Lead } from "@dennation/typebook/react";
+import {
+	C,
+	Callout,
+	CodeBlock,
+	Heading,
+	Lead,
+} from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
@@ -14,7 +20,7 @@ function PageStory() {
 				to show.
 			</Lead>
 
-			<H2>The handle</H2>
+			<Heading level={2}>The handle</Heading>
 			<p>
 				Everything starts with a handle. <C>getComponentMeta()</C> returns a
 				self-contained object; the plugin injects the component's extracted
@@ -35,7 +41,7 @@ const meta = getComponentMeta(Button, {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>One variant — Story</H2>
+			<Heading level={2}>One variant — Story</Heading>
 			<p>
 				<C>{"<Story>"}</C> renders a single variant inside a preview frame:{" "}
 				<C>defaultProps</C> merged with whatever you pass via <C>props</C>.
@@ -55,7 +61,7 @@ const meta = getComponentMeta(Button, {
 				reference.
 			</p>
 
-			<H2>One axis — Variants</H2>
+			<Heading level={2}>One axis — Variants</Heading>
 			<p>
 				<C>{"<Variants>"}</C> renders a labeled grid along one prop axis,
 				described by a variant config — <C>allOf()</C>, <C>values()</C> or{" "}
@@ -77,7 +83,7 @@ const meta = getComponentMeta(Button, {
 				prop reference.
 			</p>
 
-			<H2>Two axes — Matrix</H2>
+			<Heading level={2}>Two axes — Matrix</Heading>
 			<p>
 				<C>{"<Matrix>"}</C> renders the cross-product of two prop axes as a
 				table: one axis across the columns (<C>x</C>), one or more stacked down

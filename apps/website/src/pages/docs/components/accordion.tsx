@@ -2,7 +2,7 @@ import {
 	Accordion,
 	C,
 	getComponentMeta,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 	propsToRows,
@@ -22,7 +22,7 @@ function PageAccordion() {
 				previously open one.
 			</Lead>
 
-			<H2>Example</H2>
+			<Heading level={2}>Example</Heading>
 			<Snippet name="accordion-example">
 				{() => (
 					<Accordion
@@ -45,7 +45,7 @@ function PageAccordion() {
 				)}
 			</Snippet>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference props={propsToRows(meta.props)} />
 			<DocsFooter
 				prev={{ to: "/docs/components/cards", title: "Cards" }}

@@ -2,7 +2,7 @@ import {
 	C,
 	CodeBlock,
 	ErrorBoundary,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 	Snippet,
@@ -24,7 +24,7 @@ function PageErrorBoundary() {
 				broken example never takes down the whole page.
 			</Lead>
 
-			<H2>Example</H2>
+			<Heading level={2}>Example</Heading>
 			<p>
 				The child below throws on render; the boundary renders its default
 				fallback (the error message) in place:
@@ -37,7 +37,7 @@ function PageErrorBoundary() {
 				)}
 			</Snippet>
 
-			<H2>Custom fallback</H2>
+			<Heading level={2}>Custom fallback</Heading>
 			<p>
 				Pass <C>fallback</C> to replace the default red error box with your own
 				node.
@@ -52,7 +52,7 @@ function PageErrorBoundary() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference
 				props={[
 					{

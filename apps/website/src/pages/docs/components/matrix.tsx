@@ -1,7 +1,7 @@
 import {
 	C,
 	CodeBlock,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 } from "@dennation/typebook/react";
@@ -18,7 +18,7 @@ function PageMatrix() {
 				down the rows (<C>y</C>). Perfect for color × variant sweeps.
 			</Lead>
 
-			<H2>Usage</H2>
+			<Heading level={2}>Usage</Heading>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -40,7 +40,7 @@ import { Matrix } from "@dennation/typebook/react";
 				give you every combination of both against the x axis.
 			</p>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference
 				props={[
 					{
@@ -78,7 +78,7 @@ import { Matrix } from "@dennation/typebook/react";
 				]}
 			/>
 
-			<H2>Related</H2>
+			<Heading level={2}>Related</Heading>
 			<p>
 				A single axis is enough? Use{" "}
 				<Link to="/docs/components/variants">Variants</Link>. Just one variant?

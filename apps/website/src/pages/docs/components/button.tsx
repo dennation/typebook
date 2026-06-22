@@ -2,7 +2,7 @@ import {
 	Button,
 	C,
 	CodeBlock,
-	H2,
+	Heading,
 	Lead,
 	PropsReference,
 	Snippet,
@@ -20,7 +20,7 @@ function PageButton() {
 				<C>as="a"</C> escape hatch to render an anchor with the same styling.
 			</Lead>
 
-			<H2>Example</H2>
+			<Heading level={2}>Example</Heading>
 			<Snippet name="button-variants">
 				{() => (
 					<div className="flex flex-wrap items-center gap-3">
@@ -32,7 +32,7 @@ function PageButton() {
 				)}
 			</Snippet>
 
-			<H2>As an anchor</H2>
+			<Heading level={2}>As an anchor</Heading>
 			<p>
 				Pass <C>as="a"</C> to render an <C>{"<a>"}</C> with the button styling —
 				the props then accept anchor attributes such as <C>href</C>.
@@ -45,7 +45,7 @@ function PageButton() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Composing the class</H2>
+			<Heading level={2}>Composing the class</Heading>
 			<p>
 				When you need the button styling on an element you can't replace (a
 				router <C>{"<Link>"}</C>, say), <C>buttonClass(variant, size, extra)</C>{" "}
@@ -67,7 +67,7 @@ import { ChevronRight } from "lucide-react";
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<H2>Props</H2>
+			<Heading level={2}>Props</Heading>
 			<PropsReference
 				props={[
 					{
