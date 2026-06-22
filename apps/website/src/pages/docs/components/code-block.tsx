@@ -47,25 +47,25 @@ function PageCodeBlock() {
 
 			<H3>Tabs</H3>
 			<P>
-				Pass <C>tabs</C> instead of <C>code</C> to stack variants — the classic
-				npm/pnpm/yarn switcher:
+				Nest <C>CodeBlock.Tab</C> children instead of <C>code</C> to stack
+				variants — the classic npm/pnpm/yarn switcher:
 			</P>
-			<CodeBlock
-				tabs={[
-					{
-						label: "pnpm",
-						lang: "bash",
-						icon: <SquareTerminal size={13} />,
-						code: "pnpm add @dennation/typebook",
-					},
-					{
-						label: "npm",
-						lang: "bash",
-						icon: <SquareTerminal size={13} />,
-						code: "npm install @dennation/typebook",
-					},
-				]}
-			/>
+			<CodeBlock>
+				<CodeBlock.Tab
+					label="pnpm"
+					lang="bash"
+					icon={<SquareTerminal size={13} />}
+				>
+					{`pnpm add @dennation/typebook`}
+				</CodeBlock.Tab>
+				<CodeBlock.Tab
+					label="npm"
+					lang="bash"
+					icon={<SquareTerminal size={13} />}
+				>
+					{`npm install @dennation/typebook`}
+				</CodeBlock.Tab>
+			</CodeBlock>
 
 			<H2>Props</H2>
 			<PropsReference props={propsToRows(codeBlock.props)} />

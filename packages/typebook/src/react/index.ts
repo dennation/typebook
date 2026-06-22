@@ -3,7 +3,8 @@
 export {
 	CodeBlock,
 	type CodeBlockProps,
-	type CodeTab,
+	CodeBlockTab,
+	type CodeBlockTabProps,
 } from "./features/code-block/index";
 export {
 	CopyCommand,
