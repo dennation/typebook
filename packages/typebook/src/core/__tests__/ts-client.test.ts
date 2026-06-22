@@ -414,6 +414,40 @@ describe("complex unions", () => {
 	});
 });
 
+// --- JSDoc tags ---
+
+describe("JSDoc tags", () => {
+	let props: PropInfo[];
+
+	beforeAll(async () => {
+		const result = await extractProps("stories/WithJsDoc.stories.tsx");
+		expect(result).not.toBeNull();
+		props = result!;
+	});
+
+	test("prose description is extracted", () => {
+		const size = findProp(props, "size")!;
+		expect(size.description).toBe("The visual size of the control.");
+	});
+
+	test("@deprecated with text → the tag's text", () => {
+		const color = findProp(props, "color")!;
+		expect(color.deprecated).toBe("use `tone` instead");
+	});
+
+	test("bare @deprecated → true", () => {
+		const legacy = findProp(props, "legacy")!;
+		expect(legacy.deprecated).toBe(true);
+	});
+
+	test("non-deprecated prop → deprecated is undefined", () => {
+		const size = findProp(props, "size")!;
+		expect(size.deprecated).toBeUndefined();
+		const tone = findProp(props, "tone")!;
+		expect(tone.deprecated).toBeUndefined();
+	});
+});
+
 // --- Edge cases ---
 
 describe("edge cases", () => {

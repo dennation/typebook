@@ -332,6 +332,10 @@ export class TypeScriptClient {
 			// (applied later from the component's own source).
 			const defaultTag = getSymbolDefaultTag(checker, prop);
 			if (defaultTag) info.defaultValue = defaultTag;
+			// `@deprecated` JSDoc tag — `true` for a bare tag, the tag's text (the
+			// replacement / migration note) when it carries one.
+			const deprecated = getSymbolDeprecation(checker, prop);
+			if (deprecated !== undefined) info.deprecated = deprecated;
 
 			props.push(info);
 		}
@@ -471,6 +475,24 @@ function getSymbolDefaultTag(
 		}
 	}
 	return "";
+}
+
+/**
+ * Read a prop's `@deprecated` JSDoc tag. Returns the tag's text (a replacement /
+ * migration note) when present, `true` for a bare `@deprecated`, or `undefined`
+ * when the prop carries no such tag. Like other JSDoc tags it survives into
+ * emitted `.d.ts`, so it works for components documented from a built package.
+ */
+function getSymbolDeprecation(
+	checker: ts.TypeChecker,
+	symbol: ts.Symbol,
+): string | true | undefined {
+	for (const tag of symbol.getJsDocTags(checker)) {
+		if (tag.name === "deprecated") {
+			return ts.displayPartsToString(tag.text).trim() || true;
+		}
+	}
+	return undefined;
 }
 
 /**

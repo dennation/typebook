@@ -19,6 +19,7 @@ export function propsToRows(
 			type: formatPropType(p),
 			required: !p.optional,
 			default: p.defaultValue,
+			deprecated: p.deprecated,
 			desc: p.description ?? "",
 		}));
 }
