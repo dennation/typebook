@@ -5,7 +5,6 @@ import {
 	H2,
 	Lead,
 	MDTable,
-	P,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Palette } from "lucide-react";
@@ -22,13 +21,13 @@ function PageTheming() {
 			</Lead>
 
 			<H2>Design tokens</H2>
-			<P>
+			<p>
 				The single source of truth is <C>theme.css</C> inside the package. It
 				defines the palette as variables and re-exports them into Tailwind
 				utilities via <C>@theme inline</C> — so <C>bg-bg</C>,{" "}
 				<C>text-fg-muted</C>, <C>border-border</C>, <C>text-accent</C> stay
 				live.
-			</P>
+			</p>
 			<MDTable
 				head={["Token group", "Examples", "Purpose"]}
 				rows={[
@@ -61,12 +60,12 @@ function PageTheming() {
 			/>
 
 			<H2>Dark mode</H2>
-			<P>
+			<p>
 				A <C>[data-theme="dark"]</C> block overrides the same variable names.
 				Toggling is one attribute on <C>{"<html>"}</C>; the package ships{" "}
 				<C>{"<ThemeToggle/>"}</C> which also persists the choice in{" "}
 				<C>localStorage</C> and respects the system preference.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab file="index.html" lang="tsx">
 					{`<script>
@@ -79,11 +78,11 @@ function PageTheming() {
 			</CodeBlock.Root>
 
 			<H2>Using the tokens in your site</H2>
-			<P>
+			<p>
 				A consumer that renders its own pages (like this site) imports the
 				shared tokens and lets Tailwind scan the package sources so the
 				components' utilities are emitted:
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/styles.css"

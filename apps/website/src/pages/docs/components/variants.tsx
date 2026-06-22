@@ -4,7 +4,6 @@ import {
 	CodeBlock,
 	H2,
 	Lead,
-	P,
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
@@ -88,12 +87,12 @@ import { Variants } from "@dennation/typebook/react";
 			/>
 
 			<H2>Related</H2>
-			<P>
-				One variant at a time? Use <Link to="/docs/components/story">Story</Link>.
-				Two axes crossed in a table? Use{" "}
-				<Link to="/docs/components/matrix">Matrix</Link>. For the big picture see{" "}
-				<Link to="/docs/guides/story">Rendering stories</Link>.
-			</P>
+			<p>
+				One variant at a time? Use{" "}
+				<Link to="/docs/components/story">Story</Link>. Two axes crossed in a
+				table? Use <Link to="/docs/components/matrix">Matrix</Link>. For the big
+				picture see <Link to="/docs/guides/story">Rendering stories</Link>.
+			</p>
 			<DocsFooter
 				prev={{ to: "/docs/components/story", title: "Story" }}
 				next={{ to: "/docs/components/matrix", title: "Matrix" }}

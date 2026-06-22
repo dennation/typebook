@@ -6,7 +6,6 @@ import {
 	H2,
 	H3,
 	Lead,
-	P,
 	PropsReference,
 	propsToRows,
 } from "@dennation/typebook/react";
@@ -31,12 +30,12 @@ function PageCodeBlock() {
 			</Lead>
 
 			<H2>One tab</H2>
-			<P>
+			<p>
 				A lone <C>CodeBlock.Tab</C> is the everyday case. Add <C>file</C> for a
 				filename label, <C>showLineNumbers</C> for a gutter, and{" "}
 				<C>highlightLines</C> to call out specific lines (1-based). The tab{" "}
 				<C>label</C> defaults to the <C>file</C>, else the <C>lang</C>.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="example.ts"
@@ -53,10 +52,10 @@ function PageCodeBlock() {
 			</CodeBlock.Root>
 
 			<H3>Several tabs</H3>
-			<P>
+			<p>
 				Add more <C>CodeBlock.Tab</C> children to stack variants — the classic
 				npm/pnpm/yarn switcher:
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					label="pnpm"
@@ -75,10 +74,10 @@ function PageCodeBlock() {
 			</CodeBlock.Root>
 
 			<H2>Tab props</H2>
-			<P>
+			<p>
 				<C>CodeBlock.Root</C> takes only its <C>CodeBlock.Tab</C> children;
 				every code option lives on the tab.
-			</P>
+			</p>
 			<PropsReference props={propsToRows(meta.props)} />
 
 			<Callout type="info" title="Async by design">

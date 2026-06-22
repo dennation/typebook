@@ -1,12 +1,4 @@
-import {
-	A,
-	C,
-	CodeBlock,
-	H2,
-	Lead,
-	P,
-	Snippet,
-} from "@dennation/typebook/react";
+import { A, C, CodeBlock, H2, Lead, Snippet } from "@dennation/typebook/react";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Palette, Rocket, Search, Zap } from "lucide-react";
@@ -38,11 +30,11 @@ function PageIcons() {
 			</Snippet>
 
 			<H2>Usage</H2>
-			<P>
+			<p>
 				Import the glyph you need and set <C>size</C> (square, in px). lucide
 				icons take <C>strokeWidth</C>; Tabler icons take <C>stroke</C>. Color
 				follows the surrounding text.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab lang="tsx">
 					{`import { Search, ChevronRight } from "lucide-react";
@@ -55,14 +47,14 @@ import { IconBrandGithub } from "@tabler/icons-react";
 			</CodeBlock.Root>
 
 			<H2>Stroke width</H2>
-			<P>
+			<p>
 				Both libraries default to a <C>2</C> px stroke, and that's the weight we
 				use everywhere across the docs — sidebar, header, inline glyphs — so the
 				icon set reads consistently. Override <C>strokeWidth</C> (lucide) or{" "}
 				<C>stroke</C> (Tabler) only for large decorative glyphs, where a lighter{" "}
 				<C>1.2</C>–<C>1.5</C> weight keeps them from feeling heavy (as on the{" "}
 				<C>Zap</C> above).
-			</P>
+			</p>
 
 			<DocsFooter
 				prev={{ to: "/docs/guides/snippet", title: "Live snippets" }}

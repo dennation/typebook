@@ -6,7 +6,6 @@ import {
 	getComponentMeta,
 	H2,
 	Lead,
-	P,
 	PrevNextNav,
 	PropsReference,
 	propsToRows,
@@ -30,10 +29,10 @@ function PageNavigation() {
 			</Lead>
 
 			<H2>DocsSidebar</H2>
-			<P>
+			<p>
 				Collapsible sections with an active-item highlight and a mobile drawer
 				(≤820px). Data comes in as <C>DocsNavSection[]</C>.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="DocsPage.tsx"
@@ -51,10 +50,10 @@ function PageNavigation() {
 			</CodeBlock.Root>
 
 			<H2>DocsToc</H2>
-			<P>
+			<p>
 				The "On this page" outline. Feed it headings from <C>useDocHeadings</C>{" "}
 				— the active item follows the scroll (scrollspy).
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="DocsPage.tsx"

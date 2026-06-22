@@ -4,7 +4,6 @@ import {
 	CodeBlock,
 	H2,
 	Lead,
-	P,
 	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
@@ -34,10 +33,10 @@ function PageButton() {
 			</Snippet>
 
 			<H2>As an anchor</H2>
-			<P>
+			<p>
 				Pass <C>as="a"</C> to render an <C>{"<a>"}</C> with the button styling —
 				the props then accept anchor attributes such as <C>href</C>.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab lang="tsx">
 					{`<Button as="a" href="https://example.com" variant="ghost">
@@ -47,12 +46,12 @@ function PageButton() {
 			</CodeBlock.Root>
 
 			<H2>Composing the class</H2>
-			<P>
+			<p>
 				When you need the button styling on an element you can't replace (a
 				router <C>{"<Link>"}</C>, say), <C>buttonClass(variant, size, extra)</C>{" "}
 				returns the class string directly. <C>ARROW_CLASS</C> is a helper for a
 				trailing chevron that nudges right on hover.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="cta.tsx"

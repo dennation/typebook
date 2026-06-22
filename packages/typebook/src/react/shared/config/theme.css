@@ -240,6 +240,21 @@ button {
 	.doc-prose :is(p, li, blockquote) a .inline-code {
 		color: var(--accent);
 	}
+	/* hr / blockquote — bare tags in prose (no wrapper component). */
+	.doc-prose hr {
+		border: 0;
+		border-top: 1px solid var(--border);
+		margin-block: calc(40px * var(--density));
+	}
+	.doc-prose blockquote {
+		margin: 0;
+		padding-left: 18px;
+		padding-block: 4px;
+		border-left: 3px solid var(--accent-soft-border);
+		color: var(--fg-muted);
+		font-style: italic;
+		font-size: 15.5px;
+	}
 
 	/* Steps — numbered procedure built on CSS counters + connector line
 	   (both pseudo-element only). */

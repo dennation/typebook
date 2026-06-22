@@ -4,7 +4,6 @@ import {
 	CodeBlock,
 	H2,
 	Lead,
-	P,
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
@@ -21,10 +20,10 @@ function PageSnippet() {
 			</Lead>
 
 			<H2>Usage</H2>
-			<P>
+			<p>
 				The child is a <strong>component function</strong>, not raw JSX. The
 				simplest form is an inline arrow; the shown source is its body.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -43,11 +42,11 @@ function PageSnippet() {
 </Snippet>`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<P>
+			<p>
 				Because the example is a component, it can use hooks — give the inline
 				function a capitalized name so the rules-of-hooks lint recognises it as
 				a component:
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/counter.tsx"
@@ -62,14 +61,14 @@ function PageSnippet() {
 </Snippet>`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<P>
+			<p>
 				At build time the plugin finds every <C>{"<Snippet>"}</C>, slices the
 				inline function's <C>body</C> straight from the file, dedents it and{" "}
 				<strong>injects it back onto the element</strong> as a{" "}
 				<C>__snippetSource</C> prop. At runtime the toggle reads that prop
 				directly (no context, no generated file, no fetch) and renders it
 				through <C>CodeBlock</C>.
-			</P>
+			</p>
 
 			<Callout type="warning" title="Inline child must be a function">
 				Without <C>source</C>, the child must be an <strong>inline</strong>{" "}
@@ -83,13 +82,13 @@ function PageSnippet() {
 			<H2>
 				Reference an example with <C>source</C>
 			</H2>
-			<P>
+			<p>
 				Sometimes the example already lives somewhere — a component in this file
 				or imported from another. Point <C>source</C> at it instead of inlining.
 				The build resolves the reference through the TypeScript program
 				(following an import into another module), slices that function's body,
 				and injects it as the shown source.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -103,14 +102,14 @@ import { ButtonDemo } from "../demos/ButtonDemo";
 <Snippet source={ButtonDemo} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<P>
+			<p>
 				With <C>source</C>, <C>children</C> becomes an optional{" "}
 				<strong>layout render-prop</strong>. It receives{" "}
 				<C>{"{ preview, source, code, name }"}</C> — the live demo, the source
 				already rendered as a <C>CodeBlock</C>, the raw source text, and the{" "}
 				<C>name</C> label — so you decide where and how each appears. Omit{" "}
 				<C>children</C> for the default card.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"

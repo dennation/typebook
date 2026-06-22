@@ -4,7 +4,6 @@ import {
 	ErrorBoundary,
 	H2,
 	Lead,
-	P,
 	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
@@ -26,10 +25,10 @@ function PageErrorBoundary() {
 			</Lead>
 
 			<H2>Example</H2>
-			<P>
+			<p>
 				The child below throws on render; the boundary renders its default
 				fallback (the error message) in place:
-			</P>
+			</p>
 			<Snippet name="error-boundary-example">
 				{() => (
 					<ErrorBoundary>
@@ -39,10 +38,10 @@ function PageErrorBoundary() {
 			</Snippet>
 
 			<H2>Custom fallback</H2>
-			<P>
+			<p>
 				Pass <C>fallback</C> to replace the default red error box with your own
 				node.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab lang="tsx">
 					{`import { ErrorBoundary } from "@dennation/typebook/react";

@@ -5,7 +5,6 @@ import {
 	getComponentMeta,
 	H2,
 	Lead,
-	P,
 	PropsReference,
 	propsToRows,
 	Snippet,
@@ -50,9 +49,9 @@ function PageCards() {
 
 			<H2>DocCard props</H2>
 			<PropsReference props={propsToRows(meta.props)} />
-			<P>
+			<p>
 				<C>Cards</C> itself takes only <C>children</C>.
-			</P>
+			</p>
 			<DocsFooter
 				prev={{ to: "/docs/components/steps", title: "Steps" }}
 				next={{ to: "/docs/components/accordion", title: "Accordion" }}

@@ -3,7 +3,6 @@ import {
 	getComponentMeta,
 	H2,
 	Lead,
-	P,
 	PropsReference,
 	propsToRows,
 	Snippet,
@@ -31,12 +30,12 @@ function PageTabs() {
 						tabs={[
 							{
 								label: "First",
-								content: <P>Content of the first panel.</P>,
+								content: <p>Content of the first panel.</p>,
 							},
 							{
 								label: "Second",
 								content: (
-									<P>Content of the second panel — any ReactNode works.</P>
+									<p>Content of the second panel — any ReactNode works.</p>
 								),
 							},
 						]}
