@@ -5,7 +5,6 @@ import {
 	H2,
 	Lead,
 	P,
-	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -15,71 +14,109 @@ function PageStory() {
 	return (
 		<>
 			<Lead>
-				<C>{"<Story>"}</C> renders a single variant of a registered component
-				inside a preview frame — the component with its <C>defaultProps</C>{" "}
-				merged with whatever you pass via <C>props</C>.
+				Typebook gives you a small family of components for rendering stories
+				from a single handle: <C>{"<Story>"}</C>, <C>{"<Variants>"}</C> and{" "}
+				<C>{"<Matrix>"}</C>. They all read the same{" "}
+				<C>getComponentMeta()</C> handle — pick the one that matches how much of
+				the prop space you want to show.
 			</Lead>
 
-			<H2>Usage</H2>
+			<H2>The handle</H2>
+			<P>
+				Everything starts with a handle. <C>getComponentMeta()</C> returns a
+				self-contained object; the plugin injects the component's extracted
+				props into it at build time.
+			</P>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
 					icon={<IconBrandReact size={14} />}
 					lang="tsx"
 				>
-					{`import { Story } from "@dennation/typebook/react";
+					{`import { getComponentMeta } from "@dennation/typebook/react";
+import { Button } from "../components/Button";
 
-<Story of={meta} />
-<Story of={meta} props={{ size: "lg", children: "Large" }} />`}
+const meta = getComponentMeta(Button, {
+  defaultProps: { children: "Click me" },
+});`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
+			<H2>One variant — Story</H2>
+			<P>
+				<C>{"<Story>"}</C> renders a single variant inside a preview frame:{" "}
+				<C>defaultProps</C> merged with whatever you pass via <C>props</C>.
+			</P>
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`<Story of={meta} />
+<Story of={meta} props={{ size: "lg", children: "Large" }} />`}
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
+			<P>
+				See <Link to="/docs/components/story">Story</Link> for the full prop
+				reference.
+			</P>
+
+			<H2>One axis — Variants</H2>
+			<P>
+				<C>{"<Variants>"}</C> renders a labeled grid along one prop axis,
+				described by a variant config — <C>allOf()</C>, <C>values()</C> or{" "}
+				<C>generate()</C>.
+			</P>
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`import { allOf } from "@dennation/typebook/react";
+
+<Variants of={meta} items={allOf(meta, "size")} />`}
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
+			<P>
+				See <Link to="/docs/components/variants">Variants</Link> for the full
+				prop reference.
+			</P>
+
+			<H2>Two axes — Matrix</H2>
+			<P>
+				<C>{"<Matrix>"}</C> renders the cross-product of two prop axes as a
+				table: one axis across the columns (<C>x</C>), one or more stacked down
+				the rows (<C>y</C>).
+			</P>
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`<Matrix
+  of={meta}
+  x={allOf(meta, "color")}
+  y={[allOf(meta, "variant")]}
+/>`}
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
+			<P>
+				See <Link to="/docs/components/matrix">Matrix</Link> for the full prop
+				reference.
+			</P>
+
 			<Callout type="info" title="Type-safe props">
-				The <C>props</C> prop is phantom-typed: if the component has required
-				props that <C>defaultProps</C> doesn't cover, TypeScript makes{" "}
-				<C>props</C> mandatory and demands exactly the missing keys.
+				All three are phantom-typed on the handle: required props that{" "}
+				<C>defaultProps</C> doesn't cover must be supplied via <C>props</C> at
+				the call site, with exactly the missing keys demanded.
 			</Callout>
 
-			<H2>Props</H2>
-			<PropsReference
-				props={[
-					{
-						name: "of",
-						type: "ComponentMeta",
-						required: true,
-						desc: (
-							<>
-								The handle returned by <C>getComponentMeta()</C>.
-							</>
-						),
-					},
-					{
-						name: "props",
-						type: "Partial<Props> & MissingProps",
-						desc: (
-							<>
-								Per-story prop overrides; merged over <C>defaultProps</C>.
-								Required when the registration leaves required props uncovered.
-							</>
-						),
-					},
-					{
-						name: "isolate",
-						type: "boolean",
-						desc: "Render the preview inside an iframe to isolate styles and layout.",
-					},
-				]}
-			/>
-
-			<H2>Related</H2>
-			<P>
-				Need several values of one prop at once? Use{" "}
-				<Link to="/docs/guides/variants">Variant grids</Link>. Two axes? Use{" "}
-				<Link to="/docs/guides/matrix">Prop matrices</Link>.
-			</P>
 			<DocsFooter
 				prev={{ to: "/docs/guides/theming", title: "Theming" }}
-				next={{ to: "/docs/guides/variants", title: "Variant grids" }}
+				next={{ to: "/docs/guides/playground", title: "Interactive playground" }}
 			/>
 		</>
 	);

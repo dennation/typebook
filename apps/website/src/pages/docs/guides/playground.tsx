@@ -75,7 +75,7 @@ function PagePlayground() {
 				objects) are shown read-only with their type.
 			</P>
 			<DocsFooter
-				prev={{ to: "/docs/guides/matrix", title: "Prop matrices" }}
+				prev={{ to: "/docs/guides/story", title: "Rendering stories" }}
 				next={{ to: "/docs/guides/snippet", title: "Live snippets" }}
 			/>
 		</>

@@ -83,7 +83,7 @@ function PageCallout() {
 				/>
 			</Cards>
 			<DocsFooter
-				prev={{ to: "/docs/guides/icons", title: "Icons" }}
+				prev={{ to: "/docs/components/matrix", title: "Matrix" }}
 				next={{ to: "/docs/components/code-block", title: "CodeBlock" }}
 			/>
 		</>

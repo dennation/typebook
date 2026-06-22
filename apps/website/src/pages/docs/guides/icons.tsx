@@ -66,7 +66,7 @@ import { IconBrandGithub } from "@tabler/icons-react";
 
 			<DocsFooter
 				prev={{ to: "/docs/guides/snippet", title: "Live snippets" }}
-				next={{ to: "/docs/components/callout", title: "Callout" }}
+				next={{ to: "/docs/components/story", title: "Story" }}
 			/>
 		</>
 	);

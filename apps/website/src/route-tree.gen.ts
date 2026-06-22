@@ -12,23 +12,24 @@ import { Route as rootRouteImport } from './pages/__root'
 import { Route as DocsRouteRouteImport } from './pages/docs/route'
 import { Route as IndexRouteImport } from './pages/index'
 import { Route as DocsIndexRouteImport } from './pages/docs/index'
-import { Route as DocsGuidesVariantsRouteImport } from './pages/docs/guides/variants'
 import { Route as DocsGuidesThemingRouteImport } from './pages/docs/guides/theming'
 import { Route as DocsGuidesStoryRouteImport } from './pages/docs/guides/story'
 import { Route as DocsGuidesSnippetRouteImport } from './pages/docs/guides/snippet'
 import { Route as DocsGuidesPlaygroundRouteImport } from './pages/docs/guides/playground'
-import { Route as DocsGuidesMatrixRouteImport } from './pages/docs/guides/matrix'
+import { Route as DocsGuidesIconsRouteImport } from './pages/docs/guides/icons'
 import { Route as DocsGettingStartedQuickStartRouteImport } from './pages/docs/getting-started/quick-start'
 import { Route as DocsGettingStartedIntroductionRouteImport } from './pages/docs/getting-started/introduction'
 import { Route as DocsGettingStartedInstallationRouteImport } from './pages/docs/getting-started/installation'
+import { Route as DocsComponentsVariantsRouteImport } from './pages/docs/components/variants'
 import { Route as DocsComponentsThemeToggleRouteImport } from './pages/docs/components/theme-toggle'
 import { Route as DocsComponentsTabsRouteImport } from './pages/docs/components/tabs'
 import { Route as DocsComponentsTablesRouteImport } from './pages/docs/components/tables'
+import { Route as DocsComponentsStoryRouteImport } from './pages/docs/components/story'
 import { Route as DocsComponentsStepsRouteImport } from './pages/docs/components/steps'
 import { Route as DocsComponentsProseRouteImport } from './pages/docs/components/prose'
 import { Route as DocsComponentsNavigationRouteImport } from './pages/docs/components/navigation'
+import { Route as DocsComponentsMatrixRouteImport } from './pages/docs/components/matrix'
 import { Route as DocsComponentsLayoutRouteImport } from './pages/docs/components/layout'
-import { Route as DocsGuidesIconsRouteImport } from './pages/docs/guides/icons'
 import { Route as DocsComponentsErrorBoundaryRouteImport } from './pages/docs/components/error-boundary'
 import { Route as DocsComponentsCopyCommandRouteImport } from './pages/docs/components/copy-command'
 import { Route as DocsComponentsCodeBlockRouteImport } from './pages/docs/components/code-block'
@@ -52,11 +53,6 @@ const DocsIndexRoute = DocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DocsRouteRoute,
 } as any)
-const DocsGuidesVariantsRoute = DocsGuidesVariantsRouteImport.update({
-  id: '/guides/variants',
-  path: '/guides/variants',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
 const DocsGuidesThemingRoute = DocsGuidesThemingRouteImport.update({
   id: '/guides/theming',
   path: '/guides/theming',
@@ -77,9 +73,9 @@ const DocsGuidesPlaygroundRoute = DocsGuidesPlaygroundRouteImport.update({
   path: '/guides/playground',
   getParentRoute: () => DocsRouteRoute,
 } as any)
-const DocsGuidesMatrixRoute = DocsGuidesMatrixRouteImport.update({
-  id: '/guides/matrix',
-  path: '/guides/matrix',
+const DocsGuidesIconsRoute = DocsGuidesIconsRouteImport.update({
+  id: '/guides/icons',
+  path: '/guides/icons',
   getParentRoute: () => DocsRouteRoute,
 } as any)
 const DocsGettingStartedQuickStartRoute =
@@ -100,6 +96,11 @@ const DocsGettingStartedInstallationRoute =
     path: '/getting-started/installation',
     getParentRoute: () => DocsRouteRoute,
   } as any)
+const DocsComponentsVariantsRoute = DocsComponentsVariantsRouteImport.update({
+  id: '/components/variants',
+  path: '/components/variants',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
 const DocsComponentsThemeToggleRoute =
   DocsComponentsThemeToggleRouteImport.update({
     id: '/components/theme-toggle',
@@ -114,6 +115,11 @@ const DocsComponentsTabsRoute = DocsComponentsTabsRouteImport.update({
 const DocsComponentsTablesRoute = DocsComponentsTablesRouteImport.update({
   id: '/components/tables',
   path: '/components/tables',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsComponentsStoryRoute = DocsComponentsStoryRouteImport.update({
+  id: '/components/story',
+  path: '/components/story',
   getParentRoute: () => DocsRouteRoute,
 } as any)
 const DocsComponentsStepsRoute = DocsComponentsStepsRouteImport.update({
@@ -132,14 +138,14 @@ const DocsComponentsNavigationRoute =
     path: '/components/navigation',
     getParentRoute: () => DocsRouteRoute,
   } as any)
+const DocsComponentsMatrixRoute = DocsComponentsMatrixRouteImport.update({
+  id: '/components/matrix',
+  path: '/components/matrix',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
 const DocsComponentsLayoutRoute = DocsComponentsLayoutRouteImport.update({
   id: '/components/layout',
   path: '/components/layout',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
-const DocsGuidesIconsRoute = DocsGuidesIconsRouteImport.update({
-  id: '/guides/icons',
-  path: '/guides/icons',
   getParentRoute: () => DocsRouteRoute,
 } as any)
 const DocsComponentsErrorBoundaryRoute =
@@ -191,23 +197,24 @@ export interface FileRoutesByFullPath {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
-  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
+  '/docs/components/matrix': typeof DocsComponentsMatrixRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
+  '/docs/components/story': typeof DocsComponentsStoryRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
   '/docs/components/theme-toggle': typeof DocsComponentsThemeToggleRoute
+  '/docs/components/variants': typeof DocsComponentsVariantsRoute
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
-  '/docs/guides/matrix': typeof DocsGuidesMatrixRoute
+  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
   '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
   '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
-  '/docs/guides/variants': typeof DocsGuidesVariantsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -219,23 +226,24 @@ export interface FileRoutesByTo {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
-  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
+  '/docs/components/matrix': typeof DocsComponentsMatrixRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
+  '/docs/components/story': typeof DocsComponentsStoryRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
   '/docs/components/theme-toggle': typeof DocsComponentsThemeToggleRoute
+  '/docs/components/variants': typeof DocsComponentsVariantsRoute
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
-  '/docs/guides/matrix': typeof DocsGuidesMatrixRoute
+  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
   '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
   '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
-  '/docs/guides/variants': typeof DocsGuidesVariantsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -249,23 +257,24 @@ export interface FileRoutesById {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
-  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
+  '/docs/components/matrix': typeof DocsComponentsMatrixRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
+  '/docs/components/story': typeof DocsComponentsStoryRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
   '/docs/components/theme-toggle': typeof DocsComponentsThemeToggleRoute
+  '/docs/components/variants': typeof DocsComponentsVariantsRoute
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
-  '/docs/guides/matrix': typeof DocsGuidesMatrixRoute
+  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
   '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
   '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
-  '/docs/guides/variants': typeof DocsGuidesVariantsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -280,23 +289,24 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
-    | '/docs/guides/icons'
     | '/docs/components/layout'
+    | '/docs/components/matrix'
     | '/docs/components/navigation'
     | '/docs/components/prose'
     | '/docs/components/steps'
+    | '/docs/components/story'
     | '/docs/components/tables'
     | '/docs/components/tabs'
     | '/docs/components/theme-toggle'
+    | '/docs/components/variants'
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
-    | '/docs/guides/matrix'
+    | '/docs/guides/icons'
     | '/docs/guides/playground'
     | '/docs/guides/snippet'
     | '/docs/guides/story'
     | '/docs/guides/theming'
-    | '/docs/guides/variants'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -308,23 +318,24 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
-    | '/docs/guides/icons'
     | '/docs/components/layout'
+    | '/docs/components/matrix'
     | '/docs/components/navigation'
     | '/docs/components/prose'
     | '/docs/components/steps'
+    | '/docs/components/story'
     | '/docs/components/tables'
     | '/docs/components/tabs'
     | '/docs/components/theme-toggle'
+    | '/docs/components/variants'
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
-    | '/docs/guides/matrix'
+    | '/docs/guides/icons'
     | '/docs/guides/playground'
     | '/docs/guides/snippet'
     | '/docs/guides/story'
     | '/docs/guides/theming'
-    | '/docs/guides/variants'
   id:
     | '__root__'
     | '/'
@@ -337,23 +348,24 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
-    | '/docs/guides/icons'
     | '/docs/components/layout'
+    | '/docs/components/matrix'
     | '/docs/components/navigation'
     | '/docs/components/prose'
     | '/docs/components/steps'
+    | '/docs/components/story'
     | '/docs/components/tables'
     | '/docs/components/tabs'
     | '/docs/components/theme-toggle'
+    | '/docs/components/variants'
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
-    | '/docs/guides/matrix'
+    | '/docs/guides/icons'
     | '/docs/guides/playground'
     | '/docs/guides/snippet'
     | '/docs/guides/story'
     | '/docs/guides/theming'
-    | '/docs/guides/variants'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -384,13 +396,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof DocsRouteRoute
     }
-    '/docs/guides/variants': {
-      id: '/docs/guides/variants'
-      path: '/guides/variants'
-      fullPath: '/docs/guides/variants'
-      preLoaderRoute: typeof DocsGuidesVariantsRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
     '/docs/guides/theming': {
       id: '/docs/guides/theming'
       path: '/guides/theming'
@@ -419,11 +424,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsGuidesPlaygroundRouteImport
       parentRoute: typeof DocsRouteRoute
     }
-    '/docs/guides/matrix': {
-      id: '/docs/guides/matrix'
-      path: '/guides/matrix'
-      fullPath: '/docs/guides/matrix'
-      preLoaderRoute: typeof DocsGuidesMatrixRouteImport
+    '/docs/guides/icons': {
+      id: '/docs/guides/icons'
+      path: '/guides/icons'
+      fullPath: '/docs/guides/icons'
+      preLoaderRoute: typeof DocsGuidesIconsRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/getting-started/quick-start': {
@@ -447,6 +452,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsGettingStartedInstallationRouteImport
       parentRoute: typeof DocsRouteRoute
     }
+    '/docs/components/variants': {
+      id: '/docs/components/variants'
+      path: '/components/variants'
+      fullPath: '/docs/components/variants'
+      preLoaderRoute: typeof DocsComponentsVariantsRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
     '/docs/components/theme-toggle': {
       id: '/docs/components/theme-toggle'
       path: '/components/theme-toggle'
@@ -466,6 +478,13 @@ declare module '@tanstack/react-router' {
       path: '/components/tables'
       fullPath: '/docs/components/tables'
       preLoaderRoute: typeof DocsComponentsTablesRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/components/story': {
+      id: '/docs/components/story'
+      path: '/components/story'
+      fullPath: '/docs/components/story'
+      preLoaderRoute: typeof DocsComponentsStoryRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/components/steps': {
@@ -489,18 +508,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsComponentsNavigationRouteImport
       parentRoute: typeof DocsRouteRoute
     }
+    '/docs/components/matrix': {
+      id: '/docs/components/matrix'
+      path: '/components/matrix'
+      fullPath: '/docs/components/matrix'
+      preLoaderRoute: typeof DocsComponentsMatrixRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
     '/docs/components/layout': {
       id: '/docs/components/layout'
       path: '/components/layout'
       fullPath: '/docs/components/layout'
       preLoaderRoute: typeof DocsComponentsLayoutRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/guides/icons': {
-      id: '/docs/guides/icons'
-      path: '/guides/icons'
-      fullPath: '/docs/guides/icons'
-      preLoaderRoute: typeof DocsGuidesIconsRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/components/error-boundary': {
@@ -564,23 +583,24 @@ interface DocsRouteRouteChildren {
   DocsComponentsCodeBlockRoute: typeof DocsComponentsCodeBlockRoute
   DocsComponentsCopyCommandRoute: typeof DocsComponentsCopyCommandRoute
   DocsComponentsErrorBoundaryRoute: typeof DocsComponentsErrorBoundaryRoute
-  DocsGuidesIconsRoute: typeof DocsGuidesIconsRoute
   DocsComponentsLayoutRoute: typeof DocsComponentsLayoutRoute
+  DocsComponentsMatrixRoute: typeof DocsComponentsMatrixRoute
   DocsComponentsNavigationRoute: typeof DocsComponentsNavigationRoute
   DocsComponentsProseRoute: typeof DocsComponentsProseRoute
   DocsComponentsStepsRoute: typeof DocsComponentsStepsRoute
+  DocsComponentsStoryRoute: typeof DocsComponentsStoryRoute
   DocsComponentsTablesRoute: typeof DocsComponentsTablesRoute
   DocsComponentsTabsRoute: typeof DocsComponentsTabsRoute
   DocsComponentsThemeToggleRoute: typeof DocsComponentsThemeToggleRoute
+  DocsComponentsVariantsRoute: typeof DocsComponentsVariantsRoute
   DocsGettingStartedInstallationRoute: typeof DocsGettingStartedInstallationRoute
   DocsGettingStartedIntroductionRoute: typeof DocsGettingStartedIntroductionRoute
   DocsGettingStartedQuickStartRoute: typeof DocsGettingStartedQuickStartRoute
-  DocsGuidesMatrixRoute: typeof DocsGuidesMatrixRoute
+  DocsGuidesIconsRoute: typeof DocsGuidesIconsRoute
   DocsGuidesPlaygroundRoute: typeof DocsGuidesPlaygroundRoute
   DocsGuidesSnippetRoute: typeof DocsGuidesSnippetRoute
   DocsGuidesStoryRoute: typeof DocsGuidesStoryRoute
   DocsGuidesThemingRoute: typeof DocsGuidesThemingRoute
-  DocsGuidesVariantsRoute: typeof DocsGuidesVariantsRoute
 }
 
 const DocsRouteRouteChildren: DocsRouteRouteChildren = {
@@ -592,23 +612,24 @@ const DocsRouteRouteChildren: DocsRouteRouteChildren = {
   DocsComponentsCodeBlockRoute: DocsComponentsCodeBlockRoute,
   DocsComponentsCopyCommandRoute: DocsComponentsCopyCommandRoute,
   DocsComponentsErrorBoundaryRoute: DocsComponentsErrorBoundaryRoute,
-  DocsGuidesIconsRoute: DocsGuidesIconsRoute,
   DocsComponentsLayoutRoute: DocsComponentsLayoutRoute,
+  DocsComponentsMatrixRoute: DocsComponentsMatrixRoute,
   DocsComponentsNavigationRoute: DocsComponentsNavigationRoute,
   DocsComponentsProseRoute: DocsComponentsProseRoute,
   DocsComponentsStepsRoute: DocsComponentsStepsRoute,
+  DocsComponentsStoryRoute: DocsComponentsStoryRoute,
   DocsComponentsTablesRoute: DocsComponentsTablesRoute,
   DocsComponentsTabsRoute: DocsComponentsTabsRoute,
   DocsComponentsThemeToggleRoute: DocsComponentsThemeToggleRoute,
+  DocsComponentsVariantsRoute: DocsComponentsVariantsRoute,
   DocsGettingStartedInstallationRoute: DocsGettingStartedInstallationRoute,
   DocsGettingStartedIntroductionRoute: DocsGettingStartedIntroductionRoute,
   DocsGettingStartedQuickStartRoute: DocsGettingStartedQuickStartRoute,
-  DocsGuidesMatrixRoute: DocsGuidesMatrixRoute,
+  DocsGuidesIconsRoute: DocsGuidesIconsRoute,
   DocsGuidesPlaygroundRoute: DocsGuidesPlaygroundRoute,
   DocsGuidesSnippetRoute: DocsGuidesSnippetRoute,
   DocsGuidesStoryRoute: DocsGuidesStoryRoute,
   DocsGuidesThemingRoute: DocsGuidesThemingRoute,
-  DocsGuidesVariantsRoute: DocsGuidesVariantsRoute,
 }
 
 const DocsRouteRouteWithChildren = DocsRouteRoute._addFileChildren(
