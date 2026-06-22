@@ -28,24 +28,24 @@ function PageSteps() {
 			<H2>Example</H2>
 			<Snippet name="steps-example">
 				{() => (
-					<Steps>
-						<Step title="Install the package">
+					<Steps.Root>
+						<Steps.Step title="Install the package">
 							<P>
 								Any content works inside a step — paragraphs, code blocks,
 								callouts.
 							</P>
-						</Step>
-						<Step title="Wire the plugin">
+						</Steps.Step>
+						<Steps.Step title="Wire the plugin">
 							<CodeBlock.Root>
 								<CodeBlock.Tab lang="bash">
 									{`pnpm add @dennation/typebook`}
 								</CodeBlock.Tab>
 							</CodeBlock.Root>
-						</Step>
-						<Step title="Render a story">
+						</Steps.Step>
+						<Steps.Step title="Render a story">
 							<P>The connector line stops automatically at the last step.</P>
-						</Step>
-					</Steps>
+						</Steps.Step>
+					</Steps.Root>
 				)}
 			</Snippet>
 
