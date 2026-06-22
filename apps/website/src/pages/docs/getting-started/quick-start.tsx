@@ -57,12 +57,14 @@ const meta = getComponentMeta(Button, {
 					showLineNumbers
 				>
 					{`import { allOf } from "@dennation/typebook/react";
-import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
+import { Matrix, Story, Variants } from "@dennation/typebook/react";
 
 <Story of={meta} />
 <Variants of={meta} items={allOf(meta, "size")} />
 <Matrix of={meta} x={allOf(meta, "color")} y={[allOf(meta, "variant")]} />
-<Playground of={meta} />`}
+
+// add \`interactive\` to edit any preview's props in place
+<Story of={meta} interactive />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
@@ -87,10 +89,6 @@ import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 					[
 						<InlineCode key="c">{"<Matrix>"}</InlineCode>,
 						"A cross-product table of an x axis and y axes",
-					],
-					[
-						<InlineCode key="c">{"<Playground>"}</InlineCode>,
-						"Live preview + editable props table",
 					],
 					[
 						<InlineCode key="c">{"<Snippet>"}</InlineCode>,

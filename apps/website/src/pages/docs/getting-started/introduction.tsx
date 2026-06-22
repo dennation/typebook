@@ -23,16 +23,16 @@ function PageIntroduction() {
 				@dennation/typebook is a React component documentation library. Register
 				a component once — the bundler plugin extracts its prop types via the
 				TypeScript Compiler API and you render stories, variant grids, matrices
-				and interactive playgrounds on any page.
+				and interactive, editable previews on any page.
 			</Lead>
 			<Paragraph>
 				It ships two things that work together: a{" "}
 				<Strong>storybook runtime</Strong> (<InlineCode>Story</InlineCode>,{" "}
 				<InlineCode>Variants</InlineCode>, <InlineCode>Matrix</InlineCode>,{" "}
-				<InlineCode>Playground</InlineCode>, <InlineCode>Snippet</InlineCode>)
-				driven by build-time prop injection, and a{" "}
-				<Strong>docs component kit</Strong> (callouts, code blocks, tabs, steps,
-				sidebar — everything this site is built from).
+				<InlineCode>Snippet</InlineCode> — each with an optional{" "}
+				<InlineCode>interactive</InlineCode> mode) driven by build-time prop
+				injection, and a <Strong>docs component kit</Strong> (callouts, code
+				blocks, tabs, steps, sidebar — everything this site is built from).
 			</Paragraph>
 
 			<Callout type="info" title="This site is the demo">

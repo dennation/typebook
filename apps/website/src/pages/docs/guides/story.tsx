@@ -5,6 +5,7 @@ import {
 	InlineCode,
 	Lead,
 	Paragraph,
+	Strong,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -113,6 +114,26 @@ const meta = getComponentMeta(Button, {
 				reference.
 			</Paragraph>
 
+			<Heading level={2}>Shared options</Heading>
+			<Paragraph>
+				All three accept the same trio: <InlineCode>title</InlineCode> (a
+				caption above the preview), <InlineCode>showSource</InlineCode> (a "show
+				source" toggle, <Strong>on by default</Strong>) and{" "}
+				<InlineCode>interactive</InlineCode> (edit each preview's props in place
+				— see <Link to="/docs/guides/interactive">Interactive props</Link>).
+			</Paragraph>
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`<Story of={meta} title="Primary" />
+<Variants of={meta} items={allOf(meta, "size")} title="Sizes" showSource={false} />
+<Matrix of={meta} x={allOf(meta, "color")} y={[allOf(meta, "variant")]} interactive />`}
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
+
 			<Callout type="info" title="Type-safe props">
 				All three are phantom-typed on the handle: required props that{" "}
 				<InlineCode>defaultProps</InlineCode> doesn't cover must be supplied via{" "}
@@ -123,8 +144,8 @@ const meta = getComponentMeta(Button, {
 			<DocsFooter
 				prev={{ to: "/docs/guides/theming", title: "Theming" }}
 				next={{
-					to: "/docs/guides/playground",
-					title: "Interactive playground",
+					to: "/docs/guides/interactive",
+					title: "Interactive props",
 				}}
 			/>
 		</>

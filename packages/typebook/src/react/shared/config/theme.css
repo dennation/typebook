@@ -2,7 +2,7 @@
    Typebook — design system (Tailwind 4, OKLCH tokens)
    ------------------------------------------------------------
    Single source of truth for the whole package: the storybook
-   UI (Story/Variants/Matrix/Playground/…) and the marketing
+   UI (Story/Variants/Matrix/Snippet/…) and the marketing
    landing both read these tokens. Imported by:
      • shared/config/styles.css  (injected into the storybook)
      • apps/website/src/styles.css (the marketing site)

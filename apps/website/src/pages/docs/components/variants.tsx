@@ -84,6 +84,26 @@ import { Variants } from "@dennation/typebook/react";
 						desc: "Fixed column count; by default the grid adapts to the variant count.",
 					},
 					{
+						name: "title",
+						type: "string",
+						desc: "Optional caption shown above the grid.",
+					},
+					{
+						name: "showSource",
+						type: "boolean",
+						desc: 'Show a "show source" toggle on each cell (on by default).',
+					},
+					{
+						name: "interactive",
+						type: "boolean",
+						desc: (
+							<>
+								Make each cell's props editable in place — see{" "}
+								<Link to="/docs/guides/interactive">Interactive props</Link>.
+							</>
+						),
+					},
+					{
 						name: "isolate",
 						type: "boolean",
 						desc: "Render each variant inside an iframe.",
