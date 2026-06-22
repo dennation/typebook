@@ -98,11 +98,21 @@ packages/typebook/
         prev-next-nav/              — <PrevNextNav prev next onPrev onNext/> — footer page cards
       features/                     — Interactive units
         prop-input/                 — <PropInput> per-prop controls (literal/bool/string/number)
-        code-block/                 — <CodeBlock tabs|code file lang showLineNumbers highlightLines/> —
-                                      the one code component; lib/tokenize.ts — lazy Shiki singleton tokenizing
-                                      with the One Light / One Dark Pro pair (codeToTokensWithThemes); each token
-                                      carries both colors as --tk-l/--tk-d, theme.css picks one per [data-theme]
-                                      (any language, theme-aware colors)
+        code-block/                 — <CodeBlock.Root>{<CodeBlock.Tab label lang file icon showLineNumbers
+                                      highlightLines>{`code`}</CodeBlock.Tab>…}</CodeBlock.Root> — a compound
+                                      code component, always tabbed (a lone tab → one-tab bar; no single/tabs
+                                      duality, no `code` prop). Each child in its own file:
+                                        ui/CodeBlock.tsx     — the { Root, Tab } namespace object
+                                        ui/CodeBlockRoot.tsx — root: collects tabs, owns active state, one layout
+                                        ui/CodeBlockTab.tsx  — null marker; every code option lives on the tab
+                                        ui/TabBar.tsx        — tab buttons + CopyButton for the active tab
+                                        ui/CopyButton.tsx    — copy-to-clipboard button (useCopy)
+                                        ui/CodeView.tsx      — the scrollable <pre>: tokenized lines + gutter/highlights
+                                        lib/tabsFromChildren.ts — <CodeBlock.Tab> children → CodeTab[] model
+                                        lib/useTokens.ts     — async Shiki tokens for one tab (null until resolved)
+                                        lib/tokenize.ts      — lazy Shiki singleton tokenizing with the One Light /
+                                      One Dark Pro pair (codeToTokensWithThemes); each token carries both colors as
+                                      --tk-l/--tk-d, theme.css picks one per [data-theme] (any language, theme-aware)
         copy-command/               — <CopyCommand cmd="npx …"/> — copy-able install-command pill
       entities/                     — Domain entities
         theme/                      — Light/dark theme with localStorage + system preference
@@ -132,7 +142,7 @@ packages/typebook/
 ### Package exports
 
 - `@dennation/typebook` — **React-free types only** (`TypebookConfig`, `MetaConfigPick`, `MetaConfigOmit`, `MetaConfigBase`, `PropInfo`, `PropType`, `MissingProps`, `VariantConfig`, …). No `react` import. Authoring API and React-coupled types live in `/react`.
-- `@dennation/typebook/react` — **authoring API:** `getComponentMeta`, `allOf`, `values`, `generate` + the React-coupled types `ComponentMeta`/`PropsOf`/`DefaultedOf` (React-free domain types come from the base entry). **storybook runtime:** `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`. **docs kit** (for consumer documentation sites): content set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (tabs/filename/line numbers/highlight lines; Shiki with the One Light / One Dark Pro theme pair, each token carrying both colors so highlighting follows the theme — any language, theme-aware colors, lazy-loaded grammars), `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`. Icons are **not** exported — they are imported directly from `lucide-react` (brand glyphs from `@tabler/icons-react`) at each call site.
+- `@dennation/typebook/react` — **authoring API:** `getComponentMeta`, `allOf`, `values`, `generate` + the React-coupled types `ComponentMeta`/`PropsOf`/`DefaultedOf` (React-free domain types come from the base entry). **storybook runtime:** `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`. **docs kit** (for consumer documentation sites): content set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps`/`Step`, `Accordion`, `Cards`/`DocCard`, `H2`/`H3`, `P`/`Lead`/`C`/`A`/`Ul`/`Ol`/`Li`/`Hr`/`Quote`, `ImgPlaceholder`), `CodeBlock` (compound `CodeBlock.Root` + `CodeBlock.Tab`, always tabbed — per-tab filename/lang/icon/line numbers/highlight lines, no `code` prop; Shiki with the One Light / One Dark Pro theme pair, each token carrying both colors so highlighting follows the theme — any language, theme-aware colors, lazy-loaded grammars), `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`. Icons are **not** exported — they are imported directly from `lucide-react` (brand glyphs from `@tabler/icons-react`) at each call site.
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
 > **What lives where.** The package exports only what is **universal** — the storybook runtime, the docs component kit (content set, CodeBlock, sidebar/toc/breadcrumbs/prev-next, CopyCommand), generic primitives (`Button`, `ThemeToggle`, `cx`) and the design system. Anything **specific to one site** (marketing landing sections, demo "gifs", section heading, layout constants, page content and nav data) lives in that app — see `apps/website`, not the package.

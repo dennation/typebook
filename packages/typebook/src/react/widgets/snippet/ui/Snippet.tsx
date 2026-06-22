@@ -60,7 +60,11 @@ export function Snippet({
 }: SnippetProps) {
 	const sourceNode: ReactNode | null =
 		code !== undefined ? (
-			<CodeBlock code={code} lang="tsx" file={name} />
+			<CodeBlock.Root>
+				<CodeBlock.Tab lang="tsx" file={name}>
+					{code}
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 		) : null;
 
 	// `source={ref}` form: the demo is the referenced component; `children`, if any, is the layout.

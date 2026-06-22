@@ -66,18 +66,21 @@ function PageProse() {
 			/>
 
 			<H2>Usage</H2>
-			<CodeBlock
-				file="page.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				code={`import { A, C, H2, Lead, Li, P, Quote, Ul } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="page.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`import { A, C, H2, Lead, Li, P, Quote, Ul } from "@dennation/typebook/react";
 
 <Lead>One-line summary under the page title.</Lead>
 <H2>Section</H2>
 <P>Body text with <C>inline code</C> and <A onClick={() => go("tabs")}>a link</A>.</P>
 <Ul><Li>Point one</Li></Ul>
 <Quote>A pull quote.</Quote>`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<H2>Components</H2>
 			<MDTable

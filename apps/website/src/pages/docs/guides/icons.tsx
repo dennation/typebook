@@ -1,4 +1,12 @@
-import { A, C, CodeBlock, H2, Lead, P, Snippet } from "@dennation/typebook/react";
+import {
+	A,
+	C,
+	CodeBlock,
+	H2,
+	Lead,
+	P,
+	Snippet,
+} from "@dennation/typebook/react";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Palette, Rocket, Search, Zap } from "lucide-react";
@@ -35,15 +43,16 @@ function PageIcons() {
 				icons take <C>strokeWidth</C>; Tabler icons take <C>stroke</C>. Color
 				follows the surrounding text.
 			</P>
-			<CodeBlock
-				lang="tsx"
-				code={`import { Search, ChevronRight } from "lucide-react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab lang="tsx">
+					{`import { Search, ChevronRight } from "lucide-react";
 import { IconBrandGithub } from "@tabler/icons-react";
 
 <Search size={16} />
 <ChevronRight className="text-fg-muted" />
 <IconBrandGithub size={16} stroke={1.5} />`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<H2>Stroke width</H2>
 			<P>

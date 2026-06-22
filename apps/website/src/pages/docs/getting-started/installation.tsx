@@ -30,7 +30,7 @@ function PageInstallation() {
 			</Callout>
 
 			<H2>Install the package</H2>
-			<CodeBlock>
+			<CodeBlock.Root>
 				<CodeBlock.Tab
 					label="pnpm"
 					lang="bash"
@@ -52,7 +52,7 @@ function PageInstallation() {
 				>
 					{`yarn add @dennation/typebook`}
 				</CodeBlock.Tab>
-			</CodeBlock>
+			</CodeBlock.Root>
 
 			<H2>Wire it up</H2>
 			<Steps>
@@ -62,18 +62,21 @@ function PageInstallation() {
 						<C>/vite</C>, <C>/rollup</C>, <C>/rolldown</C>, <C>/webpack</C>,{" "}
 						<C>/rspack</C>, <C>/esbuild</C> or <C>/farm</C>.
 					</P>
-					<CodeBlock
-						file="vite.config.ts"
-						icon={<IconBrandTypescript size={14} />}
-						lang="tsx"
-						code={`import { typebook } from "@dennation/typebook/vite";
+					<CodeBlock.Root>
+						<CodeBlock.Tab
+							file="vite.config.ts"
+							icon={<IconBrandTypescript size={14} />}
+							lang="tsx"
+						>
+							{`import { typebook } from "@dennation/typebook/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [typebook(), react()],
 });`}
-					/>
+						</CodeBlock.Tab>
+					</CodeBlock.Root>
 				</Step>
 				<Step title="Register a component">
 					<P>
@@ -82,11 +85,13 @@ export default defineConfig({
 						into this call at build time — no registry, no provider, no imports
 						to manage.
 					</P>
-					<CodeBlock
-						file="src/pages/button.tsx"
-						icon={<IconBrandReact size={14} />}
-						lang="tsx"
-						code={`import { allOf, getComponentMeta } from "@dennation/typebook/react";
+					<CodeBlock.Root>
+						<CodeBlock.Tab
+							file="src/pages/button.tsx"
+							icon={<IconBrandReact size={14} />}
+							lang="tsx"
+						>
+							{`import { allOf, getComponentMeta } from "@dennation/typebook/react";
 import { Story, Variants } from "@dennation/typebook/react";
 import { Button } from "../components/Button";
 
@@ -96,7 +101,8 @@ const button = getComponentMeta(Button, {
 
 <Story of={button} />
 <Variants of={button} items={allOf(button, "size")} />`}
-					/>
+						</CodeBlock.Tab>
+					</CodeBlock.Root>
 				</Step>
 				<Step title="Load the styles">
 					<P>

@@ -25,11 +25,13 @@ function PageLayout() {
 				<C>sidebar</C> node. With a sidebar the root becomes a two-column grid (
 				<C>260px</C> + content); without one the content scrolls full-width.
 			</P>
-			<CodeBlock
-				file="src/pages/__root.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				code={`import { Layout } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/__root.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`import { Layout } from "@dennation/typebook/react";
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 
 export const Route = createRootRoute({ component: RootComponent });
@@ -41,7 +43,8 @@ function RootComponent() {
     </Layout>
   );
 }`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<P>
 				<C>Layout</C> reads the current theme through the package's theme

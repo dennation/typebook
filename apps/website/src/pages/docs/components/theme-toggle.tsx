@@ -36,12 +36,13 @@ function PageThemeToggle() {
 				<Link to="/docs/guides/theming">Theming</Link> for the token system it
 				drives.
 			</P>
-			<CodeBlock
-				lang="tsx"
-				code={`import { ThemeToggle } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab lang="tsx">
+					{`import { ThemeToggle } from "@dennation/typebook/react";
 
 <ThemeToggle className="rounded-lg border border-border p-2" size={18} />`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<H2>Props</H2>
 			<PropsReference

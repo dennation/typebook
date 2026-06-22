@@ -21,15 +21,18 @@ function PageStory() {
 			</Lead>
 
 			<H2>Usage</H2>
-			<CodeBlock
-				file="src/pages/button.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				code={`import { Story } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`import { Story } from "@dennation/typebook/react";
 
 <Story of={button} />
 <Story of={button} props={{ size: "lg", children: "Large" }} />`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<Callout type="info" title="Type-safe props">
 				The <C>props</C> prop is phantom-typed: if the component has required

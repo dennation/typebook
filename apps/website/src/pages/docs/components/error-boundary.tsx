@@ -43,14 +43,15 @@ function PageErrorBoundary() {
 				Pass <C>fallback</C> to replace the default red error box with your own
 				node.
 			</P>
-			<CodeBlock
-				lang="tsx"
-				code={`import { ErrorBoundary } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab lang="tsx">
+					{`import { ErrorBoundary } from "@dennation/typebook/react";
 
 <ErrorBoundary fallback={<p>Couldn't render this example.</p>}>
   <RiskyComponent />
 </ErrorBoundary>`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<H2>Props</H2>
 			<PropsReference

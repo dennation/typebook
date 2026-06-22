@@ -25,11 +25,13 @@ function PageSnippet() {
 				The child is a <strong>component function</strong>, not raw JSX. The
 				simplest form is an inline arrow; the shown source is its body.
 			</P>
-			<CodeBlock
-				file="src/pages/button.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				code={`import { Snippet } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`import { Snippet } from "@dennation/typebook/react";
 
 <Snippet name="button-group">
   {() => (
@@ -39,23 +41,27 @@ function PageSnippet() {
     </div>
   )}
 </Snippet>`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 			<P>
 				Because the example is a component, it can use hooks — give the inline
 				function a capitalized name so the rules-of-hooks lint recognises it as
 				a component:
 			</P>
-			<CodeBlock
-				file="src/pages/counter.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				code={`<Snippet name="counter">
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/counter.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`<Snippet name="counter">
   {function Counter() {
     const [n, setN] = useState(0);
     return <Button onClick={() => setN(n + 1)}>Count: {n}</Button>;
   }}
 </Snippet>`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 			<P>
 				At build time the plugin finds every <C>{"<Snippet>"}</C>, slices the
 				inline function's <C>body</C> straight from the file, dedents it and{" "}
@@ -80,20 +86,23 @@ function PageSnippet() {
 			<P>
 				Sometimes the example already lives somewhere — a component in this file
 				or imported from another. Point <C>source</C> at it instead of inlining.
-				The build resolves the reference through the TypeScript program (following
-				an import into another module), slices that function's body, and injects
-				it as the shown source.
+				The build resolves the reference through the TypeScript program
+				(following an import into another module), slices that function's body,
+				and injects it as the shown source.
 			</P>
-			<CodeBlock
-				file="src/pages/button.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				code={`import { Snippet } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`import { Snippet } from "@dennation/typebook/react";
 import { ButtonDemo } from "../demos/ButtonDemo";
 
 // default card — preview + "show source" toggle
 <Snippet source={ButtonDemo} />`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 			<P>
 				With <C>source</C>, <C>children</C> becomes an optional{" "}
 				<strong>layout render-prop</strong>. It receives{" "}
@@ -102,11 +111,13 @@ import { ButtonDemo } from "../demos/ButtonDemo";
 				<C>name</C> label — so you decide where and how each appears. Omit{" "}
 				<C>children</C> for the default card.
 			</P>
-			<CodeBlock
-				file="src/pages/button.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				code={`<Snippet source={ButtonDemo}>
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`<Snippet source={ButtonDemo}>
   {({ preview, source }) => (
     <div className="grid grid-cols-2 gap-4">
       {preview}
@@ -114,7 +125,8 @@ import { ButtonDemo } from "../demos/ButtonDemo";
     </div>
   )}
 </Snippet>`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<H2>Props</H2>
 			<PropsReference

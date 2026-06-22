@@ -20,12 +20,14 @@ function PageVariants() {
 			</Lead>
 
 			<H2>Usage</H2>
-			<CodeBlock
-				file="src/pages/button.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				showLineNumbers
-				code={`import { allOf, values } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+					showLineNumbers
+				>
+					{`import { allOf, values } from "@dennation/typebook/react";
 import { Variants } from "@dennation/typebook/react";
 
 // every value of a literal-union prop, straight from its TS type
@@ -33,7 +35,8 @@ import { Variants } from "@dennation/typebook/react";
 
 // or an explicit, typed list
 <Variants of={button} items={values(button, "size", ["sm", "lg"])} columns={2} />`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<Callout type="success" title="Variants come from types">
 				<C>allOf()</C> reads the prop's literal-union (or boolean) type from the
