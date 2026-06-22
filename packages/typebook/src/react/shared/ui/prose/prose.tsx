@@ -1,8 +1,5 @@
 import type { ReactNode } from "react";
 
-/** Plain paragraph — typography comes from the `.doc-prose` theme layer. */
-export const P = ({ children }: { children: ReactNode }) => <p>{children}</p>;
-
 /** Lead paragraph rendered under the page title. */
 export const Lead = ({ children }: { children: ReactNode }) => (
 	<p className="text-[17px] leading-[1.6] text-fg-muted m-0 mb-2 text-pretty">
@@ -41,26 +38,6 @@ export function A({ href = "#", onClick, children }: AProps) {
 		</a>
 	);
 }
-
-export const Ul = ({ children }: { children: ReactNode }) => (
-	<ul>{children}</ul>
-);
-export const Ol = ({ children }: { children: ReactNode }) => (
-	<ol>{children}</ol>
-);
-export const Li = ({ children }: { children: ReactNode }) => (
-	<li>{children}</li>
-);
-
-export const Hr = () => (
-	<hr className="border-0 border-t border-border my-[calc(40px*var(--density))]" />
-);
-
-export const Quote = ({ children }: { children: ReactNode }) => (
-	<blockquote className="border-l-3 border-accent-soft-border pl-4.5 py-1 m-0 text-fg-muted italic text-[15.5px]">
-		{children}
-	</blockquote>
-);
 
 /** Hatched placeholder used where the docs would show a screenshot. */
 export function ImgPlaceholder({

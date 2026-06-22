@@ -3,7 +3,6 @@ import {
 	CodeBlock,
 	H2,
 	Lead,
-	P,
 	PropsReference,
 	Snippet,
 	ThemeToggle,
@@ -22,7 +21,7 @@ function PageThemeToggle() {
 			</Lead>
 
 			<H2>Example</H2>
-			<P>Click to toggle the theme of this page:</P>
+			<p>Click to toggle the theme of this page:</p>
 			<Snippet name="theme-toggle-example">
 				{() => (
 					<ThemeToggle className="inline-flex items-center justify-center size-10 rounded-(--radius-token) border border-border text-fg-muted hover:text-fg hover:bg-bg-tertiary transition-colors" />
@@ -30,12 +29,12 @@ function PageThemeToggle() {
 			</Snippet>
 
 			<H2>Usage</H2>
-			<P>
+			<p>
 				The button renders a sun/moon icon for the current theme — style it
 				through <C>className</C>. See{" "}
 				<Link to="/docs/guides/theming">Theming</Link> for the token system it
 				drives.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab lang="tsx">
 					{`import { ThemeToggle } from "@dennation/typebook/react";

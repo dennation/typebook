@@ -4,7 +4,6 @@ import {
 	getComponentMeta,
 	H2,
 	Lead,
-	P,
 	PropsReference,
 	propsToRows,
 	Snippet,
@@ -30,10 +29,10 @@ function PageSteps() {
 				{() => (
 					<Steps.Root>
 						<Steps.Step title="Install the package">
-							<P>
+							<p>
 								Any content works inside a step — paragraphs, code blocks,
 								callouts.
-							</P>
+							</p>
 						</Steps.Step>
 						<Steps.Step title="Wire the plugin">
 							<CodeBlock.Root>
@@ -43,16 +42,16 @@ function PageSteps() {
 							</CodeBlock.Root>
 						</Steps.Step>
 						<Steps.Step title="Render a story">
-							<P>The connector line stops automatically at the last step.</P>
+							<p>The connector line stops automatically at the last step.</p>
 						</Steps.Step>
 					</Steps.Root>
 				)}
 			</Snippet>
 
 			<H2>Props</H2>
-			<P>
+			<p>
 				<C>Steps</C> takes only <C>children</C>. Each <C>Step</C> accepts:
-			</P>
+			</p>
 			<PropsReference props={propsToRows(meta.props)} />
 			<DocsFooter
 				prev={{ to: "/docs/components/tabs", title: "Tabs" }}

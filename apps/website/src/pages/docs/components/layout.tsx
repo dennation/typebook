@@ -3,7 +3,6 @@ import {
 	CodeBlock,
 	H2,
 	Lead,
-	P,
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
@@ -20,11 +19,11 @@ function PageLayout() {
 			</Lead>
 
 			<H2>Usage</H2>
-			<P>
+			<p>
 				Wrap your route's outlet in <C>{"<Layout>"}</C> and pass a{" "}
 				<C>sidebar</C> node. With a sidebar the root becomes a two-column grid (
 				<C>260px</C> + content); without one the content scrolls full-width.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/__root.tsx"
@@ -46,13 +45,13 @@ function RootComponent() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<P>
+			<p>
 				<C>Layout</C> reads the current theme through the package's theme
 				entity, so a <Link to="/docs/components/theme-toggle">ThemeToggle</Link>{" "}
 				placed anywhere inside swaps the whole page through the cascade. Pass{" "}
 				<C>theme</C> to pin a page to a fixed theme regardless of the user's
 				choice.
-			</P>
+			</p>
 
 			<H2>Props</H2>
 			<PropsReference

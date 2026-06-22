@@ -3,15 +3,9 @@ import {
 	CodeBlock,
 	H2,
 	H3,
-	Hr,
 	ImgPlaceholder,
 	Lead,
-	Li,
 	MDTable,
-	Ol,
-	P,
-	Quote,
-	Ul,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
@@ -28,36 +22,36 @@ function PageProse() {
 			</Lead>
 
 			<H2>Headings</H2>
-			<P>
+			<p>
 				<C>H2</C> and <C>H3</C> derive an anchor id from their text (via{" "}
 				<C>slugify</C>), render a hover-revealed <C>#</C> link, and carry the{" "}
 				<C>.doc-h2</C>/<C>.doc-h3</C> hooks that <C>useDocHeadings</C> collects
 				for the table of contents — every heading on this page is one of them.
-			</P>
+			</p>
 
 			<H3>Lists</H3>
-			<Ul>
-				<Li>Unordered lists get a custom "–" marker</Li>
-				<Li>Spacing and markers live in the theme layer</Li>
-			</Ul>
-			<Ol>
-				<Li>Ordered lists count normally</Li>
-				<Li>Both accept any inline content</Li>
-			</Ol>
+			<ul>
+				<li>Unordered lists get a custom "–" marker</li>
+				<li>Spacing and markers live in the theme layer</li>
+			</ul>
+			<ol>
+				<li>Ordered lists count normally</li>
+				<li>Both accept any inline content</li>
+			</ol>
 
 			<H3>Quote and rule</H3>
-			<Quote>
+			<blockquote>
 				Blockquotes carry an accent-tinted left border and italic text.
-			</Quote>
-			<Hr />
+			</blockquote>
+			<hr />
 
 			<H3>Inline</H3>
-			<P>
+			<p>
 				Inline code like <C>useDocHeadings()</C> uses the <C>.inline-code</C>{" "}
 				theme class; <a href="https://github.com/dennation/typebook">links</a>{" "}
 				carry the accent color and an offset underline. <C>A</C> takes an{" "}
 				<C>onClick</C> for in-app navigation instead of a hard <C>href</C>.
-			</P>
+			</p>
 
 			<H3>Image placeholder</H3>
 			<ImgPlaceholder
@@ -72,30 +66,46 @@ function PageProse() {
 					icon={<IconBrandReact size={14} />}
 					lang="tsx"
 				>
-					{`import { A, C, H2, Lead, Li, P, Quote, Ul } from "@dennation/typebook/react";
+					{`import { A, C, H2, Lead } from "@dennation/typebook/react";
 
+// Prose is plain HTML — styled by the .doc-prose layer:
+<p>Body text with <C>inline code</C> and <A onClick={() => go("tabs")}>a link</A>.</p>
+<ul><li>Point one</li></ul>
+<blockquote>A pull quote.</blockquote>
+<hr />
+
+// Components carry behavior or props:
 <Lead>One-line summary under the page title.</Lead>
-<H2>Section</H2>
-<P>Body text with <C>inline code</C> and <A onClick={() => go("tabs")}>a link</A>.</P>
-<Ul><Li>Point one</Li></Ul>
-<Quote>A pull quote.</Quote>`}
+<H2>Section</H2>`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
 			<H2>Components</H2>
+			<p>
+				Only elements that carry behavior or props are components. Plain prose —
+				paragraphs, lists, blockquotes and rules — is written as bare HTML and
+				styled by the <C>.doc-prose</C> layer, so it works the same whether you
+				author it in JSX or render it from Markdown.
+			</p>
 			<MDTable
 				head={["Component", "Renders"]}
 				rows={[
 					[<C key="c">H2 / H3</C>, "Anchored headings with TOC hooks"],
 					[<C key="c">Lead</C>, "Large muted intro paragraph"],
-					[<C key="c">P / Ul / Ol / Li</C>, "Paragraphs and lists"],
-					[<C key="c">C</C>, "Inline code"],
-					[<C key="c">A</C>, "Accent link (href or onClick)"],
-					[<C key="c">Quote / Hr</C>, "Blockquote and divider"],
+					[<C key="c">C</C>, "Inline code (works outside .doc-prose too)"],
+					[<C key="c">A</C>, "Accent link (href or onClick navigation)"],
 					[
 						<C key="c">ImgPlaceholder</C>,
 						"Hatched stand-in with a label and optional height",
 					],
+				]}
+			/>
+			<MDTable
+				head={["Plain tag", "Styled by"]}
+				rows={[
+					[<C key="c">p / ul / ol / li</C>, ".doc-prose typography"],
+					[<C key="c">blockquote</C>, ".doc-prose blockquote"],
+					[<C key="c">hr</C>, ".doc-prose hr"],
 				]}
 			/>
 			<DocsFooter

@@ -3,7 +3,6 @@ import {
 	CodeBlock,
 	H2,
 	Lead,
-	P,
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
@@ -36,10 +35,10 @@ import { Matrix } from "@dennation/typebook/react";
 />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<P>
+			<p>
 				Each entry in <C>y</C> contributes its own block of rows, so two y-axes
 				give you every combination of both against the x axis.
-			</P>
+			</p>
 
 			<H2>Props</H2>
 			<PropsReference
@@ -80,12 +79,12 @@ import { Matrix } from "@dennation/typebook/react";
 			/>
 
 			<H2>Related</H2>
-			<P>
+			<p>
 				A single axis is enough? Use{" "}
 				<Link to="/docs/components/variants">Variants</Link>. Just one variant?
 				Use <Link to="/docs/components/story">Story</Link>. For the big picture
 				see <Link to="/docs/guides/story">Rendering stories</Link>.
-			</P>
+			</p>
 			<DocsFooter
 				prev={{ to: "/docs/components/variants", title: "Variants" }}
 				next={{ to: "/docs/components/callout", title: "Callout" }}

@@ -4,10 +4,7 @@ import {
 	CodeBlock,
 	H2,
 	Lead,
-	Li,
-	P,
 	PropsReference,
-	Ul,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
@@ -36,17 +33,17 @@ function PagePlayground() {
 			</CodeBlock.Root>
 
 			<H2>What the table gives you</H2>
-			<Ul>
-				<Li>
+			<ul>
+				<li>
 					A control per prop: literal unions become selects, booleans toggles,
 					strings and numbers inputs
-				</Li>
-				<Li>Search across prop names and a toggle for inherited props</Li>
-				<Li>
+				</li>
+				<li>Search across prop names and a toggle for inherited props</li>
+				<li>
 					Required props are marked; defaults and JSDoc descriptions come from
 					the registry
-				</Li>
-			</Ul>
+				</li>
+			</ul>
 
 			<Callout type="info" title="Where the metadata comes from">
 				The table is driven by <C>PropInfo[]</C> that the bundler plugin
@@ -70,10 +67,10 @@ function PagePlayground() {
 					},
 				]}
 			/>
-			<P>
+			<p>
 				Props that can't be edited as plain values (functions, nodes, complex
 				objects) are shown read-only with their type.
-			</P>
+			</p>
 			<DocsFooter
 				prev={{ to: "/docs/guides/story", title: "Rendering stories" }}
 				next={{ to: "/docs/guides/snippet", title: "Live snippets" }}

@@ -6,7 +6,6 @@ import {
 	DocCard,
 	H2,
 	Lead,
-	P,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -23,13 +22,13 @@ function PageIntroduction() {
 				TypeScript Compiler API and you render stories, variant grids, matrices
 				and interactive playgrounds on any page.
 			</Lead>
-			<P>
+			<p>
 				It ships two things that work together: a{" "}
 				<strong>storybook runtime</strong> (<C>Story</C>, <C>Variants</C>,{" "}
 				<C>Matrix</C>, <C>Playground</C>, <C>Snippet</C>) driven by build-time
 				prop injection, and a <strong>docs component kit</strong> (callouts,
 				code blocks, tabs, steps, sidebar — everything this site is built from).
-			</P>
+			</p>
 
 			<Callout type="info" title="This site is the demo">
 				Every component documented here renders the documentation you are
@@ -37,14 +36,14 @@ function PageIntroduction() {
 			</Callout>
 
 			<H2>How it works</H2>
-			<P>
+			<p>
 				The <C>typebook()</C> bundler plugin scans your sources for{" "}
 				<C>getComponentMeta(Component)</C> calls, resolves prop types, default
 				values and JSDoc through the TypeScript Compiler API, and{" "}
 				<strong>injects</strong> the result straight back into each call as the
 				handle's <C>props</C>. No registry file, no context, no lookup — the
 				handle the story components receive already carries everything.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -66,7 +65,7 @@ const meta = getComponentMeta(Button, {
 			</CodeBlock.Root>
 
 			<H2>Key design decisions</H2>
-			<P>
+			<p>
 				Metadata is <strong>injected at the call site</strong>, not emitted to a
 				registry file — data lives where it's used, with no string-id
 				indirection and no provider to wire. Type-safety comes from{" "}
@@ -76,7 +75,7 @@ const meta = getComponentMeta(Button, {
 				factory is published for every bundler via{" "}
 				<a href="https://unplugin.unjs.io">unplugin</a> — no bundler is
 				privileged.
-			</P>
+			</p>
 
 			<H2>Next steps</H2>
 			<Cards>

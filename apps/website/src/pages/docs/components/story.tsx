@@ -4,7 +4,6 @@ import {
 	CodeBlock,
 	H2,
 	Lead,
-	P,
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
@@ -72,12 +71,12 @@ function PageStory() {
 			/>
 
 			<H2>Related</H2>
-			<P>
+			<p>
 				Need several values of one prop at once? Use{" "}
 				<Link to="/docs/components/variants">Variants</Link>. Two axes? Use{" "}
-				<Link to="/docs/components/matrix">Matrix</Link>. For the big picture see{" "}
-				<Link to="/docs/guides/story">Rendering stories</Link>.
-			</P>
+				<Link to="/docs/components/matrix">Matrix</Link>. For the big picture
+				see <Link to="/docs/guides/story">Rendering stories</Link>.
+			</p>
 			<DocsFooter
 				prev={{ to: "/docs/guides/icons", title: "Icons" }}
 				next={{ to: "/docs/components/variants", title: "Variants" }}

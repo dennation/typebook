@@ -1,11 +1,4 @@
-import {
-	C,
-	Callout,
-	CodeBlock,
-	H2,
-	Lead,
-	P,
-} from "@dennation/typebook/react";
+import { C, Callout, CodeBlock, H2, Lead } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
@@ -16,17 +9,17 @@ function PageStory() {
 			<Lead>
 				Typebook gives you a small family of components for rendering stories
 				from a single handle: <C>{"<Story>"}</C>, <C>{"<Variants>"}</C> and{" "}
-				<C>{"<Matrix>"}</C>. They all read the same{" "}
-				<C>getComponentMeta()</C> handle — pick the one that matches how much of
-				the prop space you want to show.
+				<C>{"<Matrix>"}</C>. They all read the same <C>getComponentMeta()</C>{" "}
+				handle — pick the one that matches how much of the prop space you want
+				to show.
 			</Lead>
 
 			<H2>The handle</H2>
-			<P>
+			<p>
 				Everything starts with a handle. <C>getComponentMeta()</C> returns a
 				self-contained object; the plugin injects the component's extracted
 				props into it at build time.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -43,10 +36,10 @@ const meta = getComponentMeta(Button, {
 			</CodeBlock.Root>
 
 			<H2>One variant — Story</H2>
-			<P>
+			<p>
 				<C>{"<Story>"}</C> renders a single variant inside a preview frame:{" "}
 				<C>defaultProps</C> merged with whatever you pass via <C>props</C>.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -57,17 +50,17 @@ const meta = getComponentMeta(Button, {
 <Story of={meta} props={{ size: "lg", children: "Large" }} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<P>
+			<p>
 				See <Link to="/docs/components/story">Story</Link> for the full prop
 				reference.
-			</P>
+			</p>
 
 			<H2>One axis — Variants</H2>
-			<P>
+			<p>
 				<C>{"<Variants>"}</C> renders a labeled grid along one prop axis,
 				described by a variant config — <C>allOf()</C>, <C>values()</C> or{" "}
 				<C>generate()</C>.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -79,17 +72,17 @@ const meta = getComponentMeta(Button, {
 <Variants of={meta} items={allOf(meta, "size")} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<P>
+			<p>
 				See <Link to="/docs/components/variants">Variants</Link> for the full
 				prop reference.
-			</P>
+			</p>
 
 			<H2>Two axes — Matrix</H2>
-			<P>
+			<p>
 				<C>{"<Matrix>"}</C> renders the cross-product of two prop axes as a
 				table: one axis across the columns (<C>x</C>), one or more stacked down
 				the rows (<C>y</C>).
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -103,10 +96,10 @@ const meta = getComponentMeta(Button, {
 />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<P>
+			<p>
 				See <Link to="/docs/components/matrix">Matrix</Link> for the full prop
 				reference.
-			</P>
+			</p>
 
 			<Callout type="info" title="Type-safe props">
 				All three are phantom-typed on the handle: required props that{" "}
@@ -116,7 +109,10 @@ const meta = getComponentMeta(Button, {
 
 			<DocsFooter
 				prev={{ to: "/docs/guides/theming", title: "Theming" }}
-				next={{ to: "/docs/guides/playground", title: "Interactive playground" }}
+				next={{
+					to: "/docs/guides/playground",
+					title: "Interactive playground",
+				}}
 			/>
 		</>
 	);

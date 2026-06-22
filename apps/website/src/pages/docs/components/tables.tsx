@@ -3,7 +3,6 @@ import {
 	H2,
 	Lead,
 	MDTable,
-	P,
 	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
@@ -51,10 +50,10 @@ function PageTables() {
 			/>
 
 			<H2>PropsReference</H2>
-			<P>
+			<p>
 				One striped row per prop with the name, type badge, required marker,
 				default value and description:
-			</P>
+			</p>
 			<Snippet name="props-table-example">
 				{() => (
 					<PropsReference

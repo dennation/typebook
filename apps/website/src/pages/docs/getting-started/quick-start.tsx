@@ -5,7 +5,6 @@ import {
 	H2,
 	Lead,
 	MDTable,
-	P,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -22,12 +21,12 @@ function PageQuickStart() {
 			</Lead>
 
 			<H2>Register a component</H2>
-			<P>
+			<p>
 				<C>getComponentMeta()</C> calls can live anywhere in{" "}
 				<C>{"src/**/*.tsx"}</C> — no special filename required and no id to
 				assign. It returns a self-contained handle; the plugin injects the
 				extracted props into it at build time.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -44,11 +43,11 @@ const meta = getComponentMeta(Button, {
 			</CodeBlock.Root>
 
 			<H2>Render stories</H2>
-			<P>
+			<p>
 				Pass the handle to any story component. They are type-safe: required
 				props not covered by <C>defaultProps</C> must be supplied via{" "}
 				<C>props</C> at the call site.
-			</P>
+			</p>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -98,10 +97,10 @@ import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 					],
 				]}
 			/>
-			<P>
+			<p>
 				Continue with <Link to="/docs/guides/story">Rendering stories</Link> for
 				the full prop reference of each story component.
-			</P>
+			</p>
 			<DocsFooter
 				prev={{
 					to: "/docs/getting-started/installation",
