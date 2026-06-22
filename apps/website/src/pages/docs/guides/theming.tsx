@@ -67,16 +67,16 @@ function PageTheming() {
 				<C>{"<ThemeToggle/>"}</C> which also persists the choice in{" "}
 				<C>localStorage</C> and respects the system preference.
 			</P>
-			<CodeBlock
-				file="index.html"
-				lang="tsx"
-				code={`<script>
+			<CodeBlock.Root>
+				<CodeBlock.Tab file="index.html" lang="tsx">
+					{`<script>
   // apply the saved theme before first paint to avoid a flash
   var t = localStorage.getItem("typebook-theme") ||
     (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
   document.documentElement.setAttribute("data-theme", t);
 </script>`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<H2>Using the tokens in your site</H2>
 			<P>
@@ -84,16 +84,19 @@ function PageTheming() {
 				shared tokens and lets Tailwind scan the package sources so the
 				components' utilities are emitted:
 			</P>
-			<CodeBlock
-				file="src/styles.css"
-				icon={<Palette size={14} />}
-				lang="bash"
-				code={`@import "tailwindcss";
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/styles.css"
+					icon={<Palette size={14} />}
+					lang="bash"
+				>
+					{`@import "tailwindcss";
 @import "@dennation/typebook/src/react/shared/config/theme.css";
 
 @source "./**/*.tsx";
 @source "../node_modules/@dennation/typebook/src/react/**/*.tsx";`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<Callout type="info" title="Re-theming is two variables">
 				Change <C>--accent-h</C> and <C>--accent-c</C> on <C>:root</C> and every

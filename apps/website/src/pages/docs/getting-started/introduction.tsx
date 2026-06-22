@@ -45,12 +45,14 @@ function PageIntroduction() {
 				handle's <C>props</C>. No registry file, no context, no lookup — the
 				handle the story components receive already carries everything.
 			</P>
-			<CodeBlock
-				file="src/pages/button.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				showLineNumbers
-				code={`import { allOf, getComponentMeta } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+					showLineNumbers
+				>
+					{`import { allOf, getComponentMeta } from "@dennation/typebook/react";
 import { Story, Variants } from "@dennation/typebook/react";
 import { Button } from "../components/Button";
 
@@ -60,7 +62,8 @@ const button = getComponentMeta(Button, {
 
 <Story of={button} />
 <Variants of={button} items={allOf(button, "size")} />`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<H2>Key design decisions</H2>
 			<P>

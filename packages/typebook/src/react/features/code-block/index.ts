@@ -1,6 +1,9 @@
+export { CodeBlock } from "./ui/CodeBlock";
 export {
-	CodeBlock,
-	type CodeBlockProps,
+	CodeBlockRoot,
+	type CodeBlockRootProps,
+} from "./ui/CodeBlockRoot";
+export {
 	CodeBlockTab,
 	type CodeBlockTabProps,
-} from "./ui/CodeBlock";
+} from "./ui/CodeBlockTab";

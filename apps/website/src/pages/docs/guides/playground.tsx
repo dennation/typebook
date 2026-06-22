@@ -23,14 +23,17 @@ function PagePlayground() {
 			</Lead>
 
 			<H2>Usage</H2>
-			<CodeBlock
-				file="src/pages/button.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				code={`import { Playground } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`import { Playground } from "@dennation/typebook/react";
 
 <Playground of={button} />`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<H2>What the table gives you</H2>
 			<Ul>

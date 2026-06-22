@@ -36,7 +36,11 @@ function PageSteps() {
 							</P>
 						</Step>
 						<Step title="Wire the plugin">
-							<CodeBlock lang="bash" code={`pnpm add @dennation/typebook`} />
+							<CodeBlock.Root>
+								<CodeBlock.Tab lang="bash">
+									{`pnpm add @dennation/typebook`}
+								</CodeBlock.Tab>
+							</CodeBlock.Root>
 						</Step>
 						<Step title="Render a story">
 							<P>The connector line stops automatically at the last step.</P>

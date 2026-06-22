@@ -20,11 +20,13 @@ function PageMatrix() {
 			</Lead>
 
 			<H2>Usage</H2>
-			<CodeBlock
-				file="src/pages/button.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				code={`import { allOf } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`import { allOf } from "@dennation/typebook/react";
 import { Matrix } from "@dennation/typebook/react";
 
 <Matrix
@@ -32,7 +34,8 @@ import { Matrix } from "@dennation/typebook/react";
   x={allOf(button, "color")}
   y={[allOf(button, "variant"), allOf(button, "size")]}
 />`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 			<P>
 				Each entry in <C>y</C> contributes its own block of rows, so two y-axes
 				give you every combination of both against the x axis.

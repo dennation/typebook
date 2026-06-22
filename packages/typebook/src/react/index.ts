@@ -2,7 +2,8 @@
 // Docs components (for consumer documentation sites)
 export {
 	CodeBlock,
-	type CodeBlockProps,
+	CodeBlockRoot,
+	type CodeBlockRootProps,
 	CodeBlockTab,
 	type CodeBlockTabProps,
 } from "./features/code-block/index";

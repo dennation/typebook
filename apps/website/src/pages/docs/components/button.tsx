@@ -38,12 +38,13 @@ function PageButton() {
 				Pass <C>as="a"</C> to render an <C>{"<a>"}</C> with the button styling —
 				the props then accept anchor attributes such as <C>href</C>.
 			</P>
-			<CodeBlock
-				lang="tsx"
-				code={`<Button as="a" href="https://example.com" variant="ghost">
+			<CodeBlock.Root>
+				<CodeBlock.Tab lang="tsx">
+					{`<Button as="a" href="https://example.com" variant="ghost">
   Read the docs
 </Button>`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<H2>Composing the class</H2>
 			<P>
@@ -52,17 +53,20 @@ function PageButton() {
 				returns the class string directly. <C>ARROW_CLASS</C> is a helper for a
 				trailing chevron that nudges right on hover.
 			</P>
-			<CodeBlock
-				file="cta.tsx"
-				icon={<IconBrandReact size={14} />}
-				lang="tsx"
-				code={`import { ARROW_CLASS, buttonClass } from "@dennation/typebook/react";
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="cta.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`import { ARROW_CLASS, buttonClass } from "@dennation/typebook/react";
 import { ChevronRight } from "lucide-react";
 
 <Link to="/docs" className={buttonClass("primary", "lg")}>
   Get started <ChevronRight className={ARROW_CLASS} />
 </Link>`}
-			/>
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<H2>Props</H2>
 			<PropsReference
