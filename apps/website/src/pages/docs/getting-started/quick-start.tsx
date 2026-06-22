@@ -37,7 +37,7 @@ function PageQuickStart() {
 					{`import { getComponentMeta } from "@dennation/typebook/react";
 import { Button } from "../components/Button";
 
-const button = getComponentMeta(Button, {
+const meta = getComponentMeta(Button, {
   defaultProps: { children: "Click me" },
 });`}
 				</CodeBlock.Tab>
@@ -59,10 +59,10 @@ const button = getComponentMeta(Button, {
 					{`import { allOf } from "@dennation/typebook/react";
 import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 
-<Story of={button} />
-<Variants of={button} items={allOf(button, "size")} />
-<Matrix of={button} x={allOf(button, "color")} y={[allOf(button, "variant")]} />
-<Playground of={button} />`}
+<Story of={meta} />
+<Variants of={meta} items={allOf(meta, "size")} />
+<Matrix of={meta} x={allOf(meta, "color")} y={[allOf(meta, "variant")]} />
+<Playground of={meta} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 

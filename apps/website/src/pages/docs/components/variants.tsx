@@ -32,10 +32,10 @@ function PageVariants() {
 import { Variants } from "@dennation/typebook/react";
 
 // every value of a literal-union prop, straight from its TS type
-<Variants of={button} items={allOf(button, "size")} />
+<Variants of={meta} items={allOf(meta, "size")} />
 
 // or an explicit, typed list
-<Variants of={button} items={values(button, "size", ["sm", "lg"])} columns={2} />`}
+<Variants of={meta} items={values(meta, "size", ["sm", "lg"])} columns={2} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 

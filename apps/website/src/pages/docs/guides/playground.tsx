@@ -31,7 +31,7 @@ function PagePlayground() {
 				>
 					{`import { Playground } from "@dennation/typebook/react";
 
-<Playground of={button} />`}
+<Playground of={meta} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 

@@ -56,12 +56,12 @@ function PageIntroduction() {
 import { Story, Variants } from "@dennation/typebook/react";
 import { Button } from "../components/Button";
 
-const button = getComponentMeta(Button, {
+const meta = getComponentMeta(Button, {
   defaultProps: { children: "Click me" },
 });
 
-<Story of={button} />
-<Variants of={button} items={allOf(button, "size")} />`}
+<Story of={meta} />
+<Variants of={meta} items={allOf(meta, "size")} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 

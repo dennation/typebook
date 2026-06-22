@@ -15,8 +15,8 @@ import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const breadcrumbs = getComponentMeta(Breadcrumbs);
-const prevNextNav = getComponentMeta(PrevNextNav);
+const breadcrumbsMeta = getComponentMeta(Breadcrumbs);
+const prevNextNavMeta = getComponentMeta(PrevNextNav);
 
 function PageNavigation() {
 	return (
@@ -79,7 +79,7 @@ function PageNavigation() {
 					{`<Breadcrumbs items={["Docs", section, title]} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<PropsReference props={propsToRows(breadcrumbs.props)} />
+			<PropsReference props={propsToRows(breadcrumbsMeta.props)} />
 
 			<H2>PrevNextNav</H2>
 			<CodeBlock.Root>
@@ -92,7 +92,7 @@ function PageNavigation() {
 />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<PropsReference props={propsToRows(prevNextNav.props)} />
+			<PropsReference props={propsToRows(prevNextNavMeta.props)} />
 
 			<Callout type="info" title="Bring your own router">
 				None of these components import a router. The sidebar on this site

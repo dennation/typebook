@@ -36,7 +36,7 @@ function PageStory() {
 					{`import { getComponentMeta } from "@dennation/typebook/react";
 import { Button } from "../components/Button";
 
-const button = getComponentMeta(Button, {
+const meta = getComponentMeta(Button, {
   defaultProps: { children: "Click me" },
 });`}
 				</CodeBlock.Tab>
@@ -53,8 +53,8 @@ const button = getComponentMeta(Button, {
 					icon={<IconBrandReact size={14} />}
 					lang="tsx"
 				>
-					{`<Story of={button} />
-<Story of={button} props={{ size: "lg", children: "Large" }} />`}
+					{`<Story of={meta} />
+<Story of={meta} props={{ size: "lg", children: "Large" }} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 			<P>
@@ -76,7 +76,7 @@ const button = getComponentMeta(Button, {
 				>
 					{`import { allOf } from "@dennation/typebook/react";
 
-<Variants of={button} items={allOf(button, "size")} />`}
+<Variants of={meta} items={allOf(meta, "size")} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 			<P>
@@ -97,9 +97,9 @@ const button = getComponentMeta(Button, {
 					lang="tsx"
 				>
 					{`<Matrix
-  of={button}
-  x={allOf(button, "color")}
-  y={[allOf(button, "variant")]}
+  of={meta}
+  x={allOf(meta, "color")}
+  y={[allOf(meta, "variant")]}
 />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
