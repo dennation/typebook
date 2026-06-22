@@ -12,7 +12,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const tabs = getComponentMeta(Tabs);
+const meta = getComponentMeta(Tabs);
 
 function PageTabs() {
 	return (
@@ -45,7 +45,7 @@ function PageTabs() {
 			</Snippet>
 
 			<H2>Props</H2>
-			<PropsReference props={propsToRows(tabs.props)} />
+			<PropsReference props={propsToRows(meta.props)} />
 			<DocsFooter
 				prev={{ to: "/docs/components/code-block", title: "CodeBlock" }}
 				next={{ to: "/docs/components/steps", title: "Steps" }}

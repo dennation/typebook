@@ -15,7 +15,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SquareTerminal } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const codeBlockTab = getComponentMeta(CodeBlock.Tab);
+const meta = getComponentMeta(CodeBlock.Tab);
 
 function PageCodeBlock() {
 	return (
@@ -79,7 +79,7 @@ function PageCodeBlock() {
 				<C>CodeBlock.Root</C> takes only its <C>CodeBlock.Tab</C> children;
 				every code option lives on the tab.
 			</P>
-			<PropsReference props={propsToRows(codeBlockTab.props)} />
+			<PropsReference props={propsToRows(meta.props)} />
 
 			<Callout type="info" title="Async by design">
 				Shiki and its grammars load lazily on the first render; until then the

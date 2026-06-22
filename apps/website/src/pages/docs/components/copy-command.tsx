@@ -11,7 +11,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const copyCommand = getComponentMeta(CopyCommand);
+const meta = getComponentMeta(CopyCommand);
 
 function PageCopyCommand() {
 	return (
@@ -28,7 +28,7 @@ function PageCopyCommand() {
 			</Snippet>
 
 			<H2>Props</H2>
-			<PropsReference props={propsToRows(copyCommand.props)} />
+			<PropsReference props={propsToRows(meta.props)} />
 			<DocsFooter
 				prev={{ to: "/docs/components/navigation", title: "Navigation" }}
 				next={{ to: "/docs/components/layout", title: "Layout" }}

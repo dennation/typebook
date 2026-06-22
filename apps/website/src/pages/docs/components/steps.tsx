@@ -14,7 +14,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const step = getComponentMeta(Step);
+const meta = getComponentMeta(Step);
 
 function PageSteps() {
 	return (
@@ -53,7 +53,7 @@ function PageSteps() {
 			<P>
 				<C>Steps</C> takes only <C>children</C>. Each <C>Step</C> accepts:
 			</P>
-			<PropsReference props={propsToRows(step.props)} />
+			<PropsReference props={propsToRows(meta.props)} />
 			<DocsFooter
 				prev={{ to: "/docs/components/tabs", title: "Tabs" }}
 				next={{ to: "/docs/components/cards", title: "Cards" }}

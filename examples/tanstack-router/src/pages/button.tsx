@@ -9,7 +9,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "../components/Button";
 
-const button = getComponentMeta(Button, {
+const meta = getComponentMeta(Button, {
 	// defaultProps: { children: 'Click me' },
 });
 
@@ -30,17 +30,17 @@ function ButtonPage() {
 
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">Default</h2>
-				<Story of={button} />
+				<Story of={meta} />
 			</section>
 
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">All sizes</h2>
-				<Variants of={button} items={allOf(button, "size")} />
+				<Variants of={meta} items={allOf(meta, "size")} />
 			</section>
 
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">All variants</h2>
-				<Variants of={button} items={allOf(button, "variant")} />
+				<Variants of={meta} items={allOf(meta, "variant")} />
 			</section>
 
 			<section>
@@ -48,9 +48,9 @@ function ButtonPage() {
 					Color × Variant matrix
 				</h2>
 				<Matrix
-					of={button}
-					x={allOf(button, "color")}
-					y={[allOf(button, "variant")]}
+					of={meta}
+					x={allOf(meta, "color")}
+					y={[allOf(meta, "variant")]}
 				/>
 			</section>
 

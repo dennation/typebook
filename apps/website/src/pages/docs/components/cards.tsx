@@ -14,7 +14,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Palette, Zap } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const docCard = getComponentMeta(DocCard);
+const meta = getComponentMeta(DocCard);
 
 function PageCards() {
 	const navigate = useNavigate();
@@ -49,7 +49,7 @@ function PageCards() {
 			</Snippet>
 
 			<H2>DocCard props</H2>
-			<PropsReference props={propsToRows(docCard.props)} />
+			<PropsReference props={propsToRows(meta.props)} />
 			<P>
 				<C>Cards</C> itself takes only <C>children</C>.
 			</P>

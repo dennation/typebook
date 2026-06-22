@@ -15,7 +15,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Box, Layers } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const callout = getComponentMeta(Callout);
+const meta = getComponentMeta(Callout);
 
 function PageCallout() {
 	const navigate = useNavigate();
@@ -57,7 +57,7 @@ function PageCallout() {
 			</div>
 
 			<H2>Props</H2>
-			<PropsReference props={propsToRows(callout.props)} />
+			<PropsReference props={propsToRows(meta.props)} />
 
 			<H2>Notes</H2>
 			<P>

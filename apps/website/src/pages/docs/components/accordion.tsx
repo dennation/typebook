@@ -11,7 +11,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const accordion = getComponentMeta(Accordion);
+const meta = getComponentMeta(Accordion);
 
 function PageAccordion() {
 	return (
@@ -46,7 +46,7 @@ function PageAccordion() {
 			</Snippet>
 
 			<H2>Props</H2>
-			<PropsReference props={propsToRows(accordion.props)} />
+			<PropsReference props={propsToRows(meta.props)} />
 			<DocsFooter
 				prev={{ to: "/docs/components/cards", title: "Cards" }}
 				next={{ to: "/docs/components/tables", title: "Tables" }}
