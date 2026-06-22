@@ -50,11 +50,18 @@ export {
 	type PropsReferenceProps,
 } from "./shared/ui/props-reference/index";
 export {
-	A,
-	type AProps,
-	C,
-	ImgPlaceholder,
+	Blockquote,
+	Divider,
+	Emphasis,
+	ImagePlaceholder,
+	InlineCode,
 	Lead,
+	Link,
+	type LinkProps,
+	List,
+	ListItem,
+	Paragraph,
+	Strong,
 } from "./shared/ui/prose/index";
 export {
 	Step,

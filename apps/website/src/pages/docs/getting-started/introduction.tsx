@@ -1,11 +1,14 @@
 import {
-	C,
 	Callout,
 	Cards,
 	CodeBlock,
 	DocCard,
 	Heading,
+	InlineCode,
 	Lead,
+	Link,
+	Paragraph,
+	Strong,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -22,28 +25,32 @@ function PageIntroduction() {
 				TypeScript Compiler API and you render stories, variant grids, matrices
 				and interactive playgrounds on any page.
 			</Lead>
-			<p>
+			<Paragraph>
 				It ships two things that work together: a{" "}
-				<strong>storybook runtime</strong> (<C>Story</C>, <C>Variants</C>,{" "}
-				<C>Matrix</C>, <C>Playground</C>, <C>Snippet</C>) driven by build-time
-				prop injection, and a <strong>docs component kit</strong> (callouts,
-				code blocks, tabs, steps, sidebar — everything this site is built from).
-			</p>
+				<Strong>storybook runtime</Strong> (<InlineCode>Story</InlineCode>,{" "}
+				<InlineCode>Variants</InlineCode>, <InlineCode>Matrix</InlineCode>,{" "}
+				<InlineCode>Playground</InlineCode>, <InlineCode>Snippet</InlineCode>)
+				driven by build-time prop injection, and a{" "}
+				<Strong>docs component kit</Strong> (callouts, code blocks, tabs, steps,
+				sidebar — everything this site is built from).
+			</Paragraph>
 
 			<Callout type="info" title="This site is the demo">
 				Every component documented here renders the documentation you are
-				reading: the sidebar is <C>DocsSidebar</C>, this note is <C>Callout</C>.
+				reading: the sidebar is <InlineCode>DocsSidebar</InlineCode>, this note
+				is <InlineCode>Callout</InlineCode>.
 			</Callout>
 
 			<Heading level={2}>How it works</Heading>
-			<p>
-				The <C>typebook()</C> bundler plugin scans your sources for{" "}
-				<C>getComponentMeta(Component)</C> calls, resolves prop types, default
-				values and JSDoc through the TypeScript Compiler API, and{" "}
-				<strong>injects</strong> the result straight back into each call as the
-				handle's <C>props</C>. No registry file, no context, no lookup — the
-				handle the story components receive already carries everything.
-			</p>
+			<Paragraph>
+				The <InlineCode>typebook()</InlineCode> bundler plugin scans your
+				sources for <InlineCode>getComponentMeta(Component)</InlineCode> calls,
+				resolves prop types, default values and JSDoc through the TypeScript
+				Compiler API, and <Strong>injects</Strong> the result straight back into
+				each call as the handle's <InlineCode>props</InlineCode>. No registry
+				file, no context, no lookup — the handle the story components receive
+				already carries everything.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -65,17 +72,18 @@ const meta = getComponentMeta(Button, {
 			</CodeBlock.Root>
 
 			<Heading level={2}>Key design decisions</Heading>
-			<p>
-				Metadata is <strong>injected at the call site</strong>, not emitted to a
+			<Paragraph>
+				Metadata is <Strong>injected at the call site</Strong>, not emitted to a
 				registry file — data lives where it's used, with no string-id
 				indirection and no provider to wire. Type-safety comes from{" "}
-				<C>getComponentMeta</C>'s generics, so <C>tsc</C> and tests pass without
-				the plugin. Routing stays the <strong>consumer's responsibility</strong>
-				, so the library works with any router. And the same <C>typebook()</C>{" "}
+				<InlineCode>getComponentMeta</InlineCode>'s generics, so{" "}
+				<InlineCode>tsc</InlineCode> and tests pass without the plugin. Routing
+				stays the <Strong>consumer's responsibility</Strong>, so the library
+				works with any router. And the same <InlineCode>typebook()</InlineCode>{" "}
 				factory is published for every bundler via{" "}
-				<a href="https://unplugin.unjs.io">unplugin</a> — no bundler is
+				<Link href="https://unplugin.unjs.io">unplugin</Link> — no bundler is
 				privileged.
-			</p>
+			</Paragraph>
 
 			<Heading level={2}>Next steps</Heading>
 			<Cards>

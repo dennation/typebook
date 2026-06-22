@@ -1,10 +1,12 @@
 import {
-	C,
 	Callout,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
+	Strong,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
@@ -14,16 +16,17 @@ function PageSnippet() {
 	return (
 		<>
 			<Lead>
-				<C>{"<Snippet>"}</C> renders a component example live and adds a "show
-				source" toggle that reveals the exact original code — extracted at build
-				time, character for character, no regeneration artifacts.
+				<InlineCode>{"<Snippet>"}</InlineCode> renders a component example live
+				and adds a "show source" toggle that reveals the exact original code —
+				extracted at build time, character for character, no regeneration
+				artifacts.
 			</Lead>
 
 			<Heading level={2}>Usage</Heading>
-			<p>
-				The child is a <strong>component function</strong>, not raw JSX. The
+			<Paragraph>
+				The child is a <Strong>component function</Strong>, not raw JSX. The
 				simplest form is an inline arrow; the shown source is its body.
-			</p>
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -42,11 +45,11 @@ function PageSnippet() {
 </Snippet>`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<p>
+			<Paragraph>
 				Because the example is a component, it can use hooks — give the inline
 				function a capitalized name so the rules-of-hooks lint recognises it as
 				a component:
-			</p>
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/counter.tsx"
@@ -61,34 +64,36 @@ function PageSnippet() {
 </Snippet>`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<p>
-				At build time the plugin finds every <C>{"<Snippet>"}</C>, slices the
-				inline function's <C>body</C> straight from the file, dedents it and{" "}
-				<strong>injects it back onto the element</strong> as a{" "}
-				<C>__snippetSource</C> prop. At runtime the toggle reads that prop
-				directly (no context, no generated file, no fetch) and renders it
-				through <C>CodeBlock</C>.
-			</p>
+			<Paragraph>
+				At build time the plugin finds every{" "}
+				<InlineCode>{"<Snippet>"}</InlineCode>, slices the inline function's{" "}
+				<InlineCode>body</InlineCode> straight from the file, dedents it and{" "}
+				<Strong>injects it back onto the element</Strong> as a{" "}
+				<InlineCode>__snippetSource</InlineCode> prop. At runtime the toggle
+				reads that prop directly (no context, no generated file, no fetch) and
+				renders it through <InlineCode>CodeBlock</InlineCode>.
+			</Paragraph>
 
 			<Callout type="warning" title="Inline child must be a function">
-				Without <C>source</C>, the child must be an <strong>inline</strong>{" "}
-				function — a bare component reference (<C>{"{Counter}"}</C>) or raw JSX
-				raises a build error, since its source can't be sliced from this call
-				site. To document an example declared elsewhere, use <C>source</C>{" "}
-				instead (below). <C>name</C> is optional; it's just a label shown above
-				the source.
+				Without <InlineCode>source</InlineCode>, the child must be an{" "}
+				<Strong>inline</Strong> function — a bare component reference (
+				<InlineCode>{"{Counter}"}</InlineCode>) or raw JSX raises a build error,
+				since its source can't be sliced from this call site. To document an
+				example declared elsewhere, use <InlineCode>source</InlineCode> instead
+				(below). <InlineCode>name</InlineCode> is optional; it's just a label
+				shown above the source.
 			</Callout>
 
 			<Heading level={2}>
-				Reference an example with <C>source</C>
+				Reference an example with <InlineCode>source</InlineCode>
 			</Heading>
-			<p>
+			<Paragraph>
 				Sometimes the example already lives somewhere — a component in this file
-				or imported from another. Point <C>source</C> at it instead of inlining.
-				The build resolves the reference through the TypeScript program
-				(following an import into another module), slices that function's body,
-				and injects it as the shown source.
-			</p>
+				or imported from another. Point <InlineCode>source</InlineCode> at it
+				instead of inlining. The build resolves the reference through the
+				TypeScript program (following an import into another module), slices
+				that function's body, and injects it as the shown source.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -102,14 +107,15 @@ import { ButtonDemo } from "../demos/ButtonDemo";
 <Snippet source={ButtonDemo} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<p>
-				With <C>source</C>, <C>children</C> becomes an optional{" "}
-				<strong>layout render-prop</strong>. It receives{" "}
-				<C>{"{ preview, source, code, name }"}</C> — the live demo, the source
-				already rendered as a <C>CodeBlock</C>, the raw source text, and the{" "}
-				<C>name</C> label — so you decide where and how each appears. Omit{" "}
-				<C>children</C> for the default card.
-			</p>
+			<Paragraph>
+				With <InlineCode>source</InlineCode>, <InlineCode>children</InlineCode>{" "}
+				becomes an optional <Strong>layout render-prop</Strong>. It receives{" "}
+				<InlineCode>{"{ preview, source, code, name }"}</InlineCode> — the live
+				demo, the source already rendered as a{" "}
+				<InlineCode>CodeBlock</InlineCode>, the raw source text, and the{" "}
+				<InlineCode>name</InlineCode> label — so you decide where and how each
+				appears. Omit <InlineCode>children</InlineCode> for the default card.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"

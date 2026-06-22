@@ -1,8 +1,9 @@
 import {
-	C,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
@@ -13,17 +14,19 @@ function PageLayout() {
 	return (
 		<>
 			<Lead>
-				<C>{"<Layout>"}</C> is the runtime shell for a Typebook page: it sets
-				the <C>data-theme</C> attribute, injects the package stylesheet on first
-				mount, and lays out an optional sidebar next to the scrollable content.
+				<InlineCode>{"<Layout>"}</InlineCode> is the runtime shell for a
+				Typebook page: it sets the <InlineCode>data-theme</InlineCode>{" "}
+				attribute, injects the package stylesheet on first mount, and lays out
+				an optional sidebar next to the scrollable content.
 			</Lead>
 
 			<Heading level={2}>Usage</Heading>
-			<p>
-				Wrap your route's outlet in <C>{"<Layout>"}</C> and pass a{" "}
-				<C>sidebar</C> node. With a sidebar the root becomes a two-column grid (
-				<C>260px</C> + content); without one the content scrolls full-width.
-			</p>
+			<Paragraph>
+				Wrap your route's outlet in <InlineCode>{"<Layout>"}</InlineCode> and
+				pass a <InlineCode>sidebar</InlineCode> node. With a sidebar the root
+				becomes a two-column grid (<InlineCode>260px</InlineCode> + content);
+				without one the content scrolls full-width.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/__root.tsx"
@@ -45,13 +48,14 @@ function RootComponent() {
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 
-			<p>
-				<C>Layout</C> reads the current theme through the package's theme
-				entity, so a <Link to="/docs/components/theme-toggle">ThemeToggle</Link>{" "}
-				placed anywhere inside swaps the whole page through the cascade. Pass{" "}
-				<C>theme</C> to pin a page to a fixed theme regardless of the user's
-				choice.
-			</p>
+			<Paragraph>
+				<InlineCode>Layout</InlineCode> reads the current theme through the
+				package's theme entity, so a{" "}
+				<Link to="/docs/components/theme-toggle">ThemeToggle</Link> placed
+				anywhere inside swaps the whole page through the cascade. Pass{" "}
+				<InlineCode>theme</InlineCode> to pin a page to a fixed theme regardless
+				of the user's choice.
+			</Paragraph>
 
 			<Heading level={2}>Props</Heading>
 			<PropsReference

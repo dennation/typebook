@@ -1,8 +1,8 @@
 import {
 	Accordion,
-	C,
 	getComponentMeta,
 	Heading,
+	InlineCode,
 	Lead,
 	PropsReference,
 	propsToRows,
@@ -17,9 +17,9 @@ function PageAccordion() {
 	return (
 		<>
 			<Lead>
-				<C>Accordion</C> is a single-open FAQ list: clicking a question expands
-				its answer with an animated height transition and collapses the
-				previously open one.
+				<InlineCode>Accordion</InlineCode> is a single-open FAQ list: clicking a
+				question expands its answer with an animated height transition and
+				collapses the previously open one.
 			</Lead>
 
 			<Heading level={2}>Example</Heading>
@@ -35,7 +35,8 @@ function PageAccordion() {
 								q: "Can answers hold rich content?",
 								a: (
 									<>
-										Yes, <C>a</C> is a <C>ReactNode</C> — code, links and lists
+										Yes, <InlineCode>a</InlineCode> is a{" "}
+										<InlineCode>ReactNode</InlineCode> — code, links and lists
 										all work.
 									</>
 								),

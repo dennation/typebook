@@ -1,4 +1,11 @@
-import { C, CodeBlock, Heading, Lead } from "@dennation/typebook/react";
+import {
+	CodeBlock,
+	Heading,
+	InlineCode,
+	Lead,
+	Paragraph,
+	Strong,
+} from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
@@ -7,19 +14,22 @@ function PageInlineCode() {
 	return (
 		<>
 			<Lead>
-				<C>C</C> renders inline code — short monospace fragments inside running
-				text, like <C>useDocHeadings()</C> or <C>--accent</C>. It applies the{" "}
-				<C>.inline-code</C> theme class.
+				<InlineCode>InlineCode</InlineCode> renders inline code — short
+				monospace fragments inside running text, like{" "}
+				<InlineCode>useDocHeadings()</InlineCode> or{" "}
+				<InlineCode>--accent</InlineCode>. It applies the{" "}
+				<InlineCode>.inline-code</InlineCode> theme class.
 			</Lead>
 
-			<Heading level={2}>Why a component, not a bare tag</Heading>
-			<p>
-				Unlike paragraphs and lists, <C>C</C> is used <strong>outside</strong>{" "}
-				the <C>.doc-prose</C> layer too — inside callouts, tables, tabs and
-				cards. A descendant CSS rule like <C>.doc-prose code</C> wouldn't reach
-				those places, so the styling rides on the explicit <C>.inline-code</C>{" "}
-				class the component applies.
-			</p>
+			<Heading level={2}>Inline, not a block</Heading>
+			<Paragraph>
+				<InlineCode>InlineCode</InlineCode> is for short fragments{" "}
+				<Strong>inside</Strong> running text — a prop name, a token, a value.
+				For a whole highlighted snippet use <InlineCode>CodeBlock</InlineCode>{" "}
+				instead. It carries the <InlineCode>.inline-code</InlineCode> class, so
+				it looks the same wherever it appears — including inside callouts,
+				tables, tabs and cards.
+			</Paragraph>
 
 			<Heading level={2}>Usage</Heading>
 			<CodeBlock.Root>
@@ -28,9 +38,9 @@ function PageInlineCode() {
 					icon={<IconBrandReact size={14} />}
 					lang="tsx"
 				>
-					{`import { C } from "@dennation/typebook/react";
+					{`import { InlineCode } from "@dennation/typebook/react";
 
-<p>Read the value from <C>import.meta.env</C>.</p>`}
+<Paragraph>Read the value from <InlineCode>import.meta.env</InlineCode>.</Paragraph>`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 

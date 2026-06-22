@@ -1,11 +1,12 @@
 import {
 	Breadcrumbs,
-	C,
 	Callout,
 	CodeBlock,
 	getComponentMeta,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PrevNextNav,
 	PropsReference,
 	propsToRows,
@@ -21,18 +22,20 @@ function PageNavigation() {
 	return (
 		<>
 			<Lead>
-				The four pieces of docs chrome around the content: <C>DocsSidebar</C> on
-				the left, <C>DocsToc</C> on the right, <C>Breadcrumbs</C> above the
-				title and <C>PrevNextNav</C> at the bottom. All router-agnostic —
-				navigation goes through callbacks. You are looking at all four right
+				The four pieces of docs chrome around the content:{" "}
+				<InlineCode>DocsSidebar</InlineCode> on the left,{" "}
+				<InlineCode>DocsToc</InlineCode> on the right,{" "}
+				<InlineCode>Breadcrumbs</InlineCode> above the title and{" "}
+				<InlineCode>PrevNextNav</InlineCode> at the bottom. All router-agnostic
+				— navigation goes through callbacks. You are looking at all four right
 				now.
 			</Lead>
 
 			<Heading level={2}>DocsSidebar</Heading>
-			<p>
+			<Paragraph>
 				Collapsible sections with an active-item highlight and a mobile drawer
-				(≤820px). Data comes in as <C>DocsNavSection[]</C>.
-			</p>
+				(≤820px). Data comes in as <InlineCode>DocsNavSection[]</InlineCode>.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="DocsPage.tsx"
@@ -50,10 +53,11 @@ function PageNavigation() {
 			</CodeBlock.Root>
 
 			<Heading level={2}>DocsToc</Heading>
-			<p>
-				The "On this page" outline. Feed it headings from <C>useDocHeadings</C>{" "}
-				— the active item follows the scroll (scrollspy).
-			</p>
+			<Paragraph>
+				The "On this page" outline. Feed it headings from{" "}
+				<InlineCode>useDocHeadings</InlineCode> — the active item follows the
+				scroll (scrollspy).
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="DocsPage.tsx"
@@ -95,8 +99,9 @@ function PageNavigation() {
 
 			<Callout type="info" title="Bring your own router">
 				None of these components import a router. The sidebar on this site
-				renders its items through <C>@dennation/menu</C>, whose <C>Item</C> is a
-				TanStack Router <C>&lt;Link&gt;</C>; yours can render anything.
+				renders its items through <InlineCode>@dennation/menu</InlineCode>,
+				whose <InlineCode>Item</InlineCode> is a TanStack Router{" "}
+				<InlineCode>&lt;Link&gt;</InlineCode>; yours can render anything.
 			</Callout>
 			<DocsFooter
 				prev={{

@@ -59,7 +59,7 @@ export function DocsShell() {
 							<h1 className="text-[34px] font-[650] tracking-[-0.03em] leading-[1.12] m-0 mb-3.5">
 								{meta.title}
 							</h1>
-							<div className="doc-prose text-[15.5px] leading-[calc(1.72*var(--density))] [&>*+*]:mt-[calc(18px*var(--density))]">
+							<div className="text-[15.5px] leading-[calc(1.72*var(--density))]">
 								<Outlet />
 							</div>
 						</main>

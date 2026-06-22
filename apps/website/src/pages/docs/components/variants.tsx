@@ -1,9 +1,10 @@
 import {
-	C,
 	Callout,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
@@ -14,9 +15,11 @@ function PageVariants() {
 	return (
 		<>
 			<Lead>
-				<C>{"<Variants>"}</C> renders a labeled grid of component variants along
-				one prop axis. The axis is described by a variant config —{" "}
-				<C>allOf()</C>, <C>values()</C> or <C>generate()</C>.
+				<InlineCode>{"<Variants>"}</InlineCode> renders a labeled grid of
+				component variants along one prop axis. The axis is described by a
+				variant config — <InlineCode>allOf()</InlineCode>,{" "}
+				<InlineCode>values()</InlineCode> or <InlineCode>generate()</InlineCode>
+				.
 			</Lead>
 
 			<Heading level={2}>Usage</Heading>
@@ -39,9 +42,9 @@ import { Variants } from "@dennation/typebook/react";
 			</CodeBlock.Root>
 
 			<Callout type="success" title="Variants come from types">
-				<C>allOf()</C> reads the prop's literal-union (or boolean) type from the
-				handle's injected <C>props</C> — add a value to the union and the grid
-				grows by itself.
+				<InlineCode>allOf()</InlineCode> reads the prop's literal-union (or
+				boolean) type from the handle's injected <InlineCode>props</InlineCode>{" "}
+				— add a value to the union and the grid grows by itself.
 			</Callout>
 
 			<Heading level={2}>Props</Heading>
@@ -53,7 +56,8 @@ import { Variants } from "@dennation/typebook/react";
 						required: true,
 						desc: (
 							<>
-								The handle returned by <C>getComponentMeta()</C>.
+								The handle returned by{" "}
+								<InlineCode>getComponentMeta()</InlineCode>.
 							</>
 						),
 					},
@@ -63,8 +67,9 @@ import { Variants } from "@dennation/typebook/react";
 						required: true,
 						desc: (
 							<>
-								The axis: <C>allOf(of, prop)</C>, <C>values(of, prop, vs)</C> or{" "}
-								<C>generate(of, prop, fn, n)</C>.
+								The axis: <InlineCode>allOf(of, prop)</InlineCode>,{" "}
+								<InlineCode>values(of, prop, vs)</InlineCode> or{" "}
+								<InlineCode>generate(of, prop, fn, n)</InlineCode>.
 							</>
 						),
 					},
@@ -87,12 +92,12 @@ import { Variants } from "@dennation/typebook/react";
 			/>
 
 			<Heading level={2}>Related</Heading>
-			<p>
+			<Paragraph>
 				One variant at a time? Use{" "}
 				<Link to="/docs/components/story">Story</Link>. Two axes crossed in a
 				table? Use <Link to="/docs/components/matrix">Matrix</Link>. For the big
 				picture see <Link to="/docs/guides/story">Rendering stories</Link>.
-			</p>
+			</Paragraph>
 			<DocsFooter
 				prev={{ to: "/docs/components/story", title: "Story" }}
 				next={{ to: "/docs/components/matrix", title: "Matrix" }}

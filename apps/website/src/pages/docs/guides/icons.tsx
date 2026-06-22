@@ -1,9 +1,10 @@
 import {
-	A,
-	C,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
+	Link,
+	Paragraph,
 	Snippet,
 } from "@dennation/typebook/react";
 import { IconBrandGithub } from "@tabler/icons-react";
@@ -16,11 +17,12 @@ function PageIcons() {
 		<>
 			<Lead>
 				Typebook ships no icon component — icons are imported directly from{" "}
-				<A href="https://lucide.dev/icons/">lucide-react</A>, with brand glyphs
-				(GitHub, React, TypeScript) coming from{" "}
-				<A href="https://tabler.io/icons">@tabler/icons-react</A>. Both render
-				inline SVG that inherits the current text color via <C>currentColor</C>,
-				so they are theme-aware automatically.
+				<Link href="https://lucide.dev/icons/">lucide-react</Link>, with brand
+				glyphs (GitHub, React, TypeScript) coming from{" "}
+				<Link href="https://tabler.io/icons">@tabler/icons-react</Link>. Both
+				render inline SVG that inherits the current text color via{" "}
+				<InlineCode>currentColor</InlineCode>, so they are theme-aware
+				automatically.
 			</Lead>
 
 			<Heading level={2}>Example</Heading>
@@ -37,11 +39,12 @@ function PageIcons() {
 			</Snippet>
 
 			<Heading level={2}>Usage</Heading>
-			<p>
-				Import the glyph you need and set <C>size</C> (square, in px). lucide
-				icons take <C>strokeWidth</C>; Tabler icons take <C>stroke</C>. Color
-				follows the surrounding text.
-			</p>
+			<Paragraph>
+				Import the glyph you need and set <InlineCode>size</InlineCode> (square,
+				in px). lucide icons take <InlineCode>strokeWidth</InlineCode>; Tabler
+				icons take <InlineCode>stroke</InlineCode>. Color follows the
+				surrounding text.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab lang="tsx">
 					{`import { Search, ChevronRight } from "lucide-react";
@@ -54,14 +57,16 @@ import { IconBrandGithub } from "@tabler/icons-react";
 			</CodeBlock.Root>
 
 			<Heading level={2}>Stroke width</Heading>
-			<p>
-				Both libraries default to a <C>2</C> px stroke, and that's the weight we
-				use everywhere across the docs — sidebar, header, inline glyphs — so the
-				icon set reads consistently. Override <C>strokeWidth</C> (lucide) or{" "}
-				<C>stroke</C> (Tabler) only for large decorative glyphs, where a lighter{" "}
-				<C>1.2</C>–<C>1.5</C> weight keeps them from feeling heavy (as on the{" "}
-				<C>Zap</C> above).
-			</p>
+			<Paragraph>
+				Both libraries default to a <InlineCode>2</InlineCode> px stroke, and
+				that's the weight we use everywhere across the docs — sidebar, header,
+				inline glyphs — so the icon set reads consistently. Override{" "}
+				<InlineCode>strokeWidth</InlineCode> (lucide) or{" "}
+				<InlineCode>stroke</InlineCode> (Tabler) only for large decorative
+				glyphs, where a lighter <InlineCode>1.2</InlineCode>–
+				<InlineCode>1.5</InlineCode> weight keeps them from feeling heavy (as on
+				the <InlineCode>Zap</InlineCode> above).
+			</Paragraph>
 
 			<DocsFooter
 				prev={{ to: "/docs/guides/snippet", title: "Live snippets" }}

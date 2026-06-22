@@ -1,8 +1,9 @@
 import {
-	C,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
@@ -13,9 +14,10 @@ function PageMatrix() {
 	return (
 		<>
 			<Lead>
-				<C>{"<Matrix>"}</C> renders the cross-product of two prop axes as a
-				table: one axis across the columns (<C>x</C>), one or more axes stacked
-				down the rows (<C>y</C>). Perfect for color × variant sweeps.
+				<InlineCode>{"<Matrix>"}</InlineCode> renders the cross-product of two
+				prop axes as a table: one axis across the columns (
+				<InlineCode>x</InlineCode>), one or more axes stacked down the rows (
+				<InlineCode>y</InlineCode>). Perfect for color × variant sweeps.
 			</Lead>
 
 			<Heading level={2}>Usage</Heading>
@@ -35,10 +37,11 @@ import { Matrix } from "@dennation/typebook/react";
 />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
-			<p>
-				Each entry in <C>y</C> contributes its own block of rows, so two y-axes
-				give you every combination of both against the x axis.
-			</p>
+			<Paragraph>
+				Each entry in <InlineCode>y</InlineCode> contributes its own block of
+				rows, so two y-axes give you every combination of both against the x
+				axis.
+			</Paragraph>
 
 			<Heading level={2}>Props</Heading>
 			<PropsReference
@@ -49,7 +52,8 @@ import { Matrix } from "@dennation/typebook/react";
 						required: true,
 						desc: (
 							<>
-								The handle returned by <C>getComponentMeta()</C>.
+								The handle returned by{" "}
+								<InlineCode>getComponentMeta()</InlineCode>.
 							</>
 						),
 					},
@@ -79,12 +83,12 @@ import { Matrix } from "@dennation/typebook/react";
 			/>
 
 			<Heading level={2}>Related</Heading>
-			<p>
+			<Paragraph>
 				A single axis is enough? Use{" "}
 				<Link to="/docs/components/variants">Variants</Link>. Just one variant?
 				Use <Link to="/docs/components/story">Story</Link>. For the big picture
 				see <Link to="/docs/guides/story">Rendering stories</Link>.
-			</p>
+			</Paragraph>
 			<DocsFooter
 				prev={{ to: "/docs/components/variants", title: "Variants" }}
 				next={{ to: "/docs/components/callout", title: "Callout" }}

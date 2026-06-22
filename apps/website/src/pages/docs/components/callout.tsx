@@ -1,11 +1,12 @@
 import {
-	C,
 	Callout,
 	Cards,
 	DocCard,
 	getComponentMeta,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 	propsToRows,
 	Snippet,
@@ -36,10 +37,10 @@ function PageCallout() {
 			</Snippet>
 
 			<Heading level={2}>Intents</Heading>
-			<p>
+			<Paragraph>
 				Four built-in intents map to semantic colors. Each picks a matching
 				icon.
-			</p>
+			</Paragraph>
 			<div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
 				<Callout type="info" title="info">
 					Neutral context and cross-references.
@@ -59,12 +60,12 @@ function PageCallout() {
 			<PropsReference props={propsToRows(meta.props)} />
 
 			<Heading level={2}>Notes</Heading>
-			<p>
+			<Paragraph>
 				Intent colors are fixed OKLCH values blended with the theme through{" "}
-				<C>color-mix()</C>, so callouts adapt to dark mode without extra
-				variants. Inline code inside a callout switches to the page background
-				for contrast.
-			</p>
+				<InlineCode>color-mix()</InlineCode>, so callouts adapt to dark mode
+				without extra variants. Inline code inside a callout switches to the
+				page background for contrast.
+			</Paragraph>
 
 			<Heading level={2}>Related</Heading>
 			<Cards>

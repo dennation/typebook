@@ -198,64 +198,6 @@ button {
 		font-feature-settings: "ss02";
 	}
 
-	/* Doc prose base typography — applied to markdown emitted as raw
-	   <p>/<strong>/<ul>/<li>, plus the custom list marker (::marker). */
-	.doc-prose p {
-		margin: 0;
-		text-wrap: pretty;
-		color: var(--fg);
-	}
-	.doc-prose strong {
-		font-weight: 600;
-	}
-	.doc-prose ul,
-	.doc-prose ol {
-		margin: 0;
-		padding-left: 24px;
-		display: flex;
-		flex-direction: column;
-		gap: 7px;
-	}
-	.doc-prose li {
-		padding-left: 4px;
-	}
-	.doc-prose li::marker {
-		color: var(--fg-subtle);
-	}
-	.doc-prose ul li::marker {
-		content: "–  ";
-	}
-	/* Inline prose links — scoped to running text so block-level link cards
-	   (prev/next footer, doc cards) keep their own styling. */
-	.doc-prose :is(p, li, blockquote) a {
-		color: var(--accent);
-		font-weight: 500;
-		text-decoration: underline;
-		text-decoration-color: var(--accent-soft-border);
-		text-underline-offset: 3px;
-	}
-	.doc-prose :is(p, li, blockquote) a:hover {
-		text-decoration-color: var(--accent);
-	}
-	.doc-prose :is(p, li, blockquote) a .inline-code {
-		color: var(--accent);
-	}
-	/* hr / blockquote — bare tags in prose (no wrapper component). */
-	.doc-prose hr {
-		border: 0;
-		border-top: 1px solid var(--border);
-		margin-block: calc(40px * var(--density));
-	}
-	.doc-prose blockquote {
-		margin: 0;
-		padding-left: 18px;
-		padding-block: 4px;
-		border-left: 3px solid var(--accent-soft-border);
-		color: var(--fg-muted);
-		font-style: italic;
-		font-size: 15.5px;
-	}
-
 	/* Steps — numbered procedure built on CSS counters + connector line
 	   (both pseudo-element only). */
 	.steps {
