@@ -124,13 +124,13 @@ const FEATURES: Feature[] = [
 	},
 ];
 
-/** Landing "Why Typebok" feature grid with looping demos. */
+/** Landing "Why Typebook" feature grid with looping demos. */
 export function LandingFeatures() {
 	return (
 		<section className={SECTION_PAD} id="features">
 			<div className={CONTAINER}>
 				<SectionHead
-					kicker="Why Typebok"
+					kicker="Why Typebook"
 					title="Everything a docs site needs, nothing it doesn't"
 					sub="The polish you'd build by hand — stories, navigation, theming and components — working out of the box, on top of the types you already write."
 				/>

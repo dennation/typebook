@@ -16,7 +16,7 @@ export interface LandingCtaProps {
 /** Landing final call-to-action band. */
 export function LandingCta({
 	docsHref = "#",
-	command = "npx create-typebok@latest",
+	command = "npx create-typebook@latest",
 }: LandingCtaProps) {
 	return (
 		<section className="pt-0 pb-30 max-[860px]:pb-21">

@@ -66,7 +66,7 @@ export function SiteHeader({ version = "v2.4" }: SiteHeaderProps) {
 				<span className="w-6.5 h-6.5 rounded-[7px] bg-fg text-bg grid place-items-center font-mono font-semibold text-[14px] shrink-0">
 					T
 				</span>
-				Typebok
+				Typebook
 				<span className="text-[11px] font-mono text-fg-muted border border-border rounded-[99px] px-2 py-0.5 ml-0.5">
 					{version}
 				</span>

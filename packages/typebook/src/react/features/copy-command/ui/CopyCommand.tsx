@@ -21,7 +21,7 @@ const copyButton = tv({
 	},
 });
 
-/** A copy-able command pill (e.g. `npx create-typebok@latest`). */
+/** A copy-able command pill (e.g. `npx create-typebook@latest`). */
 export function CopyCommand({
 	cmd,
 	copyIcon = <Copy size={15} />,

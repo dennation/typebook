@@ -31,7 +31,7 @@ export function SiteFooter({ docsHref = "#" }: SiteFooterProps) {
 							<span className="w-6.5 h-6.5 rounded-[7px] bg-fg text-bg grid place-items-center font-mono font-semibold text-[14px] shrink-0">
 								T
 							</span>
-							Typebok
+							Typebook
 						</a>
 						<p className="text-[13.5px] text-fg-muted leading-[1.6] max-w-[30ch] m-0">
 							The content-first documentation framework for React. Open source,
@@ -56,7 +56,7 @@ export function SiteFooter({ docsHref = "#" }: SiteFooterProps) {
 					))}
 				</div>
 				<div className="flex items-center justify-between pt-7 border-t border-border text-[13px] text-fg-subtle max-[620px]:flex-col max-[620px]:gap-4 max-[620px]:text-center">
-					<span>© 2026 Typebok. Released under the MIT License.</span>
+					<span>© 2026 Typebook. Released under the MIT License.</span>
 					<div className="flex gap-4.5">
 						<a className="hover:text-fg-muted" href="#top">
 							Privacy

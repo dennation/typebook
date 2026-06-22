@@ -12,7 +12,7 @@ export interface LandingProps {
 	command?: string;
 }
 
-/** The full Typebok marketing landing page, composed from its sections.
+/** The full Typebook marketing landing page, composed from its sections.
     The site header is rendered by the root layout. */
 export function Landing({ docsHref = "#", command }: LandingProps) {
 	return (
