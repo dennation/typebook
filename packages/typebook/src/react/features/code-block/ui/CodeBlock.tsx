@@ -8,6 +8,7 @@ import {
 	useState,
 } from "react";
 import { tv } from "tailwind-variants";
+import { useCopy } from "../../../shared/lib/useCopy";
 import { type ThemedTokenWithVariants, tokenize } from "../lib/tokenize";
 
 export interface CodeBlockTabProps {
@@ -145,7 +146,7 @@ export function CodeBlock({
 		? tabItems
 		: [{ label: file || lang, lang, code: code ?? "", file, icon }];
 	const [active, setActive] = useState(0);
-	const [copied, setCopied] = useState(false);
+	const { copied, copy } = useCopy();
 	const cur = items[active] ?? (items[0] as CodeTab);
 
 	// Shiki is async — render plain lines until the tokens arrive.
@@ -168,13 +169,7 @@ export function CodeBlock({
 	const plainLines = cur.code.replace(/\n+$/, "").split("\n");
 	const lineCount = tokens?.length ?? plainLines.length;
 
-	const doCopy = () => {
-		navigator.clipboard
-			?.writeText(cur.code.replace(/\n+$/, ""))
-			.catch(() => {});
-		setCopied(true);
-		setTimeout(() => setCopied(false), 1600);
-	};
+	const doCopy = () => copy(cur.code.replace(/\n+$/, ""));
 
 	const CopyBtn = ({ extra = "" }: { extra?: string }) => (
 		<button
