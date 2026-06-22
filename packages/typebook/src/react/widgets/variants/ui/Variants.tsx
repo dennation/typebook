@@ -17,7 +17,7 @@ export type VariantsProps<
 	isolate?: boolean;
 	/** Optional caption shown above the grid. */
 	label?: string;
-	/** Show a "show source" toggle on each cell, revealing that variant's serialized usage. */
+	/** Show a "show source" toggle on each cell, revealing that variant's serialized usage (on by default). */
 	showSource?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
 	? { props?: Partial<Props> }
@@ -32,7 +32,7 @@ export function Variants<
 	props,
 	columns,
 	isolate,
-	showSource,
+	showSource = true,
 	label,
 }: VariantsProps<Props, Defaulted>) {
 	const Component = of.component;

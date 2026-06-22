@@ -10,7 +10,7 @@ export type StoryProps<Props extends object, Defaulted extends keyof Props> = {
 	isolate?: boolean;
 	/** Optional caption shown as a header above the preview. */
 	label?: string;
-	/** Show a "show source" toggle revealing the serialized component usage. */
+	/** Show a "show source" toggle revealing the serialized component usage (on by default). */
 	showSource?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
 	? { props?: Partial<Props> }
@@ -19,7 +19,13 @@ export type StoryProps<Props extends object, Defaulted extends keyof Props> = {
 export function Story<
 	Props extends object,
 	Defaulted extends keyof Props = never,
->({ of, props, isolate, label, showSource }: StoryProps<Props, Defaulted>) {
+>({
+	of,
+	props,
+	isolate,
+	label,
+	showSource = true,
+}: StoryProps<Props, Defaulted>) {
 	const Component = of.component;
 
 	const merged: Record<string, unknown> = {

@@ -34,6 +34,8 @@ export interface MatrixTableProps {
 	rows: MatrixRow[];
 	render: (props: any) => ReactNode;
 	isolate?: boolean;
+	/** Per-cell source node for the "show source" toggle; omit to hide the toggle. */
+	source?: (props: Record<string, unknown>) => ReactNode;
 }
 
 export function MatrixTable({
@@ -41,6 +43,7 @@ export function MatrixTable({
 	rows,
 	render,
 	isolate,
+	source,
 }: MatrixTableProps) {
 	const { root, table, cornerCell, columnHead } = matrixTable();
 	return (
@@ -70,6 +73,7 @@ export function MatrixTable({
 											props={cell.props}
 											render={render}
 											isolate={isolate}
+											source={source ? source(cell.props) : undefined}
 										/>
 									</td>
 								))}
