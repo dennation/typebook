@@ -1,9 +1,10 @@
 import {
-	C,
 	CodeBlock,
 	ErrorBoundary,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
@@ -18,17 +19,18 @@ function PageErrorBoundary() {
 	return (
 		<>
 			<Lead>
-				<C>ErrorBoundary</C> catches render errors in its subtree and shows a
-				fallback instead of crashing the page. The preview frames around{" "}
-				<C>{"<Story>"}</C> and friends wrap each variant in one, so a single
-				broken example never takes down the whole page.
+				<InlineCode>ErrorBoundary</InlineCode> catches render errors in its
+				subtree and shows a fallback instead of crashing the page. The preview
+				frames around <InlineCode>{"<Story>"}</InlineCode> and friends wrap each
+				variant in one, so a single broken example never takes down the whole
+				page.
 			</Lead>
 
 			<Heading level={2}>Example</Heading>
-			<p>
+			<Paragraph>
 				The child below throws on render; the boundary renders its default
 				fallback (the error message) in place:
-			</p>
+			</Paragraph>
 			<Snippet name="error-boundary-example">
 				{() => (
 					<ErrorBoundary>
@@ -38,10 +40,10 @@ function PageErrorBoundary() {
 			</Snippet>
 
 			<Heading level={2}>Custom fallback</Heading>
-			<p>
-				Pass <C>fallback</C> to replace the default red error box with your own
-				node.
-			</p>
+			<Paragraph>
+				Pass <InlineCode>fallback</InlineCode> to replace the default red error
+				box with your own node.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab lang="tsx">
 					{`import { ErrorBoundary } from "@dennation/typebook/react";

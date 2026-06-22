@@ -1,8 +1,10 @@
 import {
-	C,
+	Emphasis,
 	getComponentMeta,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 	propsToRows,
 	Snippet,
@@ -17,10 +19,11 @@ function PageTabs() {
 	return (
 		<>
 			<Lead>
-				<C>Tabs</C> switches between related panels of content with an
-				underline-style tab bar. For tabbed <em>code</em>, prefer{" "}
-				<C>CodeBlock</C>'s own <C>CodeBlock.Tab</C> children — this component is
-				for arbitrary content.
+				<InlineCode>Tabs</InlineCode> switches between related panels of content
+				with an underline-style tab bar. For tabbed <Emphasis>code</Emphasis>,
+				prefer <InlineCode>CodeBlock</InlineCode>'s own{" "}
+				<InlineCode>CodeBlock.Tab</InlineCode> children — this component is for
+				arbitrary content.
 			</Lead>
 
 			<Heading level={2}>Example</Heading>
@@ -30,12 +33,14 @@ function PageTabs() {
 						tabs={[
 							{
 								label: "First",
-								content: <p>Content of the first panel.</p>,
+								content: <Paragraph>Content of the first panel.</Paragraph>,
 							},
 							{
 								label: "Second",
 								content: (
-									<p>Content of the second panel — any ReactNode works.</p>
+									<Paragraph>
+										Content of the second panel — any ReactNode works.
+									</Paragraph>
 								),
 							},
 						]}

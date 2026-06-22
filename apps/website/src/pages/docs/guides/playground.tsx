@@ -1,9 +1,11 @@
 import {
-	C,
 	Callout,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
+	List,
+	Paragraph,
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
@@ -14,9 +16,9 @@ function PagePlayground() {
 	return (
 		<>
 			<Lead>
-				<C>{"<Playground>"}</C> is the interactive story: a live preview on top,
-				an editable props table below. Controls are derived from the extracted
-				TypeScript types — no manual arg configuration.
+				<InlineCode>{"<Playground>"}</InlineCode> is the interactive story: a
+				live preview on top, an editable props table below. Controls are derived
+				from the extracted TypeScript types — no manual arg configuration.
 			</Lead>
 
 			<Heading level={2}>Usage</Heading>
@@ -33,22 +35,24 @@ function PagePlayground() {
 			</CodeBlock.Root>
 
 			<Heading level={2}>What the table gives you</Heading>
-			<ul>
-				<li>
+			<List.Root>
+				<List.Item>
 					A control per prop: literal unions become selects, booleans toggles,
 					strings and numbers inputs
-				</li>
-				<li>Search across prop names and a toggle for inherited props</li>
-				<li>
+				</List.Item>
+				<List.Item>
+					Search across prop names and a toggle for inherited props
+				</List.Item>
+				<List.Item>
 					Required props are marked; defaults and JSDoc descriptions come from
 					the registry
-				</li>
-			</ul>
+				</List.Item>
+			</List.Root>
 
 			<Callout type="info" title="Where the metadata comes from">
-				The table is driven by <C>PropInfo[]</C> that the bundler plugin
-				extracted at build time — types, optionality, default values from
-				destructuring, and JSDoc comments.
+				The table is driven by <InlineCode>PropInfo[]</InlineCode> that the
+				bundler plugin extracted at build time — types, optionality, default
+				values from destructuring, and JSDoc comments.
 			</Callout>
 
 			<Heading level={2}>Props</Heading>
@@ -60,17 +64,18 @@ function PagePlayground() {
 						required: true,
 						desc: (
 							<>
-								The handle returned by <C>getComponentMeta()</C>. Initial
-								control values come from its <C>defaultProps</C>.
+								The handle returned by{" "}
+								<InlineCode>getComponentMeta()</InlineCode>. Initial control
+								values come from its <InlineCode>defaultProps</InlineCode>.
 							</>
 						),
 					},
 				]}
 			/>
-			<p>
+			<Paragraph>
 				Props that can't be edited as plain values (functions, nodes, complex
 				objects) are shown read-only with their type.
-			</p>
+			</Paragraph>
 			<DocsFooter
 				prev={{ to: "/docs/guides/story", title: "Rendering stories" }}
 				next={{ to: "/docs/guides/snippet", title: "Live snippets" }}

@@ -1,8 +1,9 @@
 import {
-	C,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 	Snippet,
 	ThemeToggle,
@@ -14,14 +15,16 @@ function PageThemeToggle() {
 	return (
 		<>
 			<Lead>
-				<C>ThemeToggle</C> flips the document <C>data-theme</C> between light
-				and dark and persists the choice to <C>localStorage</C>. It writes the
+				<InlineCode>ThemeToggle</InlineCode> flips the document{" "}
+				<InlineCode>data-theme</InlineCode> between light and dark and persists
+				the choice to <InlineCode>localStorage</InlineCode>. It writes the
 				attribute on the document root, so the whole page — including the design
-				tokens in <C>theme.css</C> — swaps through the cascade.
+				tokens in <InlineCode>theme.css</InlineCode> — swaps through the
+				cascade.
 			</Lead>
 
 			<Heading level={2}>Example</Heading>
-			<p>Click to toggle the theme of this page:</p>
+			<Paragraph>Click to toggle the theme of this page:</Paragraph>
 			<Snippet name="theme-toggle-example">
 				{() => (
 					<ThemeToggle className="inline-flex items-center justify-center size-10 rounded-(--radius-token) border border-border text-fg-muted hover:text-fg hover:bg-bg-tertiary transition-colors" />
@@ -29,12 +32,12 @@ function PageThemeToggle() {
 			</Snippet>
 
 			<Heading level={2}>Usage</Heading>
-			<p>
+			<Paragraph>
 				The button renders a sun/moon icon for the current theme — style it
-				through <C>className</C>. See{" "}
+				through <InlineCode>className</InlineCode>. See{" "}
 				<Link to="/docs/guides/theming">Theming</Link> for the token system it
 				drives.
-			</p>
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab lang="tsx">
 					{`import { ThemeToggle } from "@dennation/typebook/react";

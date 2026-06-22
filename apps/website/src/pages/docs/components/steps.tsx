@@ -1,9 +1,10 @@
 import {
-	C,
 	CodeBlock,
 	getComponentMeta,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 	propsToRows,
 	Snippet,
@@ -19,9 +20,9 @@ function PageSteps() {
 	return (
 		<>
 			<Lead>
-				<C>Steps</C> renders a numbered procedure with a connector line. The
-				counters and the line are pure CSS (counters + pseudo-elements from the
-				theme layer), so the markup stays minimal.
+				<InlineCode>Steps</InlineCode> renders a numbered procedure with a
+				connector line. The counters and the line are pure CSS (counters +
+				pseudo-elements from the theme layer), so the markup stays minimal.
 			</Lead>
 
 			<Heading level={2}>Example</Heading>
@@ -29,10 +30,10 @@ function PageSteps() {
 				{() => (
 					<Steps.Root>
 						<Steps.Step title="Install the package">
-							<p>
+							<Paragraph>
 								Any content works inside a step — paragraphs, code blocks,
 								callouts.
-							</p>
+							</Paragraph>
 						</Steps.Step>
 						<Steps.Step title="Wire the plugin">
 							<CodeBlock.Root>
@@ -42,16 +43,20 @@ function PageSteps() {
 							</CodeBlock.Root>
 						</Steps.Step>
 						<Steps.Step title="Render a story">
-							<p>The connector line stops automatically at the last step.</p>
+							<Paragraph>
+								The connector line stops automatically at the last step.
+							</Paragraph>
 						</Steps.Step>
 					</Steps.Root>
 				)}
 			</Snippet>
 
 			<Heading level={2}>Props</Heading>
-			<p>
-				<C>Steps</C> takes only <C>children</C>. Each <C>Step</C> accepts:
-			</p>
+			<Paragraph>
+				<InlineCode>Steps</InlineCode> takes only{" "}
+				<InlineCode>children</InlineCode>. Each <InlineCode>Step</InlineCode>{" "}
+				accepts:
+			</Paragraph>
 			<PropsReference props={propsToRows(meta.props)} />
 			<DocsFooter
 				prev={{ to: "/docs/components/tabs", title: "Tabs" }}

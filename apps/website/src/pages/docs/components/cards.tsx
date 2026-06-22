@@ -1,10 +1,11 @@
 import {
-	C,
 	Cards,
 	DocCard,
 	getComponentMeta,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 	propsToRows,
 	Snippet,
@@ -20,9 +21,9 @@ function PageCards() {
 	return (
 		<>
 			<Lead>
-				<C>Cards</C> lays out a two-column grid (one column on small screens) of{" "}
-				<C>DocCard</C> navigation cards — icon, title, description, click
-				handler.
+				<InlineCode>Cards</InlineCode> lays out a two-column grid (one column on
+				small screens) of <InlineCode>DocCard</InlineCode> navigation cards —
+				icon, title, description, click handler.
 			</Lead>
 
 			<Heading level={2}>Example</Heading>
@@ -49,9 +50,10 @@ function PageCards() {
 
 			<Heading level={2}>DocCard props</Heading>
 			<PropsReference props={propsToRows(meta.props)} />
-			<p>
-				<C>Cards</C> itself takes only <C>children</C>.
-			</p>
+			<Paragraph>
+				<InlineCode>Cards</InlineCode> itself takes only{" "}
+				<InlineCode>children</InlineCode>.
+			</Paragraph>
 			<DocsFooter
 				prev={{ to: "/docs/components/steps", title: "Steps" }}
 				next={{ to: "/docs/components/accordion", title: "Accordion" }}

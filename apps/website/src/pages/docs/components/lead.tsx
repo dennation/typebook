@@ -1,4 +1,10 @@
-import { C, CodeBlock, Heading, Lead } from "@dennation/typebook/react";
+import {
+	CodeBlock,
+	Heading,
+	InlineCode,
+	Lead,
+	Paragraph,
+} from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
@@ -7,18 +13,18 @@ function PageLead() {
 	return (
 		<>
 			<Lead>
-				<C>Lead</C> is the large, muted intro paragraph that sits directly under
-				a page title — a one-line summary that sets up the page. The sentence
-				you are reading is a <C>Lead</C>.
+				<InlineCode>Lead</InlineCode> is the large, muted intro paragraph that
+				sits directly under a page title — a one-line summary that sets up the
+				page. The sentence you are reading is a <InlineCode>Lead</InlineCode>.
 			</Lead>
 
 			<Heading level={2}>When to use it</Heading>
-			<p>
-				Open each docs page with exactly one <C>Lead</C>: a single sentence that
-				says what the thing is. Body copy that follows is plain <C>{"<p>"}</C>,
-				styled by the <C>.doc-prose</C> layer. <C>Lead</C> has no Markdown
-				equivalent, which is why it stays a component rather than a bare tag.
-			</p>
+			<Paragraph>
+				Open each docs page with exactly one <InlineCode>Lead</InlineCode>: a
+				single sentence that says what the thing is. Body copy that follows uses{" "}
+				<InlineCode>Paragraph</InlineCode> — <InlineCode>Lead</InlineCode> is
+				just the larger, muted variant reserved for that opening line.
+			</Paragraph>
 
 			<Heading level={2}>Usage</Heading>
 			<CodeBlock.Root>

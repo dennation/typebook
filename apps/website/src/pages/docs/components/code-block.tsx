@@ -1,10 +1,11 @@
 import {
-	C,
 	Callout,
 	CodeBlock,
 	getComponentMeta,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 	propsToRows,
 } from "@dennation/typebook/react";
@@ -19,22 +20,25 @@ function PageCodeBlock() {
 	return (
 		<>
 			<Lead>
-				<C>CodeBlock</C> renders highlighted, copyable code. It is a compound
-				component: a <C>CodeBlock.Root</C> wraps one or more{" "}
-				<C>CodeBlock.Tab</C> children. Every block is tabbed — a single tab just
-				renders a one-tab bar, so there is one layout and no special cases.
-				Highlighting is Shiki with the One Light / One Dark Pro theme pair —
-				full TextMate grammars for any language, and each token ships both
-				colors so they follow dark mode automatically.
+				<InlineCode>CodeBlock</InlineCode> renders highlighted, copyable code.
+				It is a compound component: a <InlineCode>CodeBlock.Root</InlineCode>{" "}
+				wraps one or more <InlineCode>CodeBlock.Tab</InlineCode> children. Every
+				block is tabbed — a single tab just renders a one-tab bar, so there is
+				one layout and no special cases. Highlighting is Shiki with the One
+				Light / One Dark Pro theme pair — full TextMate grammars for any
+				language, and each token ships both colors so they follow dark mode
+				automatically.
 			</Lead>
 
 			<Heading level={2}>One tab</Heading>
-			<p>
-				A lone <C>CodeBlock.Tab</C> is the everyday case. Add <C>file</C> for a
-				filename label, <C>showLineNumbers</C> for a gutter, and{" "}
-				<C>highlightLines</C> to call out specific lines (1-based). The tab{" "}
-				<C>label</C> defaults to the <C>file</C>, else the <C>lang</C>.
-			</p>
+			<Paragraph>
+				A lone <InlineCode>CodeBlock.Tab</InlineCode> is the everyday case. Add{" "}
+				<InlineCode>file</InlineCode> for a filename label,{" "}
+				<InlineCode>showLineNumbers</InlineCode> for a gutter, and{" "}
+				<InlineCode>highlightLines</InlineCode> to call out specific lines
+				(1-based). The tab <InlineCode>label</InlineCode> defaults to the{" "}
+				<InlineCode>file</InlineCode>, else the <InlineCode>lang</InlineCode>.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="example.ts"
@@ -51,10 +55,10 @@ function PageCodeBlock() {
 			</CodeBlock.Root>
 
 			<Heading level={3}>Several tabs</Heading>
-			<p>
-				Add more <C>CodeBlock.Tab</C> children to stack variants — the classic
-				npm/pnpm/yarn switcher:
-			</p>
+			<Paragraph>
+				Add more <InlineCode>CodeBlock.Tab</InlineCode> children to stack
+				variants — the classic npm/pnpm/yarn switcher:
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					label="pnpm"
@@ -73,10 +77,11 @@ function PageCodeBlock() {
 			</CodeBlock.Root>
 
 			<Heading level={2}>Tab props</Heading>
-			<p>
-				<C>CodeBlock.Root</C> takes only its <C>CodeBlock.Tab</C> children;
-				every code option lives on the tab.
-			</p>
+			<Paragraph>
+				<InlineCode>CodeBlock.Root</InlineCode> takes only its{" "}
+				<InlineCode>CodeBlock.Tab</InlineCode> children; every code option lives
+				on the tab.
+			</Paragraph>
 			<PropsReference props={propsToRows(meta.props)} />
 
 			<Callout type="info" title="Async by design">

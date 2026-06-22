@@ -1,8 +1,9 @@
 import {
-	C,
 	Heading,
+	InlineCode,
 	Lead,
 	MDTable,
+	Paragraph,
 	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
@@ -13,10 +14,11 @@ function PageTables() {
 	return (
 		<>
 			<Lead>
-				Two table components: <C>MDTable</C> for plain data (the equivalent of a
-				markdown pipe table) and <C>PropsReference</C> for documenting a
-				component API — every props list on this site is a <C>PropsReference</C>
-				.
+				Two table components: <InlineCode>MDTable</InlineCode> for plain data
+				(the equivalent of a markdown pipe table) and{" "}
+				<InlineCode>PropsReference</InlineCode> for documenting a component API
+				— every props list on this site is a{" "}
+				<InlineCode>PropsReference</InlineCode>.
 			</Lead>
 
 			<Heading level={2}>MDTable</Heading>
@@ -25,9 +27,21 @@ function PageTables() {
 					<MDTable
 						head={["Bundler", "Entry", "Status"]}
 						rows={[
-							["Vite", <C key="e">@dennation/typebook/vite</C>, "Stable"],
-							["webpack", <C key="e">@dennation/typebook/webpack</C>, "Stable"],
-							["esbuild", <C key="e">@dennation/typebook/esbuild</C>, "Stable"],
+							[
+								"Vite",
+								<InlineCode key="e">@dennation/typebook/vite</InlineCode>,
+								"Stable",
+							],
+							[
+								"webpack",
+								<InlineCode key="e">@dennation/typebook/webpack</InlineCode>,
+								"Stable",
+							],
+							[
+								"esbuild",
+								<InlineCode key="e">@dennation/typebook/esbuild</InlineCode>,
+								"Stable",
+							],
 						]}
 					/>
 				)}
@@ -50,10 +64,10 @@ function PageTables() {
 			/>
 
 			<Heading level={2}>PropsReference</Heading>
-			<p>
+			<Paragraph>
 				One striped row per prop with the name, type badge, required marker,
 				default value and description:
-			</p>
+			</Paragraph>
 			<Snippet name="props-table-example">
 				{() => (
 					<PropsReference
@@ -83,8 +97,11 @@ function PageTables() {
 						desc: (
 							<>
 								Rows to render:{" "}
-								<C>{"{ name, type, required?, default?, desc }"}</C>, where{" "}
-								<C>desc</C> is a <C>ReactNode</C>.
+								<InlineCode>
+									{"{ name, type, required?, default?, desc }"}
+								</InlineCode>
+								, where <InlineCode>desc</InlineCode> is a{" "}
+								<InlineCode>ReactNode</InlineCode>.
 							</>
 						),
 					},

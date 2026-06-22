@@ -1,9 +1,10 @@
 import {
-	C,
 	Callout,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	Steps,
 } from "@dennation/typebook/react";
 import { IconBrandReact, IconBrandTypescript } from "@tabler/icons-react";
@@ -15,10 +16,11 @@ function PageInstallation() {
 	return (
 		<>
 			<Lead>
-				Install the package and add the <C>typebook()</C> plugin to your
-				bundler. That's the whole setup — the plugin injects each component's
-				prop metadata directly into your <C>getComponentMeta()</C> calls at
-				build time, so there's no registry file and no provider to wire.
+				Install the package and add the <InlineCode>typebook()</InlineCode>{" "}
+				plugin to your bundler. That's the whole setup — the plugin injects each
+				component's prop metadata directly into your{" "}
+				<InlineCode>getComponentMeta()</InlineCode> calls at build time, so
+				there's no registry file and no provider to wire.
 			</Lead>
 
 			<Callout type="warning" title="Requirements">
@@ -55,11 +57,13 @@ function PageInstallation() {
 			<Heading level={2}>Wire it up</Heading>
 			<Steps.Root>
 				<Steps.Step title="Add the bundler plugin">
-					<p>
+					<Paragraph>
 						Import the plugin from the entry that matches your bundler —{" "}
-						<C>/vite</C>, <C>/rollup</C>, <C>/rolldown</C>, <C>/webpack</C>,{" "}
-						<C>/rspack</C>, <C>/esbuild</C> or <C>/farm</C>.
-					</p>
+						<InlineCode>/vite</InlineCode>, <InlineCode>/rollup</InlineCode>,{" "}
+						<InlineCode>/rolldown</InlineCode>,{" "}
+						<InlineCode>/webpack</InlineCode>, <InlineCode>/rspack</InlineCode>,{" "}
+						<InlineCode>/esbuild</InlineCode> or <InlineCode>/farm</InlineCode>.
+					</Paragraph>
 					<CodeBlock.Root>
 						<CodeBlock.Tab
 							file="vite.config.ts"
@@ -77,12 +81,12 @@ export default defineConfig({
 					</CodeBlock.Root>
 				</Steps.Step>
 				<Steps.Step title="Register a component">
-					<p>
-						Call <C>getComponentMeta</C> with your component, then render its
-						stories anywhere. The plugin injects the extracted prop metadata
-						into this call at build time — no registry, no provider, no imports
-						to manage.
-					</p>
+					<Paragraph>
+						Call <InlineCode>getComponentMeta</InlineCode> with your component,
+						then render its stories anywhere. The plugin injects the extracted
+						prop metadata into this call at build time — no registry, no
+						provider, no imports to manage.
+					</Paragraph>
 					<CodeBlock.Root>
 						<CodeBlock.Tab
 							file="src/pages/button.tsx"
@@ -103,19 +107,21 @@ const meta = getComponentMeta(Button, {
 					</CodeBlock.Root>
 				</Steps.Step>
 				<Steps.Step title="Load the styles">
-					<p>
-						The storybook UI injects its CSS through <C>{"<Layout>"}</C>. If you
-						render your own pages instead, import the shared <C>theme.css</C>{" "}
-						tokens and <C>@source</C>-scan the package — see{" "}
+					<Paragraph>
+						The storybook UI injects its CSS through{" "}
+						<InlineCode>{"<Layout>"}</InlineCode>. If you render your own pages
+						instead, import the shared <InlineCode>theme.css</InlineCode> tokens
+						and <InlineCode>@source</InlineCode>-scan the package — see{" "}
 						<Link to="/docs/guides/theming">Theming</Link>.
-					</p>
+					</Paragraph>
 				</Steps.Step>
 			</Steps.Root>
 
 			<Callout type="info">
-				Injection happens in the plugin's <C>transform</C> hook, so plain{" "}
-				<C>tsc</C> and tests still type-check without it — the handle's{" "}
-				<C>props</C> is simply empty until a build runs.
+				Injection happens in the plugin's <InlineCode>transform</InlineCode>{" "}
+				hook, so plain <InlineCode>tsc</InlineCode> and tests still type-check
+				without it — the handle's <InlineCode>props</InlineCode> is simply empty
+				until a build runs.
 			</Callout>
 			<DocsFooter
 				prev={{

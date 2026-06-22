@@ -1,10 +1,11 @@
 import {
-	C,
 	Callout,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
 	MDTable,
+	Paragraph,
 } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Palette } from "lucide-react";
@@ -16,56 +17,61 @@ function PageTheming() {
 			<Lead>
 				One OKLCH token system drives everything: the storybook UI, the docs kit
 				and any consumer site. Tokens are CSS custom properties, so dark mode
-				and live re-theming work through the cascade — no Tailwind <C>dark:</C>{" "}
-				variants.
+				and live re-theming work through the cascade — no Tailwind{" "}
+				<InlineCode>dark:</InlineCode> variants.
 			</Lead>
 
 			<Heading level={2}>Design tokens</Heading>
-			<p>
-				The single source of truth is <C>theme.css</C> inside the package. It
-				defines the palette as variables and re-exports them into Tailwind
-				utilities via <C>@theme inline</C> — so <C>bg-bg</C>,{" "}
-				<C>text-fg-muted</C>, <C>border-border</C>, <C>text-accent</C> stay
-				live.
-			</p>
+			<Paragraph>
+				The single source of truth is <InlineCode>theme.css</InlineCode> inside
+				the package. It defines the palette as variables and re-exports them
+				into Tailwind utilities via <InlineCode>@theme inline</InlineCode> — so{" "}
+				<InlineCode>bg-bg</InlineCode>, <InlineCode>text-fg-muted</InlineCode>,{" "}
+				<InlineCode>border-border</InlineCode>,{" "}
+				<InlineCode>text-accent</InlineCode> stay live.
+			</Paragraph>
 			<MDTable
 				head={["Token group", "Examples", "Purpose"]}
 				rows={[
 					[
 						"Knobs",
-						<C key="v">--accent-h --accent-c --radius</C>,
+						<InlineCode key="v">--accent-h --accent-c --radius</InlineCode>,
 						"Accent hue/chroma and base corner radius",
 					],
 					[
 						"Backgrounds",
-						<C key="v">--bg --bg-secondary --code-bg</C>,
+						<InlineCode key="v">--bg --bg-secondary --code-bg</InlineCode>,
 						"Page, sections, cards, code blocks",
 					],
 					[
 						"Text",
-						<C key="v">--fg --fg-muted --fg-subtle</C>,
+						<InlineCode key="v">--fg --fg-muted --fg-subtle</InlineCode>,
 						"Three contrast levels",
 					],
 					[
 						"Accent",
-						<C key="v">--accent --accent-soft --ring</C>,
+						<InlineCode key="v">--accent --accent-soft --ring</InlineCode>,
 						"Buttons, links, highlights, focus ring",
 					],
 					[
 						"Shadows",
-						<C key="v">--shadow-sm --shadow-md --shadow-lg</C>,
+						<InlineCode key="v">
+							--shadow-sm --shadow-md --shadow-lg
+						</InlineCode>,
 						"Elevation; code highlighting uses Shiki's One theme",
 					],
 				]}
 			/>
 
 			<Heading level={2}>Dark mode</Heading>
-			<p>
-				A <C>[data-theme="dark"]</C> block overrides the same variable names.
-				Toggling is one attribute on <C>{"<html>"}</C>; the package ships{" "}
-				<C>{"<ThemeToggle/>"}</C> which also persists the choice in{" "}
-				<C>localStorage</C> and respects the system preference.
-			</p>
+			<Paragraph>
+				A <InlineCode>[data-theme="dark"]</InlineCode> block overrides the same
+				variable names. Toggling is one attribute on{" "}
+				<InlineCode>{"<html>"}</InlineCode>; the package ships{" "}
+				<InlineCode>{"<ThemeToggle/>"}</InlineCode> which also persists the
+				choice in <InlineCode>localStorage</InlineCode> and respects the system
+				preference.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab file="index.html" lang="tsx">
 					{`<script>
@@ -78,11 +84,11 @@ function PageTheming() {
 			</CodeBlock.Root>
 
 			<Heading level={2}>Using the tokens in your site</Heading>
-			<p>
+			<Paragraph>
 				A consumer that renders its own pages (like this site) imports the
 				shared tokens and lets Tailwind scan the package sources so the
 				components' utilities are emitted:
-			</p>
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/styles.css"
@@ -98,9 +104,10 @@ function PageTheming() {
 			</CodeBlock.Root>
 
 			<Callout type="info" title="Re-theming is two variables">
-				Change <C>--accent-h</C> and <C>--accent-c</C> on <C>:root</C> and every
-				accent-colored surface — buttons, links, the active sidebar item, search
-				highlights — follows.
+				Change <InlineCode>--accent-h</InlineCode> and{" "}
+				<InlineCode>--accent-c</InlineCode> on <InlineCode>:root</InlineCode>{" "}
+				and every accent-colored surface — buttons, links, the active sidebar
+				item, search highlights — follows.
 			</Callout>
 			<DocsFooter
 				prev={{ to: "/docs/getting-started/quick-start", title: "Quick Start" }}

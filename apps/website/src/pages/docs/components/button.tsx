@@ -1,9 +1,10 @@
 import {
 	Button,
-	C,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 	Snippet,
 } from "@dennation/typebook/react";
@@ -15,9 +16,11 @@ function PageButton() {
 	return (
 		<>
 			<Lead>
-				<C>Button</C> is the package's call-to-action primitive — two variants (
-				<C>primary</C>, <C>ghost</C>), three sizes, and a polymorphic{" "}
-				<C>as="a"</C> escape hatch to render an anchor with the same styling.
+				<InlineCode>Button</InlineCode> is the package's call-to-action
+				primitive — two variants (<InlineCode>primary</InlineCode>,{" "}
+				<InlineCode>ghost</InlineCode>), three sizes, and a polymorphic{" "}
+				<InlineCode>as="a"</InlineCode> escape hatch to render an anchor with
+				the same styling.
 			</Lead>
 
 			<Heading level={2}>Example</Heading>
@@ -33,10 +36,11 @@ function PageButton() {
 			</Snippet>
 
 			<Heading level={2}>As an anchor</Heading>
-			<p>
-				Pass <C>as="a"</C> to render an <C>{"<a>"}</C> with the button styling —
-				the props then accept anchor attributes such as <C>href</C>.
-			</p>
+			<Paragraph>
+				Pass <InlineCode>as="a"</InlineCode> to render an{" "}
+				<InlineCode>{"<a>"}</InlineCode> with the button styling — the props
+				then accept anchor attributes such as <InlineCode>href</InlineCode>.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab lang="tsx">
 					{`<Button as="a" href="https://example.com" variant="ghost">
@@ -46,12 +50,13 @@ function PageButton() {
 			</CodeBlock.Root>
 
 			<Heading level={2}>Composing the class</Heading>
-			<p>
+			<Paragraph>
 				When you need the button styling on an element you can't replace (a
-				router <C>{"<Link>"}</C>, say), <C>buttonClass(variant, size, extra)</C>{" "}
-				returns the class string directly. <C>ARROW_CLASS</C> is a helper for a
-				trailing chevron that nudges right on hover.
-			</p>
+				router <InlineCode>{"<Link>"}</InlineCode>, say),{" "}
+				<InlineCode>buttonClass(variant, size, extra)</InlineCode> returns the
+				class string directly. <InlineCode>ARROW_CLASS</InlineCode> is a helper
+				for a trailing chevron that nudges right on hover.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="cta.tsx"

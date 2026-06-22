@@ -1,10 +1,11 @@
 import {
-	C,
 	Callout,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
 	MDTable,
+	Paragraph,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -21,12 +22,12 @@ function PageQuickStart() {
 			</Lead>
 
 			<Heading level={2}>Register a component</Heading>
-			<p>
-				<C>getComponentMeta()</C> calls can live anywhere in{" "}
-				<C>{"src/**/*.tsx"}</C> — no special filename required and no id to
-				assign. It returns a self-contained handle; the plugin injects the
-				extracted props into it at build time.
-			</p>
+			<Paragraph>
+				<InlineCode>getComponentMeta()</InlineCode> calls can live anywhere in{" "}
+				<InlineCode>{"src/**/*.tsx"}</InlineCode> — no special filename required
+				and no id to assign. It returns a self-contained handle; the plugin
+				injects the extracted props into it at build time.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -43,11 +44,11 @@ const meta = getComponentMeta(Button, {
 			</CodeBlock.Root>
 
 			<Heading level={2}>Render stories</Heading>
-			<p>
+			<Paragraph>
 				Pass the handle to any story component. They are type-safe: required
-				props not covered by <C>defaultProps</C> must be supplied via{" "}
-				<C>props</C> at the call site.
-			</p>
+				props not covered by <InlineCode>defaultProps</InlineCode> must be
+				supplied via <InlineCode>props</InlineCode> at the call site.
+			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab
 					file="src/pages/button.tsx"
@@ -76,31 +77,31 @@ import { Matrix, Playground, Story, Variants } from "@dennation/typebook/react";
 				head={["Component", "Renders"]}
 				rows={[
 					[
-						<C key="c">{"<Story>"}</C>,
+						<InlineCode key="c">{"<Story>"}</InlineCode>,
 						"One variant with merged defaultProps + props",
 					],
 					[
-						<C key="c">{"<Variants>"}</C>,
+						<InlineCode key="c">{"<Variants>"}</InlineCode>,
 						"A grid along one prop axis (allOf / values / generate)",
 					],
 					[
-						<C key="c">{"<Matrix>"}</C>,
+						<InlineCode key="c">{"<Matrix>"}</InlineCode>,
 						"A cross-product table of an x axis and y axes",
 					],
 					[
-						<C key="c">{"<Playground>"}</C>,
+						<InlineCode key="c">{"<Playground>"}</InlineCode>,
 						"Live preview + editable props table",
 					],
 					[
-						<C key="c">{"<Snippet>"}</C>,
+						<InlineCode key="c">{"<Snippet>"}</InlineCode>,
 						"Arbitrary JSX with a show-source toggle",
 					],
 				]}
 			/>
-			<p>
+			<Paragraph>
 				Continue with <Link to="/docs/guides/story">Rendering stories</Link> for
 				the full prop reference of each story component.
-			</p>
+			</Paragraph>
 			<DocsFooter
 				prev={{
 					to: "/docs/getting-started/installation",

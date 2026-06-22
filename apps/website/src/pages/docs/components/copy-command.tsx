@@ -1,8 +1,8 @@
 import {
-	C,
 	CopyCommand,
 	getComponentMeta,
 	Heading,
+	InlineCode,
 	Lead,
 	PropsReference,
 	propsToRows,
@@ -17,9 +17,9 @@ function PageCopyCommand() {
 	return (
 		<>
 			<Lead>
-				<C>CopyCommand</C> is the copy-able install-command pill from the
-				landing hero: a <C>$</C> prompt, the command in monospace, and a copy
-				button with a brief confirmation state.
+				<InlineCode>CopyCommand</InlineCode> is the copy-able install-command
+				pill from the landing hero: a <InlineCode>$</InlineCode> prompt, the
+				command in monospace, and a copy button with a brief confirmation state.
 			</Lead>
 
 			<Heading level={2}>Example</Heading>

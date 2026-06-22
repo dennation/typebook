@@ -1,9 +1,10 @@
 import {
-	C,
 	Callout,
 	CodeBlock,
 	Heading,
+	InlineCode,
 	Lead,
+	Paragraph,
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
@@ -14,9 +15,10 @@ function PageStory() {
 	return (
 		<>
 			<Lead>
-				<C>{"<Story>"}</C> renders a single variant of a registered component
-				inside a preview frame — the component with its <C>defaultProps</C>{" "}
-				merged with whatever you pass via <C>props</C>.
+				<InlineCode>{"<Story>"}</InlineCode> renders a single variant of a
+				registered component inside a preview frame — the component with its{" "}
+				<InlineCode>defaultProps</InlineCode> merged with whatever you pass via{" "}
+				<InlineCode>props</InlineCode>.
 			</Lead>
 
 			<Heading level={2}>Usage</Heading>
@@ -34,9 +36,10 @@ function PageStory() {
 			</CodeBlock.Root>
 
 			<Callout type="info" title="Type-safe props">
-				The <C>props</C> prop is phantom-typed: if the component has required
-				props that <C>defaultProps</C> doesn't cover, TypeScript makes{" "}
-				<C>props</C> mandatory and demands exactly the missing keys.
+				The <InlineCode>props</InlineCode> prop is phantom-typed: if the
+				component has required props that <InlineCode>defaultProps</InlineCode>{" "}
+				doesn't cover, TypeScript makes <InlineCode>props</InlineCode> mandatory
+				and demands exactly the missing keys.
 			</Callout>
 
 			<Heading level={2}>Props</Heading>
@@ -48,7 +51,8 @@ function PageStory() {
 						required: true,
 						desc: (
 							<>
-								The handle returned by <C>getComponentMeta()</C>.
+								The handle returned by{" "}
+								<InlineCode>getComponentMeta()</InlineCode>.
 							</>
 						),
 					},
@@ -57,8 +61,9 @@ function PageStory() {
 						type: "Partial<Props> & MissingProps",
 						desc: (
 							<>
-								Per-story prop overrides; merged over <C>defaultProps</C>.
-								Required when the registration leaves required props uncovered.
+								Per-story prop overrides; merged over{" "}
+								<InlineCode>defaultProps</InlineCode>. Required when the
+								registration leaves required props uncovered.
 							</>
 						),
 					},
@@ -71,12 +76,12 @@ function PageStory() {
 			/>
 
 			<Heading level={2}>Related</Heading>
-			<p>
+			<Paragraph>
 				Need several values of one prop at once? Use{" "}
 				<Link to="/docs/components/variants">Variants</Link>. Two axes? Use{" "}
 				<Link to="/docs/components/matrix">Matrix</Link>. For the big picture
 				see <Link to="/docs/guides/story">Rendering stories</Link>.
-			</p>
+			</Paragraph>
 			<DocsFooter
 				prev={{ to: "/docs/guides/icons", title: "Icons" }}
 				next={{ to: "/docs/components/variants", title: "Variants" }}
