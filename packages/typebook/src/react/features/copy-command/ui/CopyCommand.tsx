@@ -1,6 +1,7 @@
 import { Check, Copy } from "lucide-react";
-import { type ReactNode, useCallback, useState } from "react";
+import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";
+import { useCopy } from "../../../shared/lib/useCopy";
 
 export interface CopyCommandProps {
 	/** The shell command to display and copy. */
@@ -27,13 +28,7 @@ export function CopyCommand({
 	copyIcon = <Copy size={15} />,
 	copiedIcon = <Check size={15} />,
 }: CopyCommandProps) {
-	const [copied, setCopied] = useState(false);
-
-	const copy = useCallback(() => {
-		navigator.clipboard?.writeText(cmd).catch(() => {});
-		setCopied(true);
-		setTimeout(() => setCopied(false), 1500);
-	}, [cmd]);
+	const { copied, copy } = useCopy();
 
 	return (
 		<div className="inline-flex items-center gap-3 whitespace-nowrap h-12.5 pl-4.5 pr-2 bg-code-bg border border-border rounded-[calc(var(--radius-token)+2px)] font-mono text-[14px] text-fg shadow-sm">
@@ -42,7 +37,7 @@ export function CopyCommand({
 			<button
 				type="button"
 				className={copyButton({ copied })}
-				onClick={copy}
+				onClick={() => copy(cmd)}
 				aria-label="Copy command"
 			>
 				{copied ? copiedIcon : copyIcon}
