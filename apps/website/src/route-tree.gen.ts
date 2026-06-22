@@ -28,7 +28,7 @@ import { Route as DocsComponentsStepsRouteImport } from './pages/docs/components
 import { Route as DocsComponentsProseRouteImport } from './pages/docs/components/prose'
 import { Route as DocsComponentsNavigationRouteImport } from './pages/docs/components/navigation'
 import { Route as DocsComponentsLayoutRouteImport } from './pages/docs/components/layout'
-import { Route as DocsComponentsIconRouteImport } from './pages/docs/components/icon'
+import { Route as DocsGuidesIconsRouteImport } from './pages/docs/guides/icons'
 import { Route as DocsComponentsErrorBoundaryRouteImport } from './pages/docs/components/error-boundary'
 import { Route as DocsComponentsCopyCommandRouteImport } from './pages/docs/components/copy-command'
 import { Route as DocsComponentsCodeBlockRouteImport } from './pages/docs/components/code-block'
@@ -137,9 +137,9 @@ const DocsComponentsLayoutRoute = DocsComponentsLayoutRouteImport.update({
   path: '/components/layout',
   getParentRoute: () => DocsRouteRoute,
 } as any)
-const DocsComponentsIconRoute = DocsComponentsIconRouteImport.update({
-  id: '/components/icon',
-  path: '/components/icon',
+const DocsGuidesIconsRoute = DocsGuidesIconsRouteImport.update({
+  id: '/guides/icons',
+  path: '/guides/icons',
   getParentRoute: () => DocsRouteRoute,
 } as any)
 const DocsComponentsErrorBoundaryRoute =
@@ -191,7 +191,7 @@ export interface FileRoutesByFullPath {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
-  '/docs/components/icon': typeof DocsComponentsIconRoute
+  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
@@ -219,7 +219,7 @@ export interface FileRoutesByTo {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
-  '/docs/components/icon': typeof DocsComponentsIconRoute
+  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
@@ -249,7 +249,7 @@ export interface FileRoutesById {
   '/docs/components/code-block': typeof DocsComponentsCodeBlockRoute
   '/docs/components/copy-command': typeof DocsComponentsCopyCommandRoute
   '/docs/components/error-boundary': typeof DocsComponentsErrorBoundaryRoute
-  '/docs/components/icon': typeof DocsComponentsIconRoute
+  '/docs/guides/icons': typeof DocsGuidesIconsRoute
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/prose': typeof DocsComponentsProseRoute
@@ -280,7 +280,7 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
-    | '/docs/components/icon'
+    | '/docs/guides/icons'
     | '/docs/components/layout'
     | '/docs/components/navigation'
     | '/docs/components/prose'
@@ -308,7 +308,7 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
-    | '/docs/components/icon'
+    | '/docs/guides/icons'
     | '/docs/components/layout'
     | '/docs/components/navigation'
     | '/docs/components/prose'
@@ -337,7 +337,7 @@ export interface FileRouteTypes {
     | '/docs/components/code-block'
     | '/docs/components/copy-command'
     | '/docs/components/error-boundary'
-    | '/docs/components/icon'
+    | '/docs/guides/icons'
     | '/docs/components/layout'
     | '/docs/components/navigation'
     | '/docs/components/prose'
@@ -496,11 +496,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsComponentsLayoutRouteImport
       parentRoute: typeof DocsRouteRoute
     }
-    '/docs/components/icon': {
-      id: '/docs/components/icon'
-      path: '/components/icon'
-      fullPath: '/docs/components/icon'
-      preLoaderRoute: typeof DocsComponentsIconRouteImport
+    '/docs/guides/icons': {
+      id: '/docs/guides/icons'
+      path: '/guides/icons'
+      fullPath: '/docs/guides/icons'
+      preLoaderRoute: typeof DocsGuidesIconsRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/components/error-boundary': {
@@ -564,7 +564,7 @@ interface DocsRouteRouteChildren {
   DocsComponentsCodeBlockRoute: typeof DocsComponentsCodeBlockRoute
   DocsComponentsCopyCommandRoute: typeof DocsComponentsCopyCommandRoute
   DocsComponentsErrorBoundaryRoute: typeof DocsComponentsErrorBoundaryRoute
-  DocsComponentsIconRoute: typeof DocsComponentsIconRoute
+  DocsGuidesIconsRoute: typeof DocsGuidesIconsRoute
   DocsComponentsLayoutRoute: typeof DocsComponentsLayoutRoute
   DocsComponentsNavigationRoute: typeof DocsComponentsNavigationRoute
   DocsComponentsProseRoute: typeof DocsComponentsProseRoute
@@ -592,7 +592,7 @@ const DocsRouteRouteChildren: DocsRouteRouteChildren = {
   DocsComponentsCodeBlockRoute: DocsComponentsCodeBlockRoute,
   DocsComponentsCopyCommandRoute: DocsComponentsCopyCommandRoute,
   DocsComponentsErrorBoundaryRoute: DocsComponentsErrorBoundaryRoute,
-  DocsComponentsIconRoute: DocsComponentsIconRoute,
+  DocsGuidesIconsRoute: DocsGuidesIconsRoute,
   DocsComponentsLayoutRoute: DocsComponentsLayoutRoute,
   DocsComponentsNavigationRoute: DocsComponentsNavigationRoute,
   DocsComponentsProseRoute: DocsComponentsProseRoute,

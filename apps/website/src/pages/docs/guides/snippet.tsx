@@ -94,7 +94,7 @@ function PageSnippet() {
 					to: "/docs/guides/playground",
 					title: "Interactive playground",
 				}}
-				next={{ to: "/docs/components/callout", title: "Callout" }}
+				next={{ to: "/docs/guides/icons", title: "Icons" }}
 			/>
 		</>
 	);
