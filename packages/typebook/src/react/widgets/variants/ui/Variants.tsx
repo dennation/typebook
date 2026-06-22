@@ -15,6 +15,8 @@ export type VariantsProps<
 	items: VariantConfig;
 	columns?: number;
 	isolate?: boolean;
+	/** Optional caption shown above the grid. */
+	label?: string;
 	/** Show a "show source" toggle on each cell, revealing that variant's serialized usage. */
 	showSource?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
@@ -31,6 +33,7 @@ export function Variants<
 	columns,
 	isolate,
 	showSource,
+	label,
 }: VariantsProps<Props, Defaulted>) {
 	const Component = of.component;
 
@@ -45,7 +48,7 @@ export function Variants<
 		[Component],
 	);
 
-	return (
+	const grid = (
 		<div style={getGridStyle(variants.length, columns)}>
 			{variants.map((v) => (
 				<PreviewFrame
@@ -61,6 +64,15 @@ export function Variants<
 					}
 				/>
 			))}
+		</div>
+	);
+
+	if (!label) return grid;
+
+	return (
+		<div>
+			<p className="text-sm font-medium text-fg mb-3">{label}</p>
+			{grid}
 		</div>
 	);
 }
