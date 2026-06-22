@@ -5,7 +5,6 @@ import {
 	H2,
 	Lead,
 	P,
-	Step,
 	Steps,
 } from "@dennation/typebook/react";
 import { IconBrandReact, IconBrandTypescript } from "@tabler/icons-react";
@@ -55,8 +54,8 @@ function PageInstallation() {
 			</CodeBlock.Root>
 
 			<H2>Wire it up</H2>
-			<Steps>
-				<Step title="Add the bundler plugin">
+			<Steps.Root>
+				<Steps.Step title="Add the bundler plugin">
 					<P>
 						Import the plugin from the entry that matches your bundler —{" "}
 						<C>/vite</C>, <C>/rollup</C>, <C>/rolldown</C>, <C>/webpack</C>,{" "}
@@ -77,8 +76,8 @@ export default defineConfig({
 });`}
 						</CodeBlock.Tab>
 					</CodeBlock.Root>
-				</Step>
-				<Step title="Register a component">
+				</Steps.Step>
+				<Steps.Step title="Register a component">
 					<P>
 						Call <C>getComponentMeta</C> with your component, then render its
 						stories anywhere. The plugin injects the extracted prop metadata
@@ -103,16 +102,16 @@ const button = getComponentMeta(Button, {
 <Variants of={button} items={allOf(button, "size")} />`}
 						</CodeBlock.Tab>
 					</CodeBlock.Root>
-				</Step>
-				<Step title="Load the styles">
+				</Steps.Step>
+				<Steps.Step title="Load the styles">
 					<P>
 						The storybook UI injects its CSS through <C>{"<Layout>"}</C>. If you
 						render your own pages instead, import the shared <C>theme.css</C>{" "}
 						tokens and <C>@source</C>-scan the package — see{" "}
 						<Link to="/docs/guides/theming">Theming</Link>.
 					</P>
-				</Step>
-			</Steps>
+				</Steps.Step>
+			</Steps.Root>
 
 			<Callout type="info">
 				Injection happens in the plugin's <C>transform</C> hook, so plain{" "}

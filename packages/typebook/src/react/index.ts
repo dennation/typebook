@@ -62,7 +62,13 @@ export {
 	Quote,
 	Ul,
 } from "./shared/ui/prose/index";
-export { Step, type StepProps, Steps } from "./shared/ui/steps/index";
+export {
+	Step,
+	type StepProps,
+	Steps,
+	StepsRoot,
+	type StepsRootProps,
+} from "./shared/ui/steps/index";
 export { type TabItem, Tabs, type TabsProps } from "./shared/ui/tabs/index";
 export type { ComponentMeta, DefaultedOf, PropsOf } from "./types";
 export { allOf, generate, values } from "./variants";
