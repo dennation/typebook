@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import ts from "typescript";
 import { DEFAULT_INHERITED_PROVIDERS, LOG_PREFIX } from "../constants";
 import type { PropInfo, PropType } from "../types";
-import { dedent, sliceWithLeadingIndent } from "./source-slice";
+import { dedent } from "./source-slice";
 
 /** A function source resolved from a `<Snippet source={ref}>` reference. */
 export interface SnippetSource {
@@ -569,7 +569,7 @@ function sliceFunctionBody(fn: ts.SignatureDeclaration): string | null {
 	// Expression body: unwrap `() => ( … )` parens so the shown source is just the expression.
 	let expr: ts.Expression = body;
 	while (ts.isParenthesizedExpression(expr)) expr = expr.expression;
-	return dedent(sliceWithLeadingIndent(text, expr.getStart(), expr.getEnd()));
+	return dedent(text.slice(expr.getStart(), expr.getEnd()));
 }
 
 /**
