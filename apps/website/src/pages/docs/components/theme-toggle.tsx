@@ -60,7 +60,7 @@ function PageThemeToggle() {
 				]}
 			/>
 			<DocsFooter
-				prev={{ to: "/docs/components/icon", title: "Icon" }}
+				prev={{ to: "/docs/components/button", title: "Button" }}
 				next={{ to: "/docs/components/error-boundary", title: "ErrorBoundary" }}
 			/>
 		</>
