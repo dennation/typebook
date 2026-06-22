@@ -5,7 +5,7 @@ import { CONTAINER, SECTION_PAD } from "../shared/lib/landingLayout";
 import { SectionHead } from "../shared/ui/SectionHead";
 
 const COLS: { name: string; tag: string; own?: boolean }[] = [
-	{ name: "Typebok", tag: "this", own: true },
+	{ name: "Typebook", tag: "this", own: true },
 	{ name: "Nextra", tag: "MDX + Next" },
 	{ name: "Docusaurus", tag: "React" },
 	{ name: "Mintlify", tag: "hosted SaaS" },
@@ -60,7 +60,7 @@ const OWN_CELL =
 	"bg-[color-mix(in_oklch,var(--accent)_6%,var(--bg))] border-l border-r border-l-accent-soft-border border-r-accent-soft-border relative";
 const FEAT_CELL = "text-[14px] font-medium text-fg w-[34%]";
 
-/** Landing comparison table (Typebok vs alternatives). */
+/** Landing comparison table (Typebook vs alternatives). */
 export function LandingCompare() {
 	return (
 		<section

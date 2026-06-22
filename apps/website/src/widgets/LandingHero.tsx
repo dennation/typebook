@@ -35,7 +35,7 @@ export interface LandingHeroProps {
 /** Landing hero: headline, CTAs and the docs-site preview mockup. */
 export function LandingHero({
 	docsHref = "#",
-	command = "npx create-typebok@latest",
+	command = "npx create-typebook@latest",
 }: LandingHeroProps) {
 	return (
 		<section
@@ -67,7 +67,7 @@ export function LandingHero({
 					.
 				</h1>
 				<p className="text-[clamp(17px,2.1vw,20px)] leading-[1.6] text-fg-muted m-0 mb-9 max-w-[56ch] text-pretty">
-					Typebok is a content-first documentation framework for React. Write
+					Typebook is a content-first documentation framework for React. Write
 					plain
 					<strong className="text-fg font-semibold"> Markdown or MDX</strong> —
 					ship a polished sidebar, syntax highlighting and dark mode with{" "}
@@ -154,7 +154,7 @@ export function LandingHero({
 								</h2>
 								<p className="text-[14px] leading-[1.6] text-fg-muted m-0 mb-5 max-w-[46ch]">
 									Draw the reader's eye to notes, tips, warnings and dangers —
-									the most-used MDX component in Typebok.
+									the most-used MDX component in Typebook.
 								</p>
 								<div className="flex gap-2.75 px-3.75 py-3.25 rounded-[9px] text-[13px] leading-[1.5] border border-[color-mix(in_oklch,oklch(0.68_0.15_70)_35%,var(--border))] bg-[color-mix(in_oklch,oklch(0.68_0.15_70)_9%,var(--bg))] mt-1">
 									<span className="shrink-0 mt-px [color:oklch(0.68_0.15_70)]">
