@@ -29,8 +29,8 @@ function PageStory() {
 				>
 					{`import { Story } from "@dennation/typebook/react";
 
-<Story of={button} />
-<Story of={button} props={{ size: "lg", children: "Large" }} />`}
+<Story of={meta} />
+<Story of={meta} props={{ size: "lg", children: "Large" }} />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
 

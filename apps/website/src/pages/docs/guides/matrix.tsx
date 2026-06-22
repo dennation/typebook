@@ -30,9 +30,9 @@ function PageMatrix() {
 import { Matrix } from "@dennation/typebook/react";
 
 <Matrix
-  of={button}
-  x={allOf(button, "color")}
-  y={[allOf(button, "variant"), allOf(button, "size")]}
+  of={meta}
+  x={allOf(meta, "color")}
+  y={[allOf(meta, "variant"), allOf(meta, "size")]}
 />`}
 				</CodeBlock.Tab>
 			</CodeBlock.Root>
