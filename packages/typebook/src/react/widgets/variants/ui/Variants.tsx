@@ -1,3 +1,5 @@
+import { SourceBlock } from "@react/features/code-block/index";
+import { componentSource } from "@react/shared/lib/componentSource";
 import { getGridStyle } from "@react/shared/lib/getGridStyle";
 import { PreviewFrame } from "@react/shared/ui/preview/index";
 import type { ComponentMeta } from "@react/types";
@@ -13,6 +15,8 @@ export type VariantsProps<
 	items: VariantConfig;
 	columns?: number;
 	isolate?: boolean;
+	/** Show a "show source" toggle on each cell, revealing that variant's serialized usage. */
+	showSource?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
 	? { props?: Partial<Props> }
 	: { props: Partial<Props> & MissingProps<Props, Defaulted> });
@@ -20,7 +24,14 @@ export type VariantsProps<
 export function Variants<
 	Props extends object,
 	Defaulted extends keyof Props = never,
->({ of, items, props, columns, isolate }: VariantsProps<Props, Defaulted>) {
+>({
+	of,
+	items,
+	props,
+	columns,
+	isolate,
+	showSource,
+}: VariantsProps<Props, Defaulted>) {
 	const Component = of.component;
 
 	const baseProps: Record<string, unknown> = {
@@ -43,6 +54,11 @@ export function Variants<
 					props={v.props}
 					render={render}
 					isolate={isolate}
+					source={
+						showSource ? (
+							<SourceBlock code={componentSource(Component, v.props)} />
+						) : undefined
+					}
 				/>
 			))}
 		</div>

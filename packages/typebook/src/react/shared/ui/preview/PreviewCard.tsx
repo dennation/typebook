@@ -1,4 +1,5 @@
-import { type ReactNode, useState } from "react";
+import type { ReactNode } from "react";
+import { SourceToggle } from "./SourceToggle";
 
 export interface PreviewCardProps {
 	/** The live preview, rendered as-is (the caller owns its padding/centering). */
@@ -17,8 +18,6 @@ export interface PreviewCardProps {
  * an optional "show source" toggle revealing a code block. Used by `<Story>` and `<Snippet>`.
  */
 export function PreviewCard({ preview, source, label }: PreviewCardProps) {
-	const [open, setOpen] = useState(false);
-
 	return (
 		<div className="border border-border rounded-lg overflow-hidden">
 			{label && (
@@ -27,28 +26,7 @@ export function PreviewCard({ preview, source, label }: PreviewCardProps) {
 				</div>
 			)}
 			{preview}
-			{source !== undefined && (
-				<div className="border-t border-border">
-					<button
-						type="button"
-						onClick={() => setOpen((o) => !o)}
-						aria-expanded={open}
-						className="w-full text-left text-xs px-3 py-2 font-medium text-fg-muted hover:text-fg bg-bg-secondary cursor-pointer transition-colors"
-					>
-						{open ? "Hide source" : "Show source"}
-					</button>
-					{open && (
-						<div className="p-2">
-							{source ?? (
-								<p className="text-xs text-fg-muted p-3 m-0">
-									No source found for this snippet. Add the typebook bundler
-									plugin and rebuild.
-								</p>
-							)}
-						</div>
-					)}
-				</div>
-			)}
+			{source !== undefined && <SourceToggle source={source} />}
 		</div>
 	);
 }
