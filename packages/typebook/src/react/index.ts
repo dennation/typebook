@@ -19,6 +19,7 @@ export { childText } from "./shared/lib/childText";
 export { cx } from "./shared/lib/cx";
 export { propsToRows } from "./shared/lib/propsToRows";
 export { slugify } from "./shared/lib/slugify";
+export { type UseCopy, useCopy } from "./shared/lib/useCopy";
 // Universal design-system primitives (reusable by consumer docs sites)
 export {
 	Accordion,
