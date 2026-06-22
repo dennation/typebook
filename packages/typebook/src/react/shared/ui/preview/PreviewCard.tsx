@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Disclosure } from "./Disclosure";
 import { SourceToggle } from "./SourceToggle";
 
 export interface PreviewCardProps {
@@ -9,15 +10,22 @@ export interface PreviewCardProps {
 	 * (leave `undefined`) for a card with no source row. `null` shows the "no source" fallback.
 	 */
 	source?: ReactNode | null;
+	/** An interactive controls panel; pass a node to show the "show controls" toggle. */
+	controls?: ReactNode;
 	/** Optional caption shown as a header above the preview. */
 	label?: string;
 }
 
 /**
  * The shared preview card: a bordered block with an optional header label, the live preview, and
- * an optional "show source" toggle revealing a code block. Used by `<Story>` and `<Snippet>`.
+ * optional "show source" / "show controls" toggles. Used by `<Story>` and `<Snippet>`.
  */
-export function PreviewCard({ preview, source, label }: PreviewCardProps) {
+export function PreviewCard({
+	preview,
+	source,
+	controls,
+	label,
+}: PreviewCardProps) {
 	return (
 		<div className="border border-border rounded-lg overflow-hidden">
 			{label && (
@@ -27,6 +35,9 @@ export function PreviewCard({ preview, source, label }: PreviewCardProps) {
 			)}
 			{preview}
 			{source !== undefined && <SourceToggle source={source} />}
+			{controls !== undefined && (
+				<Disclosure label="controls">{controls}</Disclosure>
+			)}
 		</div>
 	);
 }

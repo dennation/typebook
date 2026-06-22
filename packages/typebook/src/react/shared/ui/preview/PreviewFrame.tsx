@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { memo } from "react";
+import { Disclosure } from "./Disclosure";
 import { Preview } from "./Preview";
 import { SourceToggle } from "./SourceToggle";
 
@@ -13,6 +14,8 @@ export interface PreviewFrameProps {
 	 * (leave `undefined`) for a cell with no source row.
 	 */
 	source?: ReactNode | null;
+	/** An interactive controls panel; pass a node to show the "show controls" toggle. */
+	controls?: ReactNode;
 }
 
 export const PreviewFrame = memo(function PreviewFrame({
@@ -21,6 +24,7 @@ export const PreviewFrame = memo(function PreviewFrame({
 	render,
 	isolate,
 	source,
+	controls,
 }: PreviewFrameProps) {
 	return (
 		<div className="relative bg-bg-secondary rounded-lg overflow-hidden">
@@ -29,6 +33,9 @@ export const PreviewFrame = memo(function PreviewFrame({
 			</span>
 			<Preview props={props} render={render} isolate={isolate} />
 			{source !== undefined && <SourceToggle source={source} />}
+			{controls !== undefined && (
+				<Disclosure label="controls">{controls}</Disclosure>
+			)}
 		</div>
 	);
 });

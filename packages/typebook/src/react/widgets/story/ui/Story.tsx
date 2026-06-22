@@ -1,4 +1,5 @@
 import { SourceBlock } from "@react/features/code-block/index";
+import { InteractivePreview } from "@react/features/prop-input/index";
 import { componentSource } from "@react/shared/lib/componentSource";
 import { Preview, PreviewCard } from "@react/shared/ui/preview/index";
 import type { ComponentMeta } from "@react/types";
@@ -12,6 +13,8 @@ export type StoryProps<Props extends object, Defaulted extends keyof Props> = {
 	title?: string;
 	/** Show a "show source" toggle revealing the serialized component usage (on by default). */
 	showSource?: boolean;
+	/** Make the props editable in place via a "show controls" panel. */
+	interactive?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
 	? { props?: Partial<Props> }
 	: { props: Partial<Props> & MissingProps<Props, Defaulted> });
@@ -25,6 +28,7 @@ export function Story<
 	isolate,
 	title,
 	showSource = true,
+	interactive,
 }: StoryProps<Props, Defaulted>) {
 	const Component = of.component;
 
@@ -37,6 +41,20 @@ export function Story<
 		(p: any) => createElement(Component, p),
 		[Component],
 	);
+
+	if (interactive) {
+		return (
+			<InteractivePreview
+				card
+				title={title}
+				component={Component}
+				propInfos={of.props}
+				initialProps={merged}
+				isolate={isolate}
+				showSource={showSource}
+			/>
+		);
+	}
 
 	const preview = <Preview props={merged} render={render} isolate={isolate} />;
 

@@ -14,8 +14,7 @@ const toggle = tv({
 	variants: {
 		checked: {
 			true: "bg-accent text-bg border-accent",
-			false:
-				"bg-transparent text-fg-muted border-border hover:border-accent",
+			false: "bg-transparent text-fg-muted border-border hover:border-accent",
 		},
 	},
 });

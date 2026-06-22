@@ -92,10 +92,6 @@ export {
 export { Layout, type LayoutProps } from "./widgets/layout/index";
 export { Matrix, type MatrixProps } from "./widgets/matrix/index";
 export {
-	Playground,
-	type PlaygroundProps,
-} from "./widgets/playground/index";
-export {
 	type PrevNextItem,
 	PrevNextNav,
 	type PrevNextNavProps,

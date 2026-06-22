@@ -1,4 +1,5 @@
 import { SourceBlock } from "@react/features/code-block/index";
+import { InteractivePreview } from "@react/features/prop-input/index";
 import { componentSource } from "@react/shared/lib/componentSource";
 import { getGridStyle } from "@react/shared/lib/getGridStyle";
 import { PreviewFrame } from "@react/shared/ui/preview/index";
@@ -19,6 +20,8 @@ export type VariantsProps<
 	title?: string;
 	/** Show a "show source" toggle on each cell, revealing that variant's serialized usage (on by default). */
 	showSource?: boolean;
+	/** Make each cell's props editable in place via a "show controls" panel. */
+	interactive?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
 	? { props?: Partial<Props> }
 	: { props: Partial<Props> & MissingProps<Props, Defaulted> });
@@ -33,6 +36,7 @@ export function Variants<
 	columns,
 	isolate,
 	showSource = true,
+	interactive,
 	title,
 }: VariantsProps<Props, Defaulted>) {
 	const Component = of.component;
@@ -50,20 +54,32 @@ export function Variants<
 
 	const grid = (
 		<div style={getGridStyle(variants.length, columns)}>
-			{variants.map((v) => (
-				<PreviewFrame
-					key={v.label}
-					label={v.label}
-					props={v.props}
-					render={render}
-					isolate={isolate}
-					source={
-						showSource ? (
-							<SourceBlock code={componentSource(Component, v.props)} />
-						) : undefined
-					}
-				/>
-			))}
+			{variants.map((v) =>
+				interactive ? (
+					<InteractivePreview
+						key={v.label}
+						badge={v.label}
+						component={Component}
+						propInfos={of.props}
+						initialProps={v.props}
+						isolate={isolate}
+						showSource={showSource}
+					/>
+				) : (
+					<PreviewFrame
+						key={v.label}
+						label={v.label}
+						props={v.props}
+						render={render}
+						isolate={isolate}
+						source={
+							showSource ? (
+								<SourceBlock code={componentSource(Component, v.props)} />
+							) : undefined
+						}
+					/>
+				),
+			)}
 		</div>
 	);
 

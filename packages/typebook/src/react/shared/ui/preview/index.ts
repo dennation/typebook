@@ -1,3 +1,4 @@
+export { Disclosure, type DisclosureProps } from "./Disclosure";
 export { ErrorBoundary } from "./ErrorBoundary";
 export { Isolate } from "./Isolate";
 export { Preview, type PreviewProps } from "./Preview";

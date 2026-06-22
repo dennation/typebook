@@ -1,7 +1,6 @@
-import { PreviewFrame } from "@react/shared/ui/preview/index";
 import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";
-import type { MatrixRow } from "../lib/buildMatrixRows";
+import type { MatrixCell, MatrixRow } from "../lib/buildMatrixRows";
 
 const matrixTable = tv({
 	slots: {
@@ -32,19 +31,11 @@ const matrixTable = tv({
 export interface MatrixTableProps {
 	xLabels: string[];
 	rows: MatrixRow[];
-	render: (props: any) => ReactNode;
-	isolate?: boolean;
-	/** Per-cell source node for the "show source" toggle; omit to hide the toggle. */
-	source?: (props: Record<string, unknown>) => ReactNode;
+	/** Renders the preview for one cell (interactive or static — Matrix decides). */
+	renderCell: (cell: MatrixCell) => ReactNode;
 }
 
-export function MatrixTable({
-	xLabels,
-	rows,
-	render,
-	isolate,
-	source,
-}: MatrixTableProps) {
+export function MatrixTable({ xLabels, rows, renderCell }: MatrixTableProps) {
 	const { root, table, cornerCell, columnHead } = matrixTable();
 	return (
 		<div className={root()}>
@@ -68,13 +59,7 @@ export function MatrixTable({
 								<td className={rowHead()}>{row.label}</td>
 								{row.cells.map((cell) => (
 									<td key={`${row.label}-${cell.label}`} className={bodyCell()}>
-										<PreviewFrame
-											label={cell.label}
-											props={cell.props}
-											render={render}
-											isolate={isolate}
-											source={source ? source(cell.props) : undefined}
-										/>
+										{renderCell(cell)}
 									</td>
 								))}
 							</tr>
