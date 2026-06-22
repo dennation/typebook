@@ -99,7 +99,7 @@ import { Variants } from "@dennation/typebook/react";
 						desc: (
 							<>
 								Make each cell's props editable in place — see{" "}
-								<Link to="/docs/guides/interactive">Interactive props</Link>.
+								<Link to="/docs/guides/story">Rendering stories</Link>.
 							</>
 						),
 					},

@@ -83,8 +83,7 @@ function PageStory() {
 						desc: (
 							<>
 								Make the props editable in place via a "show controls" panel —
-								see <Link to="/docs/guides/interactive">Interactive props</Link>
-								.
+								see <Link to="/docs/guides/story">Rendering stories</Link>.
 							</>
 						),
 					},

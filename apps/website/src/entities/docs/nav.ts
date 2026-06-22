@@ -30,7 +30,6 @@ export const GETTING_STARTED = defineMenu<DocsMeta | undefined>({
 export const GUIDES = defineMenu<DocsMeta | undefined>({
 	"/docs/guides/theming": { title: "Theming" },
 	"/docs/guides/story": { title: "Rendering stories" },
-	"/docs/guides/interactive": { title: "Interactive props" },
 	"/docs/guides/snippet": { title: "Live snippets" },
 	"/docs/guides/icons": { title: "Icons" },
 });
@@ -117,9 +116,10 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		desc: "Render stories with Story, Variants and Matrix",
 	},
 	{
-		slug: "guides/interactive",
+		slug: "guides/story",
 		title: "Interactive props",
-		section: "Guides",
+		section: "Rendering stories",
+		heading: "interactive-props",
 		desc: "Edit any preview's props in place — per-cell, live source",
 	},
 	{

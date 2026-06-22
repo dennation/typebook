@@ -158,8 +158,8 @@ import { ButtonDemo } from "../demos/ButtonDemo";
 			/>
 			<DocsFooter
 				prev={{
-					to: "/docs/guides/interactive",
-					title: "Interactive props",
+					to: "/docs/guides/story",
+					title: "Rendering stories",
 				}}
 				next={{ to: "/docs/guides/icons", title: "Icons" }}
 			/>
