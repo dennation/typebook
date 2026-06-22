@@ -7,7 +7,7 @@ import {
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageMatrix() {
@@ -78,17 +78,22 @@ import { Matrix } from "@dennation/typebook/react";
 					},
 				]}
 			/>
+
+			<H2>Related</H2>
+			<P>
+				A single axis is enough? Use{" "}
+				<Link to="/docs/components/variants">Variants</Link>. Just one variant?
+				Use <Link to="/docs/components/story">Story</Link>. For the big picture
+				see <Link to="/docs/guides/story">Rendering stories</Link>.
+			</P>
 			<DocsFooter
-				prev={{ to: "/docs/guides/variants", title: "Variant grids" }}
-				next={{
-					to: "/docs/guides/playground",
-					title: "Interactive playground",
-				}}
+				prev={{ to: "/docs/components/variants", title: "Variants" }}
+				next={{ to: "/docs/components/callout", title: "Callout" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/guides/matrix")({
+export const Route = createFileRoute("/docs/components/matrix")({
 	component: PageMatrix,
 });

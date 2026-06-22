@@ -4,10 +4,11 @@ import {
 	CodeBlock,
 	H2,
 	Lead,
+	P,
 	PropsReference,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
 function PageVariants() {
@@ -85,14 +86,22 @@ import { Variants } from "@dennation/typebook/react";
 					},
 				]}
 			/>
+
+			<H2>Related</H2>
+			<P>
+				One variant at a time? Use <Link to="/docs/components/story">Story</Link>.
+				Two axes crossed in a table? Use{" "}
+				<Link to="/docs/components/matrix">Matrix</Link>. For the big picture see{" "}
+				<Link to="/docs/guides/story">Rendering stories</Link>.
+			</P>
 			<DocsFooter
-				prev={{ to: "/docs/guides/story", title: "Rendering stories" }}
-				next={{ to: "/docs/guides/matrix", title: "Prop matrices" }}
+				prev={{ to: "/docs/components/story", title: "Story" }}
+				next={{ to: "/docs/components/matrix", title: "Matrix" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/guides/variants")({
+export const Route = createFileRoute("/docs/components/variants")({
 	component: PageVariants,
 });

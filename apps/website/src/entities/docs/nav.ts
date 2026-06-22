@@ -30,14 +30,15 @@ export const GETTING_STARTED = defineMenu<DocsMeta | undefined>({
 export const GUIDES = defineMenu<DocsMeta | undefined>({
 	"/docs/guides/theming": { title: "Theming" },
 	"/docs/guides/story": { title: "Rendering stories" },
-	"/docs/guides/variants": { title: "Variant grids" },
-	"/docs/guides/matrix": { title: "Prop matrices" },
 	"/docs/guides/playground": { title: "Interactive playground" },
 	"/docs/guides/snippet": { title: "Live snippets" },
 	"/docs/guides/icons": { title: "Icons" },
 });
 
 export const COMPONENTS = defineMenu<DocsMeta | undefined>({
+	"/docs/components/story": { title: "Story" },
+	"/docs/components/variants": { title: "Variants" },
+	"/docs/components/matrix": { title: "Matrix" },
 	"/docs/components/callout": { title: "Callout" },
 	"/docs/components/code-block": { title: "CodeBlock" },
 	"/docs/components/tabs": { title: "Tabs" },
@@ -109,19 +110,7 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		slug: "guides/story",
 		title: "Rendering stories",
 		section: "Guides",
-		desc: "Render a single component variant",
-	},
-	{
-		slug: "guides/variants",
-		title: "Variant grids",
-		section: "Guides",
-		desc: "A grid of variants along one prop axis",
-	},
-	{
-		slug: "guides/matrix",
-		title: "Prop matrices",
-		section: "Guides",
-		desc: "Cross-product table of two prop axes",
+		desc: "Render stories with Story, Variants and Matrix",
 	},
 	{
 		slug: "guides/playground",
@@ -140,6 +129,24 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		title: "Icons",
 		section: "Guides",
 		desc: "Import icons from lucide-react and @tabler/icons-react (currentColor)",
+	},
+	{
+		slug: "components/story",
+		title: "Story",
+		section: "Components",
+		desc: "Render a single component variant",
+	},
+	{
+		slug: "components/variants",
+		title: "Variants",
+		section: "Components",
+		desc: "A grid of variants along one prop axis",
+	},
+	{
+		slug: "components/matrix",
+		title: "Matrix",
+		section: "Components",
+		desc: "Cross-product table of two prop axes",
 	},
 	{
 		slug: "components/callout",
