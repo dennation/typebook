@@ -15,7 +15,6 @@ import { Route as DocsIndexRouteImport } from './pages/docs/index'
 import { Route as DocsGuidesThemingRouteImport } from './pages/docs/guides/theming'
 import { Route as DocsGuidesStoryRouteImport } from './pages/docs/guides/story'
 import { Route as DocsGuidesSnippetRouteImport } from './pages/docs/guides/snippet'
-import { Route as DocsGuidesPlaygroundRouteImport } from './pages/docs/guides/playground'
 import { Route as DocsGuidesIconsRouteImport } from './pages/docs/guides/icons'
 import { Route as DocsGettingStartedQuickStartRouteImport } from './pages/docs/getting-started/quick-start'
 import { Route as DocsGettingStartedIntroductionRouteImport } from './pages/docs/getting-started/introduction'
@@ -70,11 +69,6 @@ const DocsGuidesStoryRoute = DocsGuidesStoryRouteImport.update({
 const DocsGuidesSnippetRoute = DocsGuidesSnippetRouteImport.update({
   id: '/guides/snippet',
   path: '/guides/snippet',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
-const DocsGuidesPlaygroundRoute = DocsGuidesPlaygroundRouteImport.update({
-  id: '/guides/playground',
-  path: '/guides/playground',
   getParentRoute: () => DocsRouteRoute,
 } as any)
 const DocsGuidesIconsRoute = DocsGuidesIconsRouteImport.update({
@@ -241,7 +235,6 @@ export interface FileRoutesByFullPath {
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
   '/docs/guides/icons': typeof DocsGuidesIconsRoute
-  '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
   '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
   '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
@@ -274,7 +267,6 @@ export interface FileRoutesByTo {
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
   '/docs/guides/icons': typeof DocsGuidesIconsRoute
-  '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
   '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
   '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
@@ -309,7 +301,6 @@ export interface FileRoutesById {
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
   '/docs/guides/icons': typeof DocsGuidesIconsRoute
-  '/docs/guides/playground': typeof DocsGuidesPlaygroundRoute
   '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
   '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
@@ -345,7 +336,6 @@ export interface FileRouteTypes {
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
     | '/docs/guides/icons'
-    | '/docs/guides/playground'
     | '/docs/guides/snippet'
     | '/docs/guides/story'
     | '/docs/guides/theming'
@@ -378,7 +368,6 @@ export interface FileRouteTypes {
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
     | '/docs/guides/icons'
-    | '/docs/guides/playground'
     | '/docs/guides/snippet'
     | '/docs/guides/story'
     | '/docs/guides/theming'
@@ -412,7 +401,6 @@ export interface FileRouteTypes {
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
     | '/docs/guides/icons'
-    | '/docs/guides/playground'
     | '/docs/guides/snippet'
     | '/docs/guides/story'
     | '/docs/guides/theming'
@@ -465,13 +453,6 @@ declare module '@tanstack/react-router' {
       path: '/guides/snippet'
       fullPath: '/docs/guides/snippet'
       preLoaderRoute: typeof DocsGuidesSnippetRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/guides/playground': {
-      id: '/docs/guides/playground'
-      path: '/guides/playground'
-      fullPath: '/docs/guides/playground'
-      preLoaderRoute: typeof DocsGuidesPlaygroundRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/guides/icons': {
@@ -679,7 +660,6 @@ interface DocsRouteRouteChildren {
   DocsGettingStartedIntroductionRoute: typeof DocsGettingStartedIntroductionRoute
   DocsGettingStartedQuickStartRoute: typeof DocsGettingStartedQuickStartRoute
   DocsGuidesIconsRoute: typeof DocsGuidesIconsRoute
-  DocsGuidesPlaygroundRoute: typeof DocsGuidesPlaygroundRoute
   DocsGuidesSnippetRoute: typeof DocsGuidesSnippetRoute
   DocsGuidesStoryRoute: typeof DocsGuidesStoryRoute
   DocsGuidesThemingRoute: typeof DocsGuidesThemingRoute
@@ -712,7 +692,6 @@ const DocsRouteRouteChildren: DocsRouteRouteChildren = {
   DocsGettingStartedIntroductionRoute: DocsGettingStartedIntroductionRoute,
   DocsGettingStartedQuickStartRoute: DocsGettingStartedQuickStartRoute,
   DocsGuidesIconsRoute: DocsGuidesIconsRoute,
-  DocsGuidesPlaygroundRoute: DocsGuidesPlaygroundRoute,
   DocsGuidesSnippetRoute: DocsGuidesSnippetRoute,
   DocsGuidesStoryRoute: DocsGuidesStoryRoute,
   DocsGuidesThemingRoute: DocsGuidesThemingRoute,

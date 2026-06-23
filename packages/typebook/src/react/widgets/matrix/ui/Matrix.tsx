@@ -1,7 +1,11 @@
+import { SourceBlock } from "@react/features/code-block/index";
+import { InteractivePreview } from "@react/features/prop-input/index";
+import { componentSource } from "@react/shared/lib/componentSource";
+import { PreviewFrame } from "@react/shared/ui/preview/index";
 import type { ComponentMeta } from "@react/types";
 import { createElement, useCallback } from "react";
 import type { MissingProps, VariantConfig } from "@/types";
-import { buildMatrixRows } from "../lib/buildMatrixRows";
+import { buildMatrixRows, type MatrixCell } from "../lib/buildMatrixRows";
 import { MatrixTable } from "./MatrixTable";
 
 export type MatrixProps<Props extends object, Defaulted extends keyof Props> = {
@@ -9,6 +13,12 @@ export type MatrixProps<Props extends object, Defaulted extends keyof Props> = {
 	x: VariantConfig;
 	y: VariantConfig[];
 	isolate?: boolean;
+	/** Optional title shown above the table. */
+	title?: string;
+	/** Show a "show source" toggle on each cell (on by default). */
+	showSource?: boolean;
+	/** Make each cell's props editable in place via a "show controls" panel. */
+	interactive?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
 	? { props?: Partial<Props> }
 	: { props: Partial<Props> & MissingProps<Props, Defaulted> });
@@ -16,7 +26,16 @@ export type MatrixProps<Props extends object, Defaulted extends keyof Props> = {
 export function Matrix<
 	Props extends object,
 	Defaulted extends keyof Props = never,
->({ of, x, y, props, isolate }: MatrixProps<Props, Defaulted>) {
+>({
+	of,
+	x,
+	y,
+	props,
+	isolate,
+	title,
+	showSource = true,
+	interactive,
+}: MatrixProps<Props, Defaulted>) {
 	const Component = of.component;
 	const render = useCallback(
 		(p: any) => createElement(Component, p),
@@ -31,12 +50,40 @@ export function Matrix<
 	const { xLabels, rows } = buildMatrixRows(x, y, of.props, baseProps);
 	if (xLabels.length === 0) return null;
 
+	const renderCell = (cell: MatrixCell) =>
+		interactive ? (
+			<InteractivePreview
+				badge={cell.label}
+				component={Component}
+				propInfos={of.props}
+				initialProps={cell.props}
+				isolate={isolate}
+				showSource={showSource}
+			/>
+		) : (
+			<PreviewFrame
+				label={cell.label}
+				props={cell.props}
+				render={render}
+				isolate={isolate}
+				source={
+					showSource ? (
+						<SourceBlock code={componentSource(Component, cell.props)} />
+					) : undefined
+				}
+			/>
+		);
+
+	const table = (
+		<MatrixTable xLabels={xLabels} rows={rows} renderCell={renderCell} />
+	);
+
+	if (!title) return table;
+
 	return (
-		<MatrixTable
-			xLabels={xLabels}
-			rows={rows}
-			render={render}
-			isolate={isolate}
-		/>
+		<div>
+			<p className="text-sm font-medium text-fg mb-3">{title}</p>
+			{table}
+		</div>
 	);
 }

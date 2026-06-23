@@ -7,3 +7,4 @@ export {
 	CodeBlockTab,
 	type CodeBlockTabProps,
 } from "./ui/CodeBlockTab";
+export { SourceBlock, type SourceBlockProps } from "./ui/SourceBlock";

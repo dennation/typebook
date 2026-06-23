@@ -75,6 +75,26 @@ import { Matrix } from "@dennation/typebook/react";
 						desc: "Base props applied to every cell.",
 					},
 					{
+						name: "title",
+						type: "string",
+						desc: "Optional caption shown above the table.",
+					},
+					{
+						name: "showSource",
+						type: "boolean",
+						desc: 'Show a "show source" toggle on each cell (on by default).',
+					},
+					{
+						name: "interactive",
+						type: "boolean",
+						desc: (
+							<>
+								Make each cell's props editable in place — see{" "}
+								<Link to="/docs/guides/story">Rendering stories</Link>.
+							</>
+						),
+					},
+					{
 						name: "isolate",
 						type: "boolean",
 						desc: "Render each cell inside an iframe.",

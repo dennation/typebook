@@ -1,3 +1,6 @@
+import { SourceBlock } from "@react/features/code-block/index";
+import { InteractivePreview } from "@react/features/prop-input/index";
+import { componentSource } from "@react/shared/lib/componentSource";
 import { getGridStyle } from "@react/shared/lib/getGridStyle";
 import { PreviewFrame } from "@react/shared/ui/preview/index";
 import type { ComponentMeta } from "@react/types";
@@ -13,6 +16,12 @@ export type VariantsProps<
 	items: VariantConfig;
 	columns?: number;
 	isolate?: boolean;
+	/** Optional title shown above the grid. */
+	title?: string;
+	/** Show a "show source" toggle on each cell, revealing that variant's serialized usage (on by default). */
+	showSource?: boolean;
+	/** Make each cell's props editable in place via a "show controls" panel. */
+	interactive?: boolean;
 } & (keyof MissingProps<Props, Defaulted> extends never
 	? { props?: Partial<Props> }
 	: { props: Partial<Props> & MissingProps<Props, Defaulted> });
@@ -20,7 +29,16 @@ export type VariantsProps<
 export function Variants<
 	Props extends object,
 	Defaulted extends keyof Props = never,
->({ of, items, props, columns, isolate }: VariantsProps<Props, Defaulted>) {
+>({
+	of,
+	items,
+	props,
+	columns,
+	isolate,
+	showSource = true,
+	interactive,
+	title,
+}: VariantsProps<Props, Defaulted>) {
 	const Component = of.component;
 
 	const baseProps: Record<string, unknown> = {
@@ -34,17 +52,43 @@ export function Variants<
 		[Component],
 	);
 
-	return (
+	const grid = (
 		<div style={getGridStyle(variants.length, columns)}>
-			{variants.map((v) => (
-				<PreviewFrame
-					key={v.label}
-					label={v.label}
-					props={v.props}
-					render={render}
-					isolate={isolate}
-				/>
-			))}
+			{variants.map((v) =>
+				interactive ? (
+					<InteractivePreview
+						key={v.label}
+						badge={v.label}
+						component={Component}
+						propInfos={of.props}
+						initialProps={v.props}
+						isolate={isolate}
+						showSource={showSource}
+					/>
+				) : (
+					<PreviewFrame
+						key={v.label}
+						label={v.label}
+						props={v.props}
+						render={render}
+						isolate={isolate}
+						source={
+							showSource ? (
+								<SourceBlock code={componentSource(Component, v.props)} />
+							) : undefined
+						}
+					/>
+				),
+			)}
+		</div>
+	);
+
+	if (!title) return grid;
+
+	return (
+		<div>
+			<p className="text-sm font-medium text-fg mb-3">{title}</p>
+			{grid}
 		</div>
 	);
 }

@@ -4,7 +4,9 @@ import {
 	Heading,
 	InlineCode,
 	Lead,
+	List,
 	Paragraph,
+	Strong,
 } from "@dennation/typebook/react";
 import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -113,6 +115,66 @@ const meta = getComponentMeta(Button, {
 				reference.
 			</Paragraph>
 
+			<Heading level={2}>Shared options</Heading>
+			<Paragraph>
+				All three accept the same trio: <InlineCode>title</InlineCode> (a
+				caption above the preview), <InlineCode>showSource</InlineCode> (a "show
+				source" toggle, <Strong>on by default</Strong>) and{" "}
+				<InlineCode>interactive</InlineCode> (covered below).
+			</Paragraph>
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`<Story of={meta} title="Primary" />
+<Variants of={meta} items={allOf(meta, "size")} title="Sizes" showSource={false} />
+<Matrix of={meta} x={allOf(meta, "color")} y={[allOf(meta, "variant")]} interactive />`}
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
+
+			<Heading level={2}>Interactive props</Heading>
+			<Paragraph>
+				Add <InlineCode>interactive</InlineCode> and every preview becomes
+				editable in place — each one owns its own state. In a grid or matrix
+				every cell edits <Strong>independently</Strong>; there is no single
+				panel mutating all of them at once.
+			</Paragraph>
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="src/pages/button.tsx"
+					icon={<IconBrandReact size={14} />}
+					lang="tsx"
+				>
+					{`<Story of={meta} interactive />
+<Variants of={meta} items={allOf(meta, "size")} interactive />
+<Matrix of={meta} x={allOf(meta, "color")} y={[allOf(meta, "variant")]} interactive />`}
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
+			<List.Root>
+				<List.Item>
+					Each preview gets a "show controls" toggle (collapsed by default)
+					revealing a props table scoped to that one instance.
+				</List.Item>
+				<List.Item>
+					A control per prop: literal unions become selects, booleans toggles,
+					strings and numbers inputs. Search across names and a toggle for
+					inherited props.
+				</List.Item>
+				<List.Item>
+					The "show source" panel is <Strong>live</Strong> — the code reflects
+					the props you've edited.
+				</List.Item>
+			</List.Root>
+			<Callout type="info" title="Where the controls come from">
+				The controls are derived from the <InlineCode>PropInfo[]</InlineCode>{" "}
+				the bundler plugin extracted at build time — types, optionality,
+				defaults from destructuring, and JSDoc. Props that can't be edited as
+				plain values (functions, complex objects) are shown read-only with their
+				type.
+			</Callout>
+
 			<Callout type="info" title="Type-safe props">
 				All three are phantom-typed on the handle: required props that{" "}
 				<InlineCode>defaultProps</InlineCode> doesn't cover must be supplied via{" "}
@@ -122,10 +184,7 @@ const meta = getComponentMeta(Button, {
 
 			<DocsFooter
 				prev={{ to: "/docs/guides/theming", title: "Theming" }}
-				next={{
-					to: "/docs/guides/playground",
-					title: "Interactive playground",
-				}}
+				next={{ to: "/docs/guides/snippet", title: "Live snippets" }}
 			/>
 		</>
 	);

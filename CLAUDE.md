@@ -28,7 +28,7 @@ apps/
 
 ## packages/typebook
 
-React component documentation library. In its bundler-plugin `transform` hook it scans each source module for `getComponentMeta()` calls and `<Snippet>` elements, extracts prop types via the TypeScript Compiler API, and **injects** the results back into the same module — `__props` into the `getComponentMeta()` config, `__snippetSource` onto the `<Snippet>` element. No files are generated; the handle returned by `getComponentMeta()` is self-contained. Consumers embed `<Story>`, `<Variants>`, `<Matrix>`, `<Playground>`, `<Snippet>` on any page to render component variants.
+React component documentation library. In its bundler-plugin `transform` hook it scans each source module for `getComponentMeta()` calls and `<Snippet>` elements, extracts prop types via the TypeScript Compiler API, and **injects** the results back into the same module — `__props` into the `getComponentMeta()` config, `__snippetSource` onto the `<Snippet>` element. No files are generated; the handle returned by `getComponentMeta()` is self-contained. Consumers embed `<Story>`, `<Variants>`, `<Matrix>`, `<Snippet>` on any page to render component variants (each story view takes an optional `interactive` prop for editable, per-preview props).
 
 ### Commands
 
@@ -81,15 +81,13 @@ packages/typebook/
       (no root provider — handles and snippets carry their own data, injected at build time)
       widgets/                      — Large public blocks
         Layout/                     — <Layout sidebar={…}>{children}</Layout>
-        Story/                      — <Story of={reg} props={…} /> — single variant
-        Variants/                   — <Variants of={reg} items={…} /> — prop axis grid
-        Matrix/                     — <Matrix of={reg} x={…} y={[…]} /> — cross-product table
-          ui/MatrixTable.tsx        — Table layout
+        Story/                      — <Story of={reg} props={…} title? showSource? interactive? /> — single variant
+        Variants/                   — <Variants of={reg} items={…} title? showSource? interactive? /> — prop axis grid
+        Matrix/                     — <Matrix of={reg} x={…} y={[…]} title? showSource? interactive? /> — cross-product table
+          ui/MatrixTable.tsx        — Table layout only (calls renderCell(cell) per cell)
           lib/buildMatrixRows.ts    — Pure builder (testable without React)
-        Playground/                 — <Playground of={reg} /> — interactive props editor
-          ui/PropsTable.tsx         — Search + filter + rows
-          ui/PropRow.tsx            — Single prop row
-          lib/isControllable.ts     — whether the Playground can render a control for a prop
+        (no Playground widget — "play with props" is the per-preview `interactive` prop on
+         Story/Variants/Matrix; each cell holds its own state. See features/prop-input.)
         Snippet/                    — <Snippet>{children}</Snippet> — live render + "show source" toggle
           ui/Snippet.tsx            — Renders children; toggle reveals the injected __snippetSource prop (no fetch, no context)
         docs-sidebar/               — <DocsSidebar sections={…} current onNavigate/> — collapsible docs nav + mobile drawer
@@ -97,7 +95,12 @@ packages/typebook/
         breadcrumbs/                — <Breadcrumbs items={[…]}/> — chevron trail above a docs title
         prev-next-nav/              — <PrevNextNav prev next onPrev onNext/> — footer page cards
       features/                     — Interactive units
-        prop-input/                 — <PropInput> per-prop controls (literal/bool/string/number)
+        prop-input/                 — prop-editing UI: <PropInput> per-prop controls
+                                      (literal/bool/string/number/node); PropsTable (search +
+                                      filter + rows) + PropRow + lib/isControllable; and
+                                      InteractivePreview — a single preview that owns its own
+                                      props state (used by Story/Variants/Matrix `interactive`),
+                                      with a live "show source" panel reflecting the edits
         code-block/                 — <CodeBlock.Root>{<CodeBlock.Tab label lang file icon showLineNumbers
                                       highlightLines>{`code`}</CodeBlock.Tab>…}</CodeBlock.Root> — a compound
                                       code component, always tabbed (a lone tab → one-tab bar; no single/tabs
@@ -137,14 +140,14 @@ packages/typebook/
 ### Build entry points
 
 - **`index`** — **React-free** types only (`TypebookConfig`, `PropInfo`, `PropType`, `MetaConfig*`, `VariantConfig`, …). Authoring API and React-coupled types (`ComponentMeta`) live in `react/`.
-- **`react/index`** — authoring API (`getComponentMeta`, `allOf`, `values`, `generate`) + `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary` + the docs component kit (content set, `CodeBlock`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `PropsReference`, `propsToRows`). Domain types come from the base entry, not re-exported here. **No search** — the package ships nothing search-related in its first versions; a docs site wires its own (see `apps/website`).
+- **`react/index`** — authoring API (`getComponentMeta`, `allOf`, `values`, `generate`) + `Layout`, `Story`, `Variants`, `Matrix`, `Snippet`, `ErrorBoundary` + the docs component kit (content set, `CodeBlock`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `PropsReference`, `propsToRows`). Domain types come from the base entry, not re-exported here. **No search** — the package ships nothing search-related in its first versions; a docs site wires its own (see `apps/website`).
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
 - **`cli/index`** — `npx @dennation/typebook` (prints plugin usage; there is no codegen step).
 
 ### Package exports
 
 - `@dennation/typebook` — **React-free types only** (`TypebookConfig`, `MetaConfigPick`, `MetaConfigOmit`, `MetaConfigBase`, `PropInfo`, `PropType`, `MissingProps`, `VariantConfig`, …). No `react` import. Authoring API and React-coupled types live in `/react`.
-- `@dennation/typebook/react` — **authoring API:** `getComponentMeta`, `allOf`, `values`, `generate` + the React-coupled types `ComponentMeta`/`PropsOf`/`DefaultedOf` (React-free domain types come from the base entry). **storybook runtime:** `Layout`, `Story`, `Variants`, `Matrix`, `Playground`, `Snippet`, `ErrorBoundary`. **docs kit** (for consumer documentation sites): content set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps` (compound `Steps.Root` + `Steps.Step`), `Accordion`, `Cards`/`DocCard`, `Heading` (single component, `level={2|3}`), `Paragraph`/`Lead`/`List` (compound `List.Root` + `List.Item`)/`Blockquote`/`Divider`/`Strong`/`Emphasis`/`InlineCode`/`Link`/`ImagePlaceholder` (component-only prose set — every element carries its own styles; no `.doc-prose` container, no bare-tag styling)), `CodeBlock` (compound `CodeBlock.Root` + `CodeBlock.Tab`, always tabbed — per-tab filename/lang/icon/line numbers/highlight lines, no `code` prop; Shiki with the One Light / One Dark Pro theme pair, each token carrying both colors so highlighting follows the theme — any language, theme-aware colors, lazy-loaded grammars), `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`. Icons are **not** exported — they are imported directly from `lucide-react` (brand glyphs from `@tabler/icons-react`) at each call site.
+- `@dennation/typebook/react` — **authoring API:** `getComponentMeta`, `allOf`, `values`, `generate` + the React-coupled types `ComponentMeta`/`PropsOf`/`DefaultedOf` (React-free domain types come from the base entry). **storybook runtime:** `Layout`, `Story`, `Variants`, `Matrix`, `Snippet`, `ErrorBoundary` (`Story`/`Variants`/`Matrix` share `title` / `showSource` / `interactive`). **docs kit** (for consumer documentation sites): content set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps` (compound `Steps.Root` + `Steps.Step`), `Accordion`, `Cards`/`DocCard`, `Heading` (single component, `level={2|3}`), `Paragraph`/`Lead`/`List` (compound `List.Root` + `List.Item`)/`Blockquote`/`Divider`/`Strong`/`Emphasis`/`InlineCode`/`Link`/`ImagePlaceholder` (component-only prose set — every element carries its own styles; no `.doc-prose` container, no bare-tag styling)), `CodeBlock` (compound `CodeBlock.Root` + `CodeBlock.Tab`, always tabbed — per-tab filename/lang/icon/line numbers/highlight lines, no `code` prop; Shiki with the One Light / One Dark Pro theme pair, each token carrying both colors so highlighting follows the theme — any language, theme-aware colors, lazy-loaded grammars), `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`. Icons are **not** exported — they are imported directly from `lucide-react` (brand glyphs from `@tabler/icons-react`) at each call site.
 - `@dennation/typebook/vite` — `typebook()` Vite plugin (also default export). Same `typebook()` factory is published from `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/esbuild`, `/farm` via [unplugin](https://unplugin.unjs.io)
 
 > **What lives where.** The package exports only what is **universal** — the storybook runtime, the docs component kit (content set, CodeBlock, sidebar/toc/breadcrumbs/prev-next, CopyCommand), generic primitives (`Button`, `ThemeToggle`, `cx`) and the design system. Anything **specific to one site** (marketing landing sections, demo "gifs", section heading, layout constants, page content and nav data) lives in that app — see `apps/website`, not the package.
@@ -169,9 +172,9 @@ const button = getComponentMeta(Button, {
 <Matrix of={button} x={allOf(button, 'color')} y={[allOf(button, 'variant')]} />
 ```
 
-- **No id.** `getComponentMeta(Component, config?)` returns a self-contained `ComponentMeta` (`component`, `defaultProps`, `props`). `<Story>`/`<Variants>`/`<Matrix>`/`<Playground>` read everything from the handle — there is no registry, no context, no lookup by key.
+- **No id.** `getComponentMeta(Component, config?)` returns a self-contained `ComponentMeta` (`component`, `defaultProps`, `props`). `<Story>`/`<Variants>`/`<Matrix>` read everything from the handle — there is no registry, no context, no lookup by key.
 - `getComponentMeta()` calls can live anywhere in `./src/**/*.{ts,tsx}` — no special filename required. They're **local**: import the handle to use it elsewhere; uniqueness isn't required, so there's no `DuplicateRegistrationError`.
-- **`props` is injected at build time.** As authored, the handle's `props` is `[]`; the plugin's `transform` hook extracts `PropInfo[]` via the TS Compiler API and injects it as `__props` into the `getComponentMeta()` config (or as a new config argument when none was passed). Without the plugin (e.g. plain `tsc`/tests) the handle still type-checks — `props` is just empty, so `<Variants>`/`<Matrix>`/`<Playground>` degrade gracefully.
+- **`props` is injected at build time.** As authored, the handle's `props` is `[]`; the plugin's `transform` hook extracts `PropInfo[]` via the TS Compiler API and injects it as `__props` into the `getComponentMeta()` config (or as a new config argument when none was passed). Without the plugin (e.g. plain `tsc`/tests) the handle still type-checks — `props` is just empty, so `<Variants>`/`<Matrix>` degrade gracefully.
 - `<Story>` / `<Variants>` / `<Matrix>` are **type-safe**: required props not covered by `defaultProps` must be passed via `props={…}` at the call site (`MissingProps` phantom type), inferred from `getComponentMeta`'s generics (not from the injected data).
 
 ### Snippet API

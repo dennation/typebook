@@ -1,5 +1,6 @@
-import { CodeBlock } from "@react/features/code-block/index";
-import { type ComponentType, type ReactNode, useState } from "react";
+import { SourceBlock } from "@react/features/code-block/index";
+import { PreviewCard } from "@react/shared/ui/preview/index";
+import type { ComponentType, ReactNode } from "react";
 
 /**
  * What a `<Snippet source={…}>` layout render-prop receives: the live demo and its revealed source,
@@ -59,13 +60,7 @@ export function Snippet({
 	__snippetSource: code,
 }: SnippetProps) {
 	const sourceNode: ReactNode | null =
-		code !== undefined ? (
-			<CodeBlock.Root>
-				<CodeBlock.Tab lang="tsx" file={name}>
-					{code}
-				</CodeBlock.Tab>
-			</CodeBlock.Root>
-		) : null;
+		code !== undefined ? <SourceBlock code={code} name={name} /> : null;
 
 	// `source={ref}` form: the demo is the referenced component; `children`, if any, is the layout.
 	if (Source) {
@@ -90,31 +85,10 @@ function SnippetCard({
 	preview: ReactNode;
 	source: ReactNode | null;
 }) {
-	const [open, setOpen] = useState(false);
-
 	return (
-		<div className="border border-border rounded-lg overflow-hidden">
-			<div className="p-4">{preview}</div>
-			<div className="border-t border-border">
-				<button
-					type="button"
-					onClick={() => setOpen((o) => !o)}
-					aria-expanded={open}
-					className="w-full text-left text-xs px-3 py-2 font-medium text-fg-muted hover:text-fg bg-bg-secondary cursor-pointer transition-colors"
-				>
-					{open ? "Hide source" : "Show source"}
-				</button>
-				{open && (
-					<div className="p-2">
-						{source ?? (
-							<p className="text-xs text-fg-muted p-3 m-0">
-								No source found for this snippet. Add the typebook bundler
-								plugin and rebuild.
-							</p>
-						)}
-					</div>
-				)}
-			</div>
-		</div>
+		<PreviewCard
+			preview={<div className="p-4">{preview}</div>}
+			source={source}
+		/>
 	);
 }

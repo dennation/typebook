@@ -173,8 +173,8 @@ Disable docs routing entirely by omitting `docs` (or setting it to `false`).
 
 | Import | Description |
 |---|---|
-| `@dennation/typebook` | `register`, `allOf`, `values`, `generate`, types |
-| `@dennation/typebook/react` | `TypebookLayout`, `Story`, `VariantsStory`, `MatrixStory`, `Playground`, `CodePreview`, `ErrorBoundary`, `RegistryProvider` |
+| `@dennation/typebook` | React-free types (`TypebookConfig`, `PropInfo`, `MetaConfig*`, `VariantConfig`, …) |
+| `@dennation/typebook/react` | `getComponentMeta`, `allOf`, `values`, `generate`, `Layout`, `Story`, `Variants`, `Matrix`, `Snippet`, `ErrorBoundary` + the docs component kit |
 | `@dennation/typebook/vite` | `typebook` Vite plugin |
 
 ## Requirements

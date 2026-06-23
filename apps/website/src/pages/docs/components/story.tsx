@@ -68,6 +68,26 @@ function PageStory() {
 						),
 					},
 					{
+						name: "title",
+						type: "string",
+						desc: "Optional caption shown as a header above the preview.",
+					},
+					{
+						name: "showSource",
+						type: "boolean",
+						desc: 'Show a "show source" toggle with the serialized usage (on by default).',
+					},
+					{
+						name: "interactive",
+						type: "boolean",
+						desc: (
+							<>
+								Make the props editable in place via a "show controls" panel —
+								see <Link to="/docs/guides/story">Rendering stories</Link>.
+							</>
+						),
+					},
+					{
 						name: "isolate",
 						type: "boolean",
 						desc: "Render the preview inside an iframe to isolate styles and layout.",
