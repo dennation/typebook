@@ -19,6 +19,15 @@ import { Route as DocsGuidesIconsRouteImport } from './pages/docs/guides/icons'
 import { Route as DocsGettingStartedQuickStartRouteImport } from './pages/docs/getting-started/quick-start'
 import { Route as DocsGettingStartedIntroductionRouteImport } from './pages/docs/getting-started/introduction'
 import { Route as DocsGettingStartedInstallationRouteImport } from './pages/docs/getting-started/installation'
+import { Route as DocsFunctionsValuesRouteImport } from './pages/docs/functions/values'
+import { Route as DocsFunctionsSlugifyRouteImport } from './pages/docs/functions/slugify'
+import { Route as DocsFunctionsPropsToRowsRouteImport } from './pages/docs/functions/props-to-rows'
+import { Route as DocsFunctionsGetComponentMetaRouteImport } from './pages/docs/functions/get-component-meta'
+import { Route as DocsFunctionsGenerateRouteImport } from './pages/docs/functions/generate'
+import { Route as DocsFunctionsCxRouteImport } from './pages/docs/functions/cx'
+import { Route as DocsFunctionsChildTextRouteImport } from './pages/docs/functions/child-text'
+import { Route as DocsFunctionsButtonClassRouteImport } from './pages/docs/functions/button-class'
+import { Route as DocsFunctionsAllOfRouteImport } from './pages/docs/functions/all-of'
 import { Route as DocsComponentsVariantsRouteImport } from './pages/docs/components/variants'
 import { Route as DocsComponentsThemeToggleRouteImport } from './pages/docs/components/theme-toggle'
 import { Route as DocsComponentsTabsRouteImport } from './pages/docs/components/tabs'
@@ -94,6 +103,54 @@ const DocsGettingStartedInstallationRoute =
     path: '/getting-started/installation',
     getParentRoute: () => DocsRouteRoute,
   } as any)
+const DocsFunctionsValuesRoute = DocsFunctionsValuesRouteImport.update({
+  id: '/functions/values',
+  path: '/functions/values',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsFunctionsSlugifyRoute = DocsFunctionsSlugifyRouteImport.update({
+  id: '/functions/slugify',
+  path: '/functions/slugify',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsFunctionsPropsToRowsRoute =
+  DocsFunctionsPropsToRowsRouteImport.update({
+    id: '/functions/props-to-rows',
+    path: '/functions/props-to-rows',
+    getParentRoute: () => DocsRouteRoute,
+  } as any)
+const DocsFunctionsGetComponentMetaRoute =
+  DocsFunctionsGetComponentMetaRouteImport.update({
+    id: '/functions/get-component-meta',
+    path: '/functions/get-component-meta',
+    getParentRoute: () => DocsRouteRoute,
+  } as any)
+const DocsFunctionsGenerateRoute = DocsFunctionsGenerateRouteImport.update({
+  id: '/functions/generate',
+  path: '/functions/generate',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsFunctionsCxRoute = DocsFunctionsCxRouteImport.update({
+  id: '/functions/cx',
+  path: '/functions/cx',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsFunctionsChildTextRoute = DocsFunctionsChildTextRouteImport.update({
+  id: '/functions/child-text',
+  path: '/functions/child-text',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsFunctionsButtonClassRoute =
+  DocsFunctionsButtonClassRouteImport.update({
+    id: '/functions/button-class',
+    path: '/functions/button-class',
+    getParentRoute: () => DocsRouteRoute,
+  } as any)
+const DocsFunctionsAllOfRoute = DocsFunctionsAllOfRouteImport.update({
+  id: '/functions/all-of',
+  path: '/functions/all-of',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
 const DocsComponentsVariantsRoute = DocsComponentsVariantsRouteImport.update({
   id: '/components/variants',
   path: '/components/variants',
@@ -231,6 +288,15 @@ export interface FileRoutesByFullPath {
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
   '/docs/components/theme-toggle': typeof DocsComponentsThemeToggleRoute
   '/docs/components/variants': typeof DocsComponentsVariantsRoute
+  '/docs/functions/all-of': typeof DocsFunctionsAllOfRoute
+  '/docs/functions/button-class': typeof DocsFunctionsButtonClassRoute
+  '/docs/functions/child-text': typeof DocsFunctionsChildTextRoute
+  '/docs/functions/cx': typeof DocsFunctionsCxRoute
+  '/docs/functions/generate': typeof DocsFunctionsGenerateRoute
+  '/docs/functions/get-component-meta': typeof DocsFunctionsGetComponentMetaRoute
+  '/docs/functions/props-to-rows': typeof DocsFunctionsPropsToRowsRoute
+  '/docs/functions/slugify': typeof DocsFunctionsSlugifyRoute
+  '/docs/functions/values': typeof DocsFunctionsValuesRoute
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
@@ -263,6 +329,15 @@ export interface FileRoutesByTo {
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
   '/docs/components/theme-toggle': typeof DocsComponentsThemeToggleRoute
   '/docs/components/variants': typeof DocsComponentsVariantsRoute
+  '/docs/functions/all-of': typeof DocsFunctionsAllOfRoute
+  '/docs/functions/button-class': typeof DocsFunctionsButtonClassRoute
+  '/docs/functions/child-text': typeof DocsFunctionsChildTextRoute
+  '/docs/functions/cx': typeof DocsFunctionsCxRoute
+  '/docs/functions/generate': typeof DocsFunctionsGenerateRoute
+  '/docs/functions/get-component-meta': typeof DocsFunctionsGetComponentMetaRoute
+  '/docs/functions/props-to-rows': typeof DocsFunctionsPropsToRowsRoute
+  '/docs/functions/slugify': typeof DocsFunctionsSlugifyRoute
+  '/docs/functions/values': typeof DocsFunctionsValuesRoute
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
@@ -297,6 +372,15 @@ export interface FileRoutesById {
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
   '/docs/components/theme-toggle': typeof DocsComponentsThemeToggleRoute
   '/docs/components/variants': typeof DocsComponentsVariantsRoute
+  '/docs/functions/all-of': typeof DocsFunctionsAllOfRoute
+  '/docs/functions/button-class': typeof DocsFunctionsButtonClassRoute
+  '/docs/functions/child-text': typeof DocsFunctionsChildTextRoute
+  '/docs/functions/cx': typeof DocsFunctionsCxRoute
+  '/docs/functions/generate': typeof DocsFunctionsGenerateRoute
+  '/docs/functions/get-component-meta': typeof DocsFunctionsGetComponentMetaRoute
+  '/docs/functions/props-to-rows': typeof DocsFunctionsPropsToRowsRoute
+  '/docs/functions/slugify': typeof DocsFunctionsSlugifyRoute
+  '/docs/functions/values': typeof DocsFunctionsValuesRoute
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
@@ -332,6 +416,15 @@ export interface FileRouteTypes {
     | '/docs/components/tabs'
     | '/docs/components/theme-toggle'
     | '/docs/components/variants'
+    | '/docs/functions/all-of'
+    | '/docs/functions/button-class'
+    | '/docs/functions/child-text'
+    | '/docs/functions/cx'
+    | '/docs/functions/generate'
+    | '/docs/functions/get-component-meta'
+    | '/docs/functions/props-to-rows'
+    | '/docs/functions/slugify'
+    | '/docs/functions/values'
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
@@ -364,6 +457,15 @@ export interface FileRouteTypes {
     | '/docs/components/tabs'
     | '/docs/components/theme-toggle'
     | '/docs/components/variants'
+    | '/docs/functions/all-of'
+    | '/docs/functions/button-class'
+    | '/docs/functions/child-text'
+    | '/docs/functions/cx'
+    | '/docs/functions/generate'
+    | '/docs/functions/get-component-meta'
+    | '/docs/functions/props-to-rows'
+    | '/docs/functions/slugify'
+    | '/docs/functions/values'
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
@@ -397,6 +499,15 @@ export interface FileRouteTypes {
     | '/docs/components/tabs'
     | '/docs/components/theme-toggle'
     | '/docs/components/variants'
+    | '/docs/functions/all-of'
+    | '/docs/functions/button-class'
+    | '/docs/functions/child-text'
+    | '/docs/functions/cx'
+    | '/docs/functions/generate'
+    | '/docs/functions/get-component-meta'
+    | '/docs/functions/props-to-rows'
+    | '/docs/functions/slugify'
+    | '/docs/functions/values'
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
@@ -481,6 +592,69 @@ declare module '@tanstack/react-router' {
       path: '/getting-started/installation'
       fullPath: '/docs/getting-started/installation'
       preLoaderRoute: typeof DocsGettingStartedInstallationRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/functions/values': {
+      id: '/docs/functions/values'
+      path: '/functions/values'
+      fullPath: '/docs/functions/values'
+      preLoaderRoute: typeof DocsFunctionsValuesRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/functions/slugify': {
+      id: '/docs/functions/slugify'
+      path: '/functions/slugify'
+      fullPath: '/docs/functions/slugify'
+      preLoaderRoute: typeof DocsFunctionsSlugifyRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/functions/props-to-rows': {
+      id: '/docs/functions/props-to-rows'
+      path: '/functions/props-to-rows'
+      fullPath: '/docs/functions/props-to-rows'
+      preLoaderRoute: typeof DocsFunctionsPropsToRowsRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/functions/get-component-meta': {
+      id: '/docs/functions/get-component-meta'
+      path: '/functions/get-component-meta'
+      fullPath: '/docs/functions/get-component-meta'
+      preLoaderRoute: typeof DocsFunctionsGetComponentMetaRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/functions/generate': {
+      id: '/docs/functions/generate'
+      path: '/functions/generate'
+      fullPath: '/docs/functions/generate'
+      preLoaderRoute: typeof DocsFunctionsGenerateRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/functions/cx': {
+      id: '/docs/functions/cx'
+      path: '/functions/cx'
+      fullPath: '/docs/functions/cx'
+      preLoaderRoute: typeof DocsFunctionsCxRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/functions/child-text': {
+      id: '/docs/functions/child-text'
+      path: '/functions/child-text'
+      fullPath: '/docs/functions/child-text'
+      preLoaderRoute: typeof DocsFunctionsChildTextRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/functions/button-class': {
+      id: '/docs/functions/button-class'
+      path: '/functions/button-class'
+      fullPath: '/docs/functions/button-class'
+      preLoaderRoute: typeof DocsFunctionsButtonClassRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/functions/all-of': {
+      id: '/docs/functions/all-of'
+      path: '/functions/all-of'
+      fullPath: '/docs/functions/all-of'
+      preLoaderRoute: typeof DocsFunctionsAllOfRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/components/variants': {
@@ -656,6 +830,15 @@ interface DocsRouteRouteChildren {
   DocsComponentsTabsRoute: typeof DocsComponentsTabsRoute
   DocsComponentsThemeToggleRoute: typeof DocsComponentsThemeToggleRoute
   DocsComponentsVariantsRoute: typeof DocsComponentsVariantsRoute
+  DocsFunctionsAllOfRoute: typeof DocsFunctionsAllOfRoute
+  DocsFunctionsButtonClassRoute: typeof DocsFunctionsButtonClassRoute
+  DocsFunctionsChildTextRoute: typeof DocsFunctionsChildTextRoute
+  DocsFunctionsCxRoute: typeof DocsFunctionsCxRoute
+  DocsFunctionsGenerateRoute: typeof DocsFunctionsGenerateRoute
+  DocsFunctionsGetComponentMetaRoute: typeof DocsFunctionsGetComponentMetaRoute
+  DocsFunctionsPropsToRowsRoute: typeof DocsFunctionsPropsToRowsRoute
+  DocsFunctionsSlugifyRoute: typeof DocsFunctionsSlugifyRoute
+  DocsFunctionsValuesRoute: typeof DocsFunctionsValuesRoute
   DocsGettingStartedInstallationRoute: typeof DocsGettingStartedInstallationRoute
   DocsGettingStartedIntroductionRoute: typeof DocsGettingStartedIntroductionRoute
   DocsGettingStartedQuickStartRoute: typeof DocsGettingStartedQuickStartRoute
@@ -688,6 +871,15 @@ const DocsRouteRouteChildren: DocsRouteRouteChildren = {
   DocsComponentsTabsRoute: DocsComponentsTabsRoute,
   DocsComponentsThemeToggleRoute: DocsComponentsThemeToggleRoute,
   DocsComponentsVariantsRoute: DocsComponentsVariantsRoute,
+  DocsFunctionsAllOfRoute: DocsFunctionsAllOfRoute,
+  DocsFunctionsButtonClassRoute: DocsFunctionsButtonClassRoute,
+  DocsFunctionsChildTextRoute: DocsFunctionsChildTextRoute,
+  DocsFunctionsCxRoute: DocsFunctionsCxRoute,
+  DocsFunctionsGenerateRoute: DocsFunctionsGenerateRoute,
+  DocsFunctionsGetComponentMetaRoute: DocsFunctionsGetComponentMetaRoute,
+  DocsFunctionsPropsToRowsRoute: DocsFunctionsPropsToRowsRoute,
+  DocsFunctionsSlugifyRoute: DocsFunctionsSlugifyRoute,
+  DocsFunctionsValuesRoute: DocsFunctionsValuesRoute,
   DocsGettingStartedInstallationRoute: DocsGettingStartedInstallationRoute,
   DocsGettingStartedIntroductionRoute: DocsGettingStartedIntroductionRoute,
   DocsGettingStartedQuickStartRoute: DocsGettingStartedQuickStartRoute,

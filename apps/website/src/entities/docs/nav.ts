@@ -58,11 +58,24 @@ export const COMPONENTS = defineMenu<DocsMeta | undefined>({
 	"/docs/components/error-boundary": { title: "ErrorBoundary" },
 });
 
+export const FUNCTIONS = defineMenu<DocsMeta | undefined>({
+	"/docs/functions/get-component-meta": { title: "getComponentMeta" },
+	"/docs/functions/all-of": { title: "allOf" },
+	"/docs/functions/values": { title: "values" },
+	"/docs/functions/generate": { title: "generate" },
+	"/docs/functions/props-to-rows": { title: "propsToRows" },
+	"/docs/functions/slugify": { title: "slugify" },
+	"/docs/functions/child-text": { title: "childText" },
+	"/docs/functions/cx": { title: "cx" },
+	"/docs/functions/button-class": { title: "buttonClass" },
+});
+
 /** Sidebar sections, paired with their label for breadcrumb/title lookup. */
 export const SECTIONS: { label: string; menu: Menu<DocsMeta | undefined> }[] = [
 	{ label: "Getting Started", menu: GETTING_STARTED },
 	{ label: "Guides", menu: GUIDES },
 	{ label: "Components", menu: COMPONENTS },
+	{ label: "Functions", menu: FUNCTIONS },
 ];
 
 export const DEFAULT_DOCS_SLUG = "getting-started/introduction";
@@ -266,5 +279,59 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		title: "ErrorBoundary",
 		section: "Components",
 		desc: "Catch render errors in a subtree and show a fallback",
+	},
+	{
+		slug: "functions/get-component-meta",
+		title: "getComponentMeta",
+		section: "Functions",
+		desc: "Register a component and return a self-contained handle",
+	},
+	{
+		slug: "functions/all-of",
+		title: "allOf",
+		section: "Functions",
+		desc: "Build a variant axis from a prop's literal-union or boolean type",
+	},
+	{
+		slug: "functions/values",
+		title: "values",
+		section: "Functions",
+		desc: "Build a variant axis from an explicit list of values",
+	},
+	{
+		slug: "functions/generate",
+		title: "generate",
+		section: "Functions",
+		desc: "Build a variant axis from a generator function",
+	},
+	{
+		slug: "functions/props-to-rows",
+		title: "propsToRows",
+		section: "Functions",
+		desc: "Map a handle's extracted props into PropsReference rows",
+	},
+	{
+		slug: "functions/slugify",
+		title: "slugify",
+		section: "Functions",
+		desc: "Turn heading text into a URL-friendly anchor id",
+	},
+	{
+		slug: "functions/child-text",
+		title: "childText",
+		section: "Functions",
+		desc: "Extract plain text from React children",
+	},
+	{
+		slug: "functions/cx",
+		title: "cx",
+		section: "Functions",
+		desc: "Join class names, dropping falsy values",
+	},
+	{
+		slug: "functions/button-class",
+		title: "buttonClass",
+		section: "Functions",
+		desc: "Compose the Button class string for a raw element",
 	},
 ];
