@@ -1,7 +1,8 @@
 import { Menu } from "@dennation/menu/react";
-import { Book, Layers, Rocket } from "lucide-react";
+import { Book, Braces, Layers, Rocket } from "lucide-react";
 import {
 	COMPONENTS,
+	FUNCTIONS,
 	GETTING_STARTED,
 	GUIDES,
 } from "../../../entities/docs/nav";
@@ -30,6 +31,9 @@ export function DocsSidebar({ open, onClose }: DocsSidebarProps) {
 			</SidebarSection>
 			<SidebarSection icon={<Layers size={14} />} label="Components">
 				<Menu menu={COMPONENTS} components={sidebarMenu} />
+			</SidebarSection>
+			<SidebarSection icon={<Braces size={14} />} label="Functions">
+				<Menu menu={FUNCTIONS} components={sidebarMenu} />
 			</SidebarSection>
 		</SidebarShell>
 	);
