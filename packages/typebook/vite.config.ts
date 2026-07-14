@@ -15,6 +15,7 @@ export default defineConfig({
 		lib: {
 			entry: {
 				index: resolve(__dirname, "src/index.ts"),
+				"scanner/index": resolve(__dirname, "src/scanner/index.ts"),
 				"react/index": resolve(__dirname, "src/react/index.ts"),
 				"plugins/vite": resolve(__dirname, "src/plugins/vite.ts"),
 				"plugins/rollup": resolve(__dirname, "src/plugins/rollup.ts"),

@@ -1,8 +1,7 @@
 import type { UnpluginFactory } from "unplugin";
 import { createUnplugin } from "unplugin";
 import { LOG_PREFIX, PACKAGE_NAME } from "../constants";
-import { transformTypebook } from "../core/transform";
-import { TypeScriptClient } from "../core/ts-client";
+import { transformTypebook, TypeScriptClient } from "../scanner";
 import type { TypebookConfig } from "../types";
 
 /** Source files the plugin will consider rewriting (registrations + snippets live in TS/JS). */

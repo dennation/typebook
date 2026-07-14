@@ -11,6 +11,10 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.mjs"
 		},
+		"./scanner": {
+			"types": "./dist/scanner/index.d.ts",
+			"import": "./dist/scanner/index.mjs"
+		},
 		"./react": {
 			"types": "./dist/react/index.d.ts",
 			"import": "./dist/react/index.mjs"
