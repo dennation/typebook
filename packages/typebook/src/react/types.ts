@@ -5,7 +5,7 @@ import type { PropInfo } from "@/types";
  * Returned by `getComponentMeta(Component, config)`. Self-contained: holds the
  * component reference, default props, and the extracted prop metadata. `props` is
  * empty as authored — the bundler plugin injects the real `PropInfo[]` into the
- * call at build time (see `core/transform.ts`). `<Story>`/`<Variants>`/`<Matrix>`
+ * call at build time (see `scanner/transform.ts`). `<Story>`/`<Variants>`/`<Matrix>`
  * read everything they need from the handle; there is no registry.
  *
  * Lives in the React entry (not the base `types.ts`) because it references React's
