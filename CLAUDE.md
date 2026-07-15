@@ -38,7 +38,7 @@ apps/
 
 ## packages/typebook
 
-React component documentation library. The `typebook()` bundler plugin does two things from one TypeScript-Compiler-API scan: (1) **scans** the components named by its `components` config (path/glob) by type into structured `ComponentDoc`s (props, defaults, JSDoc) — no wrapper call needed; **sub-plugins** turn that scan into artifacts (`llmInstructions()` writes Markdown docs for AI agents; `snippets()` handles `<Snippet>`); and (2) **injects** at build time — `__props` into each `defineStories()` call, `__snippetSource` onto each `<Snippet>` element. No registry files. Consumers author `defineStories(Component, config?)` → a `{ Story, Variants, Matrix }` namespace (component baked in; axes are prop names) and embed `<XStories.Variants axis="size" />` / `<Snippet>` on any page (each story view takes an optional `interactive` prop for editable, per-preview props).
+React component documentation library. The `typebook()` bundler plugin does two things from one TypeScript-Compiler-API scan: (1) **scans** the components named by its `components` config (path/glob) by type into structured `ComponentInfo`s (props, defaults, JSDoc) — no wrapper call needed; **sub-plugins** turn that scan into artifacts (`llmInstructions()` writes Markdown docs for AI agents; `snippets()` handles `<Snippet>`); and (2) **injects** at build time — `__props` into each `defineStories()` call, `__snippetSource` onto each `<Snippet>` element. No registry files. Consumers author `defineStories(Component, config?)` → a `{ Story, Variants, Matrix }` namespace (component baked in; axes are prop names) and embed `<XStories.Variants axis="size" />` / `<Snippet>` on any page (each story view takes an optional `interactive` prop for editable, per-preview props).
 
 ### Commands
 
@@ -58,30 +58,30 @@ packages/typebook/
   vite.config.ts
   src/
     index.ts                  — Base entry: re-exports the **scanner core** (the library foundation) + all React-free types
-    types.ts                  — Shared **React-free** types (TypebookConfig incl. components/plugins, ComponentDoc, TypebookPlugin, PropInfo, PropType, VariantConfig, MissingProps, …)
+    types.ts                  — Shared **React-free** types (TypebookConfig incl. components/plugins, ComponentInfo, TypebookPlugin, PropInfo, PropType, VariantConfig, MissingProps, …)
     resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into arrays
     constants.ts              — PACKAGE_NAME, NPM_REACT_PACKAGE_NAME, LOG_PREFIX, …
     cli.ts                    — CLI entry: prints that codegen runs as a bundler plugin (no generate step)
     scanner/                  — React-free extraction core (re-exported from the base `.` entry — the library foundation)
-      index.ts                — Public exports: collectComponentDocs, componentToMarkdown, TypeScriptClient,
+      index.ts                — Public exports: collectComponentInfos, componentToMarkdown, TypeScriptClient,
                                 scanMetaCalls, scanSnippets, parseProgram, injectMetaProps, applyEdits, …
       transform.ts            — injectMetaProps(program, filePath, code, tsClient) → Edit[] (props injection only);
                                 applyEdits(code, edits). The factory orchestrates one parse + these + transform plugins.
-      collectComponentDocs.ts — collectComponentDocs(client, files) → ComponentDoc[] (export-based scan of configured files)
+      collectComponentInfos.ts — collectComponentInfos(client, files) → ComponentInfo[] (export-based scan of configured files)
       componentToMarkdown.ts  — componentToMarkdown(doc) → Markdown card (props table + description/deprecation)
       meta-scanner.ts        — oxc AST: scanMetaCalls(program) finds defineStories(Component, …) calls
                                 and the position to inject __props (into config object, or as a new config arg)
       snippet-scanner.ts      — oxc AST: scanSnippets(program, src) finds every <Snippet>{fn}</Snippet>, slices the
                                 inline function's body (non-inline child → null → build error) + the inject position
-      ts-client.ts            — TypeScript Compiler API: getProps / getExportedComponentDocs / getSnippetSource.
-                                Extracts PropInfo[], defaults, JSDoc; getExportedComponentDocs finds components by type.
+      ts-client.ts            — TypeScript Compiler API: getProps / getExportedComponentInfos / getSnippetSource.
+                                Extracts PropInfo[], defaults, JSDoc; getExportedComponentInfos finds components by type.
       ast.ts                  — Shared oxc-parser helpers (parseProgram → Program, walk) used by both scanners
     plugins/                  — unplugin-based bundler integration + sub-plugins
       factory.ts              — unpluginFactory + createUnplugin. Orchestrates: project scan (buildStart/dev-watch)
                                 → generate sub-plugins; and per-module transform (one parse → injectMetaProps +
                                 transform sub-plugins → applyEdits). Resolves `components` glob via fs.globSync.
       snippets.ts             — snippets() transform sub-plugin (<Snippet> injection) + SnippetNotInlineError. Opt-in.
-      llmInstructions.ts       — llmInstructions() generate sub-plugin: ComponentDoc[] → per-component Markdown
+      llmInstructions.ts       — llmInstructions() generate sub-plugin: ComponentInfo[] → per-component Markdown
                                 cards (import line + description + @remarks usage + props table) + an llms.txt
                                 index + llms-full.txt (follows the llms.txt convention)
       vite.ts                 — typebook() Vite plugin
@@ -156,7 +156,7 @@ packages/typebook/
 
 ### Build entry points
 
-- **`index`** — the library **foundation**: the React-free **scanner core** (`collectComponentDocs`, `componentToMarkdown`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) + all React-free types (`TypebookConfig` incl. `components`/`plugins`, `ComponentDoc`, `TypebookPlugin`, `TransformCtx`, `GenerateCtx`, `PropInfo`, `PropType`, `VariantConfig`, …). Pulls `typescript` + `oxc-parser` at runtime; type-only imports stay weightless. Authoring API and React-coupled types live in `react/`.
+- **`index`** — the library **foundation**: the React-free **scanner core** (`collectComponentInfos`, `componentToMarkdown`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) + all React-free types (`TypebookConfig` incl. `components`/`plugins`, `ComponentInfo`, `TypebookPlugin`, `TransformCtx`, `GenerateCtx`, `PropInfo`, `PropType`, `VariantConfig`, …). Pulls `typescript` + `oxc-parser` at runtime; type-only imports stay weightless. Authoring API and React-coupled types live in `react/`.
 - **`react/index`** — authoring API (`defineStories`) + `Layout`, `Snippet`, `ErrorBoundary` + the docs component kit (content set, `CodeBlock`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `PropsReference`, `propsToRows`). The internal `Story`/`Variants`/`Matrix` widgets are **not** exported standalone — they come out of `defineStories`. **No search** (a docs site wires its own — see `apps/website`).
 - **`plugins/{snippets,llm-instructions}`** — sub-plugins for `typebook({ plugins: [...] })`: `snippets()` (transform: `<Snippet>` injection) and `llmInstructions()` (generate: Markdown docs from the scan).
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
@@ -164,7 +164,7 @@ packages/typebook/
 
 ### Package exports
 
-- `@dennation/typebook` — the **foundation**: React-free **scanner core** (`collectComponentDocs`, `componentToMarkdown`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) + all React-free types (`TypebookConfig`, `ComponentDoc`, `TypebookPlugin`, `TransformCtx`, `GenerateCtx`, `PropInfo`, `PropType`, `MissingProps`, `VariantConfig`, …). No `react` import.
+- `@dennation/typebook` — the **foundation**: React-free **scanner core** (`collectComponentInfos`, `componentToMarkdown`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) + all React-free types (`TypebookConfig`, `ComponentInfo`, `TypebookPlugin`, `TransformCtx`, `GenerateCtx`, `PropInfo`, `PropType`, `MissingProps`, `VariantConfig`, …). No `react` import.
 - `@dennation/typebook/plugins/snippets` — `snippets()`, `SnippetNotInlineError`.
 - `@dennation/typebook/plugins/llm-instructions` — `llmInstructions()`, `LlmInstructionsOptions`.
 - `@dennation/typebook/react` — **authoring API:** `defineStories` (+ its types `StoriesNamespace`/`StoryViewProps`/…). **storybook runtime:** `Layout`, `Snippet`, `ErrorBoundary` (story views come from `defineStories`, sharing `title` / `showSource` / `interactive`). **docs kit** (for consumer documentation sites): content set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps` (compound `Steps.Root` + `Steps.Step`), `Accordion`, `Cards`/`DocCard`, `Heading` (single component, `level={2|3}`), `Paragraph`/`Lead`/`List` (compound `List.Root` + `List.Item`)/`Blockquote`/`Divider`/`Strong`/`Emphasis`/`InlineCode`/`Link`/`ImagePlaceholder` (component-only prose set — every element carries its own styles; no `.doc-prose` container, no bare-tag styling)), `CodeBlock` (compound `CodeBlock.Root` + `CodeBlock.Tab`, always tabbed — per-tab filename/lang/icon/line numbers/highlight lines, no `code` prop; Shiki with the One Light / One Dark Pro theme pair, each token carrying both colors so highlighting follows the theme — any language, theme-aware colors, lazy-loaded grammars), `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`. Icons are **not** exported — they are imported directly from `lucide-react` (brand glyphs from `@tabler/icons-react`) at each call site.
@@ -241,7 +241,7 @@ import { Snippet } from '@dennation/typebook/react'
 ```
 vite.config.ts: typebook({ components, plugins })
   ├── buildStart / dev-watch: project scan (React-free)
-  │     └── collectComponentDocs(client, glob(components))  → ComponentDoc[] (props + JSDoc + deprecated)
+  │     └── collectComponentInfos(client, glob(components))  → ComponentInfo[] (props + JSDoc + deprecated)
   │           └── generate sub-plugins: llmInstructions() → writes .md; (others) → own artifacts
   └── transform hook, per module (enforce: 'pre')  → parse once, collect edits, apply
         ├── injectMetaProps: finds defineStories(Component, …) + injects `__props: [...]` into its config
@@ -255,7 +255,7 @@ button.stories.tsx:
 
 ### Key design decisions
 
-- **One scan, many artifacts** — the `components` config drives a single by-type export scan (`ComponentDoc[]`); every sub-plugin reads that one result (a component is never parsed twice). `llmInstructions()` writes Markdown; `snippets()` and the `defineStories` `__props` injection are per-module transform work sharing the same warm `TypeScriptClient`.
+- **One scan, many artifacts** — the `components` config drives a single by-type export scan (`ComponentInfo[]`); every sub-plugin reads that one result (a component is never parsed twice). `llmInstructions()` writes Markdown; `snippets()` and the `defineStories` `__props` injection are per-module transform work sharing the same warm `TypeScriptClient`.
 - **Injection over a generated file** — the plugin rewrites each module in its `transform` hook (injecting `__props` into `defineStories()`, `__snippetSource` onto `<Snippet>`) instead of emitting registry/`snippets.gen.ts`. Data lives at the call site; re-transformation is the bundler's own module invalidation.
 - **`defineStories` namespace** — `defineStories(Component, config?)` returns `{ Story, Variants, Matrix, props }` with the component baked in (no `of`). Type-safety comes from its generics (return type `StoriesNamespace<Props>` carries `Props` first, which is also the injection seam), so plain `tsc` works without the plugin. Axes are prop names (`keyof`), not `allOf`/`values`/`generate` calls.
 - **No runtime provider** — handles and snippets carry their own data (injected at build time), so there is nothing to provide via context; the package exposes no `TypebookProvider`. Routing, history strategy, and route tree generation are the consumer's (`vite.config.ts` + `App.tsx`), which keeps any TanStack Router dependency out of the library.

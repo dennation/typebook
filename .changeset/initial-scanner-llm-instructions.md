@@ -4,7 +4,7 @@
 
 Initial release: the component **scanner** and the **AI instructions** plugin.
 
-- `@dennation/typebook` — the scanner core: point `typebook({ components })` at your components (glob) and it extracts every exported React component's prop types, defaults and JSDoc by type (no wrapper call). Exposes `collectComponentDocs`, `componentToMarkdown`, `TypeScriptClient`, plus the React-free types (`TypebookConfig`, `ComponentDoc`, `TypebookPlugin`, …).
+- `@dennation/typebook` — the scanner core: point `typebook({ components })` at your components (glob) and it extracts every exported React component's prop types, defaults and JSDoc by type (no wrapper call). Exposes `collectComponentInfos`, `componentToMarkdown`, `TypeScriptClient`, plus the React-free types (`TypebookConfig`, `ComponentInfo`, `TypebookPlugin`, …).
 - `@dennation/typebook/plugins/llm-instructions` — `llmInstructions()` generates one Markdown card per component (props table + description + deprecation) plus an index, as context for AI agents (Claude Code, Codex).
 - `@dennation/typebook/{vite,rollup,rolldown,webpack,rspack,esbuild,farm}` — the `typebook()` bundler plugin (one unplugin factory) that runs the scan and the sub-plugins.
 

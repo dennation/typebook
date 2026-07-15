@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import ts from "typescript";
 import { DEFAULT_INHERITED_PROVIDERS, LOG_PREFIX } from "../constants";
-import type { ComponentDoc, PropInfo, PropType } from "../types";
+import type { ComponentInfo, PropInfo, PropType } from "../types";
 
 export class TypeScriptClient {
 	private service: ts.LanguageService | null = null;
@@ -107,15 +107,15 @@ export class TypeScriptClient {
 	}
 
 	/**
-	 * Extract a {@link ComponentDoc} for every exported React component in a file — the scan
+	 * Extract a {@link ComponentInfo} for every exported React component in a file — the scan
 	 * surface for `components`-configured files. No `getComponentMeta` wrapper needed: each
 	 * export is inspected by type, and the ones that are components (call signature returning a
 	 * React node, or a class construct signature) yield a doc. Non-component exports are skipped.
 	 */
-	async getExportedComponentDocs(
+	async getExportedComponentInfos(
 		filePath: string,
 		content?: string,
-	): Promise<ComponentDoc[]> {
+	): Promise<ComponentInfo[]> {
 		if (!this.program || !this.checker) {
 			await this.start();
 		}
@@ -130,20 +130,20 @@ export class TypeScriptClient {
 		const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
 		if (!moduleSymbol) return [];
 
-		const docs: ComponentDoc[] = [];
+		const docs: ComponentInfo[] = [];
 		for (const exp of checker.getExportsOfModule(moduleSymbol)) {
-			const doc = this.exportToComponentDoc(checker, exp, absPath);
+			const doc = this.exportToComponentInfo(checker, exp, absPath);
 			if (doc) docs.push(doc);
 		}
 		return docs;
 	}
 
-	/** Turn one module export into a {@link ComponentDoc}, or `null` when it isn't a component. */
-	private exportToComponentDoc(
+	/** Turn one module export into a {@link ComponentInfo}, or `null` when it isn't a component. */
+	private exportToComponentInfo(
 		checker: ts.TypeChecker,
 		exp: ts.Symbol,
 		fallbackFile: string,
-	): ComponentDoc | null {
+	): ComponentInfo | null {
 		const resolved =
 			exp.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exp) : exp;
 		const decl = resolved.getDeclarations()?.[0];
@@ -155,7 +155,7 @@ export class TypeScriptClient {
 		const props = this.extractComponentProps(checker, nameNode);
 		if (props === null) return null; // not a component
 
-		const info: Omit<ComponentDoc, "props"> = {
+		const info: Omit<ComponentInfo, "props"> = {
 			name: exp.getName(),
 			file: decl.getSourceFile().fileName,
 		};
@@ -215,7 +215,7 @@ export class TypeScriptClient {
 
 	/**
 	 * Every project source file currently in the warm program — the scan surface for
-	 * {@link collectComponentDocs}. Declaration files, `node_modules`, and files outside
+	 * {@link collectComponentInfos}. Declaration files, `node_modules`, and files outside
 	 * the project root are excluded so only the consumer's own components are scanned.
 	 */
 	projectSourceFiles(): { fileName: string; text: string }[] {

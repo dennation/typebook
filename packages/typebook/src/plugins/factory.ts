@@ -4,7 +4,7 @@ import path from "node:path";
 import type { UnpluginFactory } from "unplugin";
 import { createUnplugin } from "unplugin";
 import { LOG_PREFIX, PACKAGE_NAME } from "../constants";
-import { collectComponentDocs, TypeScriptClient } from "../scanner";
+import { collectComponentInfos, TypeScriptClient } from "../scanner";
 import type { GenerateCtx, TypebookCommand, TypebookConfig } from "../types";
 
 /**
@@ -12,7 +12,7 @@ import type { GenerateCtx, TypebookCommand, TypebookConfig } from "../types";
  * unplugin supports (Vite, Rollup, Rolldown, webpack, Rspack, esbuild, Farm).
  *
  * It owns one warm {@link TypeScriptClient}, scans the `components` config into
- * {@link ComponentDoc}s (a single by-type export scan), and runs each `generate` sub-plugin
+ * {@link ComponentInfo}s (a single by-type export scan), and runs each `generate` sub-plugin
  * with the full set — once at `buildStart` (dev + build) and again on each change in dev.
  */
 export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
@@ -78,7 +78,7 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 		const c = await ensureClient();
 		if (!c) return;
 
-		const docs = await collectComponentDocs(c, resolveComponentFiles());
+		const docs = await collectComponentInfos(c, resolveComponentFiles());
 		const ctx: GenerateCtx = { command, root: cwd, writeFile: writeFileAt };
 		for (const plugin of plugins) {
 			if (plugin.apply && plugin.apply !== command) continue;
