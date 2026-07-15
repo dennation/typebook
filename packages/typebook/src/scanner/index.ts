@@ -1,7 +1,7 @@
 // The scanner — the library's **extraction core**, re-exported from the base entry
 // `@dennation/typebook`. It reads the components named by the `components` config and extracts
 // each exported React component's props, defaults and JSDoc **by type** via the TypeScript
-// Compiler API — no React, no bundler dependency. Sub-plugins (e.g. `aiInstructions`) turn the
+// Compiler API — no React, no bundler dependency. Sub-plugins (e.g. `llmInstructions`) turn the
 // resulting `ComponentDoc[]` into artifacts.
 //
 // Pulls in `typescript` only; type-only imports stay weightless.

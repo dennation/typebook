@@ -8,7 +8,7 @@ export interface TypebookConfig {
 	/** Additional packages whose type declarations mark props as inherited (e.g. ['@heroui/theme']) */
 	inheritedProviders?: string[];
 	/**
-	 * Sub-plugins that consume the project scan (e.g. `aiInstructions()`). Each `generate` runs
+	 * Sub-plugins that consume the project scan (e.g. `llmInstructions()`). Each `generate` runs
 	 * after every scan with the full set of components — build once, dev on change.
 	 */
 	plugins?: TypebookPlugin[];
