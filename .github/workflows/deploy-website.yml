@@ -1,9 +1,10 @@
 name: Deploy website to GitHub Pages
 
 on:
-  # Auto-deploy on push is paused until the docs site matches the published npm surface
-  # (the first release ships only the scanner + AI-instructions; the site documents more).
-  # Re-add `push: { branches: [main] }` at the full launch. Deploy manually until then.
+  # The docs site + full product live on `dev` (main is the release-only scanner + AI-instructions).
+  # Deploy the site from `dev`; at the full launch, when main matches, switch this to [main].
+  push:
+    branches: [dev]
   workflow_dispatch:
 
 permissions:
