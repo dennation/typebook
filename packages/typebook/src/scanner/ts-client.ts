@@ -341,7 +341,7 @@ export class TypeScriptClient {
 			// instead of from declarations (which don't exist for mapped types)
 			const propType = checker.getTypeOfSymbol(prop);
 			const isOptional = (prop.flags & ts.SymbolFlags.Optional) !== 0;
-			const typeInfo = this.convertTsType(checker, propType);
+			const typeInfo = this.convertTsType(checker, propType, isOptional);
 			const description = getSymbolDescription(checker, prop);
 
 			const info: PropInfo = {
@@ -367,22 +367,41 @@ export class TypeScriptClient {
 		return props;
 	}
 
-	private convertTsType(checker: ts.TypeChecker, type: ts.Type): PropType {
-		const typeString = checker.typeToString(type);
+	private convertTsType(
+		checker: ts.TypeChecker,
+		type: ts.Type,
+		isOptional: boolean,
+	): PropType {
 		const flags = type.flags;
+		// A top-level `| undefined` is redundant only when the prop is OPTIONAL — TS adds it for the
+		// `?` modifier, and optionality is already tracked in `PropInfo.optional`. For a REQUIRED prop
+		// typed `T | undefined`, undefined is a meaningful value you must be able to pass, so keep it.
+		// Strip from the alias-preserving type string; nested `| undefined` (inside `()`/`<>`/`{}`,
+		// e.g. a function's return type) stays at depth > 0 and is kept.
+		let typeString = checker.typeToString(type);
+		if (
+			isOptional &&
+			type.isUnion() &&
+			type.types.some((t) => t.flags & ts.TypeFlags.Undefined)
+		) {
+			typeString = typeString
+				.replace(/\s*\|\s*undefined$/, "")
+				.replace(/^undefined\s*\|\s*/, "");
+		}
 
 		if (flags & ts.TypeFlags.Any) {
 			return { kind: "unknown", raw: "any" };
 		}
 
 		if (type.isUnion()) {
+			// `undefined` is dropped only for optional props (the `?` noise); `null` is a real,
+			// author-declared value and is never dropped.
 			const types = type.types.filter(
-				(t) =>
-					!(t.flags & ts.TypeFlags.Undefined) && !(t.flags & ts.TypeFlags.Null),
+				(t) => !(isOptional && t.flags & ts.TypeFlags.Undefined),
 			);
 
 			if (types.length === 1) {
-				return this.convertTsType(checker, types[0]);
+				return this.convertTsType(checker, types[0], isOptional);
 			}
 
 			if (types.every((t) => t.flags & ts.TypeFlags.StringLiteral)) {
