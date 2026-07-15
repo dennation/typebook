@@ -11,7 +11,7 @@
 
 ---
 
-Point `typebook()` at your components. It reads their prop types, defaults and JSDoc **from the TypeScript types** (one Compiler-API scan, no wrapper calls, no runtime), and sub-plugins turn that scan into artifacts. The first one, `aiInstructions()`, writes Markdown docs for AI coding agents (Claude Code, Codex, Cursor) following the [`llms.txt`](https://llmstxt.org) convention — so agents know your components' real APIs instead of guessing.
+Point `typebook()` at your components. It reads their prop types, defaults and JSDoc **from the TypeScript types** (one Compiler-API scan, no wrapper calls, no runtime), and sub-plugins turn that scan into artifacts. The first one, `llmInstructions()`, writes Markdown docs for AI coding agents (Claude Code, Codex, Cursor) following the [`llms.txt`](https://llmstxt.org) convention — so agents know your components' real APIs instead of guessing.
 
 > **Early release.** This version ships the **scanner core** and the **AI-instructions** plugin. The stories / docs-kit runtime is in progress.
 
@@ -23,19 +23,19 @@ npm install -D @dennation/typebook
 
 ## Quick start
 
-Add the plugin for your bundler, point `components` at your source, and enable `aiInstructions()`:
+Add the plugin for your bundler, point `components` at your source, and enable `llmInstructions()`:
 
 ```ts
 // vite.config.ts
 import { typebook } from "@dennation/typebook/vite";
-import { aiInstructions } from "@dennation/typebook/plugins/ai-instructions";
+import { llmInstructions } from "@dennation/typebook/plugins/llm-instructions";
 import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
     typebook({
       components: "src/components/**/*.tsx",
-      plugins: [aiInstructions({ importFrom: "@acme/ui" })],
+      plugins: [llmInstructions({ importFrom: "@acme/ui" })],
     }),
   ],
 });
@@ -70,7 +70,7 @@ Use for the main action only; don't nest buttons.
 
 Usage guidance comes from the component's `@remarks` JSDoc tag; the exhaustive prop values come from the union types — both give the agent fewer ways to be wrong.
 
-## `aiInstructions()` options
+## `llmInstructions()` options
 
 | Option | Type | Description |
 |---|---|---|
@@ -92,7 +92,7 @@ Built on [unplugin](https://unplugin.unjs.io), so the same `typebook()` factory 
 | Import | Description |
 |---|---|
 | `@dennation/typebook` | The scanner core — `collectComponentDocs`, `componentToMarkdown`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, … — plus the React-free types (`TypebookConfig`, `ComponentDoc`, `TypebookPlugin`, `PropInfo`, …). |
-| `@dennation/typebook/plugins/ai-instructions` | `aiInstructions()`, `AiInstructionsOptions`. |
+| `@dennation/typebook/plugins/llm-instructions` | `llmInstructions()`, `LlmInstructionsOptions`. |
 | `@dennation/typebook/{vite,rollup,…}` | The `typebook()` bundler plugin. |
 
 ## Requirements

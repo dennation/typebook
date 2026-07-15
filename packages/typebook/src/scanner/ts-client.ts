@@ -2,15 +2,6 @@ import { resolve } from "node:path";
 import ts from "typescript";
 import { DEFAULT_INHERITED_PROVIDERS, LOG_PREFIX } from "../constants";
 import type { ComponentDoc, PropInfo, PropType } from "../types";
-import { dedent } from "./source-slice";
-
-/** A function source resolved from a `<Snippet source={ref}>` reference. */
-export interface SnippetSource {
-	/** The function body, sliced 1:1 then dedented — the text shown as the snippet. */
-	source: string;
-	/** Absolute path of the file the reference resolved to (registered as a watch dependency). */
-	file: string;
-}
 
 export class TypeScriptClient {
 	private service: ts.LanguageService | null = null;
@@ -113,74 +104,6 @@ export class TypeScriptClient {
 	private refreshProgram(): void {
 		this.program = this.service?.getProgram() ?? null;
 		this.checker = this.program?.getTypeChecker() ?? null;
-	}
-
-	/**
-	 * Extract props for a single `getComponentMeta(Component, ...)` call located at `callStart`
-	 * (character offset in the source).
-	 */
-	async getProps(
-		filePath: string,
-		callStart: number,
-		content?: string,
-	): Promise<PropInfo[] | null> {
-		if (!this.program || !this.checker) {
-			await this.start();
-		}
-
-		const absPath = resolve(this.cwd, filePath);
-		if (content !== undefined) this.setOverride(absPath, content);
-
-		const sourceFile = this.program?.getSourceFile(absPath);
-		if (!sourceFile) {
-			console.warn(LOG_PREFIX, "Could not get source file:", absPath);
-			return null;
-		}
-
-		const callExpr = this.findMetaCallAt(sourceFile, callStart);
-		if (!callExpr) {
-			console.warn(
-				LOG_PREFIX,
-				`No getComponentMeta() call at offset ${callStart} in ${filePath}`,
-			);
-			return null;
-		}
-
-		return this.extractPropsFromCall(callExpr);
-	}
-
-	/**
-	 * Like {@link getProps}, but returns a full {@link ComponentDoc}: the component's name,
-	 * the file it's declared in, its component-level JSDoc description and `@deprecated`, plus
-	 * its props. This is what the AI-instruction / docs plugins consume (props alone can't carry
-	 * the component's own description). Returns `null` when no call is found at `callStart`.
-	 */
-	async getComponentDoc(
-		filePath: string,
-		callStart: number,
-		content?: string,
-	): Promise<ComponentDoc | null> {
-		if (!this.program || !this.checker) {
-			await this.start();
-		}
-
-		const absPath = resolve(this.cwd, filePath);
-		if (content !== undefined) this.setOverride(absPath, content);
-
-		const sourceFile = this.program?.getSourceFile(absPath);
-		const checker = this.checker;
-		if (!sourceFile || !checker) return null;
-
-		const callExpr = this.findMetaCallAt(sourceFile, callStart);
-		if (!callExpr) return null;
-
-		const props = this.extractPropsFromCall(callExpr);
-		if (!props) return null;
-
-		return {
-			...this.resolveComponentInfo(checker, callExpr.arguments[0], absPath),
-			props,
-		};
 	}
 
 	/**
@@ -309,92 +232,6 @@ export class TypeScriptClient {
 	}
 
 	/**
-	 * Resolve the first `getComponentMeta(Component, …)` argument to the component's name,
-	 * declaring file, and component-level JSDoc (`description`, `@deprecated`). Follows an
-	 * import alias to the real declaration so the docs come from where the component lives.
-	 */
-	private resolveComponentInfo(
-		checker: ts.TypeChecker,
-		componentNode: ts.Node | undefined,
-		fallbackFile: string,
-	): Omit<ComponentDoc, "props"> {
-		if (!componentNode) return { name: "Component", file: fallbackFile };
-
-		// `getComponentMeta(Select<T>)` passes an instantiation expression — unwrap it to the
-		// `Select` identifier so the symbol (and its name, file, JSDoc) resolves.
-		const node = ts.isExpressionWithTypeArguments(componentNode)
-			? componentNode.expression
-			: componentNode;
-
-		const symbol = checker.getSymbolAtLocation(node);
-		const resolved =
-			symbol && symbol.flags & ts.SymbolFlags.Alias
-				? checker.getAliasedSymbol(symbol)
-				: symbol;
-
-		const info: Omit<ComponentDoc, "props"> = {
-			name: baseComponentName(resolved?.getName() ?? node.getText()),
-			file:
-				resolved?.getDeclarations()?.[0]?.getSourceFile().fileName ??
-				fallbackFile,
-		};
-		if (!resolved) return info;
-
-		const description = getSymbolDescription(checker, resolved);
-		if (description) info.description = description;
-		const remarks = getSymbolRemarks(checker, resolved);
-		if (remarks) info.remarks = remarks;
-		const deprecated = getSymbolDeprecation(checker, resolved);
-		if (deprecated !== undefined) info.deprecated = deprecated;
-		return info;
-	}
-
-	/**
-	 * Resolve a `<Snippet source={ref}>` reference to the body source of the function it names.
-	 * `identifierOffset` is the character offset of the `ref` identifier (in `content`/`filePath`).
-	 * The symbol is resolved through the warm program — following an import alias into another file —
-	 * to its declaration; if that declaration is (or initializes to) a function, its body is sliced
-	 * exactly as the inline scanner would. Returns the sliced source plus the file it came from (so
-	 * the caller can register a watch dependency), or `null` when the reference can't be resolved to
-	 * a function literal.
-	 */
-	async getSnippetSource(
-		filePath: string,
-		identifierOffset: number,
-		content?: string,
-	): Promise<SnippetSource | null> {
-		if (!this.program || !this.checker) {
-			await this.start();
-		}
-
-		const absPath = resolve(this.cwd, filePath);
-		if (content !== undefined) this.setOverride(absPath, content);
-
-		const sourceFile = this.program?.getSourceFile(absPath);
-		const checker = this.checker;
-		if (!sourceFile || !checker) return null;
-
-		const ident = findIdentifierAt(sourceFile, identifierOffset);
-		if (!ident) return null;
-
-		const symbol = checker.getSymbolAtLocation(ident);
-		if (!symbol) return null;
-		const resolved =
-			symbol.flags & ts.SymbolFlags.Alias
-				? checker.getAliasedSymbol(symbol)
-				: symbol;
-
-		for (const decl of resolved.getDeclarations() ?? []) {
-			const fn = resolveFunctionLikeFromDeclaration(decl);
-			const source = fn && sliceFunctionBody(fn);
-			if (source != null) {
-				return { source, file: decl.getSourceFile().fileName };
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Overlay `content` as the in-memory snapshot for `absPath` and refresh the warm program so the
 	 * file is reparsed from it. A no-op when the content is unchanged, so repeated extraction of an
 	 * untouched file doesn't churn the program.
@@ -404,73 +241,6 @@ export class TypeScriptClient {
 		this.overrides.set(absPath, content);
 		this.fileVersions.set(absPath, (this.fileVersions.get(absPath) ?? 0) + 1);
 		this.refreshProgram();
-	}
-
-	/**
-	 * Locate the `getComponentMeta(...)` CallExpression that starts at the given character offset.
-	 */
-	private findMetaCallAt(
-		sourceFile: ts.SourceFile,
-		callStart: number,
-	): ts.CallExpression | null {
-		let found: ts.CallExpression | null = null;
-		const visit = (node: ts.Node): void => {
-			if (found) return;
-			// The scanner already validated this is a getComponentMeta() call (resolving any
-			// import alias such as `import { getComponentMeta as reg }`). `callStart` uniquely
-			// pins the exact CallExpression, so match on the offset rather than re-checking the
-			// callee name — a name check here would silently reject aliased calls and drop their props.
-			if (
-				ts.isCallExpression(node) &&
-				node.getStart(sourceFile) === callStart
-			) {
-				found = node;
-				return;
-			}
-			ts.forEachChild(node, visit);
-		};
-		visit(sourceFile);
-		return found;
-	}
-
-	private extractPropsFromCall(callExpr: ts.CallExpression): PropInfo[] | null {
-		const checker = this.checker;
-		if (!checker) return null;
-
-		const defineResultType = checker.getTypeAtLocation(callExpr);
-		const typeRef = defineResultType as ts.TypeReference;
-
-		let props: PropInfo[] | null = null;
-		if (typeRef.typeArguments && typeRef.typeArguments.length > 0) {
-			props = this.extractPropsFromType(checker, typeRef.typeArguments[0]);
-		} else {
-			const typeArgs = checker.getTypeArguments(typeRef);
-			if (typeArgs && typeArgs.length > 0) {
-				props = this.extractPropsFromType(checker, typeArgs[0]);
-			}
-		}
-
-		if (!props) {
-			console.warn(LOG_PREFIX, "Could not extract Props type argument");
-			return null;
-		}
-
-		const componentArg = callExpr.arguments[0];
-		if (!componentArg) return props;
-
-		const inheritedNames = this.getInheritedPropNames(checker, componentArg);
-		const paramDefaultProps = this.getParamDefaultProps(checker, componentArg);
-		return props.map((p) => {
-			let next: PropInfo = p;
-			if (inheritedNames.has(p.name)) {
-				next = { ...next, inherited: true };
-			}
-			const def = paramDefaultProps.get(p.name);
-			if (def !== undefined) {
-				next = { ...next, defaultValue: def };
-			}
-			return next;
-		});
 	}
 
 	/**
@@ -701,11 +471,6 @@ export class TypeScriptClient {
 /** Extensions TypeScript will accept as program root files. */
 const TS_SOURCE_EXT = /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/;
 
-/** Strip a generic component's type-argument suffix (`Select<T>` → `Select`). */
-function baseComponentName(raw: string): string {
-	return raw.replace(/<.*$/s, "").trim() || raw;
-}
-
 /** The identifier node naming a declaration (function/class/variable), or null. */
 function declarationNameNode(decl: ts.Declaration): ts.Node | null {
 	const name = (decl as { name?: ts.Node }).name;
@@ -756,47 +521,6 @@ function getSymbolDefaultTag(
 		}
 	}
 	return "";
-}
-
-/** Find the Identifier node that starts exactly at `offset` (matching the scanner's oxc offset). */
-function findIdentifierAt(
-	sourceFile: ts.SourceFile,
-	offset: number,
-): ts.Identifier | null {
-	let found: ts.Identifier | null = null;
-	const visit = (node: ts.Node): void => {
-		if (found) return;
-		if (ts.isIdentifier(node) && node.getStart(sourceFile) === offset) {
-			found = node;
-			return;
-		}
-		ts.forEachChild(node, visit);
-	};
-	visit(sourceFile);
-	return found;
-}
-
-/**
- * Slice a function-like declaration's body, mirroring the inline scanner: a block body yields its
- * statements (braces stripped); an expression body yields the expression (parens unwrapped). Read
- * from the declaration's own source file, so a cross-module reference shows that file's text.
- * Returns null when the node has no body (e.g. an overload signature).
- */
-function sliceFunctionBody(fn: ts.SignatureDeclaration): string | null {
-	const body = (fn as ts.FunctionLikeDeclaration).body;
-	if (!body) return null;
-
-	const text = fn.getSourceFile().text;
-
-	if (ts.isBlock(body)) {
-		// Strip the wrapping braces, keep the statements (incl. `return`).
-		return dedent(text.slice(body.getStart() + 1, body.getEnd() - 1));
-	}
-
-	// Expression body: unwrap `() => ( … )` parens so the shown source is just the expression.
-	let expr: ts.Expression = body;
-	while (ts.isParenthesizedExpression(expr)) expr = expr.expression;
-	return dedent(text.slice(expr.getStart(), expr.getEnd()));
 }
 
 /**

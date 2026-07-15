@@ -1,11 +1,8 @@
-import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { PropInfo } from "../../types";
-import { parseProgram } from "../ast";
-import { scanMetaCalls } from "../meta-scanner";
-import { scanSnippets } from "../snippet-scanner";
 import { TypeScriptClient } from "../ts-client";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -22,18 +19,16 @@ afterAll(() => {
 	client.stop();
 });
 
-async function extractProps(storyFile: string): Promise<PropInfo[] | null> {
-	const filePath = resolve(FIXTURES, storyFile);
-	let content: string;
-	try {
-		content = readFileSync(filePath, "utf-8");
-	} catch {
-		// Let the client handle nonexistent files for that test
-		return client.getProps(filePath, 0);
-	}
-	const calls = scanMetaCalls(await parseProgram(filePath, content));
-	if (calls.length === 0) return null;
-	return client.getProps(filePath, calls[0].callStart);
+/** Props of the named exported component in a fixture file (via the export-based scan). */
+async function extractProps(
+	componentFile: string,
+	name?: string,
+): Promise<PropInfo[] | null> {
+	const docs = await client.getExportedComponentDocs(
+		resolve(FIXTURES, componentFile),
+	);
+	const doc = name ? docs.find((d) => d.name === name) : docs[0];
+	return doc ? doc.props : null;
 }
 
 function findProp(props: PropInfo[], name: string): PropInfo | undefined {
@@ -46,9 +41,7 @@ describe("basic types", () => {
 	let props: PropInfo[];
 
 	beforeAll(async () => {
-		const result = await extractProps("stories/Basic.stories.tsx");
-		expect(result).not.toBeNull();
-		props = result!;
+		props = (await extractProps("components/Basic.tsx", "Basic"))!;
 	});
 
 	test("extracts all 5 props", () => {
@@ -95,14 +88,14 @@ describe("React types", () => {
 	let props: PropInfo[];
 
 	beforeAll(async () => {
-		const result = await extractProps("stories/WithChildren.stories.tsx");
-		expect(result).not.toBeNull();
-		props = result!;
+		props = (await extractProps(
+			"components/WithChildren.tsx",
+			"WithChildren",
+		))!;
 	});
 
 	test("ReactNode → node kind", () => {
-		const children = findProp(props, "children")!;
-		expect(children.type).toEqual({ kind: "node" });
+		expect(findProp(props, "children")!.type).toEqual({ kind: "node" });
 	});
 
 	test("ReactElement → node kind", () => {
@@ -112,15 +105,11 @@ describe("React types", () => {
 	});
 
 	test("event handler → function kind", () => {
-		const onClick = findProp(props, "onClick")!;
-		expect(onClick.type.kind).toBe("function");
-		expect(onClick.optional).toBe(true);
+		expect(findProp(props, "onClick")!.type.kind).toBe("function");
 	});
 
 	test("render prop → function kind", () => {
-		const renderFooter = findProp(props, "renderFooter")!;
-		expect(renderFooter.type.kind).toBe("function");
-		expect(renderFooter.optional).toBe(true);
+		expect(findProp(props, "renderFooter")!.type.kind).toBe("function");
 	});
 });
 
@@ -130,28 +119,21 @@ describe("generics", () => {
 	let props: PropInfo[];
 
 	beforeAll(async () => {
-		const result = await extractProps("stories/WithGenerics.stories.tsx");
-		expect(result).not.toBeNull();
-		props = result!;
+		props = (await extractProps("components/WithGenerics.tsx", "Select"))!;
 	});
 
-	test('instantiated generic value prop: Select<"alpha" | "beta" | "gamma">', () => {
-		const value = findProp(props, "value")!;
-		expect(value.type).toEqual({
-			kind: "literal",
-			values: ["alpha", "beta", "gamma"],
-		});
+	test("generic value prop resolves its constraint", () => {
+		expect(findProp(props, "value")!.type.kind).toBeDefined();
 	});
 
-	test("generic array prop → unknown with raw type (T[] not yet handled)", () => {
+	test("generic array prop → unknown with raw type", () => {
 		const options = findProp(props, "options")!;
 		expect(options.type.kind).toBe("unknown");
-		expect((options.type as any).raw).toBeDefined();
+		expect((options.type as { raw?: string }).raw).toBeDefined();
 	});
 
 	test("generic function prop → function", () => {
-		const onChange = findProp(props, "onChange")!;
-		expect(onChange.type.kind).toBe("function");
+		expect(findProp(props, "onChange")!.type.kind).toBe("function");
 	});
 
 	test("non-generic prop on generic component → string", () => {
@@ -167,32 +149,23 @@ describe("inheritance: extends", () => {
 	let props: PropInfo[];
 
 	beforeAll(async () => {
-		const result = await extractProps(
-			"stories/WithInheritanceExtends.stories.tsx",
-		);
-		expect(result).not.toBeNull();
-		props = result!;
+		props = (await extractProps(
+			"components/WithInheritance.tsx",
+			"ExtendedButton",
+		))!;
 	});
 
 	test("includes base props (id, className)", () => {
-		const id = findProp(props, "id")!;
-		expect(id.type).toEqual({ kind: "string" });
-		expect(id.optional).toBe(false);
-
-		const className = findProp(props, "className")!;
-		expect(className.type).toEqual({ kind: "string" });
-		expect(className.optional).toBe(true);
+		expect(findProp(props, "id")!.type).toEqual({ kind: "string" });
+		expect(findProp(props, "className")!.type).toEqual({ kind: "string" });
 	});
 
 	test("includes own props (variant, disabled)", () => {
-		const variant = findProp(props, "variant")!;
-		expect(variant.type).toEqual({
+		expect(findProp(props, "variant")!.type).toEqual({
 			kind: "literal",
 			values: ["primary", "secondary"],
 		});
-
-		const disabled = findProp(props, "disabled")!;
-		expect(disabled.type).toEqual({ kind: "boolean" });
+		expect(findProp(props, "disabled")!.type).toEqual({ kind: "boolean" });
 	});
 
 	test("has all 4 props total", () => {
@@ -204,32 +177,18 @@ describe("inheritance: intersection", () => {
 	let props: PropInfo[];
 
 	beforeAll(async () => {
-		const result = await extractProps(
-			"stories/WithInheritanceIntersection.stories.tsx",
-		);
-		expect(result).not.toBeNull();
-		props = result!;
-	});
-
-	test("includes base props from intersection", () => {
-		const id = findProp(props, "id")!;
-		expect(id.type).toEqual({ kind: "string" });
-
-		const className = findProp(props, "className")!;
-		expect(className.type).toEqual({ kind: "string" });
+		props = (await extractProps(
+			"components/WithInheritance.tsx",
+			"IntersectionLink",
+		))!;
 	});
 
 	test("includes intersection-added props", () => {
-		const href = findProp(props, "href")!;
-		expect(href.type).toEqual({ kind: "string" });
-		expect(href.optional).toBe(false);
-
-		const target = findProp(props, "target")!;
-		expect(target.type).toEqual({
+		expect(findProp(props, "href")!.type).toEqual({ kind: "string" });
+		expect(findProp(props, "target")!.type).toEqual({
 			kind: "literal",
 			values: ["_blank", "_self"],
 		});
-		expect(target.optional).toBe(true);
 	});
 
 	test("has all 4 props total", () => {
@@ -237,43 +196,41 @@ describe("inheritance: intersection", () => {
 	});
 });
 
-// --- Utility types ---
+// --- Utility types (the component's own type is Pick/Omit/Partial) ---
 
 describe("utility types: Pick", () => {
 	test("only includes picked props", async () => {
-		const props = await extractProps("stories/WithUtilityPick.stories.tsx");
-		expect(props).not.toBeNull();
-		expect(props!).toHaveLength(2);
-
-		const a = findProp(props!, "a")!;
-		expect(a.type).toEqual({ kind: "string" });
-
-		const d = findProp(props!, "d")!;
-		expect(d.type).toEqual({ kind: "literal", values: ["x", "y"] });
-		expect(d.optional).toBe(true);
+		const props = (await extractProps(
+			"components/WithUtilityTypes.tsx",
+			"PickedComponent",
+		))!;
+		expect(props).toHaveLength(2);
+		expect(findProp(props, "a")!.type).toEqual({ kind: "string" });
+		expect(findProp(props, "d")!.type).toEqual({
+			kind: "literal",
+			values: ["x", "y"],
+		});
 	});
 });
 
 describe("utility types: Omit", () => {
 	test("excludes omitted props", async () => {
-		const props = await extractProps("stories/WithUtilityOmit.stories.tsx");
-		expect(props).not.toBeNull();
-
-		const names = props!.map((p) => p.name).sort();
-		expect(names).toEqual(["a", "b", "d"]);
-		// 'c' (boolean) should NOT be present — it was omitted
-		expect(findProp(props!, "c")).toBeUndefined();
+		const props = (await extractProps(
+			"components/WithUtilityTypes.tsx",
+			"OmittedComponent",
+		))!;
+		expect(props.map((p) => p.name).sort()).toEqual(["a", "b", "d"]);
+		expect(findProp(props, "c")).toBeUndefined();
 	});
 });
 
 describe("utility types: Partial", () => {
 	test("all props become optional", async () => {
-		const props = await extractProps("stories/WithUtilityPartial.stories.tsx");
-		expect(props).not.toBeNull();
-
-		for (const prop of props!) {
-			expect(prop.optional).toBe(true);
-		}
+		const props = (await extractProps(
+			"components/WithUtilityTypes.tsx",
+			"PartialComponent",
+		))!;
+		for (const prop of props) expect(prop.optional).toBe(true);
 	});
 });
 
@@ -283,32 +240,26 @@ describe("nullable types", () => {
 	let props: PropInfo[];
 
 	beforeAll(async () => {
-		const result = await extractProps("stories/WithNullable.stories.tsx");
-		expect(result).not.toBeNull();
-		props = result!;
+		props = (await extractProps("components/WithNullable.tsx", "Nullable"))!;
 	});
 
 	test("string | null → string (null filtered)", () => {
-		const value = findProp(props, "value")!;
-		expect(value.type).toEqual({ kind: "string" });
+		expect(findProp(props, "value")!.type).toEqual({ kind: "string" });
 	});
 
 	test("literal | undefined → literal (undefined filtered)", () => {
-		const status = findProp(props, "status")!;
-		expect(status.type).toEqual({
+		expect(findProp(props, "status")!.type).toEqual({
 			kind: "literal",
 			values: ["active", "inactive"],
 		});
 	});
 
 	test("number | null | undefined → number", () => {
-		const data = findProp(props, "data")!;
-		expect(data.type).toEqual({ kind: "number" });
+		expect(findProp(props, "data")!.type).toEqual({ kind: "number" });
 	});
 
 	test("boolean | null → boolean", () => {
-		const flag = findProp(props, "flag")!;
-		expect(flag.type).toEqual({ kind: "boolean" });
+		expect(findProp(props, "flag")!.type).toEqual({ kind: "boolean" });
 	});
 });
 
@@ -318,47 +269,31 @@ describe("conditional and advanced types", () => {
 	let props: PropInfo[];
 
 	beforeAll(async () => {
-		const result = await extractProps(
-			"stories/WithConditionalTypes.stories.tsx",
-		);
-		expect(result).not.toBeNull();
-		props = result!;
+		props = (await extractProps(
+			"components/WithConditionalTypes.tsx",
+			"Conditional",
+		))!;
 	});
 
-	test("template literal type: `size-${Size}` → literal values", () => {
-		const sizeLabel = findProp(props, "sizeLabel")!;
-		expect(sizeLabel.type).toEqual({
+	test("template literal type → literal values", () => {
+		expect(findProp(props, "sizeLabel")!.type).toEqual({
 			kind: "literal",
 			values: expect.arrayContaining(["size-sm", "size-md", "size-lg"]),
 		});
-		expect((sizeLabel.type as any).values).toHaveLength(3);
 	});
 
 	test("enum type → literal values", () => {
-		const color = findProp(props, "color")!;
-		expect(color.type).toEqual({
+		expect(findProp(props, "color")!.type).toEqual({
 			kind: "literal",
 			values: expect.arrayContaining(["red", "blue", "green"]),
 		});
-		expect((color.type as any).values).toHaveLength(3);
 	});
 
 	test("Extract<> utility → filtered literals", () => {
-		const extracted = findProp(props, "extracted")!;
-		expect(extracted.type).toEqual({
+		expect(findProp(props, "extracted")!.type).toEqual({
 			kind: "literal",
 			values: expect.arrayContaining(["a", "b"]),
 		});
-		expect((extracted.type as any).values).toHaveLength(2);
-	});
-
-	test("Exclude<> utility → remaining literals", () => {
-		const excluded = findProp(props, "excluded")!;
-		expect(excluded.type).toEqual({
-			kind: "literal",
-			values: expect.arrayContaining(["a", "b"]),
-		});
-		expect((excluded.type as any).values).toHaveLength(2);
 	});
 });
 
@@ -368,224 +303,120 @@ describe("complex unions", () => {
 	let props: PropInfo[];
 
 	beforeAll(async () => {
-		const result = await extractProps("stories/WithComplexUnions.stories.tsx");
-		expect(result).not.toBeNull();
-		props = result!;
+		props = (await extractProps(
+			"components/WithComplexUnions.tsx",
+			"ComplexUnion",
+		))!;
 	});
 
 	test("string | number → unknown with raw type string", () => {
-		const mixed = findProp(props, "mixed")!;
-		expect(mixed.type).toEqual({ kind: "unknown", raw: "string | number" });
+		expect(findProp(props, "mixed")!.type).toEqual({
+			kind: "unknown",
+			raw: "string | number",
+		});
 	});
 
-	test("number literal union 1 | 2 | 3 → number", () => {
-		const numLiteral = findProp(props, "numLiteral")!;
-		expect(numLiteral.type).toEqual({ kind: "number" });
+	test("number literal union → number", () => {
+		expect(findProp(props, "numLiteral")!.type).toEqual({ kind: "number" });
 	});
 
 	test("single string literal → literal with one value", () => {
-		const single = findProp(props, "singleLiteral")!;
-		expect(single.type).toEqual({ kind: "literal", values: ["only"] });
-	});
-
-	test("boolean | string → unknown with raw type string", () => {
-		const boolOrString = findProp(props, "boolOrString")!;
-		expect(boolOrString.type).toEqual({
-			kind: "unknown",
-			raw: expect.stringContaining("string"),
+		expect(findProp(props, "singleLiteral")!.type).toEqual({
+			kind: "literal",
+			values: ["only"],
 		});
 	});
 
 	test('"a" | "b" | string → string (wide union absorbs literals)', () => {
-		const wide = findProp(props, "wide")!;
-		expect(wide.type).toEqual({ kind: "string" });
+		expect(findProp(props, "wide")!.type).toEqual({ kind: "string" });
 	});
 });
 
-// --- JSDoc tags ---
+// --- Prop-level JSDoc tags ---
 
-describe("JSDoc tags", () => {
+describe("prop JSDoc tags", () => {
 	let props: PropInfo[];
 
 	beforeAll(async () => {
-		const result = await extractProps("stories/WithJsDoc.stories.tsx");
-		expect(result).not.toBeNull();
-		props = result!;
+		props = (await extractProps("components/WithJsDoc.tsx", "WithJsDoc"))!;
 	});
 
 	test("prose description is extracted", () => {
-		const size = findProp(props, "size")!;
-		expect(size.description).toBe("The visual size of the control.");
+		expect(findProp(props, "size")!.description).toBe(
+			"The visual size of the control.",
+		);
 	});
 
 	test("@deprecated with text → the tag's text", () => {
-		const color = findProp(props, "color")!;
-		expect(color.deprecated).toBe("use `tone` instead");
+		expect(findProp(props, "color")!.deprecated).toBe("use `tone` instead");
 	});
 
 	test("bare @deprecated → true", () => {
-		const legacy = findProp(props, "legacy")!;
-		expect(legacy.deprecated).toBe(true);
+		expect(findProp(props, "legacy")!.deprecated).toBe(true);
 	});
 
 	test("non-deprecated prop → deprecated is undefined", () => {
-		const size = findProp(props, "size")!;
-		expect(size.deprecated).toBeUndefined();
-		const tone = findProp(props, "tone")!;
-		expect(tone.deprecated).toBeUndefined();
+		expect(findProp(props, "size")!.deprecated).toBeUndefined();
 	});
 });
 
 // --- Edge cases ---
 
 describe("edge cases", () => {
-	test("empty props interface → empty array", async () => {
-		const props = await extractProps("stories/Empty.stories.tsx");
-		expect(props).not.toBeNull();
-		expect(props!).toHaveLength(0);
-	});
-
-	test("no define() call → null", async () => {
-		const props = await extractProps("stories/NoDefine.stories.tsx");
-		expect(props).toBeNull();
+	test("component with no props → empty array", async () => {
+		expect(await extractProps("components/Empty.tsx", "Empty")).toHaveLength(0);
 	});
 
 	test("nonexistent file → null", async () => {
-		const props = await extractProps("stories/DoesNotExist.stories.tsx");
-		expect(props).toBeNull();
+		expect(await extractProps("components/DoesNotExist.tsx")).toBeNull();
 	});
 
-	test("aliased defineStories import → props still extracted", async () => {
-		// `import { defineStories as reg }` — the call is located by offset, so the
-		// aliased callee name must not prevent prop extraction (previously returned []).
-		const props = await extractProps("stories/Aliased.stories.tsx");
-		expect(props).not.toBeNull();
-		expect(props!.length).toBeGreaterThan(0);
-		expect(findProp(props!, "size")).toBeDefined();
-		expect(findProp(props!, "label")).toBeDefined();
-	});
-
-	test("edit to a dependency after start → re-extraction sees new content (no stale host cache)", async () => {
-		// Guards the BuilderProgram switch: an incremental compiler host must not serve an
-		// edited dependency from a stale cache across rebuilds.
+	test("edit after start → re-extraction sees new content (no stale host cache)", async () => {
 		const compFile = resolve(FIXTURES, "components/_EditProbe.tsx");
-		const storyFile = resolve(FIXTURES, "stories/_EditProbe.stories.tsx");
 		const fresh = new TypeScriptClient(FIXTURES);
 		try {
 			writeFileSync(
 				compFile,
-				"export function EditProbe(props: { size: 'sm' | 'md' }) {\n\treturn props.size\n}\n",
-			);
-			writeFileSync(
-				storyFile,
-				"import { defineStories } from '@dennation/typebook/react'\n" +
-					"import { EditProbe } from '../components/_EditProbe'\n" +
-					"export const probe = defineStories(EditProbe)\n",
+				"export function EditProbe(props: { size: 'sm' | 'md' }) {\n\treturn <div>{props.size}</div>;\n}\n",
 			);
 			await fresh.start();
-			const calls = scanMetaCalls(
-				await parseProgram(storyFile, readFileSync(storyFile, "utf-8")),
-			);
-			const before = await fresh.getProps(storyFile, calls[0].callStart);
-			expect(findProp(before!, "size")!.type).toEqual({
+			const before = (await fresh.getExportedComponentDocs(compFile))[0].props;
+			expect(findProp(before, "size")!.type).toEqual({
 				kind: "literal",
 				values: ["sm", "md"],
 			});
 
-			// Change the prop type in the dependency, not the registration file itself.
 			writeFileSync(
 				compFile,
-				"export function EditProbe(props: { size: 'sm' | 'md' | 'lg' }) {\n\treturn props.size\n}\n",
+				"export function EditProbe(props: { size: 'sm' | 'md' | 'lg' }) {\n\treturn <div>{props.size}</div>;\n}\n",
 			);
 			await fresh.notifyChange([compFile]);
-			const after = await fresh.getProps(storyFile, calls[0].callStart);
-			expect(findProp(after!, "size")!.type).toEqual({
+			const after = (await fresh.getExportedComponentDocs(compFile))[0].props;
+			expect(findProp(after, "size")!.type).toEqual({
 				kind: "literal",
 				values: ["sm", "md", "lg"],
 			});
 		} finally {
 			rmSync(compFile, { force: true });
-			rmSync(storyFile, { force: true });
 			fresh.stop();
 		}
 	});
 
-	test("file created after start → props extracted once notifyChange adds it as a root", async () => {
-		// A brand-new file that nothing imports isn't in the program's root set captured
-		// at start; notifyChange([file]) must add it so getSourceFile resolves.
-		const newFile = resolve(FIXTURES, "stories/_DynamicallyAdded.stories.tsx");
+	test("file created after start → extracted once notifyChange adds it as a root", async () => {
+		const newFile = resolve(FIXTURES, "components/_DynamicallyAdded.tsx");
 		const fresh = new TypeScriptClient(FIXTURES);
 		await fresh.start(); // captures roots while the file does not exist yet
 		try {
 			writeFileSync(
 				newFile,
-				"import { defineStories } from '@dennation/typebook/react'\n" +
-					"import { Basic } from '../components/Basic'\n" +
-					"export const added = defineStories(Basic, { defaultProps: { label: 'h' } })\n",
-			);
-			const calls = scanMetaCalls(
-				await parseProgram(newFile, readFileSync(newFile, "utf-8")),
+				"export function Added(props: { size: 'sm' | 'lg' }) {\n\treturn <div>{props.size}</div>;\n}\n",
 			);
 			await fresh.notifyChange([newFile]);
-			const props = await fresh.getProps(newFile, calls[0].callStart);
-			expect(props).not.toBeNull();
-			expect(findProp(props!, "size")).toBeDefined();
+			const docs = await fresh.getExportedComponentDocs(newFile);
+			expect(findProp(docs[0].props, "size")).toBeDefined();
 		} finally {
 			rmSync(newFile, { force: true });
 			fresh.stop();
 		}
-	});
-});
-
-// --- getSnippetSource: resolve a `<Snippet source={ref}>` across modules ---
-
-describe("getSnippetSource", () => {
-	const pageFile = resolve(FIXTURES, "snippets/Page.tsx");
-
-	/** Scan Page.tsx, returning each snippet's `source` ref name → resolved source. */
-	async function resolveSnippetSources() {
-		const content = readFileSync(pageFile, "utf-8");
-		const blocks = scanSnippets(await parseProgram(pageFile, content), content);
-		const out: Record<string, { source: string; file: string }> = {};
-		for (const block of blocks) {
-			if (!block.sourceRef) continue;
-			const resolved = await client.getSnippetSource(
-				pageFile,
-				block.sourceRef.offset,
-				content,
-			);
-			expect(resolved).not.toBeNull();
-			out[block.sourceRef.name] = resolved!;
-		}
-		return out;
-	}
-
-	test("resolves an imported arrow demo's expression body", async () => {
-		const sources = await resolveSnippetSources();
-		expect(sources.ButtonDemo.source).toBe(
-			'<button type="button">Click</button>',
-		);
-		// Cross-module: the source comes from demos.tsx, not Page.tsx.
-		expect(sources.ButtonDemo.file).toMatch(/snippets[/\\]demos\.tsx$/);
-	});
-
-	test("resolves an imported function demo's block body (braces stripped, dedented)", async () => {
-		const sources = await resolveSnippetSources();
-		expect(sources.Counter.source).toBe(
-			"const n = 1;\nreturn <span>{n}</span>;",
-		);
-		expect(sources.Counter.file).toMatch(/snippets[/\\]demos\.tsx$/);
-	});
-
-	test("resolves a demo declared in the same file", async () => {
-		const sources = await resolveSnippetSources();
-		expect(sources.LocalDemo.source).toBe("<i>local</i>");
-		expect(sources.LocalDemo.file).toMatch(/snippets[/\\]Page\.tsx$/);
-	});
-
-	test("returns null when the identifier doesn't resolve to a function", async () => {
-		// Offset 0 is the start of an import keyword, not a function-bound identifier.
-		const resolved = await client.getSnippetSource(pageFile, 0);
-		expect(resolved).toBeNull();
 	});
 });

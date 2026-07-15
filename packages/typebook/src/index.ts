@@ -1,20 +1,13 @@
-// Base entry — the library's foundation: the React-free **scanner core** (component
-// extraction: `collectComponentDocs`, `componentToMarkdown`, `TypeScriptClient`,
-// `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) plus all shared React-free types.
-// The React runtime + authoring API (`defineStories`) live in `@dennation/typebook/react`;
-// bundler plugins in `@dennation/typebook/{vite,rollup,…}`. Type-only imports (e.g.
-// `TypebookConfig` for a bundler config) stay weightless; importing scanner runtime pulls
-// in `typescript` + `oxc-parser`.
+// Base entry — the library's foundation: the React-free **scanner core** (`collectComponentDocs`,
+// `componentToMarkdown`, `TypeScriptClient`) plus all shared types. It reads the components named
+// by the `components` config and extracts each exported component's props, defaults and JSDoc by
+// type via the TypeScript Compiler API; sub-plugins (e.g. `llmInstructions`) turn the result into
+// artifacts. Bundler plugins live in `@dennation/typebook/{vite,rollup,…}`. Type-only imports
+// (e.g. `TypebookConfig` for a bundler config) stay weightless; the runtime pulls in `typescript`.
 export * from "./scanner";
 export type {
-	AllOfConfig,
-	GenerateConfig,
 	GenerateCtx,
-	MissingProps,
-	TransformCtx,
 	TypebookCommand,
 	TypebookConfig,
 	TypebookPlugin,
-	ValuesConfig,
-	VariantConfig,
 } from "./types";

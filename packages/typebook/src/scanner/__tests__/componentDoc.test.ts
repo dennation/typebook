@@ -1,36 +1,28 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { ComponentDoc } from "../../types";
-import { parseProgram } from "../ast";
 import { collectComponentDocs } from "../collectComponentDocs";
 import { componentToMarkdown } from "../componentToMarkdown";
-import { scanMetaCalls } from "../meta-scanner";
 import { TypeScriptClient } from "../ts-client";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const FIXTURES = resolve(__dirname, "fixtures");
 
-// --- getComponentDoc: component-level extraction ---
+// --- component-level extraction (name, file, description, remarks, deprecated) ---
 
-describe("getComponentDoc", () => {
+describe("component-level extraction", () => {
 	let client: TypeScriptClient;
 	let doc: ComponentDoc;
 
 	beforeAll(async () => {
 		client = new TypeScriptClient(FIXTURES);
 		await client.start();
-		const file = resolve(FIXTURES, "stories/WithComponentDoc.stories.tsx");
-		const content = readFileSync(file, "utf-8");
-		const calls = scanMetaCalls(await parseProgram(file, content));
-		const result = await client.getComponentDoc(
-			file,
-			calls[0].callStart,
-			content,
+		const docs = await client.getExportedComponentDocs(
+			resolve(FIXTURES, "components/WithComponentDoc.tsx"),
 		);
-		expect(result).not.toBeNull();
-		doc = result!;
+		doc = docs.find((d) => d.name === "WithComponentDoc")!;
 	});
 
 	afterAll(() => client.stop());
@@ -39,7 +31,7 @@ describe("getComponentDoc", () => {
 		expect(doc.name).toBe("WithComponentDoc");
 	});
 
-	test("points file at the component's own module, not the story", () => {
+	test("points file at the component's own module", () => {
 		expect(doc.file).toMatch(/components\/WithComponentDoc\.tsx$/);
 	});
 
@@ -47,14 +39,14 @@ describe("getComponentDoc", () => {
 		expect(doc.description).toBe("A primary call-to-action button.");
 	});
 
-	test("pulls the component-level @deprecated note", () => {
-		expect(doc.deprecated).toBe("use `Action` instead");
-	});
-
 	test("pulls the component-level @remarks usage guidance", () => {
 		expect(doc.remarks).toBe(
 			"Use for the main action only; don't nest buttons.",
 		);
+	});
+
+	test("pulls the component-level @deprecated note", () => {
+		expect(doc.deprecated).toBe("use `Action` instead");
 	});
 
 	test("still extracts props", () => {
@@ -80,7 +72,7 @@ describe("collectComponentDocs (export scan)", () => {
 
 	afterAll(() => client.stop());
 
-	test("finds exported components by type (no getComponentMeta needed)", () => {
+	test("finds exported components by type", () => {
 		expect(docs.map((d) => d.name)).toContain("Basic");
 	});
 
@@ -153,27 +145,5 @@ describe("componentToMarkdown", () => {
 		expect(md).toContain('import { Button } from "@acme/ui";');
 		expect(md).toContain("**Usage**");
 		expect(md).toContain("don't nest buttons");
-	});
-});
-
-// --- defineStories: scanner recognizes it, props extracted from return type ---
-
-describe("defineStories injection", () => {
-	let client: TypeScriptClient;
-
-	beforeAll(async () => {
-		client = new TypeScriptClient(FIXTURES);
-		await client.start();
-	});
-
-	afterAll(() => client.stop());
-
-	test("scanMetaCalls finds a defineStories() call and getProps extracts the component's props", async () => {
-		const file = resolve(FIXTURES, "stories/WithDefineStories.stories.tsx");
-		const content = readFileSync(file, "utf-8");
-		const calls = scanMetaCalls(await parseProgram(file, content));
-		expect(calls).toHaveLength(1);
-		const props = await client.getProps(file, calls[0].callStart, content);
-		expect(props?.map((p) => p.name)).toContain("size");
 	});
 });
