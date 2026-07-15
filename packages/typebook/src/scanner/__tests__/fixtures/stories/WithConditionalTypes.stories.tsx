@@ -1,12 +1,11 @@
-import { getComponentMeta } from "@dennation/typebook/react";
+import { defineStories } from "@dennation/typebook/react";
 import { Conditional } from "../components/WithConditionalTypes";
 
-export const comp = getComponentMeta(Conditional, {
+export const comp = defineStories(Conditional, {
 	defaultProps: {
 		sizeLabel: "size-sm",
 		color: 0 as any,
 		extracted: "a",
 		excluded: "a",
 	},
-	pick: ["sizeLabel", "color", "extracted", "excluded"],
 });

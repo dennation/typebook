@@ -22,13 +22,18 @@ export interface MetaCall {
 	inject: InjectTarget;
 }
 
-const META_FN_NAME = "getComponentMeta";
+// `defineStories(Component, config?)` — the call whose first argument is a component and whose
+// return type carries `Props` as its first type argument, so `extractPropsFromCall` injects `__props`.
+const META_FN_NAMES = new Set(["defineStories"]);
 
 /**
- * Quick string check before parsing — most files won't contain getComponentMeta() at all.
+ * Quick string check before parsing — most files reference neither meta call.
  */
 export function mayContainMetaCall(content: string): boolean {
-	return content.includes(`${META_FN_NAME}(`);
+	for (const name of META_FN_NAMES) {
+		if (content.includes(`${name}(`)) return true;
+	}
+	return false;
 }
 
 /**
@@ -68,7 +73,7 @@ export function scanMetaCalls(program: Program): MetaCall[] {
 function collectMetaNames(decl: ImportDeclaration, out: Set<string>): void {
 	for (const spec of decl.specifiers) {
 		if (spec.type !== "ImportSpecifier") continue;
-		if (moduleExportName(spec.imported) === META_FN_NAME) {
+		if (META_FN_NAMES.has(moduleExportName(spec.imported))) {
 			out.add(spec.local.name);
 		}
 	}

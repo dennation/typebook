@@ -89,19 +89,6 @@ describe("basic types", () => {
 	});
 });
 
-// --- Props filter ---
-
-describe("props filter", () => {
-	test("returns only filtered props when props array provided", async () => {
-		const props = await extractProps("stories/BasicFiltered.stories.tsx");
-		expect(props).not.toBeNull();
-		expect(props!).toHaveLength(2);
-
-		const names = props!.map((p) => p.name).sort();
-		expect(names).toEqual(["disabled", "size"]);
-	});
-});
-
 // --- React types ---
 
 describe("React types", () => {
@@ -468,8 +455,8 @@ describe("edge cases", () => {
 		expect(props).toBeNull();
 	});
 
-	test("aliased getComponentMeta import → props still extracted", async () => {
-		// `import { getComponentMeta as reg }` — the call is located by offset, so the
+	test("aliased defineStories import → props still extracted", async () => {
+		// `import { defineStories as reg }` — the call is located by offset, so the
 		// aliased callee name must not prevent prop extraction (previously returned []).
 		const props = await extractProps("stories/Aliased.stories.tsx");
 		expect(props).not.toBeNull();
@@ -491,9 +478,9 @@ describe("edge cases", () => {
 			);
 			writeFileSync(
 				storyFile,
-				"import { getComponentMeta } from '@dennation/typebook/react'\n" +
+				"import { defineStories } from '@dennation/typebook/react'\n" +
 					"import { EditProbe } from '../components/_EditProbe'\n" +
-					"export const probe = getComponentMeta(EditProbe)\n",
+					"export const probe = defineStories(EditProbe)\n",
 			);
 			await fresh.start();
 			const calls = scanMetaCalls(
@@ -532,9 +519,9 @@ describe("edge cases", () => {
 		try {
 			writeFileSync(
 				newFile,
-				"import { getComponentMeta } from '@dennation/typebook/react'\n" +
+				"import { defineStories } from '@dennation/typebook/react'\n" +
 					"import { Basic } from '../components/Basic'\n" +
-					"export const added = getComponentMeta(Basic, { defaultProps: { label: 'h' } })\n",
+					"export const added = defineStories(Basic, { defaultProps: { label: 'h' } })\n",
 			);
 			const calls = scanMetaCalls(
 				await parseProgram(newFile, readFileSync(newFile, "utf-8")),

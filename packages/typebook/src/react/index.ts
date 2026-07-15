@@ -1,5 +1,14 @@
 // Domain types live in the base entry (`@dennation/typebook`); not re-exported here.
 // Docs components (for consumer documentation sites)
+
+export {
+	type DefineStoriesConfig,
+	defineStories,
+	type MatrixViewProps,
+	type StoriesNamespace,
+	type StoryViewProps,
+	type VariantsViewProps,
+} from "./defineStories";
 export {
 	CodeBlock,
 	CodeBlockRoot,
@@ -15,7 +24,6 @@ export {
 	ThemeToggle,
 	type ThemeToggleProps,
 } from "./features/theme-toggle/index";
-export { getComponentMeta } from "./getComponentMeta";
 export { childText } from "./shared/lib/childText";
 export { cx } from "./shared/lib/cx";
 export { propsToRows } from "./shared/lib/propsToRows";
@@ -70,8 +78,6 @@ export {
 	type StepsRootProps,
 } from "./shared/ui/steps/index";
 export { type TabItem, Tabs, type TabsProps } from "./shared/ui/tabs/index";
-export type { ComponentMeta, DefaultedOf, PropsOf } from "./types";
-export { allOf, generate, values } from "./variants";
 export {
 	Breadcrumbs,
 	type BreadcrumbsProps,
@@ -90,7 +96,6 @@ export {
 	useDocHeadings,
 } from "./widgets/docs-toc/index";
 export { Layout, type LayoutProps } from "./widgets/layout/index";
-export { Matrix, type MatrixProps } from "./widgets/matrix/index";
 export {
 	type PrevNextItem,
 	PrevNextNav,
@@ -101,5 +106,3 @@ export {
 	type SnippetProps,
 	type SnippetRenderProps,
 } from "./widgets/snippet/index";
-export { Story, type StoryProps } from "./widgets/story/index";
-export { Variants, type VariantsProps } from "./widgets/variants/index";

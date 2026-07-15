@@ -1,7 +1,7 @@
 {
 	"name": "@dennation/typebook",
-	"version": "0.2.0",
-	"description": "React component story tool with automatic variant generation from TypeScript types",
+	"version": "0.0.0",
+	"description": "Scan React components' TypeScript prop types with a bundler plugin and generate documentation — AI-agent instructions and more, no codegen files",
 	"type": "module",
 	"bin": {
 		"typebook": "./dist/cli/index.mjs"
@@ -11,13 +11,17 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.mjs"
 		},
-		"./scanner": {
-			"types": "./dist/scanner/index.d.ts",
-			"import": "./dist/scanner/index.mjs"
-		},
 		"./react": {
 			"types": "./dist/react/index.d.ts",
 			"import": "./dist/react/index.mjs"
+		},
+		"./plugins/snippets": {
+			"types": "./dist/plugins/snippets.d.ts",
+			"import": "./dist/plugins/snippets.mjs"
+		},
+		"./plugins/ai-instructions": {
+			"types": "./dist/plugins/aiInstructions.d.ts",
+			"import": "./dist/plugins/aiInstructions.mjs"
 		},
 		"./vite": {
 			"types": "./dist/plugins/vite.d.ts",
@@ -46,6 +50,48 @@
 		"./farm": {
 			"types": "./dist/plugins/farm.d.ts",
 			"import": "./dist/plugins/farm.mjs"
+		}
+	},
+	"//publishConfig": "First release ships ONLY the scanner core + AI-instructions plugin + bundler plugins. `react` and `plugins/snippets` stay in the workspace (the docs site uses them) but are omitted from the published export map until the stories/docs API is released.",
+	"publishConfig": {
+		"access": "public",
+		"exports": {
+			".": {
+				"types": "./dist/index.d.ts",
+				"import": "./dist/index.mjs"
+			},
+			"./plugins/ai-instructions": {
+				"types": "./dist/plugins/aiInstructions.d.ts",
+				"import": "./dist/plugins/aiInstructions.mjs"
+			},
+			"./vite": {
+				"types": "./dist/plugins/vite.d.ts",
+				"import": "./dist/plugins/vite.mjs"
+			},
+			"./rollup": {
+				"types": "./dist/plugins/rollup.d.ts",
+				"import": "./dist/plugins/rollup.mjs"
+			},
+			"./rolldown": {
+				"types": "./dist/plugins/rolldown.d.ts",
+				"import": "./dist/plugins/rolldown.mjs"
+			},
+			"./webpack": {
+				"types": "./dist/plugins/webpack.d.ts",
+				"import": "./dist/plugins/webpack.mjs"
+			},
+			"./rspack": {
+				"types": "./dist/plugins/rspack.d.ts",
+				"import": "./dist/plugins/rspack.mjs"
+			},
+			"./esbuild": {
+				"types": "./dist/plugins/esbuild.d.ts",
+				"import": "./dist/plugins/esbuild.mjs"
+			},
+			"./farm": {
+				"types": "./dist/plugins/farm.d.ts",
+				"import": "./dist/plugins/farm.mjs"
+			}
 		}
 	},
 	"files": [

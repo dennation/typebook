@@ -1,7 +1,6 @@
-import { getComponentMeta } from "@dennation/typebook/react";
+import { defineStories } from "@dennation/typebook/react";
 import { OmittedComponent } from "../components/WithUtilityTypes";
 
-export const comp = getComponentMeta(OmittedComponent, {
+export const comp = defineStories(OmittedComponent, {
 	defaultProps: { a: "hello" },
-	pick: ["a", "b", "d"],
 });

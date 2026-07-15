@@ -8,64 +8,64 @@ async function scan(filename: string, content: string) {
 }
 
 describe("mayContainMetaCall", () => {
-	test("detects getComponentMeta( substring", () => {
-		expect(mayContainMetaCall("const x = getComponentMeta(Foo)")).toBe(true);
+	test("detects defineStories( substring", () => {
+		expect(mayContainMetaCall("const x = defineStories(Foo)")).toBe(true);
 	});
 
-	test("returns false when getComponentMeta( absent", () => {
+	test("returns false when defineStories( absent", () => {
 		expect(mayContainMetaCall("const x = 1")).toBe(false);
 	});
 });
 
 describe("scanMetaCalls — call discovery", () => {
-	test("local (non-exported) getComponentMeta call is captured", async () => {
+	test("local (non-exported) defineStories call is captured", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { getComponentMeta } from '@dennation/typebook/react'
+			import { defineStories } from '@dennation/typebook/react'
 			import { Button } from '@heroui/button'
-			const button = getComponentMeta(Button)
+			const button = defineStories(Button)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
 	});
 
-	test("exported getComponentMeta call is also captured", async () => {
+	test("exported defineStories call is also captured", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { getComponentMeta } from '@dennation/typebook/react'
+			import { defineStories } from '@dennation/typebook/react'
 			import { Button } from './Button'
-			export const button = getComponentMeta(Button)
+			export const button = defineStories(Button)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
 	});
 
-	test("default-exported getComponentMeta call is captured", async () => {
+	test("default-exported defineStories call is captured", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { getComponentMeta } from '@dennation/typebook/react'
+			import { defineStories } from '@dennation/typebook/react'
 			import { Button } from './Button'
-			export default getComponentMeta(Button)
+			export default defineStories(Button)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
 	});
 
-	test("multiple getComponentMeta calls in one file", async () => {
+	test("multiple defineStories calls in one file", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { getComponentMeta } from '@dennation/typebook/react'
+			import { defineStories } from '@dennation/typebook/react'
 			import { Button } from './Button'
 			import { Input } from './Input'
-			const a = getComponentMeta(Button)
-			const b = getComponentMeta(Input)
+			const a = defineStories(Button)
+			const b = defineStories(Input)
 		`,
 		);
 
@@ -76,28 +76,28 @@ describe("scanMetaCalls — call discovery", () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { getComponentMeta } from '@dennation/typebook/react'
+			import { defineStories } from '@dennation/typebook/react'
 			const MyComp = () => null
-			const comp = getComponentMeta(MyComp)
+			const comp = defineStories(MyComp)
 		`,
 		);
 
 		expect(result).toHaveLength(1);
 	});
 
-	test("file without getComponentMeta() returns empty", async () => {
+	test("file without defineStories() returns empty", async () => {
 		const result = await scan("file.tsx", `export const foo = 1`);
 		expect(result).toEqual([]);
 	});
 
-	test("getComponentMeta() nested inside a function body is still found", async () => {
+	test("defineStories() nested inside a function body is still found", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { getComponentMeta } from '@dennation/typebook/react'
+			import { defineStories } from '@dennation/typebook/react'
 			import { Button } from './Button'
 			function Page() {
-				const b = getComponentMeta(Button)
+				const b = defineStories(Button)
 				return null
 			}
 		`,
@@ -115,7 +115,7 @@ describe("scanMetaCalls — call discovery", () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { getComponentMeta as reg } from '@dennation/typebook/react'
+			import { defineStories as reg } from '@dennation/typebook/react'
 			import { Button } from './Button'
 			const button = reg(Button)
 		`,
@@ -124,13 +124,13 @@ describe("scanMetaCalls — call discovery", () => {
 		expect(result).toHaveLength(1);
 	});
 
-	test("getComponentMeta from a different package is ignored", async () => {
+	test("defineStories from a different package is ignored", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { getComponentMeta } from 'some-other-lib'
+			import { defineStories } from 'some-other-lib'
 			import { Button } from './Button'
-			const button = getComponentMeta(Button)
+			const button = defineStories(Button)
 		`,
 		);
 
@@ -139,13 +139,13 @@ describe("scanMetaCalls — call discovery", () => {
 });
 
 describe("scanMetaCalls — injection target", () => {
-	test("records callStart for each getComponentMeta()", async () => {
+	test("records callStart for each defineStories()", async () => {
 		const result = await scan(
 			"file.tsx",
 			`
-			import { getComponentMeta } from '@dennation/typebook/react'
+			import { defineStories } from '@dennation/typebook/react'
 			import { Button } from './Button'
-			const button = getComponentMeta(Button)
+			const button = defineStories(Button)
 		`,
 		);
 
@@ -155,9 +155,9 @@ describe("scanMetaCalls — injection target", () => {
 
 	test("no config → newArg insertion after the component argument", async () => {
 		const content = `
-			import { getComponentMeta } from '@dennation/typebook/react'
+			import { defineStories } from '@dennation/typebook/react'
 			import { Button } from './Button'
-			const button = getComponentMeta(Button)
+			const button = defineStories(Button)
 		`;
 		const [call] = await scan("file.tsx", content);
 
@@ -170,9 +170,9 @@ describe("scanMetaCalls — injection target", () => {
 
 	test("object-literal config → insertion just inside the brace", async () => {
 		const content = `
-			import { getComponentMeta } from '@dennation/typebook/react'
+			import { defineStories } from '@dennation/typebook/react'
 			import { Button } from './Button'
-			const button = getComponentMeta(Button, { defaultProps: {} })
+			const button = defineStories(Button, { defaultProps: {} })
 		`;
 		const [call] = await scan("file.tsx", content);
 
@@ -187,10 +187,10 @@ describe("scanMetaCalls — injection target", () => {
 		const [call] = await scan(
 			"file.tsx",
 			`
-			import { getComponentMeta } from '@dennation/typebook/react'
+			import { defineStories } from '@dennation/typebook/react'
 			import { Button } from './Button'
 			const cfg = { defaultProps: {} }
-			const button = getComponentMeta(Button, cfg)
+			const button = defineStories(Button, cfg)
 		`,
 		);
 

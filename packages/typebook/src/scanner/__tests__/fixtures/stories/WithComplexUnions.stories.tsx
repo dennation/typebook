@@ -1,7 +1,7 @@
-import { getComponentMeta } from "@dennation/typebook/react";
+import { defineStories } from "@dennation/typebook/react";
 import { ComplexUnion } from "../components/WithComplexUnions";
 
-export const comp = getComponentMeta(ComplexUnion, {
+export const comp = defineStories(ComplexUnion, {
 	defaultProps: {
 		mixed: "hello",
 		numLiteral: 1,
@@ -9,5 +9,4 @@ export const comp = getComponentMeta(ComplexUnion, {
 		boolOrString: true,
 		wide: "a",
 	},
-	pick: ["mixed", "numLiteral", "singleLiteral", "boolOrString", "wide"],
 });

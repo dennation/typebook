@@ -1,4 +1,4 @@
-interface WithJsDocProps {
+export interface WithJsDocProps {
 	/** The visual size of the control. */
 	size: "sm" | "md" | "lg";
 	/**

@@ -1,7 +1,6 @@
-import { getComponentMeta } from "@dennation/typebook/react";
+import { defineStories } from "@dennation/typebook/react";
 import { WithChildren } from "../components/WithChildren";
 
-export const comp = getComponentMeta(WithChildren, {
+export const comp = defineStories(WithChildren, {
 	defaultProps: { children: "Hello" },
-	pick: ["children", "icon", "onClick", "renderFooter"],
 });

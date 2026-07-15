@@ -1,4 +1,4 @@
-interface ComplexUnionProps {
+export interface ComplexUnionProps {
 	mixed: string | number;
 	numLiteral: 1 | 2 | 3;
 	singleLiteral: "only";

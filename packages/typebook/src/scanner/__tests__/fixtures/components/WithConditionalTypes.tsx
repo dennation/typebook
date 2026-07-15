@@ -1,5 +1,5 @@
-type Size = "sm" | "md" | "lg";
-type SizeLabel = `size-${Size}`;
+export type Size = "sm" | "md" | "lg";
+export type SizeLabel = `size-${Size}`;
 
 export enum Color {
 	Red = "red",
@@ -7,7 +7,7 @@ export enum Color {
 	Green = "green",
 }
 
-interface ConditionalProps {
+export interface ConditionalProps {
 	sizeLabel: SizeLabel;
 	color: Color;
 	extracted: Extract<"a" | "b" | "c", "a" | "b">;

@@ -1,4 +1,4 @@
-import { getComponentMeta } from "@dennation/typebook/react";
+import { defineStories } from "@dennation/typebook/react";
 import { Empty } from "../components/Empty";
 
-export const comp = getComponentMeta(Empty);
+export const comp = defineStories(Empty);

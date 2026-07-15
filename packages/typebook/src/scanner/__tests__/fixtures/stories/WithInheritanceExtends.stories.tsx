@@ -1,7 +1,6 @@
-import { getComponentMeta } from "@dennation/typebook/react";
+import { defineStories } from "@dennation/typebook/react";
 import { ExtendedButton } from "../components/WithInheritance";
 
-export const comp = getComponentMeta(ExtendedButton, {
+export const comp = defineStories(ExtendedButton, {
 	defaultProps: { id: "btn-1" },
-	pick: ["id", "className", "variant", "disabled"],
 });

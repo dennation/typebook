@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import ts from "typescript";
 import { DEFAULT_INHERITED_PROVIDERS, LOG_PREFIX } from "../constants";
-import type { PropInfo, PropType } from "../types";
+import type { ComponentDoc, PropInfo, PropType } from "../types";
 import { dedent } from "./source-slice";
 
 /** A function source resolved from a `<Snippet source={ref}>` reference. */
@@ -147,6 +147,202 @@ export class TypeScriptClient {
 		}
 
 		return this.extractPropsFromCall(callExpr);
+	}
+
+	/**
+	 * Like {@link getProps}, but returns a full {@link ComponentDoc}: the component's name,
+	 * the file it's declared in, its component-level JSDoc description and `@deprecated`, plus
+	 * its props. This is what the AI-instruction / docs plugins consume (props alone can't carry
+	 * the component's own description). Returns `null` when no call is found at `callStart`.
+	 */
+	async getComponentDoc(
+		filePath: string,
+		callStart: number,
+		content?: string,
+	): Promise<ComponentDoc | null> {
+		if (!this.program || !this.checker) {
+			await this.start();
+		}
+
+		const absPath = resolve(this.cwd, filePath);
+		if (content !== undefined) this.setOverride(absPath, content);
+
+		const sourceFile = this.program?.getSourceFile(absPath);
+		const checker = this.checker;
+		if (!sourceFile || !checker) return null;
+
+		const callExpr = this.findMetaCallAt(sourceFile, callStart);
+		if (!callExpr) return null;
+
+		const props = this.extractPropsFromCall(callExpr);
+		if (!props) return null;
+
+		return {
+			...this.resolveComponentInfo(checker, callExpr.arguments[0], absPath),
+			props,
+		};
+	}
+
+	/**
+	 * Extract a {@link ComponentDoc} for every exported React component in a file — the scan
+	 * surface for `components`-configured files. No `getComponentMeta` wrapper needed: each
+	 * export is inspected by type, and the ones that are components (call signature returning a
+	 * React node, or a class construct signature) yield a doc. Non-component exports are skipped.
+	 */
+	async getExportedComponentDocs(
+		filePath: string,
+		content?: string,
+	): Promise<ComponentDoc[]> {
+		if (!this.program || !this.checker) {
+			await this.start();
+		}
+
+		const absPath = resolve(this.cwd, filePath);
+		if (content !== undefined) this.setOverride(absPath, content);
+
+		const sourceFile = this.program?.getSourceFile(absPath);
+		const checker = this.checker;
+		if (!sourceFile || !checker) return [];
+
+		const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
+		if (!moduleSymbol) return [];
+
+		const docs: ComponentDoc[] = [];
+		for (const exp of checker.getExportsOfModule(moduleSymbol)) {
+			const doc = this.exportToComponentDoc(checker, exp, absPath);
+			if (doc) docs.push(doc);
+		}
+		return docs;
+	}
+
+	/** Turn one module export into a {@link ComponentDoc}, or `null` when it isn't a component. */
+	private exportToComponentDoc(
+		checker: ts.TypeChecker,
+		exp: ts.Symbol,
+		fallbackFile: string,
+	): ComponentDoc | null {
+		const resolved =
+			exp.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exp) : exp;
+		const decl = resolved.getDeclarations()?.[0];
+		if (!decl) return null;
+
+		const nameNode = declarationNameNode(decl);
+		if (!nameNode) return null;
+
+		const props = this.extractComponentProps(checker, nameNode);
+		if (props === null) return null; // not a component
+
+		const info: Omit<ComponentDoc, "props"> = {
+			name: exp.getName(),
+			file: decl.getSourceFile().fileName,
+		};
+		const description = getSymbolDescription(checker, resolved);
+		if (description) info.description = description;
+		const deprecated = getSymbolDeprecation(checker, resolved);
+		if (deprecated !== undefined) info.deprecated = deprecated;
+		return { ...info, props };
+	}
+
+	/**
+	 * Extract props from a component identified by its declaration name node, or `null` when the
+	 * node isn't a component. A component has a call signature returning a React node (function
+	 * component) or a construct signature (class component); its first parameter is the props type.
+	 */
+	private extractComponentProps(
+		checker: ts.TypeChecker,
+		componentNode: ts.Node,
+	): PropInfo[] | null {
+		const type = checker.getTypeAtLocation(componentNode);
+		const callSigs = type.getCallSignatures();
+		const constructSigs = type.getConstructSignatures();
+
+		let sig: ts.Signature;
+		if (callSigs.length > 0) {
+			sig = callSigs[0];
+			// ponytail: component detection by return-type string (ReactNode/Element). Covers
+			// function components; class components fall to the construct-signature branch.
+			if (!isReactReturnType(checker, sig.getReturnType())) return null;
+		} else if (constructSigs.length > 0) {
+			sig = constructSigs[0];
+		} else {
+			return null;
+		}
+
+		const propsParam = sig.getParameters()[0];
+		let props: PropInfo[] = [];
+		if (propsParam) {
+			props = this.extractPropsFromType(
+				checker,
+				checker.getTypeOfSymbol(propsParam),
+			);
+		}
+
+		const inherited = this.getInheritedPropNames(checker, componentNode);
+		const defaults = this.getParamDefaultProps(checker, componentNode);
+		return props.map((p) => {
+			let next = p;
+			if (inherited.has(p.name)) next = { ...next, inherited: true };
+			const def = defaults.get(p.name);
+			if (def !== undefined) next = { ...next, defaultValue: def };
+			return next;
+		});
+	}
+
+	/**
+	 * Every project source file currently in the warm program — the scan surface for
+	 * {@link collectComponentDocs}. Declaration files, `node_modules`, and files outside
+	 * the project root are excluded so only the consumer's own components are scanned.
+	 */
+	projectSourceFiles(): { fileName: string; text: string }[] {
+		const program = this.program;
+		if (!program) return [];
+		const files: { fileName: string; text: string }[] = [];
+		for (const sf of program.getSourceFiles()) {
+			if (sf.isDeclarationFile) continue;
+			if (sf.fileName.includes("/node_modules/")) continue;
+			if (!sf.fileName.startsWith(this.cwd)) continue;
+			files.push({ fileName: sf.fileName, text: sf.text });
+		}
+		return files;
+	}
+
+	/**
+	 * Resolve the first `getComponentMeta(Component, …)` argument to the component's name,
+	 * declaring file, and component-level JSDoc (`description`, `@deprecated`). Follows an
+	 * import alias to the real declaration so the docs come from where the component lives.
+	 */
+	private resolveComponentInfo(
+		checker: ts.TypeChecker,
+		componentNode: ts.Node | undefined,
+		fallbackFile: string,
+	): Omit<ComponentDoc, "props"> {
+		if (!componentNode) return { name: "Component", file: fallbackFile };
+
+		// `getComponentMeta(Select<T>)` passes an instantiation expression — unwrap it to the
+		// `Select` identifier so the symbol (and its name, file, JSDoc) resolves.
+		const node = ts.isExpressionWithTypeArguments(componentNode)
+			? componentNode.expression
+			: componentNode;
+
+		const symbol = checker.getSymbolAtLocation(node);
+		const resolved =
+			symbol && symbol.flags & ts.SymbolFlags.Alias
+				? checker.getAliasedSymbol(symbol)
+				: symbol;
+
+		const info: Omit<ComponentDoc, "props"> = {
+			name: baseComponentName(resolved?.getName() ?? node.getText()),
+			file:
+				resolved?.getDeclarations()?.[0]?.getSourceFile().fileName ??
+				fallbackFile,
+		};
+		if (!resolved) return info;
+
+		const description = getSymbolDescription(checker, resolved);
+		if (description) info.description = description;
+		const deprecated = getSymbolDeprecation(checker, resolved);
+		if (deprecated !== undefined) info.deprecated = deprecated;
+		return info;
 	}
 
 	/**
@@ -500,6 +696,25 @@ export class TypeScriptClient {
 
 /** Extensions TypeScript will accept as program root files. */
 const TS_SOURCE_EXT = /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/;
+
+/** Strip a generic component's type-argument suffix (`Select<T>` → `Select`). */
+function baseComponentName(raw: string): string {
+	return raw.replace(/<.*$/s, "").trim() || raw;
+}
+
+/** The identifier node naming a declaration (function/class/variable), or null. */
+function declarationNameNode(decl: ts.Declaration): ts.Node | null {
+	const name = (decl as { name?: ts.Node }).name;
+	return name && ts.isIdentifier(name) ? name : null;
+}
+
+/** Whether a signature return type looks like a rendered React node (function-component check). */
+function isReactReturnType(checker: ts.TypeChecker, type: ts.Type): boolean {
+	const s = checker.typeToString(type);
+	return /\b(ReactElement|ReactNode|ReactPortal|JSX\.Element|Element)\b/.test(
+		s,
+	);
+}
 
 /**
  * Pull the JSDoc description (the prose before any `@tag` lines) for a symbol.

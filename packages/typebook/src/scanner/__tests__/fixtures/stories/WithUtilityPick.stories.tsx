@@ -1,7 +1,6 @@
-import { getComponentMeta } from "@dennation/typebook/react";
+import { defineStories } from "@dennation/typebook/react";
 import { PickedComponent } from "../components/WithUtilityTypes";
 
-export const comp = getComponentMeta(PickedComponent, {
+export const comp = defineStories(PickedComponent, {
 	defaultProps: { a: "hello" },
-	pick: ["a", "d"],
 });

@@ -1,4 +1,4 @@
-interface SelectProps<T extends string> {
+export interface SelectProps<T extends string> {
 	value: T;
 	options: T[];
 	onChange: (value: T) => void;

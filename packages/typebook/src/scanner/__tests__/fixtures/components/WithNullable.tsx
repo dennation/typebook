@@ -1,4 +1,4 @@
-interface NullableProps {
+export interface NullableProps {
 	value: string | null;
 	status?: "active" | "inactive" | undefined;
 	data: number | null | undefined;

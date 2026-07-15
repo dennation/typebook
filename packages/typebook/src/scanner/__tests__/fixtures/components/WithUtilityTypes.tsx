@@ -1,4 +1,4 @@
-interface FullProps {
+export interface FullProps {
 	a: string;
 	b: number;
 	c: boolean;
