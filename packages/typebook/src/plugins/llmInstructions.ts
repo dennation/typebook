@@ -1,6 +1,6 @@
 import path from "node:path";
 import { componentToMarkdown } from "../scanner";
-import type { ComponentDoc, GenerateCtx, TypebookPlugin } from "../types";
+import type { ComponentInfo, GenerateCtx, TypebookPlugin } from "../types";
 
 export interface LlmInstructionsOptions {
 	/**
@@ -8,13 +8,13 @@ export interface LlmInstructionsOptions {
 	 * `{out}/{name}.md`. A **function** returns the full path per component, so cards can
 	 * sit next to their source: `(doc) => doc.file.replace(/\.tsx$/, ".md")`.
 	 */
-	out?: string | ((doc: ComponentDoc) => string);
+	out?: string | ((doc: ComponentInfo) => string);
 	/**
 	 * Module each component is imported from — used to print an `import { X } from "…"` line in
 	 * every card (agents need the exact import). A string (`"@acme/ui"`) or a function per component.
 	 * Omit to skip the import line.
 	 */
-	importFrom?: string | ((doc: ComponentDoc) => string);
+	importFrom?: string | ((doc: ComponentInfo) => string);
 	/** H1 title of the index / full file. Default: `"Components"`. */
 	title?: string;
 	/** Blockquote summary under the title (the `llms.txt` project summary). Optional. */
@@ -47,15 +47,15 @@ export function llmInstructions(
 	} = options;
 	const baseDir = typeof out === "string" ? out : DEFAULT_DIR;
 
-	const cardPath = (doc: ComponentDoc): string =>
+	const cardPath = (doc: ComponentInfo): string =>
 		typeof out === "function"
 			? out(doc)
 			: `${out}/${safeFileName(doc.name)}.md`;
-	const importStatement = (doc: ComponentDoc): string | undefined => {
+	const importStatement = (doc: ComponentInfo): string | undefined => {
 		const src = typeof importFrom === "function" ? importFrom(doc) : importFrom;
 		return src ? `import { ${doc.name} } from "${src}";` : undefined;
 	};
-	const renderCard = (doc: ComponentDoc): string =>
+	const renderCard = (doc: ComponentInfo): string =>
 		componentToMarkdown(doc, {
 			includeInherited,
 			importStatement: importStatement(doc),
@@ -86,9 +86,9 @@ export function llmInstructions(
 
 /** The `llms.txt` index: H1 + blockquote summary + a `[name](href): desc` list, sorted by name. */
 function buildIndex(
-	docs: ComponentDoc[],
+	docs: ComponentInfo[],
 	indexFile: string,
-	cardPath: (doc: ComponentDoc) => string,
+	cardPath: (doc: ComponentInfo) => string,
 	ctx: GenerateCtx,
 	title: string,
 	description: string | undefined,
@@ -111,8 +111,8 @@ function buildIndex(
 
 /** `llms-full.txt`: title + every card concatenated, for full-context ingestion. */
 function buildFull(
-	docs: ComponentDoc[],
-	renderCard: (doc: ComponentDoc) => string,
+	docs: ComponentInfo[],
+	renderCard: (doc: ComponentInfo) => string,
 	title: string,
 	description: string | undefined,
 ): string {

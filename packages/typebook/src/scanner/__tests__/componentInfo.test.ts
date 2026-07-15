@@ -2,8 +2,8 @@ import { readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import type { ComponentDoc } from "../../types";
-import { collectComponentDocs } from "../collectComponentDocs";
+import type { ComponentInfo } from "../../types";
+import { collectComponentInfos } from "../collectComponentInfos";
 import { componentToMarkdown } from "../componentToMarkdown";
 import { TypeScriptClient } from "../ts-client";
 
@@ -14,12 +14,12 @@ const FIXTURES = resolve(__dirname, "fixtures");
 
 describe("component-level extraction", () => {
 	let client: TypeScriptClient;
-	let doc: ComponentDoc;
+	let doc: ComponentInfo;
 
 	beforeAll(async () => {
 		client = new TypeScriptClient(FIXTURES);
 		await client.start();
-		const docs = await client.getExportedComponentDocs(
+		const docs = await client.getExportedComponentInfos(
 			resolve(FIXTURES, "components/WithComponentDoc.tsx"),
 		);
 		doc = docs.find((d) => d.name === "WithComponentDoc")!;
@@ -54,11 +54,11 @@ describe("component-level extraction", () => {
 	});
 });
 
-// --- collectComponentDocs: export-based scan of configured files ---
+// --- collectComponentInfos: export-based scan of configured files ---
 
-describe("collectComponentDocs (export scan)", () => {
+describe("collectComponentInfos (export scan)", () => {
 	let client: TypeScriptClient;
-	let docs: ComponentDoc[];
+	let docs: ComponentInfo[];
 
 	beforeAll(async () => {
 		client = new TypeScriptClient(FIXTURES);
@@ -67,7 +67,7 @@ describe("collectComponentDocs (export scan)", () => {
 		const files = readdirSync(dir)
 			.filter((f) => f.endsWith(".tsx"))
 			.map((f) => resolve(dir, f));
-		docs = await collectComponentDocs(client, files);
+		docs = await collectComponentInfos(client, files);
 	});
 
 	afterAll(() => client.stop());
@@ -89,7 +89,7 @@ describe("collectComponentDocs (export scan)", () => {
 // --- componentToMarkdown: pure rendering ---
 
 describe("componentToMarkdown", () => {
-	const doc: ComponentDoc = {
+	const doc: ComponentInfo = {
 		name: "Button",
 		file: "/x/Button.tsx",
 		description: "Primary action button.",

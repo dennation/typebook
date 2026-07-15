@@ -1,4 +1,4 @@
-// Base entry — the library's foundation: the React-free **scanner core** (`collectComponentDocs`,
+// Base entry — the library's foundation: the React-free **scanner core** (`collectComponentInfos`,
 // `componentToMarkdown`, `TypeScriptClient`) plus all shared types. It reads the components named
 // by the `components` config and extracts each exported component's props, defaults and JSDoc by
 // type via the TypeScript Compiler API; sub-plugins (e.g. `llmInstructions`) turn the result into

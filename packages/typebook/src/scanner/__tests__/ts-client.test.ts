@@ -24,7 +24,7 @@ async function extractProps(
 	componentFile: string,
 	name?: string,
 ): Promise<PropInfo[] | null> {
-	const docs = await client.getExportedComponentDocs(
+	const docs = await client.getExportedComponentInfos(
 		resolve(FIXTURES, componentFile),
 	);
 	const doc = name ? docs.find((d) => d.name === name) : docs[0];
@@ -380,7 +380,7 @@ describe("edge cases", () => {
 				"export function EditProbe(props: { size: 'sm' | 'md' }) {\n\treturn <div>{props.size}</div>;\n}\n",
 			);
 			await fresh.start();
-			const before = (await fresh.getExportedComponentDocs(compFile))[0].props;
+			const before = (await fresh.getExportedComponentInfos(compFile))[0].props;
 			expect(findProp(before, "size")!.type).toEqual({
 				kind: "literal",
 				values: ["sm", "md"],
@@ -391,7 +391,7 @@ describe("edge cases", () => {
 				"export function EditProbe(props: { size: 'sm' | 'md' | 'lg' }) {\n\treturn <div>{props.size}</div>;\n}\n",
 			);
 			await fresh.notifyChange([compFile]);
-			const after = (await fresh.getExportedComponentDocs(compFile))[0].props;
+			const after = (await fresh.getExportedComponentInfos(compFile))[0].props;
 			expect(findProp(after, "size")!.type).toEqual({
 				kind: "literal",
 				values: ["sm", "md", "lg"],
@@ -412,7 +412,7 @@ describe("edge cases", () => {
 				"export function Added(props: { size: 'sm' | 'lg' }) {\n\treturn <div>{props.size}</div>;\n}\n",
 			);
 			await fresh.notifyChange([newFile]);
-			const docs = await fresh.getExportedComponentDocs(newFile);
+			const docs = await fresh.getExportedComponentInfos(newFile);
 			expect(findProp(docs[0].props, "size")).toBeDefined();
 		} finally {
 			rmSync(newFile, { force: true });

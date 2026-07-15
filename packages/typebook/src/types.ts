@@ -1,7 +1,7 @@
 export interface TypebookConfig {
 	/**
 	 * Files to scan for components — a path, list of paths, or globs. Each file's exported
-	 * React components are extracted into {@link ComponentDoc}s (one scan, shared by every
+	 * React components are extracted into {@link ComponentInfo}s (one scan, shared by every
 	 * consuming plugin). Omit to scan nothing (plugins then have no components to work with).
 	 */
 	components?: string | string[];
@@ -36,7 +36,7 @@ export interface TypebookPlugin {
 	/** Run only in this command (like Vite's `apply`). Omit to run in both dev and build. */
 	apply?: TypebookCommand;
 	/** Consume every scanned component after each project scan (build once; dev on change). */
-	generate(docs: ComponentDoc[], ctx: GenerateCtx): void | Promise<void>;
+	generate(docs: ComponentInfo[], ctx: GenerateCtx): void | Promise<void>;
 }
 
 export type PropType =
@@ -77,7 +77,7 @@ export interface PropInfo {
  * A fully scanned component: its identity, source location, component-level JSDoc, and props.
  * Produced by the scanner (from the `components` scan) and handed to {@link TypebookPlugin}s. React-free.
  */
-export interface ComponentDoc {
+export interface ComponentInfo {
 	/** Component name (its export identifier). */
 	name: string;
 	/** Absolute path of the module where the component itself is declared. */

@@ -15,7 +15,7 @@ Point it at your components — one Compiler-API scan reads their props, default
 
 ## What it is
 
-`@dennation/typebook` scans your React components **by type** — a single TypeScript Compiler-API pass extracts every component's prop types, defaults, JSDoc and deprecations into a structured model (`ComponentDoc`). No wrapper calls, no decorators, no runtime.
+`@dennation/typebook` scans your React components **by type** — a single TypeScript Compiler-API pass extracts every component's prop types, defaults, JSDoc and deprecations into a structured model (`ComponentInfo`). No wrapper calls, no decorators, no runtime.
 
 That scan is the foundation. **Plugins** consume it and emit artifacts — documentation for AI agents today, more to come.
 
@@ -51,7 +51,7 @@ On build — and live on change in dev — the scan runs once and every enabled 
 
 ## Plugins
 
-Sub-plugins receive the scan result (`ComponentDoc[]`) and produce artifacts. Enable them in `typebook({ plugins: [...] })`.
+Sub-plugins receive the scan result (`ComponentInfo[]`) and produce artifacts. Enable them in `typebook({ plugins: [...] })`.
 
 ### `llm-instructions`
 
@@ -109,7 +109,7 @@ Built on [unplugin](https://unplugin.unjs.io), so the same `typebook()` factory 
 
 | Import | Description |
 |---|---|
-| `@dennation/typebook` | The scanner core — `collectComponentDocs`, `componentToMarkdown`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, … — plus the React-free types (`TypebookConfig`, `ComponentDoc`, `TypebookPlugin`, `PropInfo`, …). |
+| `@dennation/typebook` | The scanner core — `collectComponentInfos`, `componentToMarkdown`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, … — plus the React-free types (`TypebookConfig`, `ComponentInfo`, `TypebookPlugin`, `PropInfo`, …). |
 | `@dennation/typebook/plugins/llm-instructions` | `llmInstructions()`, `LlmInstructionsOptions`. |
 | `@dennation/typebook/{vite,rollup,…}` | The `typebook()` bundler plugin. |
 
