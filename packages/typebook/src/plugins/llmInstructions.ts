@@ -11,8 +11,6 @@ export interface LlmInstructionsOptions {
 	out: string | ((doc: ComponentInfo) => string);
 	/** Index file in `llms.txt` format, listing every component; `false` to skip it. */
 	indexFile: string | false;
-	/** Single concatenated file with every card (`llms-full.txt`); `false` to skip it. */
-	fullFile: string | false;
 	/**
 	 * Module each component is imported from — used to print an `import { X } from "…"` line in
 	 * every card (agents need the exact import). A string (`"@acme/ui"`) or a function per component.
@@ -30,17 +28,16 @@ export interface LlmInstructionsOptions {
 /**
  * `typebook()` sub-plugin: writes AI-agent docs from the component scan, following the
  * [`llms.txt`](https://llmstxt.org) convention — one Markdown card per component (import,
- * description, usage guidance, deprecation, props table), an `llms.txt` index, and a single
- * `llms-full.txt`. Regenerated in full on every scan (build once, dev on change).
+ * description, usage guidance, deprecation, props table) plus an `llms.txt` index.
+ * Regenerated in full on every scan (build once, dev on change).
  *
- * Output locations are explicit: `out`, `indexFile` and `fullFile` are required (pass `false`
- * to `indexFile`/`fullFile` to skip that file) — the plugin writes nowhere by default.
+ * Output locations are explicit: `out` and `indexFile` are required (pass `false` to
+ * `indexFile` to skip the index) — the plugin writes nowhere by default.
  */
 export function llmInstructions(options: LlmInstructionsOptions): TypebookPlugin {
 	const {
 		out,
 		indexFile,
-		fullFile,
 		importFrom,
 		title = "Components",
 		description,
@@ -72,11 +69,6 @@ export function llmInstructions(options: LlmInstructionsOptions): TypebookPlugin
 					indexFile,
 					buildIndex(docs, indexFile, cardPath, ctx, title, description),
 				);
-			if (fullFile !== false)
-				await ctx.writeFile(
-					fullFile,
-					buildFull(docs, renderCard, title, description),
-				);
 		},
 	};
 }
@@ -104,20 +96,6 @@ function buildIndex(
 		});
 
 	return `${heading(title, description)}## Components\n\n${lines.join("\n")}\n`;
-}
-
-/** `llms-full.txt`: title + every card concatenated, for full-context ingestion. */
-function buildFull(
-	docs: ComponentInfo[],
-	renderCard: (doc: ComponentInfo) => string,
-	title: string,
-	description: string | undefined,
-): string {
-	const cards = [...docs]
-		.sort((a, b) => a.name.localeCompare(b.name))
-		.map(renderCard)
-		.join("\n\n");
-	return `${heading(title, description)}${cards}\n`;
 }
 
 /** `# title` + optional `> description` blockquote (the `llms.txt` header). */
