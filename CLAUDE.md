@@ -83,7 +83,7 @@ packages/typebook/
       snippets.ts             — snippets() transform sub-plugin (<Snippet> injection) + SnippetNotInlineError. Opt-in.
       llmInstructions.ts       — llmInstructions() generate sub-plugin: ComponentInfo[] → per-component Markdown
                                 cards (import line + description + @remarks usage + props table) + an llms.txt
-                                index + llms-full.txt (follows the llms.txt convention)
+                                index (follows the llms.txt convention)
       vite.ts                 — typebook() Vite plugin
       rollup.ts               — typebook() Rollup plugin
       rolldown.ts             — typebook() Rolldown plugin

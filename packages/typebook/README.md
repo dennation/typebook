@@ -45,7 +45,6 @@ export default defineConfig({
         llmInstructions({
           out: ".ai/components", // where per-component cards go
           indexFile: "llms.txt", // llms.txt index at the repo root
-          fullFile: "llms-full.txt", // concatenated cards
           importFrom: "@acme/ui",
         }),
       ],
@@ -66,11 +65,10 @@ Sub-plugins receive the scan result (`ComponentInfo[]`) and produce artifacts. E
 @dennation/typebook/plugins/llm-instructions
 ```
 
-Generates documentation for AI coding agents (Claude Code, Codex, Cursor) following the [`llms.txt`](https://llmstxt.org) convention — so agents work from your components' **real** APIs instead of guessing. You choose where everything lands (there are no default paths — `out`, `indexFile` and `fullFile` are required):
+Generates documentation for AI coding agents (Claude Code, Codex, Cursor) following the [`llms.txt`](https://llmstxt.org) convention — so agents work from your components' **real** APIs instead of guessing. You choose where everything lands (there are no default paths — `out` and `indexFile` are required):
 
 - **`<Component>.md`** — one card each: import line, description, `@remarks` usage notes, deprecation, and a props table with exhaustive union values. Located under `out` (or via `out`'s function, e.g. next to each source file).
 - **`indexFile`** — an `llms.txt` index of every component (`[Name](Name.md): summary`). Put it at the repo root, where the convention expects it.
-- **`fullFile`** — every card concatenated, for full-context ingestion.
 
 Point your agent's memory (`CLAUDE.md`, `AGENTS.md`) at your `indexFile`; it reads the card it needs on demand.
 
@@ -101,7 +99,6 @@ Usage guidance comes from the component's `@remarks` JSDoc tag; the exhaustive p
 |---|---|---|
 | `out` **(required)** | `string \| (doc) => string` | Where each card goes — a directory, or a function for a full path per component (e.g. next to its source). |
 | `indexFile` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
-| `fullFile` **(required)** | `string \| false` | Path of `llms-full.txt`, or `false` to skip it. |
 | `importFrom` | `string \| (doc) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
 | `title` / `description` | `string` | H1 title and blockquote summary of the index/full file. |
 | `includeInherited` | `boolean` | Include framework-inherited props (DOM attributes). Default `false`. |
