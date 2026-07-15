@@ -1,32 +1,29 @@
+import { globSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import type { UnpluginFactory } from "unplugin";
 import { createUnplugin } from "unplugin";
 import { LOG_PREFIX, PACKAGE_NAME } from "../constants";
-import { transformTypebook, TypeScriptClient } from "../scanner";
-import type { TypebookConfig } from "../types";
-
-/** Source files the plugin will consider rewriting (registrations + snippets live in TS/JS). */
-const TRANSFORM_ID = /\.(tsx|ts|jsx|js|mts|cts|mjs|cjs)(\?.*)?$/;
+import { collectComponentDocs, TypeScriptClient } from "../scanner";
+import type { GenerateCtx, TypebookCommand, TypebookConfig } from "../types";
 
 /**
  * Shared unplugin factory — no bundler is privileged. Works across every bundler
  * unplugin supports (Vite, Rollup, Rolldown, webpack, Rspack, esbuild, Farm).
  *
- * Instead of generating files, the plugin rewrites each source module in its
- * `transform` hook (see {@link transformTypebook}):
- * - `getComponentMeta(Component, …)` calls get a `__props` literal injected;
- * - `<Snippet>{fn}</Snippet>` elements get a `__snippetSource` prop injected.
- *
- * A single warm {@link TypeScriptClient} (lazily started on the first transform)
- * extracts prop metadata. In Vite's dev server the file watcher notifies the client
- * of changes so the warm program stays fresh; re-transformation (and thus prop
- * re-extraction) then happens through Vite's own module invalidation.
+ * It owns one warm {@link TypeScriptClient}, scans the `components` config into
+ * {@link ComponentDoc}s (a single by-type export scan), and runs each `generate` sub-plugin
+ * with the full set — once at `buildStart` (dev + build) and again on each change in dev.
  */
 export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 	config = {},
 ) => {
 	let cwd = process.cwd();
+	let command: TypebookCommand = "build";
 	let client: TypeScriptClient | null = null;
 	let starting: Promise<void> | null = null;
+
+	const plugins = config.plugins ?? [];
 
 	const ensureClient = async (): Promise<TypeScriptClient | null> => {
 		if (!client && !starting) {
@@ -39,7 +36,7 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 				.catch((err: Error) => {
 					console.warn(
 						LOG_PREFIX,
-						"TypeScript client unavailable; props won't be extracted",
+						"TypeScript client unavailable; components won't be scanned",
 					);
 					console.warn(LOG_PREFIX, err.message);
 				});
@@ -48,23 +45,67 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 		return client;
 	};
 
+	/** Write a file at an absolute or root-relative path, creating parent dirs. */
+	const writeFileAt = async (
+		target: string,
+		content: string,
+	): Promise<void> => {
+		const abs = path.isAbsolute(target) ? target : path.join(cwd, target);
+		await mkdir(path.dirname(abs), { recursive: true });
+		await writeFile(abs, content, "utf8");
+	};
+
+	/** Resolve the `components` config (path / list / globs) to an absolute file list. */
+	const resolveComponentFiles = (): string[] => {
+		const patterns =
+			config.components == null
+				? []
+				: Array.isArray(config.components)
+					? config.components
+					: [config.components];
+		const files = new Set<string>();
+		for (const pattern of patterns) {
+			for (const match of globSync(pattern, { cwd })) {
+				files.add(path.resolve(cwd, match.toString()));
+			}
+		}
+		return [...files];
+	};
+
+	/** Scan configured files and run every sub-plugin with the full component set. */
+	const runGenerate = async (): Promise<void> => {
+		if (plugins.length === 0) return;
+		const c = await ensureClient();
+		if (!c) return;
+
+		const docs = await collectComponentDocs(c, resolveComponentFiles());
+		const ctx: GenerateCtx = { command, root: cwd, writeFile: writeFileAt };
+		for (const plugin of plugins) {
+			if (plugin.apply && plugin.apply !== command) continue;
+			try {
+				await plugin.generate(docs, ctx);
+			} catch (err) {
+				console.warn(
+					LOG_PREFIX,
+					`plugin "${plugin.name}" failed:`,
+					(err as Error).message,
+				);
+			}
+		}
+	};
+
+	let regenTimer: ReturnType<typeof setTimeout> | null = null;
+	const scheduleRegen = (): void => {
+		if (regenTimer) clearTimeout(regenTimer);
+		regenTimer = setTimeout(() => void runGenerate(), 150);
+	};
+
 	return {
 		name: PACKAGE_NAME,
 		enforce: "pre",
 
-		transformInclude(id) {
-			return !id.includes("/node_modules/") && TRANSFORM_ID.test(id);
-		},
-
-		async transform(code, id) {
-			const filePath = id.split("?")[0];
-			const tsClient = await ensureClient();
-			const out = await transformTypebook(code, filePath, tsClient);
-			if (out === undefined) return undefined;
-			// A `<Snippet source={ref}>` resolved into another module: tell the bundler this
-			// module's output depends on that file, so editing it re-runs this transform.
-			for (const file of out.watchFiles) this.addWatchFile(file);
-			return { code: out.code, map: null };
+		async buildStart() {
+			await runGenerate();
 		},
 
 		buildEnd() {
@@ -76,15 +117,19 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 		vite: {
 			configResolved(resolved) {
 				cwd = resolved.root;
+				command = resolved.command === "serve" ? "dev" : "build";
 			},
 
 			configureServer(server) {
-				const notify = (path: string): void => {
-					void ensureClient().then((c) => c?.notifyChange([path]));
+				const onChange = (changed: string): void => {
+					void ensureClient().then((c) => {
+						c?.notifyChange([changed]);
+						scheduleRegen();
+					});
 				};
-				server.watcher.on("change", notify);
-				server.watcher.on("add", notify);
-				server.watcher.on("unlink", notify);
+				server.watcher.on("change", onChange);
+				server.watcher.on("add", onChange);
+				server.watcher.on("unlink", onChange);
 			},
 		},
 	};

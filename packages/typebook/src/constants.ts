@@ -4,17 +4,8 @@
  */
 export const PACKAGE_NAME = "typebook";
 
-/** React subpath export — used to verify getComponentMeta() and <Snippet> imports at scan time */
-export const NPM_REACT_PACKAGE_NAME = "@dennation/typebook/react";
-
 /** Log prefix for console output */
 export const LOG_PREFIX = `[${PACKAGE_NAME}]`;
-
-/** ID for the injected Studio style element */
-export const STYLE_ELEMENT_ID = "typebook-styles";
-
-/** localStorage key for persisted theme preference */
-export const THEME_STORAGE_KEY = "typebook-theme";
 
 /** Default inherited providers — packages whose type declarations mark props as inherited */
 export const DEFAULT_INHERITED_PROVIDERS = [

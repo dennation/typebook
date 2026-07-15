@@ -1,0 +1,149 @@
+import { readdirSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import type { ComponentDoc } from "../../types";
+import { collectComponentDocs } from "../collectComponentDocs";
+import { componentToMarkdown } from "../componentToMarkdown";
+import { TypeScriptClient } from "../ts-client";
+
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const FIXTURES = resolve(__dirname, "fixtures");
+
+// --- component-level extraction (name, file, description, remarks, deprecated) ---
+
+describe("component-level extraction", () => {
+	let client: TypeScriptClient;
+	let doc: ComponentDoc;
+
+	beforeAll(async () => {
+		client = new TypeScriptClient(FIXTURES);
+		await client.start();
+		const docs = await client.getExportedComponentDocs(
+			resolve(FIXTURES, "components/WithComponentDoc.tsx"),
+		);
+		doc = docs.find((d) => d.name === "WithComponentDoc")!;
+	});
+
+	afterAll(() => client.stop());
+
+	test("resolves the component name", () => {
+		expect(doc.name).toBe("WithComponentDoc");
+	});
+
+	test("points file at the component's own module", () => {
+		expect(doc.file).toMatch(/components\/WithComponentDoc\.tsx$/);
+	});
+
+	test("pulls the component-level JSDoc description", () => {
+		expect(doc.description).toBe("A primary call-to-action button.");
+	});
+
+	test("pulls the component-level @remarks usage guidance", () => {
+		expect(doc.remarks).toBe(
+			"Use for the main action only; don't nest buttons.",
+		);
+	});
+
+	test("pulls the component-level @deprecated note", () => {
+		expect(doc.deprecated).toBe("use `Action` instead");
+	});
+
+	test("still extracts props", () => {
+		expect(doc.props.map((p) => p.name)).toContain("size");
+	});
+});
+
+// --- collectComponentDocs: export-based scan of configured files ---
+
+describe("collectComponentDocs (export scan)", () => {
+	let client: TypeScriptClient;
+	let docs: ComponentDoc[];
+
+	beforeAll(async () => {
+		client = new TypeScriptClient(FIXTURES);
+		await client.start();
+		const dir = resolve(FIXTURES, "components");
+		const files = readdirSync(dir)
+			.filter((f) => f.endsWith(".tsx"))
+			.map((f) => resolve(dir, f));
+		docs = await collectComponentDocs(client, files);
+	});
+
+	afterAll(() => client.stop());
+
+	test("finds exported components by type", () => {
+		expect(docs.map((d) => d.name)).toContain("Basic");
+	});
+
+	test("a generic component's export name has no type arguments", () => {
+		expect(docs.map((d) => d.name)).toContain("Select");
+	});
+
+	test("extracts props of a scanned component", () => {
+		const basic = docs.find((d) => d.name === "Basic");
+		expect(basic?.props.map((p) => p.name)).toContain("size");
+	});
+});
+
+// --- componentToMarkdown: pure rendering ---
+
+describe("componentToMarkdown", () => {
+	const doc: ComponentDoc = {
+		name: "Button",
+		file: "/x/Button.tsx",
+		description: "Primary action button.",
+		remarks: "Use for the main action; don't nest buttons.",
+		deprecated: "use `Action`",
+		props: [
+			{
+				name: "size",
+				optional: false,
+				type: { kind: "literal", values: ["sm", "md"] },
+				defaultValue: "'md'",
+				description: "Button size",
+			},
+			{
+				name: "onClick",
+				optional: true,
+				type: { kind: "function", raw: "() => void" },
+			},
+			{
+				name: "className",
+				optional: true,
+				type: { kind: "string" },
+				inherited: true,
+			},
+		],
+	};
+
+	test("renders heading, description, deprecation note", () => {
+		const md = componentToMarkdown(doc);
+		expect(md).toContain("## Button");
+		expect(md).toContain("Primary action button.");
+		expect(md).toContain("> ⚠️ **Deprecated:** use `Action`");
+	});
+
+	test("renders a props table with type, default, required", () => {
+		const md = componentToMarkdown(doc);
+		expect(md).toContain(
+			'| `size` | `"sm" \\| "md"` | `\'md\'` | ✔ | Button size |',
+		);
+	});
+
+	test("hides inherited props by default, shows them on request", () => {
+		expect(componentToMarkdown(doc)).not.toContain("`className`");
+		expect(componentToMarkdown(doc, { includeInherited: true })).toContain(
+			"`className`",
+		);
+	});
+
+	test("renders the import statement and @remarks usage section", () => {
+		const md = componentToMarkdown(doc, {
+			importStatement: 'import { Button } from "@acme/ui";',
+		});
+		expect(md).toContain('import { Button } from "@acme/ui";');
+		expect(md).toContain("**Usage**");
+		expect(md).toContain("don't nest buttons");
+	});
+});

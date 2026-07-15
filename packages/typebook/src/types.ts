@@ -1,8 +1,42 @@
-import type { RequiredKeysOf } from "type-fest";
-
 export interface TypebookConfig {
+	/**
+	 * Files to scan for components — a path, list of paths, or globs. Each file's exported
+	 * React components are extracted into {@link ComponentDoc}s (one scan, shared by every
+	 * consuming plugin). Omit to scan nothing (plugins then have no components to work with).
+	 */
+	components?: string | string[];
 	/** Additional packages whose type declarations mark props as inherited (e.g. ['@heroui/theme']) */
 	inheritedProviders?: string[];
+	/**
+	 * Sub-plugins that consume the project scan (e.g. `aiInstructions()`). Each `generate` runs
+	 * after every scan with the full set of components — build once, dev on change.
+	 */
+	plugins?: TypebookPlugin[];
+}
+
+/** Which command the bundler is running — mirrors Vite's `command` (`serve` → `dev`). */
+export type TypebookCommand = "dev" | "build";
+
+/** Passed to a {@link TypebookPlugin}'s `generate` on each (re)generation. */
+export interface GenerateCtx {
+	/** The command in progress, so a plugin can behave differently in dev vs build. */
+	command: TypebookCommand;
+	/** Project root — relative `writeFile` paths resolve against it. */
+	root: string;
+	/** Write a file (parent dirs created). Path is absolute or relative to {@link GenerateCtx.root}. */
+	writeFile(path: string, content: string): Promise<void>;
+}
+
+/**
+ * A sub-plugin of `typebook()`: consumes the whole project scan and emits artifacts (docs, AI
+ * instructions, …). `apply` gates the command it runs in (like Vite's `apply`).
+ */
+export interface TypebookPlugin {
+	name: string;
+	/** Run only in this command (like Vite's `apply`). Omit to run in both dev and build. */
+	apply?: TypebookCommand;
+	/** Consume every scanned component after each project scan (build once; dev on change). */
+	generate(docs: ComponentDoc[], ctx: GenerateCtx): void | Promise<void>;
 }
 
 export type PropType =
@@ -39,55 +73,23 @@ export interface PropInfo {
 	deprecated?: boolean | string;
 }
 
-/** Props the caller must provide (required keys not covered by defaultProps) */
-export type MissingProps<
-	Props extends object,
-	Defaulted extends keyof Props,
-> = Pick<Props, Exclude<RequiredKeysOf<Props>, Defaulted>>;
-
-export interface MetaConfigBase<Defaults> {
-	/** Default props applied to every render of this component */
-	defaultProps?: Defaults;
+/**
+ * A fully scanned component: its identity, source location, component-level JSDoc, and props.
+ * Produced by the scanner (from the `components` scan) and handed to {@link TypebookPlugin}s. React-free.
+ */
+export interface ComponentDoc {
+	/** Component name (its export identifier). */
+	name: string;
+	/** Absolute path of the module where the component itself is declared. */
+	file: string;
+	/** JSDoc prose above the component declaration, if any. */
+	description?: string;
+	/**
+	 * Usage guidance from the component's `@remarks` JSDoc tag — do/don't notes, composition
+	 * rules, constraints. Surfaced to AI agents so they have fewer ways to misuse the component.
+	 */
+	remarks?: string;
+	/** `@deprecated` on the component: the tag's note, `true` for a bare tag, absent otherwise. */
+	deprecated?: boolean | string;
+	props: PropInfo[];
 }
-
-export interface MetaConfigPick<
-	Props,
-	Picked extends keyof Props = keyof Props,
-	Defaults extends Partial<Props> = Partial<Props>,
-> extends MetaConfigBase<Defaults> {
-	/** Props to include in documentation. If not specified, all props are included. */
-	pick?: ReadonlyArray<Picked>;
-}
-
-export interface MetaConfigOmit<
-	Props,
-	Omitted extends keyof Props = never,
-	Defaults extends Partial<Props> = Partial<Props>,
-> extends MetaConfigBase<Defaults> {
-	/** Props to omit from documentation. */
-	omit?: ReadonlyArray<Omitted>;
-}
-
-/** Auto-generate variants from prop type (boolean/literal) */
-export interface AllOfConfig {
-	__type: "allOf";
-	prop: string;
-}
-
-/** Manual variant configuration with explicit values */
-export interface ValuesConfig {
-	__type: "values";
-	prop: string;
-	values: unknown[];
-}
-
-/** Generate variants using a function */
-export interface GenerateConfig {
-	__type: "generate";
-	prop: string;
-	fn: () => unknown;
-	count: number;
-}
-
-/** Variant configuration — either auto (allOf), manual (values), or generated */
-export type VariantConfig = AllOfConfig | ValuesConfig | GenerateConfig;

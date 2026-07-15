@@ -1,9 +1,9 @@
-interface BaseProps {
+export interface BaseProps {
 	id: string;
 	className?: string;
 }
 
-interface ExtendedButtonProps extends BaseProps {
+export interface ExtendedButtonProps extends BaseProps {
 	variant: "primary" | "secondary";
 	disabled?: boolean;
 }
@@ -16,7 +16,7 @@ export function ExtendedButton(props: ExtendedButtonProps) {
 	);
 }
 
-type IntersectionLinkProps = BaseProps & {
+export type IntersectionLinkProps = BaseProps & {
 	href: string;
 	target?: "_blank" | "_self";
 };

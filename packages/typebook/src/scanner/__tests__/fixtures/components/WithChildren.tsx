@@ -1,6 +1,6 @@
 import type { MouseEvent, ReactElement, ReactNode } from "react";
 
-interface WithChildrenProps {
+export interface WithChildrenProps {
 	children: ReactNode;
 	icon?: ReactElement;
 	onClick?: (e: MouseEvent) => void;

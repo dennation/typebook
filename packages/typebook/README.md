@@ -2,7 +2,7 @@
 
 # @dennation/typebook
 
-**Documentation site framework for React, built on TanStack Router.**
+**Scan your React components' TypeScript types with a bundler plugin and generate documentation — starting with AI-agent instructions.**
 
 [![npm version](https://img.shields.io/npm/v/@dennation/typebook)](https://www.npmjs.com/package/@dennation/typebook)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -11,175 +11,95 @@
 
 ---
 
-Typebook is a Vite plugin + React runtime for building documentation sites with file-based routing. It wraps `@tanstack/router-plugin` so pages in `src/pages/` automatically become routes — no manual route configuration.
+Point `typebook()` at your components. It reads their prop types, defaults and JSDoc **from the TypeScript types** (one Compiler-API scan, no wrapper calls, no runtime), and sub-plugins turn that scan into artifacts. The first one, `aiInstructions()`, writes Markdown docs for AI coding agents (Claude Code, Codex, Cursor) following the [`llms.txt`](https://llmstxt.org) convention — so agents know your components' real APIs instead of guessing.
 
-> **Status: pre-release.** Branch `v2-concept`. API is unstable.
+> **Early release.** This version ships the **scanner core** and the **AI-instructions** plugin. The stories / docs-kit runtime is in progress.
 
-## Quick Start
-
-### Install
+## Install
 
 ```bash
-npm install @dennation/typebook @tanstack/react-router
+npm install -D @dennation/typebook
 ```
 
-### 1. Add the Vite plugin
+## Quick start
+
+Add the plugin for your bundler, point `components` at your source, and enable `aiInstructions()`:
 
 ```ts
 // vite.config.ts
-import { typebook } from '@dennation/typebook/vite'
-import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { typebook } from "@dennation/typebook/vite";
+import { aiInstructions } from "@dennation/typebook/plugins/ai-instructions";
+import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [typebook({ docs: {} }), react()],
-})
+  plugins: [
+    typebook({
+      components: "src/components/**/*.tsx",
+      plugins: [aiInstructions({ importFrom: "@acme/ui" })],
+    }),
+  ],
+});
 ```
 
-### 2. Create the root layout
+On build (and live on change in dev) it writes, by default under `.ai/components/`:
+
+- **`llms.txt`** — an index of every component (`[Name](Name.md): summary`).
+- **`llms-full.txt`** — every card concatenated, for full-context ingestion.
+- **`<Component>.md`** — one card each: import line, description, `@remarks` usage notes, deprecation, and a props table with exhaustive union values.
+
+Point your agent's memory (`CLAUDE.md`, `AGENTS.md`) at `llms.txt`; it reads the card it needs on demand.
+
+````md
+## Button
+
+Primary call-to-action button.
 
 ```tsx
-// src/pages/__root.tsx
-import { TypebookLayout } from '@dennation/typebook/react'
-import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
-
-export const Route = createRootRoute({ component: RootComponent })
-
-function RootComponent() {
-  return (
-    <TypebookLayout
-      sidebar={
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      }
-    >
-      <Outlet />
-    </TypebookLayout>
-  )
-}
+import { Button } from "@acme/ui";
 ```
 
-### 3. Add a page
+**Usage**
 
-```tsx
-// src/pages/about.tsx
-import { createFileRoute } from '@tanstack/react-router'
+Use for the main action only; don't nest buttons.
 
-export const Route = createFileRoute('/about')({ component: AboutPage })
+| Prop | Type | Default | Required | Description |
+|---|---|---|---|---|
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | – | Button size |
+| `onClick` | `() => void` | – | ✔ | Fired on click |
+````
 
-function AboutPage() {
-  return <h1>About</h1>
-}
-```
+Usage guidance comes from the component's `@remarks` JSDoc tag; the exhaustive prop values come from the union types — both give the agent fewer ways to be wrong.
 
-### 4. Mount
+## `aiInstructions()` options
 
-```tsx
-// src/App.tsx
-import { RegistryProvider } from '@dennation/typebook/react'
-import { routeTree } from './routeTree.gen'
+| Option | Type | Description |
+|---|---|---|
+| `out` | `string \| (doc) => string` | Where each card goes — a directory, or a function for a full path per component (e.g. next to its source). Default `.ai/components`. |
+| `importFrom` | `string \| (doc) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
+| `title` / `description` | `string` | H1 title and blockquote summary of the index/full file. |
+| `indexFile` | `string \| false` | Path of the `llms.txt` index. `false` to skip. |
+| `fullFile` | `string \| false` | Path of `llms-full.txt`. `false` to skip. |
+| `includeInherited` | `boolean` | Include framework-inherited props (DOM attributes). Default `false`. |
 
-export default function App() {
-  return <RegistryProvider routeTree={routeTree} />
-}
-```
+## Every bundler
 
-Run `vite dev` — the plugin generates `src/routeTree.gen.ts` automatically.
+Built on [unplugin](https://unplugin.unjs.io), so the same `typebook()` factory ships for each bundler — import it from the matching entry:
 
-## MDX support
+`@dennation/typebook/{vite,rollup,rolldown,webpack,rspack,esbuild,farm}`
 
-MDX is not bundled. Install `@mdx-js/rollup` and place it before `typebook()`:
-
-```ts
-import mdx from '@mdx-js/rollup'
-
-plugins: [mdx(), typebook({ docs: {} }), react()]
-```
-
-Then write a route that uses an `.mdx` file as the component:
-
-```tsx
-// src/pages/getting-started.tsx
-import { createFileRoute } from '@tanstack/react-router'
-import Content from './getting-started.mdx'
-
-export const Route = createFileRoute('/getting-started')({ component: Content })
-```
-
-```mdx
-{/* src/pages/getting-started.mdx */}
-import { Button } from '../components/Button'
-
-# Getting Started
-
-<Button>Live React component in markdown</Button>
-```
-
-## Component stories
-
-`register(Component, config)` returns a descriptor that pairs with React components for rendering variants. Props are extracted from your TypeScript types at build time — no manual prop lists.
-
-```tsx
-// src/pages/button.tsx
-import { allOf, register } from '@dennation/typebook'
-import { MatrixStory, Story, VariantsStory } from '@dennation/typebook/react'
-import { createFileRoute } from '@tanstack/react-router'
-import { Button } from '../components/Button'
-
-const button = register(Button, { defaults: { children: 'Click me' } })
-
-export const Route = createFileRoute('/button')({
-  component: () => (
-    <>
-      <Story of={button} />
-      <VariantsStory of={button} items={allOf(button, 'size')} />
-      <MatrixStory of={button} x={allOf(button, 'color')} y={[allOf(button, 'variant')]} />
-    </>
-  ),
-})
-```
-
-Pass the auto-generated registry to `<RegistryProvider>` so the story components can resolve prop types:
-
-```tsx
-import { RegistryProvider } from '@dennation/typebook/react'
-import registry from './ui-registry.gen'
-import { routeTree } from './routeTree.gen'
-
-export default () => <RegistryProvider registry={registry} />
-```
-
-`register()` calls can sit anywhere in the source tree — no need to export them. The plugin walks the AST, finds every `register(Component, ...)` call, and keys the registry by the **component reference**, so each component may be registered only once. A second registration triggers an error (downgradable to a warning via `onDuplicate: 'warn'`).
-
-## Plugin options
-
-```ts
-typebook({
-  docs: {
-    routesDir: './src/pages',                       // default
-    routeTreeOutput: './src/routeTree.gen.ts',      // default
-  },
-  sourceGlob: './src/**/*.{ts,tsx}',                // default — files scanned for register() calls
-  registryFile: './src/ui-registry.gen.ts',         // default — generated registry file
-  onDuplicate: 'error',                             // default — 'warn' to downgrade
-})
-```
-
-Disable docs routing entirely by omitting `docs` (or setting it to `false`).
-
-## Package Exports
+## Package exports
 
 | Import | Description |
 |---|---|
-| `@dennation/typebook` | React-free types (`TypebookConfig`, `PropInfo`, `MetaConfig*`, `VariantConfig`, …) |
-| `@dennation/typebook/react` | `getComponentMeta`, `allOf`, `values`, `generate`, `Layout`, `Story`, `Variants`, `Matrix`, `Snippet`, `ErrorBoundary` + the docs component kit |
-| `@dennation/typebook/vite` | `typebook` Vite plugin |
+| `@dennation/typebook` | The scanner core — `collectComponentDocs`, `componentToMarkdown`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, … — plus the React-free types (`TypebookConfig`, `ComponentDoc`, `TypebookPlugin`, `PropInfo`, …). |
+| `@dennation/typebook/plugins/ai-instructions` | `aiInstructions()`, `AiInstructionsOptions`. |
+| `@dennation/typebook/{vite,rollup,…}` | The `typebook()` bundler plugin. |
 
 ## Requirements
 
-- React >= 18
-- Vite >= 5
-- TypeScript >= 5.7
-- `@tanstack/react-router` (peer)
+- TypeScript >= 5 (peer, optional — the scan degrades gracefully without it)
+- A supported bundler (Vite, Rollup, Rolldown, webpack, Rspack, esbuild, Farm)
+
+## License
+
+MIT

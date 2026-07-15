@@ -1,16 +1,7 @@
 import { resolve } from "node:path";
 import ts from "typescript";
 import { DEFAULT_INHERITED_PROVIDERS, LOG_PREFIX } from "../constants";
-import type { PropInfo, PropType } from "../types";
-import { dedent } from "./source-slice";
-
-/** A function source resolved from a `<Snippet source={ref}>` reference. */
-export interface SnippetSource {
-	/** The function body, sliced 1:1 then dedented — the text shown as the snippet. */
-	source: string;
-	/** Absolute path of the file the reference resolved to (registered as a watch dependency). */
-	file: string;
-}
+import type { ComponentDoc, PropInfo, PropType } from "../types";
 
 export class TypeScriptClient {
 	private service: ts.LanguageService | null = null;
@@ -116,53 +107,15 @@ export class TypeScriptClient {
 	}
 
 	/**
-	 * Extract props for a single `getComponentMeta(Component, ...)` call located at `callStart`
-	 * (character offset in the source).
+	 * Extract a {@link ComponentDoc} for every exported React component in a file — the scan
+	 * surface for `components`-configured files. No `getComponentMeta` wrapper needed: each
+	 * export is inspected by type, and the ones that are components (call signature returning a
+	 * React node, or a class construct signature) yield a doc. Non-component exports are skipped.
 	 */
-	async getProps(
+	async getExportedComponentDocs(
 		filePath: string,
-		callStart: number,
 		content?: string,
-	): Promise<PropInfo[] | null> {
-		if (!this.program || !this.checker) {
-			await this.start();
-		}
-
-		const absPath = resolve(this.cwd, filePath);
-		if (content !== undefined) this.setOverride(absPath, content);
-
-		const sourceFile = this.program?.getSourceFile(absPath);
-		if (!sourceFile) {
-			console.warn(LOG_PREFIX, "Could not get source file:", absPath);
-			return null;
-		}
-
-		const callExpr = this.findMetaCallAt(sourceFile, callStart);
-		if (!callExpr) {
-			console.warn(
-				LOG_PREFIX,
-				`No getComponentMeta() call at offset ${callStart} in ${filePath}`,
-			);
-			return null;
-		}
-
-		return this.extractPropsFromCall(callExpr);
-	}
-
-	/**
-	 * Resolve a `<Snippet source={ref}>` reference to the body source of the function it names.
-	 * `identifierOffset` is the character offset of the `ref` identifier (in `content`/`filePath`).
-	 * The symbol is resolved through the warm program — following an import alias into another file —
-	 * to its declaration; if that declaration is (or initializes to) a function, its body is sliced
-	 * exactly as the inline scanner would. Returns the sliced source plus the file it came from (so
-	 * the caller can register a watch dependency), or `null` when the reference can't be resolved to
-	 * a function literal.
-	 */
-	async getSnippetSource(
-		filePath: string,
-		identifierOffset: number,
-		content?: string,
-	): Promise<SnippetSource | null> {
+	): Promise<ComponentDoc[]> {
 		if (!this.program || !this.checker) {
 			await this.start();
 		}
@@ -172,26 +125,110 @@ export class TypeScriptClient {
 
 		const sourceFile = this.program?.getSourceFile(absPath);
 		const checker = this.checker;
-		if (!sourceFile || !checker) return null;
+		if (!sourceFile || !checker) return [];
 
-		const ident = findIdentifierAt(sourceFile, identifierOffset);
-		if (!ident) return null;
+		const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
+		if (!moduleSymbol) return [];
 
-		const symbol = checker.getSymbolAtLocation(ident);
-		if (!symbol) return null;
-		const resolved =
-			symbol.flags & ts.SymbolFlags.Alias
-				? checker.getAliasedSymbol(symbol)
-				: symbol;
-
-		for (const decl of resolved.getDeclarations() ?? []) {
-			const fn = resolveFunctionLikeFromDeclaration(decl);
-			const source = fn && sliceFunctionBody(fn);
-			if (source != null) {
-				return { source, file: decl.getSourceFile().fileName };
-			}
+		const docs: ComponentDoc[] = [];
+		for (const exp of checker.getExportsOfModule(moduleSymbol)) {
+			const doc = this.exportToComponentDoc(checker, exp, absPath);
+			if (doc) docs.push(doc);
 		}
-		return null;
+		return docs;
+	}
+
+	/** Turn one module export into a {@link ComponentDoc}, or `null` when it isn't a component. */
+	private exportToComponentDoc(
+		checker: ts.TypeChecker,
+		exp: ts.Symbol,
+		fallbackFile: string,
+	): ComponentDoc | null {
+		const resolved =
+			exp.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exp) : exp;
+		const decl = resolved.getDeclarations()?.[0];
+		if (!decl) return null;
+
+		const nameNode = declarationNameNode(decl);
+		if (!nameNode) return null;
+
+		const props = this.extractComponentProps(checker, nameNode);
+		if (props === null) return null; // not a component
+
+		const info: Omit<ComponentDoc, "props"> = {
+			name: exp.getName(),
+			file: decl.getSourceFile().fileName,
+		};
+		const description = getSymbolDescription(checker, resolved);
+		if (description) info.description = description;
+		const remarks = getSymbolRemarks(checker, resolved);
+		if (remarks) info.remarks = remarks;
+		const deprecated = getSymbolDeprecation(checker, resolved);
+		if (deprecated !== undefined) info.deprecated = deprecated;
+		return { ...info, props };
+	}
+
+	/**
+	 * Extract props from a component identified by its declaration name node, or `null` when the
+	 * node isn't a component. A component has a call signature returning a React node (function
+	 * component) or a construct signature (class component); its first parameter is the props type.
+	 */
+	private extractComponentProps(
+		checker: ts.TypeChecker,
+		componentNode: ts.Node,
+	): PropInfo[] | null {
+		const type = checker.getTypeAtLocation(componentNode);
+		const callSigs = type.getCallSignatures();
+		const constructSigs = type.getConstructSignatures();
+
+		let sig: ts.Signature;
+		if (callSigs.length > 0) {
+			sig = callSigs[0];
+			// ponytail: component detection by return-type string (ReactNode/Element). Covers
+			// function components; class components fall to the construct-signature branch.
+			if (!isReactReturnType(checker, sig.getReturnType())) return null;
+		} else if (constructSigs.length > 0) {
+			sig = constructSigs[0];
+		} else {
+			return null;
+		}
+
+		const propsParam = sig.getParameters()[0];
+		let props: PropInfo[] = [];
+		if (propsParam) {
+			props = this.extractPropsFromType(
+				checker,
+				checker.getTypeOfSymbol(propsParam),
+			);
+		}
+
+		const inherited = this.getInheritedPropNames(checker, componentNode);
+		const defaults = this.getParamDefaultProps(checker, componentNode);
+		return props.map((p) => {
+			let next = p;
+			if (inherited.has(p.name)) next = { ...next, inherited: true };
+			const def = defaults.get(p.name);
+			if (def !== undefined) next = { ...next, defaultValue: def };
+			return next;
+		});
+	}
+
+	/**
+	 * Every project source file currently in the warm program — the scan surface for
+	 * {@link collectComponentDocs}. Declaration files, `node_modules`, and files outside
+	 * the project root are excluded so only the consumer's own components are scanned.
+	 */
+	projectSourceFiles(): { fileName: string; text: string }[] {
+		const program = this.program;
+		if (!program) return [];
+		const files: { fileName: string; text: string }[] = [];
+		for (const sf of program.getSourceFiles()) {
+			if (sf.isDeclarationFile) continue;
+			if (sf.fileName.includes("/node_modules/")) continue;
+			if (!sf.fileName.startsWith(this.cwd)) continue;
+			files.push({ fileName: sf.fileName, text: sf.text });
+		}
+		return files;
 	}
 
 	/**
@@ -204,73 +241,6 @@ export class TypeScriptClient {
 		this.overrides.set(absPath, content);
 		this.fileVersions.set(absPath, (this.fileVersions.get(absPath) ?? 0) + 1);
 		this.refreshProgram();
-	}
-
-	/**
-	 * Locate the `getComponentMeta(...)` CallExpression that starts at the given character offset.
-	 */
-	private findMetaCallAt(
-		sourceFile: ts.SourceFile,
-		callStart: number,
-	): ts.CallExpression | null {
-		let found: ts.CallExpression | null = null;
-		const visit = (node: ts.Node): void => {
-			if (found) return;
-			// The scanner already validated this is a getComponentMeta() call (resolving any
-			// import alias such as `import { getComponentMeta as reg }`). `callStart` uniquely
-			// pins the exact CallExpression, so match on the offset rather than re-checking the
-			// callee name — a name check here would silently reject aliased calls and drop their props.
-			if (
-				ts.isCallExpression(node) &&
-				node.getStart(sourceFile) === callStart
-			) {
-				found = node;
-				return;
-			}
-			ts.forEachChild(node, visit);
-		};
-		visit(sourceFile);
-		return found;
-	}
-
-	private extractPropsFromCall(callExpr: ts.CallExpression): PropInfo[] | null {
-		const checker = this.checker;
-		if (!checker) return null;
-
-		const defineResultType = checker.getTypeAtLocation(callExpr);
-		const typeRef = defineResultType as ts.TypeReference;
-
-		let props: PropInfo[] | null = null;
-		if (typeRef.typeArguments && typeRef.typeArguments.length > 0) {
-			props = this.extractPropsFromType(checker, typeRef.typeArguments[0]);
-		} else {
-			const typeArgs = checker.getTypeArguments(typeRef);
-			if (typeArgs && typeArgs.length > 0) {
-				props = this.extractPropsFromType(checker, typeArgs[0]);
-			}
-		}
-
-		if (!props) {
-			console.warn(LOG_PREFIX, "Could not extract Props type argument");
-			return null;
-		}
-
-		const componentArg = callExpr.arguments[0];
-		if (!componentArg) return props;
-
-		const inheritedNames = this.getInheritedPropNames(checker, componentArg);
-		const paramDefaultProps = this.getParamDefaultProps(checker, componentArg);
-		return props.map((p) => {
-			let next: PropInfo = p;
-			if (inheritedNames.has(p.name)) {
-				next = { ...next, inherited: true };
-			}
-			const def = paramDefaultProps.get(p.name);
-			if (def !== undefined) {
-				next = { ...next, defaultValue: def };
-			}
-			return next;
-		});
 	}
 
 	/**
@@ -501,6 +471,28 @@ export class TypeScriptClient {
 /** Extensions TypeScript will accept as program root files. */
 const TS_SOURCE_EXT = /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/;
 
+/** The identifier node naming a declaration (function/class/variable), or null. */
+function declarationNameNode(decl: ts.Declaration): ts.Node | null {
+	const name = (decl as { name?: ts.Node }).name;
+	return name && ts.isIdentifier(name) ? name : null;
+}
+
+/** Whether a signature return type looks like a rendered React node (function-component check). */
+function isReactReturnType(checker: ts.TypeChecker, type: ts.Type): boolean {
+	const s = checker.typeToString(type);
+	return /\b(ReactElement|ReactNode|ReactPortal|JSX\.Element|Element)\b/.test(
+		s,
+	);
+}
+
+/** Read a symbol's `@remarks` JSDoc tag (usage guidance / do-don't), or "" when absent. */
+function getSymbolRemarks(checker: ts.TypeChecker, symbol: ts.Symbol): string {
+	for (const tag of symbol.getJsDocTags(checker)) {
+		if (tag.name === "remarks") return ts.displayPartsToString(tag.text).trim();
+	}
+	return "";
+}
+
 /**
  * Pull the JSDoc description (the prose before any `@tag` lines) for a symbol.
  * Returns the joined text or an empty string when there is none.
@@ -529,47 +521,6 @@ function getSymbolDefaultTag(
 		}
 	}
 	return "";
-}
-
-/** Find the Identifier node that starts exactly at `offset` (matching the scanner's oxc offset). */
-function findIdentifierAt(
-	sourceFile: ts.SourceFile,
-	offset: number,
-): ts.Identifier | null {
-	let found: ts.Identifier | null = null;
-	const visit = (node: ts.Node): void => {
-		if (found) return;
-		if (ts.isIdentifier(node) && node.getStart(sourceFile) === offset) {
-			found = node;
-			return;
-		}
-		ts.forEachChild(node, visit);
-	};
-	visit(sourceFile);
-	return found;
-}
-
-/**
- * Slice a function-like declaration's body, mirroring the inline scanner: a block body yields its
- * statements (braces stripped); an expression body yields the expression (parens unwrapped). Read
- * from the declaration's own source file, so a cross-module reference shows that file's text.
- * Returns null when the node has no body (e.g. an overload signature).
- */
-function sliceFunctionBody(fn: ts.SignatureDeclaration): string | null {
-	const body = (fn as ts.FunctionLikeDeclaration).body;
-	if (!body) return null;
-
-	const text = fn.getSourceFile().text;
-
-	if (ts.isBlock(body)) {
-		// Strip the wrapping braces, keep the statements (incl. `return`).
-		return dedent(text.slice(body.getStart() + 1, body.getEnd() - 1));
-	}
-
-	// Expression body: unwrap `() => ( … )` parens so the shown source is just the expression.
-	let expr: ts.Expression = body;
-	while (ts.isParenthesizedExpression(expr)) expr = expr.expression;
-	return dedent(text.slice(expr.getStart(), expr.getEnd()));
 }
 
 /**

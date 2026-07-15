@@ -1,17 +1,13 @@
-// Type-only entry. The runtime authoring API (getComponentMeta, allOf, values,
-// generate) and the React runtime live in `@dennation/typebook/react`; bundler
-// plugins live in `@dennation/typebook/{vite,rollup,…}`. This entry exists so
-// types (e.g. TypebookConfig for a bundler config) are reachable without React.
+// Base entry — the library's foundation: the React-free **scanner core** (`collectComponentDocs`,
+// `componentToMarkdown`, `TypeScriptClient`) plus all shared types. It reads the components named
+// by the `components` config and extracts each exported component's props, defaults and JSDoc by
+// type via the TypeScript Compiler API; sub-plugins (e.g. `aiInstructions`) turn the result into
+// artifacts. Bundler plugins live in `@dennation/typebook/{vite,rollup,…}`. Type-only imports
+// (e.g. `TypebookConfig` for a bundler config) stay weightless; the runtime pulls in `typescript`.
+export * from "./scanner";
 export type {
-	AllOfConfig,
-	GenerateConfig,
-	MetaConfigBase,
-	MetaConfigOmit,
-	MetaConfigPick,
-	MissingProps,
-	PropInfo,
-	PropType,
+	GenerateCtx,
+	TypebookCommand,
 	TypebookConfig,
-	ValuesConfig,
-	VariantConfig,
+	TypebookPlugin,
 } from "./types";

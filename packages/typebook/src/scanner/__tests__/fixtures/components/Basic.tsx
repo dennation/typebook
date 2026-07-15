@@ -1,4 +1,4 @@
-interface BasicProps {
+export interface BasicProps {
 	size: "sm" | "md" | "lg";
 	variant?: "solid" | "outline" | "ghost";
 	disabled?: boolean;
