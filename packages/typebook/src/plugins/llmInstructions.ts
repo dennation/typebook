@@ -8,7 +8,11 @@ export interface LlmInstructionsOptions {
 	 * `{out}/{name}.md`. A **function** returns the full path per component, so cards can
 	 * sit next to their source: `(doc) => doc.file.replace(/\.tsx$/, ".md")`.
 	 */
-	out?: string | ((doc: ComponentInfo) => string);
+	out: string | ((doc: ComponentInfo) => string);
+	/** Index file in `llms.txt` format, listing every component; `false` to skip it. */
+	indexFile: string | false;
+	/** Single concatenated file with every card (`llms-full.txt`); `false` to skip it. */
+	fullFile: string | false;
 	/**
 	 * Module each component is imported from — used to print an `import { X } from "…"` line in
 	 * every card (agents need the exact import). A string (`"@acme/ui"`) or a function per component.
@@ -19,33 +23,29 @@ export interface LlmInstructionsOptions {
 	title?: string;
 	/** Blockquote summary under the title (the `llms.txt` project summary). Optional. */
 	description?: string;
-	/** Index file in `llms.txt` format, listing every component (default: `llms.txt` in `out`). `false` to skip. */
-	indexFile?: string | false;
-	/** Single concatenated file with every card (`llms-full.txt`, default: in `out`). `false` to skip. */
-	fullFile?: string | false;
 	/** Include framework-inherited props (DOM attributes) in each card. Default: false. */
 	includeInherited?: boolean;
 }
-
-const DEFAULT_DIR = ".ai/components";
 
 /**
  * `typebook()` sub-plugin: writes AI-agent docs from the component scan, following the
  * [`llms.txt`](https://llmstxt.org) convention — one Markdown card per component (import,
  * description, usage guidance, deprecation, props table), an `llms.txt` index, and a single
  * `llms-full.txt`. Regenerated in full on every scan (build once, dev on change).
+ *
+ * Output locations are explicit: `out`, `indexFile` and `fullFile` are required (pass `false`
+ * to `indexFile`/`fullFile` to skip that file) — the plugin writes nowhere by default.
  */
-export function llmInstructions(
-	options: LlmInstructionsOptions = {},
-): TypebookPlugin {
+export function llmInstructions(options: LlmInstructionsOptions): TypebookPlugin {
 	const {
-		out = DEFAULT_DIR,
+		out,
+		indexFile,
+		fullFile,
 		importFrom,
 		title = "Components",
 		description,
 		includeInherited,
 	} = options;
-	const baseDir = typeof out === "string" ? out : DEFAULT_DIR;
 
 	const cardPath = (doc: ComponentInfo): string =>
 		typeof out === "function"
@@ -60,9 +60,6 @@ export function llmInstructions(
 			includeInherited,
 			importStatement: importStatement(doc),
 		});
-
-	const indexFile = options.indexFile ?? `${baseDir}/llms.txt`;
-	const fullFile = options.fullFile ?? `${baseDir}/llms-full.txt`;
 
 	return {
 		name: "llm-instructions",
