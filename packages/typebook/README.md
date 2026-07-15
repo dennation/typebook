@@ -2,7 +2,9 @@
 
 # @dennation/typebook
 
-**Scan your React components' TypeScript types with a bundler plugin and generate documentation — starting with AI-agent instructions.**
+**A toolkit for documenting React components from their TypeScript types.**
+
+Point it at your components — one Compiler-API scan reads their props, defaults and JSDoc, and plugins turn that into whatever you need.
 
 [![npm version](https://img.shields.io/npm/v/@dennation/typebook)](https://www.npmjs.com/package/@dennation/typebook)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -11,9 +13,13 @@
 
 ---
 
-Point `typebook()` at your components. It reads their prop types, defaults and JSDoc **from the TypeScript types** (one Compiler-API scan, no wrapper calls, no runtime), and sub-plugins turn that scan into artifacts. The first one, `llmInstructions()`, writes Markdown docs for AI coding agents (Claude Code, Codex, Cursor) following the [`llms.txt`](https://llmstxt.org) convention — so agents know your components' real APIs instead of guessing.
+## What it is
 
-> **Early release.** This version ships the **scanner core** and the **AI-instructions** plugin. The stories / docs-kit runtime is in progress.
+`@dennation/typebook` scans your React components **by type** — a single TypeScript Compiler-API pass extracts every component's prop types, defaults, JSDoc and deprecations into a structured model (`ComponentDoc`). No wrapper calls, no decorators, no runtime.
+
+That scan is the foundation. **Plugins** consume it and emit artifacts — documentation for AI agents today, more to come.
+
+> **Early release.** The scanner core and the `llm-instructions` plugin ship today; a stories / docs-kit runtime is in progress.
 
 ## Install
 
@@ -23,7 +29,7 @@ npm install -D @dennation/typebook
 
 ## Quick start
 
-Add the plugin for your bundler, point `components` at your source, and enable `llmInstructions()`:
+Add the plugin for your bundler, point `components` at your source, and enable the plugins you want:
 
 ```ts
 // vite.config.ts
@@ -41,7 +47,19 @@ export default defineConfig({
 });
 ```
 
-On build (and live on change in dev) it writes, by default under `.ai/components/`:
+On build — and live on change in dev — the scan runs once and every enabled plugin gets the result.
+
+## Plugins
+
+Sub-plugins receive the scan result (`ComponentDoc[]`) and produce artifacts. Enable them in `typebook({ plugins: [...] })`.
+
+### `llm-instructions`
+
+```
+@dennation/typebook/plugins/llm-instructions
+```
+
+Generates documentation for AI coding agents (Claude Code, Codex, Cursor) following the [`llms.txt`](https://llmstxt.org) convention — so agents work from your components' **real** APIs instead of guessing. By default it writes, under `.ai/components/`:
 
 - **`llms.txt`** — an index of every component (`[Name](Name.md): summary`).
 - **`llms-full.txt`** — every card concatenated, for full-context ingestion.
@@ -70,7 +88,7 @@ Use for the main action only; don't nest buttons.
 
 Usage guidance comes from the component's `@remarks` JSDoc tag; the exhaustive prop values come from the union types — both give the agent fewer ways to be wrong.
 
-## `llmInstructions()` options
+**Options**
 
 | Option | Type | Description |
 |---|---|---|
