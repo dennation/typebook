@@ -7,10 +7,5 @@
 	"access": "public",
 	"baseBranch": "main",
 	"updateInternalDependencies": "patch",
-	"ignore": [
-		"@dennation/menu",
-		"@dennation/website",
-		"@dennation/example-tanstack-router",
-		"@dennation/example-tanstack-router-mdx"
-	]
+	"ignore": []
 }

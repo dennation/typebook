@@ -1,5 +1,4 @@
 import { resolve } from "node:path";
-import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 
@@ -7,7 +6,6 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"@": resolve(__dirname, "src"),
-			"@react": resolve(__dirname, "src/react"),
 		},
 	},
 	build: {
@@ -15,8 +13,6 @@ export default defineConfig({
 		lib: {
 			entry: {
 				index: resolve(__dirname, "src/index.ts"),
-				"react/index": resolve(__dirname, "src/react/index.ts"),
-				"plugins/snippets": resolve(__dirname, "src/plugins/snippets.ts"),
 				"plugins/aiInstructions": resolve(
 					__dirname,
 					"src/plugins/aiInstructions.ts",
@@ -64,9 +60,8 @@ export default defineConfig({
 		emptyOutDir: true,
 	},
 	plugins: [
-		tailwindcss(),
 		dts({
-			include: ["src/**/*.ts", "src/**/*.tsx"],
+			include: ["src/**/*.ts"],
 			exclude: ["src/**/__tests__/**"],
 			outDir: "dist",
 			entryRoot: "src",

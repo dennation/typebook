@@ -1,5 +1,15 @@
 # @dennation/typebook — monorepo
 
+> **Branch scope — `main` is release-only.** `main` ships just the **scanner core** +
+> **AI-instructions** plugin (`@dennation/typebook` + `@dennation/typebook/plugins/ai-instructions`
+> + the `typebook()` bundler plugins). Everything else lives on the **`dev`** branch and is **not**
+> on `main`: the stories API (`defineStories`, `@dennation/typebook/react`), the `snippets` plugin,
+> the docs-kit runtime, the `@dennation/menu` package, the marketing/docs **website** and the
+> **examples**. Much of the detail below (the `react/` runtime, `widgets/`, `packages/menu`,
+> `apps/website`, `examples/*`, `defineStories`/`Snippet`/stories injection) describes the **full
+> product on `dev`** — on `main` those files don't exist. When working on `main`, treat this file's
+> `react`/menu/website/examples/stories sections as dev-only context.
+
 pnpm workspace monorepo.
 
 ## Commands (root)
