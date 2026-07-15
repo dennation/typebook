@@ -1,17 +1,8 @@
-import {
-	allOf,
-	getComponentMeta,
-	Matrix,
-	Snippet,
-	Story,
-	Variants,
-} from "@dennation/typebook/react";
+import { defineStories, Snippet } from "@dennation/typebook/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "../components/Button";
 
-const meta = getComponentMeta(Button, {
-	// defaultProps: { children: 'Click me' },
-});
+const ButtonStories = defineStories(Button);
 
 export const Route = createFileRoute("/button")({
 	component: ButtonPage,
@@ -30,28 +21,24 @@ function ButtonPage() {
 
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">Default</h2>
-				<Story of={meta} />
+				<ButtonStories.Story />
 			</section>
 
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">All sizes</h2>
-				<Variants of={meta} items={allOf(meta, "size")} />
+				<ButtonStories.Variants axis="size" />
 			</section>
 
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">All variants</h2>
-				<Variants of={meta} items={allOf(meta, "variant")} />
+				<ButtonStories.Variants axis="variant" />
 			</section>
 
 			<section>
 				<h2 className="st:text-lg st:font-semibold st:mb-3">
 					Color × Variant matrix
 				</h2>
-				<Matrix
-					of={meta}
-					x={allOf(meta, "color")}
-					y={[allOf(meta, "variant")]}
-				/>
+				<ButtonStories.Matrix x="color" y={["variant"]} />
 			</section>
 
 			<section>

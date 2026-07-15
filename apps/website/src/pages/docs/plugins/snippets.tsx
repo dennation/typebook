@@ -12,7 +12,7 @@ import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-function PageSnippet() {
+function PagePluginsSnippets() {
 	return (
 		<>
 			<Lead>
@@ -21,6 +21,26 @@ function PageSnippet() {
 				extracted at build time, character for character, no regeneration
 				artifacts.
 			</Lead>
+
+			<Heading level={2}>Enable</Heading>
+			<Paragraph>
+				<InlineCode>{"<Snippet>"}</InlineCode> is opt-in: add the{" "}
+				<InlineCode>snippets()</InlineCode> plugin to{" "}
+				<InlineCode>typebook()</InlineCode> so the source gets injected at build
+				time.
+			</Paragraph>
+			<CodeBlock.Root>
+				<CodeBlock.Tab
+					file="vite.config.ts"
+					icon={<IconBrandReact size={14} />}
+					lang="ts"
+				>
+					{`import { typebook } from "@dennation/typebook/vite";
+import { snippets } from "@dennation/typebook/plugins/snippets";
+
+typebook({ plugins: [snippets()] });`}
+				</CodeBlock.Tab>
+			</CodeBlock.Root>
 
 			<Heading level={2}>Usage</Heading>
 			<Paragraph>
@@ -48,22 +68,8 @@ function PageSnippet() {
 			<Paragraph>
 				Because the example is a component, it can use hooks — give the inline
 				function a capitalized name so the rules-of-hooks lint recognises it as
-				a component:
+				a component.
 			</Paragraph>
-			<CodeBlock.Root>
-				<CodeBlock.Tab
-					file="src/pages/counter.tsx"
-					icon={<IconBrandReact size={14} />}
-					lang="tsx"
-				>
-					{`<Snippet name="counter">
-  {function Counter() {
-    const [n, setN] = useState(0);
-    return <Button onClick={() => setN(n + 1)}>Count: {n}</Button>;
-  }}
-</Snippet>`}
-				</CodeBlock.Tab>
-			</CodeBlock.Root>
 			<Paragraph>
 				At build time the plugin finds every{" "}
 				<InlineCode>{"<Snippet>"}</InlineCode>, slices the inline function's{" "}
@@ -78,10 +84,9 @@ function PageSnippet() {
 				Without <InlineCode>source</InlineCode>, the child must be an{" "}
 				<Strong>inline</Strong> function — a bare component reference (
 				<InlineCode>{"{Counter}"}</InlineCode>) or raw JSX raises a build error,
-				since its source can't be sliced from this call site. To document an
-				example declared elsewhere, use <InlineCode>source</InlineCode> instead
-				(below). <InlineCode>name</InlineCode> is optional; it's just a label
-				shown above the source.
+				since its source can't be sliced from this call site.{" "}
+				<InlineCode>name</InlineCode> is optional; it's just a label shown above
+				the source.
 			</Callout>
 
 			<Heading level={2}>
@@ -92,46 +97,11 @@ function PageSnippet() {
 				or imported from another. Point <InlineCode>source</InlineCode> at it
 				instead of inlining. The build resolves the reference through the
 				TypeScript program (following an import into another module), slices
-				that function's body, and injects it as the shown source.
+				that function's body, and injects it as the shown source. With{" "}
+				<InlineCode>source</InlineCode>, <InlineCode>children</InlineCode>{" "}
+				becomes an optional <Strong>layout render-prop</Strong> receiving{" "}
+				<InlineCode>{"{ preview, source, code, name }"}</InlineCode>.
 			</Paragraph>
-			<CodeBlock.Root>
-				<CodeBlock.Tab
-					file="src/pages/button.tsx"
-					icon={<IconBrandReact size={14} />}
-					lang="tsx"
-				>
-					{`import { Snippet } from "@dennation/typebook/react";
-import { ButtonDemo } from "../demos/ButtonDemo";
-
-// default card — preview + "show source" toggle
-<Snippet source={ButtonDemo} />`}
-				</CodeBlock.Tab>
-			</CodeBlock.Root>
-			<Paragraph>
-				With <InlineCode>source</InlineCode>, <InlineCode>children</InlineCode>{" "}
-				becomes an optional <Strong>layout render-prop</Strong>. It receives{" "}
-				<InlineCode>{"{ preview, source, code, name }"}</InlineCode> — the live
-				demo, the source already rendered as a{" "}
-				<InlineCode>CodeBlock</InlineCode>, the raw source text, and the{" "}
-				<InlineCode>name</InlineCode> label — so you decide where and how each
-				appears. Omit <InlineCode>children</InlineCode> for the default card.
-			</Paragraph>
-			<CodeBlock.Root>
-				<CodeBlock.Tab
-					file="src/pages/button.tsx"
-					icon={<IconBrandReact size={14} />}
-					lang="tsx"
-				>
-					{`<Snippet source={ButtonDemo}>
-  {({ preview, source }) => (
-    <div className="grid grid-cols-2 gap-4">
-      {preview}
-      {source}
-    </div>
-  )}
-</Snippet>`}
-				</CodeBlock.Tab>
-			</CodeBlock.Root>
 
 			<Heading level={2}>Props</Heading>
 			<PropsReference
@@ -146,7 +116,7 @@ import { ButtonDemo } from "../demos/ButtonDemo";
 						name: "source",
 						type: "ComponentType",
 						required: false,
-						desc: "Reference to an example component declared elsewhere (this file or imported). The build slices its body as the shown source; children then acts as an optional layout render-prop.",
+						desc: "Reference to an example component declared elsewhere. The build slices its body as the shown source; children then acts as an optional layout render-prop.",
 					},
 					{
 						name: "name",
@@ -156,17 +126,18 @@ import { ButtonDemo } from "../demos/ButtonDemo";
 					},
 				]}
 			/>
+
 			<DocsFooter
 				prev={{
-					to: "/docs/guides/story",
-					title: "Rendering stories",
+					to: "/docs/plugins/ai-instructions",
+					title: "AI Instructions",
 				}}
-				next={{ to: "/docs/guides/icons", title: "Icons" }}
+				next={{ to: "/docs/guides/theming", title: "Theming" }}
 			/>
 		</>
 	);
 }
 
-export const Route = createFileRoute("/docs/guides/snippet")({
-	component: PageSnippet,
+export const Route = createFileRoute("/docs/plugins/snippets")({
+	component: PagePluginsSnippets,
 });

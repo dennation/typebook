@@ -25,7 +25,7 @@ export function DemoVariants() {
 					</span>
 					Button.tsx
 					<span className="ml-auto rounded-[99px] border border-border bg-bg px-2 py-0.5 text-[10px]">
-						allOf(button, "size")
+						.Variants axis="size"
 					</span>
 				</div>
 				<div className="p-5">

@@ -2,7 +2,7 @@ import {
 	Callout,
 	Cards,
 	DocCard,
-	getComponentMeta,
+	defineStories,
 	Heading,
 	InlineCode,
 	Lead,
@@ -15,7 +15,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Box, Layers } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const meta = getComponentMeta(Callout);
+const meta = defineStories(Callout);
 
 function PageCallout() {
 	const navigate = useNavigate();
@@ -83,7 +83,7 @@ function PageCallout() {
 				/>
 			</Cards>
 			<DocsFooter
-				prev={{ to: "/docs/components/matrix", title: "Matrix" }}
+				prev={{ to: "/docs/guides/icons", title: "Icons" }}
 				next={{ to: "/docs/components/code-block", title: "CodeBlock" }}
 			/>
 		</>

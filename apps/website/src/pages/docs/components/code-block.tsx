@@ -1,7 +1,7 @@
 import {
 	Callout,
 	CodeBlock,
-	getComponentMeta,
+	defineStories,
 	Heading,
 	InlineCode,
 	Lead,
@@ -14,7 +14,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SquareTerminal } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const meta = getComponentMeta(CodeBlock.Tab);
+const meta = defineStories(CodeBlock.Tab);
 
 function PageCodeBlock() {
 	return (

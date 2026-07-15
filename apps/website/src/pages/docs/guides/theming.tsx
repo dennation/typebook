@@ -111,7 +111,7 @@ function PageTheming() {
 			</Callout>
 			<DocsFooter
 				prev={{ to: "/docs/getting-started/quick-start", title: "Quick Start" }}
-				next={{ to: "/docs/guides/story", title: "Rendering stories" }}
+				next={{ to: "/docs/guides/icons", title: "Icons" }}
 			/>
 		</>
 	);

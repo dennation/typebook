@@ -97,7 +97,7 @@ import { Matrix, Story, Variants } from "@dennation/typebook/react";
 				]}
 			/>
 			<Paragraph>
-				Continue with <Link to="/docs/guides/story">Rendering stories</Link> for
+				Continue with <Link to="/docs/plugins/overview">Plugins</Link> for
 				the full prop reference of each story component.
 			</Paragraph>
 			<DocsFooter

@@ -8,88 +8,88 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./pages/__root";
-import { Route as AboutRouteImport } from "./pages/about";
-import { Route as ButtonRouteImport } from "./pages/button";
-import { Route as IndexRouteImport } from "./pages/index";
+import { Route as rootRouteImport } from './pages/__root'
+import { Route as ButtonRouteImport } from './pages/button'
+import { Route as AboutRouteImport } from './pages/about'
+import { Route as IndexRouteImport } from './pages/index'
 
 const ButtonRoute = ButtonRouteImport.update({
-	id: "/button",
-	path: "/button",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/button',
+  path: '/button',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
-	id: "/about",
-	path: "/about",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
-	id: "/",
-	path: "/",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
-	"/": typeof IndexRoute;
-	"/about": typeof AboutRoute;
-	"/button": typeof ButtonRoute;
+  '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/button': typeof ButtonRoute
 }
 export interface FileRoutesByTo {
-	"/": typeof IndexRoute;
-	"/about": typeof AboutRoute;
-	"/button": typeof ButtonRoute;
+  '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/button': typeof ButtonRoute
 }
 export interface FileRoutesById {
-	__root__: typeof rootRouteImport;
-	"/": typeof IndexRoute;
-	"/about": typeof AboutRoute;
-	"/button": typeof ButtonRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/button': typeof ButtonRoute
 }
 export interface FileRouteTypes {
-	fileRoutesByFullPath: FileRoutesByFullPath;
-	fullPaths: "/" | "/about" | "/button";
-	fileRoutesByTo: FileRoutesByTo;
-	to: "/" | "/about" | "/button";
-	id: "__root__" | "/" | "/about" | "/button";
-	fileRoutesById: FileRoutesById;
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/about' | '/button'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/about' | '/button'
+  id: '__root__' | '/' | '/about' | '/button'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-	IndexRoute: typeof IndexRoute;
-	AboutRoute: typeof AboutRoute;
-	ButtonRoute: typeof ButtonRoute;
+  IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  ButtonRoute: typeof ButtonRoute
 }
 
-declare module "@tanstack/react-router" {
-	interface FileRoutesByPath {
-		"/button": {
-			id: "/button";
-			path: "/button";
-			fullPath: "/button";
-			preLoaderRoute: typeof ButtonRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/about": {
-			id: "/about";
-			path: "/about";
-			fullPath: "/about";
-			preLoaderRoute: typeof AboutRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/": {
-			id: "/";
-			path: "/";
-			fullPath: "/";
-			preLoaderRoute: typeof IndexRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-	}
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/button': {
+      id: '/button'
+      path: '/button'
+      fullPath: '/button'
+      preLoaderRoute: typeof ButtonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-	IndexRoute: IndexRoute,
-	AboutRoute: AboutRoute,
-	ButtonRoute: ButtonRoute,
-};
+  IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  ButtonRoute: ButtonRoute,
+}
 export const routeTree = rootRouteImport
-	._addFileChildren(rootRouteChildren)
-	._addFileTypes<FileRouteTypes>();
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()

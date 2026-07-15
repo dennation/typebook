@@ -12,30 +12,25 @@ import { Route as rootRouteImport } from './pages/__root'
 import { Route as DocsRouteRouteImport } from './pages/docs/route'
 import { Route as IndexRouteImport } from './pages/index'
 import { Route as DocsIndexRouteImport } from './pages/docs/index'
+import { Route as DocsPluginsStoriesRouteImport } from './pages/docs/plugins/stories'
+import { Route as DocsPluginsSnippetsRouteImport } from './pages/docs/plugins/snippets'
+import { Route as DocsPluginsOverviewRouteImport } from './pages/docs/plugins/overview'
+import { Route as DocsPluginsAiInstructionsRouteImport } from './pages/docs/plugins/ai-instructions'
 import { Route as DocsGuidesThemingRouteImport } from './pages/docs/guides/theming'
-import { Route as DocsGuidesStoryRouteImport } from './pages/docs/guides/story'
-import { Route as DocsGuidesSnippetRouteImport } from './pages/docs/guides/snippet'
 import { Route as DocsGuidesIconsRouteImport } from './pages/docs/guides/icons'
 import { Route as DocsGettingStartedQuickStartRouteImport } from './pages/docs/getting-started/quick-start'
 import { Route as DocsGettingStartedIntroductionRouteImport } from './pages/docs/getting-started/introduction'
 import { Route as DocsGettingStartedInstallationRouteImport } from './pages/docs/getting-started/installation'
-import { Route as DocsFunctionsValuesRouteImport } from './pages/docs/functions/values'
 import { Route as DocsFunctionsSlugifyRouteImport } from './pages/docs/functions/slugify'
 import { Route as DocsFunctionsPropsToRowsRouteImport } from './pages/docs/functions/props-to-rows'
-import { Route as DocsFunctionsGetComponentMetaRouteImport } from './pages/docs/functions/get-component-meta'
-import { Route as DocsFunctionsGenerateRouteImport } from './pages/docs/functions/generate'
 import { Route as DocsFunctionsCxRouteImport } from './pages/docs/functions/cx'
 import { Route as DocsFunctionsChildTextRouteImport } from './pages/docs/functions/child-text'
 import { Route as DocsFunctionsButtonClassRouteImport } from './pages/docs/functions/button-class'
-import { Route as DocsFunctionsAllOfRouteImport } from './pages/docs/functions/all-of'
-import { Route as DocsComponentsVariantsRouteImport } from './pages/docs/components/variants'
 import { Route as DocsComponentsThemeToggleRouteImport } from './pages/docs/components/theme-toggle'
 import { Route as DocsComponentsTabsRouteImport } from './pages/docs/components/tabs'
 import { Route as DocsComponentsTablesRouteImport } from './pages/docs/components/tables'
-import { Route as DocsComponentsStoryRouteImport } from './pages/docs/components/story'
 import { Route as DocsComponentsStepsRouteImport } from './pages/docs/components/steps'
 import { Route as DocsComponentsNavigationRouteImport } from './pages/docs/components/navigation'
-import { Route as DocsComponentsMatrixRouteImport } from './pages/docs/components/matrix'
 import { Route as DocsComponentsLinkRouteImport } from './pages/docs/components/link'
 import { Route as DocsComponentsLeadRouteImport } from './pages/docs/components/lead'
 import { Route as DocsComponentsLayoutRouteImport } from './pages/docs/components/layout'
@@ -65,19 +60,30 @@ const DocsIndexRoute = DocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DocsRouteRoute,
 } as any)
+const DocsPluginsStoriesRoute = DocsPluginsStoriesRouteImport.update({
+  id: '/plugins/stories',
+  path: '/plugins/stories',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsPluginsSnippetsRoute = DocsPluginsSnippetsRouteImport.update({
+  id: '/plugins/snippets',
+  path: '/plugins/snippets',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsPluginsOverviewRoute = DocsPluginsOverviewRouteImport.update({
+  id: '/plugins/overview',
+  path: '/plugins/overview',
+  getParentRoute: () => DocsRouteRoute,
+} as any)
+const DocsPluginsAiInstructionsRoute =
+  DocsPluginsAiInstructionsRouteImport.update({
+    id: '/plugins/ai-instructions',
+    path: '/plugins/ai-instructions',
+    getParentRoute: () => DocsRouteRoute,
+  } as any)
 const DocsGuidesThemingRoute = DocsGuidesThemingRouteImport.update({
   id: '/guides/theming',
   path: '/guides/theming',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
-const DocsGuidesStoryRoute = DocsGuidesStoryRouteImport.update({
-  id: '/guides/story',
-  path: '/guides/story',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
-const DocsGuidesSnippetRoute = DocsGuidesSnippetRouteImport.update({
-  id: '/guides/snippet',
-  path: '/guides/snippet',
   getParentRoute: () => DocsRouteRoute,
 } as any)
 const DocsGuidesIconsRoute = DocsGuidesIconsRouteImport.update({
@@ -103,11 +109,6 @@ const DocsGettingStartedInstallationRoute =
     path: '/getting-started/installation',
     getParentRoute: () => DocsRouteRoute,
   } as any)
-const DocsFunctionsValuesRoute = DocsFunctionsValuesRouteImport.update({
-  id: '/functions/values',
-  path: '/functions/values',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
 const DocsFunctionsSlugifyRoute = DocsFunctionsSlugifyRouteImport.update({
   id: '/functions/slugify',
   path: '/functions/slugify',
@@ -119,17 +120,6 @@ const DocsFunctionsPropsToRowsRoute =
     path: '/functions/props-to-rows',
     getParentRoute: () => DocsRouteRoute,
   } as any)
-const DocsFunctionsGetComponentMetaRoute =
-  DocsFunctionsGetComponentMetaRouteImport.update({
-    id: '/functions/get-component-meta',
-    path: '/functions/get-component-meta',
-    getParentRoute: () => DocsRouteRoute,
-  } as any)
-const DocsFunctionsGenerateRoute = DocsFunctionsGenerateRouteImport.update({
-  id: '/functions/generate',
-  path: '/functions/generate',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
 const DocsFunctionsCxRoute = DocsFunctionsCxRouteImport.update({
   id: '/functions/cx',
   path: '/functions/cx',
@@ -146,16 +136,6 @@ const DocsFunctionsButtonClassRoute =
     path: '/functions/button-class',
     getParentRoute: () => DocsRouteRoute,
   } as any)
-const DocsFunctionsAllOfRoute = DocsFunctionsAllOfRouteImport.update({
-  id: '/functions/all-of',
-  path: '/functions/all-of',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
-const DocsComponentsVariantsRoute = DocsComponentsVariantsRouteImport.update({
-  id: '/components/variants',
-  path: '/components/variants',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
 const DocsComponentsThemeToggleRoute =
   DocsComponentsThemeToggleRouteImport.update({
     id: '/components/theme-toggle',
@@ -172,11 +152,6 @@ const DocsComponentsTablesRoute = DocsComponentsTablesRouteImport.update({
   path: '/components/tables',
   getParentRoute: () => DocsRouteRoute,
 } as any)
-const DocsComponentsStoryRoute = DocsComponentsStoryRouteImport.update({
-  id: '/components/story',
-  path: '/components/story',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
 const DocsComponentsStepsRoute = DocsComponentsStepsRouteImport.update({
   id: '/components/steps',
   path: '/components/steps',
@@ -188,11 +163,6 @@ const DocsComponentsNavigationRoute =
     path: '/components/navigation',
     getParentRoute: () => DocsRouteRoute,
   } as any)
-const DocsComponentsMatrixRoute = DocsComponentsMatrixRouteImport.update({
-  id: '/components/matrix',
-  path: '/components/matrix',
-  getParentRoute: () => DocsRouteRoute,
-} as any)
 const DocsComponentsLinkRoute = DocsComponentsLinkRouteImport.update({
   id: '/components/link',
   path: '/components/link',
@@ -280,30 +250,25 @@ export interface FileRoutesByFullPath {
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/lead': typeof DocsComponentsLeadRoute
   '/docs/components/link': typeof DocsComponentsLinkRoute
-  '/docs/components/matrix': typeof DocsComponentsMatrixRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
-  '/docs/components/story': typeof DocsComponentsStoryRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
   '/docs/components/theme-toggle': typeof DocsComponentsThemeToggleRoute
-  '/docs/components/variants': typeof DocsComponentsVariantsRoute
-  '/docs/functions/all-of': typeof DocsFunctionsAllOfRoute
   '/docs/functions/button-class': typeof DocsFunctionsButtonClassRoute
   '/docs/functions/child-text': typeof DocsFunctionsChildTextRoute
   '/docs/functions/cx': typeof DocsFunctionsCxRoute
-  '/docs/functions/generate': typeof DocsFunctionsGenerateRoute
-  '/docs/functions/get-component-meta': typeof DocsFunctionsGetComponentMetaRoute
   '/docs/functions/props-to-rows': typeof DocsFunctionsPropsToRowsRoute
   '/docs/functions/slugify': typeof DocsFunctionsSlugifyRoute
-  '/docs/functions/values': typeof DocsFunctionsValuesRoute
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
   '/docs/guides/icons': typeof DocsGuidesIconsRoute
-  '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
-  '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
+  '/docs/plugins/ai-instructions': typeof DocsPluginsAiInstructionsRoute
+  '/docs/plugins/overview': typeof DocsPluginsOverviewRoute
+  '/docs/plugins/snippets': typeof DocsPluginsSnippetsRoute
+  '/docs/plugins/stories': typeof DocsPluginsStoriesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -321,30 +286,25 @@ export interface FileRoutesByTo {
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/lead': typeof DocsComponentsLeadRoute
   '/docs/components/link': typeof DocsComponentsLinkRoute
-  '/docs/components/matrix': typeof DocsComponentsMatrixRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
-  '/docs/components/story': typeof DocsComponentsStoryRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
   '/docs/components/theme-toggle': typeof DocsComponentsThemeToggleRoute
-  '/docs/components/variants': typeof DocsComponentsVariantsRoute
-  '/docs/functions/all-of': typeof DocsFunctionsAllOfRoute
   '/docs/functions/button-class': typeof DocsFunctionsButtonClassRoute
   '/docs/functions/child-text': typeof DocsFunctionsChildTextRoute
   '/docs/functions/cx': typeof DocsFunctionsCxRoute
-  '/docs/functions/generate': typeof DocsFunctionsGenerateRoute
-  '/docs/functions/get-component-meta': typeof DocsFunctionsGetComponentMetaRoute
   '/docs/functions/props-to-rows': typeof DocsFunctionsPropsToRowsRoute
   '/docs/functions/slugify': typeof DocsFunctionsSlugifyRoute
-  '/docs/functions/values': typeof DocsFunctionsValuesRoute
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
   '/docs/guides/icons': typeof DocsGuidesIconsRoute
-  '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
-  '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
+  '/docs/plugins/ai-instructions': typeof DocsPluginsAiInstructionsRoute
+  '/docs/plugins/overview': typeof DocsPluginsOverviewRoute
+  '/docs/plugins/snippets': typeof DocsPluginsSnippetsRoute
+  '/docs/plugins/stories': typeof DocsPluginsStoriesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -364,30 +324,25 @@ export interface FileRoutesById {
   '/docs/components/layout': typeof DocsComponentsLayoutRoute
   '/docs/components/lead': typeof DocsComponentsLeadRoute
   '/docs/components/link': typeof DocsComponentsLinkRoute
-  '/docs/components/matrix': typeof DocsComponentsMatrixRoute
   '/docs/components/navigation': typeof DocsComponentsNavigationRoute
   '/docs/components/steps': typeof DocsComponentsStepsRoute
-  '/docs/components/story': typeof DocsComponentsStoryRoute
   '/docs/components/tables': typeof DocsComponentsTablesRoute
   '/docs/components/tabs': typeof DocsComponentsTabsRoute
   '/docs/components/theme-toggle': typeof DocsComponentsThemeToggleRoute
-  '/docs/components/variants': typeof DocsComponentsVariantsRoute
-  '/docs/functions/all-of': typeof DocsFunctionsAllOfRoute
   '/docs/functions/button-class': typeof DocsFunctionsButtonClassRoute
   '/docs/functions/child-text': typeof DocsFunctionsChildTextRoute
   '/docs/functions/cx': typeof DocsFunctionsCxRoute
-  '/docs/functions/generate': typeof DocsFunctionsGenerateRoute
-  '/docs/functions/get-component-meta': typeof DocsFunctionsGetComponentMetaRoute
   '/docs/functions/props-to-rows': typeof DocsFunctionsPropsToRowsRoute
   '/docs/functions/slugify': typeof DocsFunctionsSlugifyRoute
-  '/docs/functions/values': typeof DocsFunctionsValuesRoute
   '/docs/getting-started/installation': typeof DocsGettingStartedInstallationRoute
   '/docs/getting-started/introduction': typeof DocsGettingStartedIntroductionRoute
   '/docs/getting-started/quick-start': typeof DocsGettingStartedQuickStartRoute
   '/docs/guides/icons': typeof DocsGuidesIconsRoute
-  '/docs/guides/snippet': typeof DocsGuidesSnippetRoute
-  '/docs/guides/story': typeof DocsGuidesStoryRoute
   '/docs/guides/theming': typeof DocsGuidesThemingRoute
+  '/docs/plugins/ai-instructions': typeof DocsPluginsAiInstructionsRoute
+  '/docs/plugins/overview': typeof DocsPluginsOverviewRoute
+  '/docs/plugins/snippets': typeof DocsPluginsSnippetsRoute
+  '/docs/plugins/stories': typeof DocsPluginsStoriesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -408,30 +363,25 @@ export interface FileRouteTypes {
     | '/docs/components/layout'
     | '/docs/components/lead'
     | '/docs/components/link'
-    | '/docs/components/matrix'
     | '/docs/components/navigation'
     | '/docs/components/steps'
-    | '/docs/components/story'
     | '/docs/components/tables'
     | '/docs/components/tabs'
     | '/docs/components/theme-toggle'
-    | '/docs/components/variants'
-    | '/docs/functions/all-of'
     | '/docs/functions/button-class'
     | '/docs/functions/child-text'
     | '/docs/functions/cx'
-    | '/docs/functions/generate'
-    | '/docs/functions/get-component-meta'
     | '/docs/functions/props-to-rows'
     | '/docs/functions/slugify'
-    | '/docs/functions/values'
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
     | '/docs/guides/icons'
-    | '/docs/guides/snippet'
-    | '/docs/guides/story'
     | '/docs/guides/theming'
+    | '/docs/plugins/ai-instructions'
+    | '/docs/plugins/overview'
+    | '/docs/plugins/snippets'
+    | '/docs/plugins/stories'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -449,30 +399,25 @@ export interface FileRouteTypes {
     | '/docs/components/layout'
     | '/docs/components/lead'
     | '/docs/components/link'
-    | '/docs/components/matrix'
     | '/docs/components/navigation'
     | '/docs/components/steps'
-    | '/docs/components/story'
     | '/docs/components/tables'
     | '/docs/components/tabs'
     | '/docs/components/theme-toggle'
-    | '/docs/components/variants'
-    | '/docs/functions/all-of'
     | '/docs/functions/button-class'
     | '/docs/functions/child-text'
     | '/docs/functions/cx'
-    | '/docs/functions/generate'
-    | '/docs/functions/get-component-meta'
     | '/docs/functions/props-to-rows'
     | '/docs/functions/slugify'
-    | '/docs/functions/values'
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
     | '/docs/guides/icons'
-    | '/docs/guides/snippet'
-    | '/docs/guides/story'
     | '/docs/guides/theming'
+    | '/docs/plugins/ai-instructions'
+    | '/docs/plugins/overview'
+    | '/docs/plugins/snippets'
+    | '/docs/plugins/stories'
   id:
     | '__root__'
     | '/'
@@ -491,30 +436,25 @@ export interface FileRouteTypes {
     | '/docs/components/layout'
     | '/docs/components/lead'
     | '/docs/components/link'
-    | '/docs/components/matrix'
     | '/docs/components/navigation'
     | '/docs/components/steps'
-    | '/docs/components/story'
     | '/docs/components/tables'
     | '/docs/components/tabs'
     | '/docs/components/theme-toggle'
-    | '/docs/components/variants'
-    | '/docs/functions/all-of'
     | '/docs/functions/button-class'
     | '/docs/functions/child-text'
     | '/docs/functions/cx'
-    | '/docs/functions/generate'
-    | '/docs/functions/get-component-meta'
     | '/docs/functions/props-to-rows'
     | '/docs/functions/slugify'
-    | '/docs/functions/values'
     | '/docs/getting-started/installation'
     | '/docs/getting-started/introduction'
     | '/docs/getting-started/quick-start'
     | '/docs/guides/icons'
-    | '/docs/guides/snippet'
-    | '/docs/guides/story'
     | '/docs/guides/theming'
+    | '/docs/plugins/ai-instructions'
+    | '/docs/plugins/overview'
+    | '/docs/plugins/snippets'
+    | '/docs/plugins/stories'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -545,25 +485,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof DocsRouteRoute
     }
+    '/docs/plugins/stories': {
+      id: '/docs/plugins/stories'
+      path: '/plugins/stories'
+      fullPath: '/docs/plugins/stories'
+      preLoaderRoute: typeof DocsPluginsStoriesRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/plugins/snippets': {
+      id: '/docs/plugins/snippets'
+      path: '/plugins/snippets'
+      fullPath: '/docs/plugins/snippets'
+      preLoaderRoute: typeof DocsPluginsSnippetsRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/plugins/overview': {
+      id: '/docs/plugins/overview'
+      path: '/plugins/overview'
+      fullPath: '/docs/plugins/overview'
+      preLoaderRoute: typeof DocsPluginsOverviewRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
+    '/docs/plugins/ai-instructions': {
+      id: '/docs/plugins/ai-instructions'
+      path: '/plugins/ai-instructions'
+      fullPath: '/docs/plugins/ai-instructions'
+      preLoaderRoute: typeof DocsPluginsAiInstructionsRouteImport
+      parentRoute: typeof DocsRouteRoute
+    }
     '/docs/guides/theming': {
       id: '/docs/guides/theming'
       path: '/guides/theming'
       fullPath: '/docs/guides/theming'
       preLoaderRoute: typeof DocsGuidesThemingRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/guides/story': {
-      id: '/docs/guides/story'
-      path: '/guides/story'
-      fullPath: '/docs/guides/story'
-      preLoaderRoute: typeof DocsGuidesStoryRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/guides/snippet': {
-      id: '/docs/guides/snippet'
-      path: '/guides/snippet'
-      fullPath: '/docs/guides/snippet'
-      preLoaderRoute: typeof DocsGuidesSnippetRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/guides/icons': {
@@ -594,13 +548,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsGettingStartedInstallationRouteImport
       parentRoute: typeof DocsRouteRoute
     }
-    '/docs/functions/values': {
-      id: '/docs/functions/values'
-      path: '/functions/values'
-      fullPath: '/docs/functions/values'
-      preLoaderRoute: typeof DocsFunctionsValuesRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
     '/docs/functions/slugify': {
       id: '/docs/functions/slugify'
       path: '/functions/slugify'
@@ -613,20 +560,6 @@ declare module '@tanstack/react-router' {
       path: '/functions/props-to-rows'
       fullPath: '/docs/functions/props-to-rows'
       preLoaderRoute: typeof DocsFunctionsPropsToRowsRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/functions/get-component-meta': {
-      id: '/docs/functions/get-component-meta'
-      path: '/functions/get-component-meta'
-      fullPath: '/docs/functions/get-component-meta'
-      preLoaderRoute: typeof DocsFunctionsGetComponentMetaRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/functions/generate': {
-      id: '/docs/functions/generate'
-      path: '/functions/generate'
-      fullPath: '/docs/functions/generate'
-      preLoaderRoute: typeof DocsFunctionsGenerateRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/functions/cx': {
@@ -650,20 +583,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsFunctionsButtonClassRouteImport
       parentRoute: typeof DocsRouteRoute
     }
-    '/docs/functions/all-of': {
-      id: '/docs/functions/all-of'
-      path: '/functions/all-of'
-      fullPath: '/docs/functions/all-of'
-      preLoaderRoute: typeof DocsFunctionsAllOfRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/components/variants': {
-      id: '/docs/components/variants'
-      path: '/components/variants'
-      fullPath: '/docs/components/variants'
-      preLoaderRoute: typeof DocsComponentsVariantsRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
     '/docs/components/theme-toggle': {
       id: '/docs/components/theme-toggle'
       path: '/components/theme-toggle'
@@ -685,13 +604,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsComponentsTablesRouteImport
       parentRoute: typeof DocsRouteRoute
     }
-    '/docs/components/story': {
-      id: '/docs/components/story'
-      path: '/components/story'
-      fullPath: '/docs/components/story'
-      preLoaderRoute: typeof DocsComponentsStoryRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
     '/docs/components/steps': {
       id: '/docs/components/steps'
       path: '/components/steps'
@@ -704,13 +616,6 @@ declare module '@tanstack/react-router' {
       path: '/components/navigation'
       fullPath: '/docs/components/navigation'
       preLoaderRoute: typeof DocsComponentsNavigationRouteImport
-      parentRoute: typeof DocsRouteRoute
-    }
-    '/docs/components/matrix': {
-      id: '/docs/components/matrix'
-      path: '/components/matrix'
-      fullPath: '/docs/components/matrix'
-      preLoaderRoute: typeof DocsComponentsMatrixRouteImport
       parentRoute: typeof DocsRouteRoute
     }
     '/docs/components/link': {
@@ -822,30 +727,25 @@ interface DocsRouteRouteChildren {
   DocsComponentsLayoutRoute: typeof DocsComponentsLayoutRoute
   DocsComponentsLeadRoute: typeof DocsComponentsLeadRoute
   DocsComponentsLinkRoute: typeof DocsComponentsLinkRoute
-  DocsComponentsMatrixRoute: typeof DocsComponentsMatrixRoute
   DocsComponentsNavigationRoute: typeof DocsComponentsNavigationRoute
   DocsComponentsStepsRoute: typeof DocsComponentsStepsRoute
-  DocsComponentsStoryRoute: typeof DocsComponentsStoryRoute
   DocsComponentsTablesRoute: typeof DocsComponentsTablesRoute
   DocsComponentsTabsRoute: typeof DocsComponentsTabsRoute
   DocsComponentsThemeToggleRoute: typeof DocsComponentsThemeToggleRoute
-  DocsComponentsVariantsRoute: typeof DocsComponentsVariantsRoute
-  DocsFunctionsAllOfRoute: typeof DocsFunctionsAllOfRoute
   DocsFunctionsButtonClassRoute: typeof DocsFunctionsButtonClassRoute
   DocsFunctionsChildTextRoute: typeof DocsFunctionsChildTextRoute
   DocsFunctionsCxRoute: typeof DocsFunctionsCxRoute
-  DocsFunctionsGenerateRoute: typeof DocsFunctionsGenerateRoute
-  DocsFunctionsGetComponentMetaRoute: typeof DocsFunctionsGetComponentMetaRoute
   DocsFunctionsPropsToRowsRoute: typeof DocsFunctionsPropsToRowsRoute
   DocsFunctionsSlugifyRoute: typeof DocsFunctionsSlugifyRoute
-  DocsFunctionsValuesRoute: typeof DocsFunctionsValuesRoute
   DocsGettingStartedInstallationRoute: typeof DocsGettingStartedInstallationRoute
   DocsGettingStartedIntroductionRoute: typeof DocsGettingStartedIntroductionRoute
   DocsGettingStartedQuickStartRoute: typeof DocsGettingStartedQuickStartRoute
   DocsGuidesIconsRoute: typeof DocsGuidesIconsRoute
-  DocsGuidesSnippetRoute: typeof DocsGuidesSnippetRoute
-  DocsGuidesStoryRoute: typeof DocsGuidesStoryRoute
   DocsGuidesThemingRoute: typeof DocsGuidesThemingRoute
+  DocsPluginsAiInstructionsRoute: typeof DocsPluginsAiInstructionsRoute
+  DocsPluginsOverviewRoute: typeof DocsPluginsOverviewRoute
+  DocsPluginsSnippetsRoute: typeof DocsPluginsSnippetsRoute
+  DocsPluginsStoriesRoute: typeof DocsPluginsStoriesRoute
 }
 
 const DocsRouteRouteChildren: DocsRouteRouteChildren = {
@@ -863,30 +763,25 @@ const DocsRouteRouteChildren: DocsRouteRouteChildren = {
   DocsComponentsLayoutRoute: DocsComponentsLayoutRoute,
   DocsComponentsLeadRoute: DocsComponentsLeadRoute,
   DocsComponentsLinkRoute: DocsComponentsLinkRoute,
-  DocsComponentsMatrixRoute: DocsComponentsMatrixRoute,
   DocsComponentsNavigationRoute: DocsComponentsNavigationRoute,
   DocsComponentsStepsRoute: DocsComponentsStepsRoute,
-  DocsComponentsStoryRoute: DocsComponentsStoryRoute,
   DocsComponentsTablesRoute: DocsComponentsTablesRoute,
   DocsComponentsTabsRoute: DocsComponentsTabsRoute,
   DocsComponentsThemeToggleRoute: DocsComponentsThemeToggleRoute,
-  DocsComponentsVariantsRoute: DocsComponentsVariantsRoute,
-  DocsFunctionsAllOfRoute: DocsFunctionsAllOfRoute,
   DocsFunctionsButtonClassRoute: DocsFunctionsButtonClassRoute,
   DocsFunctionsChildTextRoute: DocsFunctionsChildTextRoute,
   DocsFunctionsCxRoute: DocsFunctionsCxRoute,
-  DocsFunctionsGenerateRoute: DocsFunctionsGenerateRoute,
-  DocsFunctionsGetComponentMetaRoute: DocsFunctionsGetComponentMetaRoute,
   DocsFunctionsPropsToRowsRoute: DocsFunctionsPropsToRowsRoute,
   DocsFunctionsSlugifyRoute: DocsFunctionsSlugifyRoute,
-  DocsFunctionsValuesRoute: DocsFunctionsValuesRoute,
   DocsGettingStartedInstallationRoute: DocsGettingStartedInstallationRoute,
   DocsGettingStartedIntroductionRoute: DocsGettingStartedIntroductionRoute,
   DocsGettingStartedQuickStartRoute: DocsGettingStartedQuickStartRoute,
   DocsGuidesIconsRoute: DocsGuidesIconsRoute,
-  DocsGuidesSnippetRoute: DocsGuidesSnippetRoute,
-  DocsGuidesStoryRoute: DocsGuidesStoryRoute,
   DocsGuidesThemingRoute: DocsGuidesThemingRoute,
+  DocsPluginsAiInstructionsRoute: DocsPluginsAiInstructionsRoute,
+  DocsPluginsOverviewRoute: DocsPluginsOverviewRoute,
+  DocsPluginsSnippetsRoute: DocsPluginsSnippetsRoute,
+  DocsPluginsStoriesRoute: DocsPluginsStoriesRoute,
 }
 
 const DocsRouteRouteWithChildren = DocsRouteRoute._addFileChildren(

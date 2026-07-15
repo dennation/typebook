@@ -27,10 +27,18 @@ export const GETTING_STARTED = defineMenu<DocsMeta | undefined>({
 	"/docs/getting-started/quick-start": { title: "Quick Start" },
 });
 
+export const PLUGINS = defineMenu<DocsMeta | undefined>({
+	"/docs/plugins/overview": { title: "Overview" },
+	"/docs/plugins/stories": { title: "Stories" },
+	"/docs/plugins/ai-instructions": {
+		title: "AI Instructions",
+		meta: { badge: "new" },
+	},
+	"/docs/plugins/snippets": { title: "Snippets" },
+});
+
 export const GUIDES = defineMenu<DocsMeta | undefined>({
 	"/docs/guides/theming": { title: "Theming" },
-	"/docs/guides/story": { title: "Rendering stories" },
-	"/docs/guides/snippet": { title: "Live snippets" },
 	"/docs/guides/icons": { title: "Icons" },
 });
 
@@ -59,10 +67,6 @@ export const COMPONENTS = defineMenu<DocsMeta | undefined>({
 });
 
 export const FUNCTIONS = defineMenu<DocsMeta | undefined>({
-	"/docs/functions/get-component-meta": { title: "getComponentMeta" },
-	"/docs/functions/all-of": { title: "allOf" },
-	"/docs/functions/values": { title: "values" },
-	"/docs/functions/generate": { title: "generate" },
 	"/docs/functions/props-to-rows": { title: "propsToRows" },
 	"/docs/functions/slugify": { title: "slugify" },
 	"/docs/functions/child-text": { title: "childText" },
@@ -73,6 +77,7 @@ export const FUNCTIONS = defineMenu<DocsMeta | undefined>({
 /** Sidebar sections, paired with their label for breadcrumb/title lookup. */
 export const SECTIONS: { label: string; menu: Menu<DocsMeta | undefined> }[] = [
 	{ label: "Getting Started", menu: GETTING_STARTED },
+	{ label: "Plugins", menu: PLUGINS },
 	{ label: "Guides", menu: GUIDES },
 	{ label: "Components", menu: COMPONENTS },
 	{ label: "Functions", menu: FUNCTIONS },
@@ -115,6 +120,30 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		title: "Quick Start",
 		section: "Getting Started",
 		desc: "getComponentMeta() to register a component and render its stories",
+	},
+	{
+		slug: "plugins/overview",
+		title: "Overview",
+		section: "Plugins",
+		desc: "The typebook() plugin, the components scan, and the sub-plugin model",
+	},
+	{
+		slug: "plugins/stories",
+		title: "Stories",
+		section: "Plugins",
+		desc: "defineStories → Story, Variants and Matrix with the component baked in",
+	},
+	{
+		slug: "plugins/ai-instructions",
+		title: "AI Instructions",
+		section: "Plugins",
+		desc: "Generate Markdown component docs for AI agents from the scan",
+	},
+	{
+		slug: "plugins/snippets",
+		title: "Snippets",
+		section: "Plugins",
+		desc: "Live example with a show-source toggle, injected at build time",
 	},
 	{
 		slug: "guides/theming",
@@ -279,30 +308,6 @@ export const SEARCH_INDEX: SearchEntry[] = [
 		title: "ErrorBoundary",
 		section: "Components",
 		desc: "Catch render errors in a subtree and show a fallback",
-	},
-	{
-		slug: "functions/get-component-meta",
-		title: "getComponentMeta",
-		section: "Functions",
-		desc: "Register a component and return a self-contained handle",
-	},
-	{
-		slug: "functions/all-of",
-		title: "allOf",
-		section: "Functions",
-		desc: "Build a variant axis from a prop's literal-union or boolean type",
-	},
-	{
-		slug: "functions/values",
-		title: "values",
-		section: "Functions",
-		desc: "Build a variant axis from an explicit list of values",
-	},
-	{
-		slug: "functions/generate",
-		title: "generate",
-		section: "Functions",
-		desc: "Build a variant axis from a generator function",
 	},
 	{
 		slug: "functions/props-to-rows",

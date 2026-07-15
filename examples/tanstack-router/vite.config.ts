@@ -1,3 +1,4 @@
+import { snippets } from "@dennation/typebook/plugins/snippets";
 import { typebook } from "@dennation/typebook/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
@@ -11,7 +12,7 @@ export default defineConfig({
 			generatedRouteTree: "./src/route-tree.gen.ts",
 			autoCodeSplitting: true,
 		}),
-		typebook(),
+		typebook({ plugins: [snippets()] }),
 		react(),
 	],
 });

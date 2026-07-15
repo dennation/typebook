@@ -2,7 +2,7 @@ import {
 	Breadcrumbs,
 	Callout,
 	CodeBlock,
-	getComponentMeta,
+	defineStories,
 	Heading,
 	InlineCode,
 	Lead,
@@ -15,8 +15,8 @@ import { IconBrandReact } from "@tabler/icons-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const breadcrumbsMeta = getComponentMeta(Breadcrumbs);
-const prevNextNavMeta = getComponentMeta(PrevNextNav);
+const breadcrumbsMeta = defineStories(Breadcrumbs);
+const prevNextNavMeta = defineStories(PrevNextNav);
 
 function PageNavigation() {
 	return (

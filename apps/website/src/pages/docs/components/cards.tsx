@@ -1,7 +1,7 @@
 import {
 	Cards,
 	DocCard,
-	getComponentMeta,
+	defineStories,
 	Heading,
 	InlineCode,
 	Lead,
@@ -14,7 +14,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Palette, Zap } from "lucide-react";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const meta = getComponentMeta(DocCard);
+const meta = defineStories(DocCard);
 
 function PageCards() {
 	const navigate = useNavigate();

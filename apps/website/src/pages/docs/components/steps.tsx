@@ -1,6 +1,6 @@
 import {
 	CodeBlock,
-	getComponentMeta,
+	defineStories,
 	Heading,
 	InlineCode,
 	Lead,
@@ -14,7 +14,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { DocsFooter } from "../../../widgets/docs/DocsFooter";
 
-const meta = getComponentMeta(Step);
+const meta = defineStories(Step);
 
 function PageSteps() {
 	return (

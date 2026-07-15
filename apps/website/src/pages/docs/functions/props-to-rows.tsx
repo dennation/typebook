@@ -48,7 +48,7 @@ function PagePropsToRows() {
 						name: "props",
 						type: "PropInfo[]",
 						required: true,
-						desc: "The extracted prop metadata — usually handle.props from getComponentMeta.",
+						desc: "The extracted prop metadata — usually the props from defineStories.",
 					},
 					{
 						name: "includeInherited",
@@ -72,16 +72,16 @@ function PagePropsToRows() {
 			<Heading level={2}>Example</Heading>
 			<CodeBlock.Root>
 				<CodeBlock.Tab file="button.tsx" lang="tsx">{`import {
-  getComponentMeta,
+  defineStories,
   propsToRows,
   PropsReference,
 } from "@dennation/typebook/react"
 import { Button } from "../components/Button"
 
-const button = getComponentMeta(Button)
+const ButtonStories = defineStories(Button)
 
 // auto props table from the component's types
-<PropsReference props={propsToRows(button.props)} />`}</CodeBlock.Tab>
+<PropsReference props={propsToRows(ButtonStories.props)} />`}</CodeBlock.Tab>
 			</CodeBlock.Root>
 
 			<Heading level={2}>Notes</Heading>
@@ -101,14 +101,14 @@ const button = getComponentMeta(Button)
 				/>
 				<DocCard
 					icon={<SquareStack size={20} />}
-					title="getComponentMeta"
-					desc="The handle whose props this maps."
-					onClick={() => navigate({ to: "/docs/functions/get-component-meta" })}
+					title="Stories"
+					desc="defineStories, whose props this maps."
+					onClick={() => navigate({ to: "/docs/plugins/stories" })}
 				/>
 			</Cards>
 
 			<DocsFooter
-				prev={{ to: "/docs/functions/generate", title: "generate" }}
+				prev={{ to: "/docs/plugins/stories", title: "Stories" }}
 				next={{ to: "/docs/functions/slugify", title: "slugify" }}
 			/>
 		</>
