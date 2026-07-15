@@ -2,6 +2,7 @@
 	"name": "@dennation/typebook",
 	"version": "0.0.0",
 	"description": "Scan React components' TypeScript prop types with a bundler plugin and generate documentation — AI-agent instructions and more, no codegen files",
+	"license": "MIT",
 	"type": "module",
 	"bin": {
 		"typebook": "./dist/cli/index.mjs"

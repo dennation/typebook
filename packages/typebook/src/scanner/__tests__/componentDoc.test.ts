@@ -51,6 +51,12 @@ describe("getComponentDoc", () => {
 		expect(doc.deprecated).toBe("use `Action` instead");
 	});
 
+	test("pulls the component-level @remarks usage guidance", () => {
+		expect(doc.remarks).toBe(
+			"Use for the main action only; don't nest buttons.",
+		);
+	});
+
 	test("still extracts props", () => {
 		expect(doc.props.map((p) => p.name)).toContain("size");
 	});
@@ -95,6 +101,7 @@ describe("componentToMarkdown", () => {
 		name: "Button",
 		file: "/x/Button.tsx",
 		description: "Primary action button.",
+		remarks: "Use for the main action; don't nest buttons.",
 		deprecated: "use `Action`",
 		props: [
 			{
@@ -137,6 +144,15 @@ describe("componentToMarkdown", () => {
 		expect(componentToMarkdown(doc, { includeInherited: true })).toContain(
 			"`className`",
 		);
+	});
+
+	test("renders the import statement and @remarks usage section", () => {
+		const md = componentToMarkdown(doc, {
+			importStatement: 'import { Button } from "@acme/ui";',
+		});
+		expect(md).toContain('import { Button } from "@acme/ui";');
+		expect(md).toContain("**Usage**");
+		expect(md).toContain("don't nest buttons");
 	});
 });
 

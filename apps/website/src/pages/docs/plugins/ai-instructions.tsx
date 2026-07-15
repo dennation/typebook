@@ -50,7 +50,9 @@ typebook({
 				note, and a props table — plus an <InlineCode>index.md</InlineCode> that
 				lists every component. Point your agent's memory (
 				<InlineCode>CLAUDE.md</InlineCode>, <InlineCode>AGENTS.md</InlineCode>)
-				at the index; it reads the card it needs on demand.
+				at the index; it reads the card it needs on demand. Each card leads with
+				the exact import and the component's @remarks usage notes; the index and
+				full file follow the llms.txt convention (llms.txt + llms-full.txt).
 			</Paragraph>
 			<CodeBlock.Root>
 				<CodeBlock.Tab file=".ai/components/Button.md" lang="md">
@@ -81,10 +83,34 @@ Primary call-to-action button.
 						desc: 'Where each card goes. A string is a directory ("{out}/{name}.md"); a function returns the full path per component (e.g. next to its source). Default ".ai/components".',
 					},
 					{
+						name: "importFrom",
+						type: "string | (doc) => string",
+						required: false,
+						desc: 'Module each component is imported from — prints an import line in every card (e.g. "@acme/ui"). Omit to skip it.',
+					},
+					{
+						name: "title",
+						type: "string",
+						required: false,
+						desc: 'H1 title of the index and full file. Default "Components".',
+					},
+					{
+						name: "description",
+						type: "string",
+						required: false,
+						desc: "Blockquote summary under the title (the llms.txt project summary).",
+					},
+					{
 						name: "indexFile",
 						type: "string | false",
 						required: false,
-						desc: "Path of the index listing every component. Default: index.md inside out. false to skip it.",
+						desc: "Path of the llms.txt index. Default: llms.txt inside out. false to skip it.",
+					},
+					{
+						name: "fullFile",
+						type: "string | false",
+						required: false,
+						desc: "Path of the concatenated llms-full.txt. Default: inside out. false to skip it.",
 					},
 					{
 						name: "includeInherited",

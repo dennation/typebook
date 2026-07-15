@@ -238,6 +238,8 @@ export class TypeScriptClient {
 		};
 		const description = getSymbolDescription(checker, resolved);
 		if (description) info.description = description;
+		const remarks = getSymbolRemarks(checker, resolved);
+		if (remarks) info.remarks = remarks;
 		const deprecated = getSymbolDeprecation(checker, resolved);
 		if (deprecated !== undefined) info.deprecated = deprecated;
 		return { ...info, props };
@@ -340,6 +342,8 @@ export class TypeScriptClient {
 
 		const description = getSymbolDescription(checker, resolved);
 		if (description) info.description = description;
+		const remarks = getSymbolRemarks(checker, resolved);
+		if (remarks) info.remarks = remarks;
 		const deprecated = getSymbolDeprecation(checker, resolved);
 		if (deprecated !== undefined) info.deprecated = deprecated;
 		return info;
@@ -714,6 +718,14 @@ function isReactReturnType(checker: ts.TypeChecker, type: ts.Type): boolean {
 	return /\b(ReactElement|ReactNode|ReactPortal|JSX\.Element|Element)\b/.test(
 		s,
 	);
+}
+
+/** Read a symbol's `@remarks` JSDoc tag (usage guidance / do-don't), or "" when absent. */
+function getSymbolRemarks(checker: ts.TypeChecker, symbol: ts.Symbol): string {
+	for (const tag of symbol.getJsDocTags(checker)) {
+		if (tag.name === "remarks") return ts.displayPartsToString(tag.text).trim();
+	}
+	return "";
 }
 
 /**

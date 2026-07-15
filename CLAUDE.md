@@ -71,7 +71,9 @@ packages/typebook/
                                 → generate sub-plugins; and per-module transform (one parse → injectMetaProps +
                                 transform sub-plugins → applyEdits). Resolves `components` glob via fs.globSync.
       snippets.ts             — snippets() transform sub-plugin (<Snippet> injection) + SnippetNotInlineError. Opt-in.
-      aiInstructions.ts       — aiInstructions() generate sub-plugin: ComponentDoc[] → Markdown cards + index
+      aiInstructions.ts       — aiInstructions() generate sub-plugin: ComponentDoc[] → per-component Markdown
+                                cards (import line + description + @remarks usage + props table) + an llms.txt
+                                index + llms-full.txt (follows the llms.txt convention)
       vite.ts                 — typebook() Vite plugin
       rollup.ts               — typebook() Rollup plugin
       rolldown.ts             — typebook() Rolldown plugin

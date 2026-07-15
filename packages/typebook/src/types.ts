@@ -117,6 +117,11 @@ export interface ComponentDoc {
 	file: string;
 	/** JSDoc prose above the component declaration, if any. */
 	description?: string;
+	/**
+	 * Usage guidance from the component's `@remarks` JSDoc tag — do/don't notes, composition
+	 * rules, constraints. Surfaced to AI agents so they have fewer ways to misuse the component.
+	 */
+	remarks?: string;
 	/** `@deprecated` on the component: the tag's note, `true` for a bare tag, absent otherwise. */
 	deprecated?: boolean | string;
 	props: PropInfo[];
