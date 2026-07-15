@@ -13,9 +13,9 @@ export default defineConfig({
 		lib: {
 			entry: {
 				index: resolve(__dirname, "src/index.ts"),
-				"plugins/aiInstructions": resolve(
+				"plugins/llmInstructions": resolve(
 					__dirname,
-					"src/plugins/aiInstructions.ts",
+					"src/plugins/llmInstructions.ts",
 				),
 				"plugins/vite": resolve(__dirname, "src/plugins/vite.ts"),
 				"plugins/rollup": resolve(__dirname, "src/plugins/rollup.ts"),

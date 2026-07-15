@@ -2,7 +2,7 @@ import path from "node:path";
 import { componentToMarkdown } from "../scanner";
 import type { ComponentDoc, GenerateCtx, TypebookPlugin } from "../types";
 
-export interface AiInstructionsOptions {
+export interface LlmInstructionsOptions {
 	/**
 	 * Where each component's Markdown card goes. A **string** is a directory —
 	 * `{out}/{name}.md`. A **function** returns the full path per component, so cards can
@@ -35,8 +35,8 @@ const DEFAULT_DIR = ".ai/components";
  * description, usage guidance, deprecation, props table), an `llms.txt` index, and a single
  * `llms-full.txt`. Regenerated in full on every scan (build once, dev on change).
  */
-export function aiInstructions(
-	options: AiInstructionsOptions = {},
+export function llmInstructions(
+	options: LlmInstructionsOptions = {},
 ): TypebookPlugin {
 	const {
 		out = DEFAULT_DIR,
@@ -65,7 +65,7 @@ export function aiInstructions(
 	const fullFile = options.fullFile ?? `${baseDir}/llms-full.txt`;
 
 	return {
-		name: "ai-instructions",
+		name: "llm-instructions",
 		async generate(docs, ctx) {
 			await Promise.all(
 				docs.map((doc) => ctx.writeFile(cardPath(doc), renderCard(doc))),

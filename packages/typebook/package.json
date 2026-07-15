@@ -12,9 +12,9 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.mjs"
 		},
-		"./plugins/ai-instructions": {
-			"types": "./dist/plugins/aiInstructions.d.ts",
-			"import": "./dist/plugins/aiInstructions.mjs"
+		"./plugins/llm-instructions": {
+			"types": "./dist/plugins/llmInstructions.d.ts",
+			"import": "./dist/plugins/llmInstructions.mjs"
 		},
 		"./vite": {
 			"types": "./dist/plugins/vite.d.ts",
