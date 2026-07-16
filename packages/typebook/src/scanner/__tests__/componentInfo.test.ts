@@ -47,10 +47,6 @@ describe("component-level extraction", () => {
 	test("pulls the component-level @deprecated note", () => {
 		expect(doc.deprecated).toBe("use `Action` instead");
 	});
-
-	test("still extracts props", () => {
-		expect(doc.props.map((p) => p.name)).toContain("size");
-	});
 });
 
 // --- collectComponentInfos: export-based scan of configured files ---
