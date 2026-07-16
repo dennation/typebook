@@ -9,6 +9,10 @@
 // ── React-free metadata types the scanner produces ──────────────────────────
 export type { ComponentInfo, PropGroup, PropInfo, PropType } from "../types";
 // ── Component extraction ─────────────────────────────────────────────────────
+export { classifyPropGroup } from "./classifyPropGroup";
 export { collectComponentInfos } from "./collectComponentInfos";
-export { classifyPropGroup } from "./propGroup";
+export {
+	type ResolvedConfigComponent,
+	resolveConfigComponents,
+} from "./resolveConfigComponents";
 export { TypeScriptClient } from "./ts-client";

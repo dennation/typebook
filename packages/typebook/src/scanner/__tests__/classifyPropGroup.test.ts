@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { classifyPropGroup } from "../propGroup";
+import { classifyPropGroup } from "../classifyPropGroup";
 
 describe("classifyPropGroup", () => {
 	test("ARIA: role and aria-* → aria", () => {
