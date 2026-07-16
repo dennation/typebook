@@ -34,7 +34,9 @@ export interface LlmInstructionsOptions {
  * Output locations are explicit: `out` and `indexFile` are required (pass `false` to
  * `indexFile` to skip the index) — the plugin writes nowhere by default.
  */
-export function llmInstructions(options: LlmInstructionsOptions): TypebookPlugin {
+export function llmInstructions(
+	options: LlmInstructionsOptions,
+): TypebookPlugin {
 	const {
 		out,
 		indexFile,
