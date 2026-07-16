@@ -1,4 +1,4 @@
-import type { PropGroup, PropInfo } from "./types";
+import type { PropGroup, PropInfo } from "../../types";
 
 /**
  * Groups hidden by default: ARIA, React internals (`ref`/`key`/…), capture-phase events, microdata,

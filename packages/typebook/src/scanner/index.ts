@@ -11,8 +11,4 @@ export type { ComponentInfo, PropGroup, PropInfo, PropType } from "../types";
 // ── Component extraction ─────────────────────────────────────────────────────
 export { classifyPropGroup } from "./classifyPropGroup";
 export { collectComponentInfos } from "./collectComponentInfos";
-export {
-	type ResolvedConfigComponent,
-	resolveConfigComponents,
-} from "./resolveConfigComponents";
 export { TypeScriptClient } from "./ts-client";

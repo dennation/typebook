@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { visibleProps } from "../propPolicy";
-import type { PropInfo } from "../types";
+import { visibleProps } from "../llm-instructions/propPolicy";
+import type { PropInfo } from "../../types";
 
 const prop = (name: string, group?: PropInfo["group"]): PropInfo => ({
 	name,

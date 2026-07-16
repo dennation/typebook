@@ -6,18 +6,6 @@ export interface TypebookConfig {
 	 */
 	components?: string | string[];
 	/**
-	 * Path to a `typebook.config.ts` listing components as imported references (type-checked). When
-	 * present it drives the scan instead of `components` globs. Omit to auto-discover
-	 * `typebook.config.{ts,mts,cts,js,mjs,cjs}` at the project root.
-	 */
-	configFile?: string;
-	/**
-	 * Standard prop groups to hide by default in every component (see {@link PropGroup}). Overrides
-	 * the built-in `DEFAULT_HIDDEN_GROUPS`. Per-component `hideGroups` in `typebook.config.ts` add to
-	 * this; `omit`/`pick` there refine individual props.
-	 */
-	hideGroups?: PropGroup[];
-	/**
 	 * Sub-plugins that consume the project scan (e.g. `llmInstructions()`). Each `generate` runs
 	 * after every scan with the full set of components — build once, dev on change.
 	 */
