@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import ts from "typescript";
 import { DEFAULT_INHERITED_PROVIDERS, LOG_PREFIX } from "../constants";
 import type { ComponentInfo, PropInfo, PropType } from "../types";
+import { classifyPropGroup } from "./propGroup";
 
 export class TypeScriptClient {
 	private service: ts.LanguageService | null = null;
@@ -206,7 +207,13 @@ export class TypeScriptClient {
 		const defaults = this.getParamDefaultProps(checker, componentNode);
 		return props.map((p) => {
 			let next = p;
-			if (inherited.has(p.name)) next = { ...next, inherited: true };
+			// Origin gates classification: only framework-inherited attributes get a standard
+			// `group` (by name); a component's own prop stays ungrouped (its distinctive API).
+			if (inherited.has(p.name)) {
+				next = { ...next, inherited: true };
+				const group = classifyPropGroup(p.name);
+				if (group) next = { ...next, group };
+			}
 			const def = defaults.get(p.name);
 			if (def !== undefined) next = { ...next, defaultValue: def };
 			return next;

@@ -173,6 +173,34 @@ describe("inheritance: extends", () => {
 	});
 });
 
+describe("group: origin-gated standard classification", () => {
+	let props: PropInfo[];
+
+	beforeAll(async () => {
+		props = (await extractProps(
+			"components/WithGroupedAttrs.tsx",
+			"WithGroupedAttrs",
+		))!;
+	});
+
+	test("inherited HTML attrs get their standard group", () => {
+		expect(findProp(props, "id")!.group).toBe("global");
+		expect(findProp(props, "disabled")!.group).toBe("element");
+		expect(findProp(props, "onClick")!.group).toBe("event:mouse");
+		expect(findProp(props, "onClickCapture")!.group).toBe("capture");
+	});
+
+	test("own props are ungrouped even when the name collides with a standard attribute", () => {
+		const size = findProp(props, "size")!;
+		expect(size.inherited).toBeUndefined();
+		expect(size.group).toBeUndefined(); // `size` is an HTML attr name, but this one is own
+	});
+
+	test("own on* callback is ungrouped (not a DOM event)", () => {
+		expect(findProp(props, "onValueChange")!.group).toBeUndefined();
+	});
+});
+
 describe("inheritance: intersection", () => {
 	let props: PropInfo[];
 

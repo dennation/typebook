@@ -48,12 +48,52 @@ export type PropType =
 	| { kind: "function"; raw?: string }
 	| { kind: "unknown"; raw: string };
 
+/**
+ * Standard attribute/event group a prop's name belongs to, grounded in the specs mirrored by
+ * `@types/react` (WAI-ARIA, WHATWG global & per-element attributes, HTML microdata/RDFa, SVG, and
+ * the DOM event categories). `undefined` for a component's own (non-standard) prop. Lets a consumer
+ * decide per group which props to surface (e.g. hide `aria`/`event:media`, keep `element`).
+ */
+export type PropGroup =
+	| "aria"
+	| "global"
+	| "element"
+	| "microdata"
+	| "rdfa"
+	| "data"
+	| "svg"
+	| "react"
+	| "event:mouse"
+	| "event:keyboard"
+	| "event:focus"
+	| "event:form"
+	| "event:pointer"
+	| "event:touch"
+	| "event:drag"
+	| "event:wheel"
+	| "event:scroll"
+	| "event:clipboard"
+	| "event:composition"
+	| "event:selection"
+	| "event:media"
+	| "event:image"
+	| "event:animation"
+	| "event:transition"
+	| "event:toggle"
+	| "capture";
+
 export interface PropInfo {
 	name: string;
 	optional: boolean;
 	type: PropType;
 	/** When true, the prop is inherited from framework types (e.g. React.HTMLAttributes) */
 	inherited?: boolean;
+	/**
+	 * Standard group this prop's name belongs to (see {@link PropGroup}), or absent when the name
+	 * isn't a recognised standard attribute (the component's own API). Classified by name, so it's
+	 * the same whether the attribute is inherited or declared manually.
+	 */
+	group?: PropGroup;
 	/**
 	 * Source text of the default value from the component's parameter destructuring
 	 * (e.g. `function Btn({ size = 'md' })` → `"'md'"`). Raw expression as written —
