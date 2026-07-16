@@ -6,16 +6,14 @@ import { formatPropType } from "./formatPropType";
  * description, usage guidance (`@remarks`), deprecation note, and a props table. Intended as
  * AI-agent context (Claude Code / Codex), so it stays plain and link-free.
  *
- * Inherited props (framework DOM attributes like `React.HTMLAttributes`) are hidden by
- * default — an agent wants the component's own API, not 200 passthrough attributes.
+ * Renders exactly the props it's given — which props to surface (the group policy + `omit`/`pick`)
+ * is decided upstream (see `visibleProps`), so a card just presents the already-filtered set.
  */
 export function componentToMarkdown(
 	doc: ComponentInfo,
-	options: { includeInherited?: boolean; importStatement?: string } = {},
+	options: { importStatement?: string } = {},
 ): string {
-	const props = options.includeInherited
-		? doc.props
-		: doc.props.filter((p) => !p.inheritedFrom);
+	const props = doc.props;
 
 	const parts = [`## ${doc.name}`];
 	if (doc.description) parts.push(doc.description);

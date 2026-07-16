@@ -47,11 +47,9 @@ describe("componentToMarkdown", () => {
 		);
 	});
 
-	test("hides inherited props by default, shows them on request", () => {
-		expect(componentToMarkdown(doc)).not.toContain("`className`");
-		expect(componentToMarkdown(doc, { includeInherited: true })).toContain(
-			"`className`",
-		);
+	test("renders exactly the props it's given (filtering happens upstream)", () => {
+		// `className` here is inheritedFrom @types/react but present in doc.props → it's rendered
+		expect(componentToMarkdown(doc)).toContain("`className`");
 	});
 
 	test("renders the import statement and @remarks usage section", () => {

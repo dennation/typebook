@@ -21,8 +21,6 @@ export interface LlmInstructionsOptions {
 	title?: string;
 	/** Blockquote summary under the title (the `llms.txt` project summary). Optional. */
 	description?: string;
-	/** Include framework-inherited props (DOM attributes) in each card. Default: false. */
-	includeInherited?: boolean;
 }
 
 /**
@@ -43,7 +41,6 @@ export function llmInstructions(
 		importFrom,
 		title = "Components",
 		description,
-		includeInherited,
 	} = options;
 
 	const cardPath = (doc: ComponentInfo): string =>
@@ -55,10 +52,7 @@ export function llmInstructions(
 		return src ? `import { ${doc.name} } from "${src}";` : undefined;
 	};
 	const renderCard = (doc: ComponentInfo): string =>
-		componentToMarkdown(doc, {
-			includeInherited,
-			importStatement: importStatement(doc),
-		});
+		componentToMarkdown(doc, { importStatement: importStatement(doc) });
 
 	return {
 		name: "llm-instructions",

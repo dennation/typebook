@@ -1,8 +1,16 @@
 import { resolve } from "node:path";
 import ts from "typescript";
+import type { ComponentSettings } from "../config";
 import { DEFAULT_INHERITED_PROVIDERS, LOG_PREFIX } from "../constants";
-import type { ComponentInfo, PropInfo, PropType } from "../types";
+import type { ComponentInfo, PropGroup, PropInfo, PropType } from "../types";
 import { classifyPropGroup } from "./propGroup";
+
+/** A component resolved from a `typebook.config.ts` entry: source location + its literal settings. */
+export interface ResolvedConfigComponent {
+	file: string;
+	name: string;
+	settings?: ComponentSettings;
+}
 
 export class TypeScriptClient {
 	private service: ts.LanguageService | null = null;
@@ -137,6 +145,59 @@ export class TypeScriptClient {
 			if (doc) docs.push(doc);
 		}
 		return docs;
+	}
+
+	/**
+	 * Statically resolve the `components` list of a `typebook.config.ts`. Reads the default export's
+	 * (or `defineTypebook(...)`'s) `components` array from the AST and, for each entry — a bare
+	 * component identifier or `{ component: X, ...settings }` — follows the import to the component's
+	 * declaration (`{ file, name }`) and reads its literal `settings`. The config is parsed, never
+	 * executed, so type-erased runtime values are irrelevant; the reference is a type-checked path.
+	 */
+	async resolveConfigComponents(
+		configPath: string,
+	): Promise<ResolvedConfigComponent[]> {
+		if (!this.program || !this.checker) await this.start();
+		const absPath = resolve(this.cwd, configPath);
+		// The config file often lives at the project root, outside tsconfig's `include`; add it to
+		// the program so its imports resolve through the same warm checker.
+		if (!this.program?.getSourceFile(absPath)) {
+			this.fileVersions.set(absPath, 0);
+			this.refreshProgram();
+		}
+		const sourceFile = this.program?.getSourceFile(absPath);
+		const checker = this.checker;
+		if (!sourceFile || !checker) return [];
+
+		const array = findComponentsArray(sourceFile);
+		if (!array) return [];
+
+		const out: ResolvedConfigComponent[] = [];
+		for (const el of array.elements) {
+			const idNode = componentIdentifierOf(el);
+			if (!idNode) continue;
+			const resolved = this.resolveIdentifierDeclaration(checker, idNode);
+			if (!resolved) continue;
+			const settings = readComponentSettings(el);
+			out.push(settings ? { ...resolved, settings } : resolved);
+		}
+		return out;
+	}
+
+	/** Follow an identifier (possibly an import alias) to its declaring source file + export name. */
+	private resolveIdentifierDeclaration(
+		checker: ts.TypeChecker,
+		id: ts.Identifier,
+	): { file: string; name: string } | null {
+		const symbol = checker.getSymbolAtLocation(id);
+		if (!symbol) return null;
+		const resolved =
+			symbol.flags & ts.SymbolFlags.Alias
+				? checker.getAliasedSymbol(symbol)
+				: symbol;
+		const decl = resolved.getDeclarations()?.[0];
+		if (!decl) return null;
+		return { file: decl.getSourceFile().fileName, name: resolved.getName() };
 	}
 
 	/** Turn one module export into a {@link ComponentInfo}, or `null` when it isn't a component. */
@@ -518,6 +579,88 @@ function packageFromDeclarationPath(fileName: string): string | null {
 	if (parts[0].startsWith("@"))
 		return parts[1] ? `${parts[0]}/${parts[1]}` : null;
 	return parts[0] || null;
+}
+
+/**
+ * The `components: [...]` array literal of a config file's default export, whether written as
+ * `export default defineTypebook({ components: [...] })` or `export default { components: [...] }`.
+ */
+function findComponentsArray(
+	sourceFile: ts.SourceFile,
+): ts.ArrayLiteralExpression | null {
+	const exportAssignment = sourceFile.statements.find(
+		(s): s is ts.ExportAssignment => ts.isExportAssignment(s),
+	);
+	if (!exportAssignment) return null;
+
+	let expr = exportAssignment.expression;
+	if (ts.isCallExpression(expr) && expr.arguments.length > 0)
+		expr = expr.arguments[0]; // unwrap defineTypebook(...)
+	if (!ts.isObjectLiteralExpression(expr)) return null;
+
+	for (const prop of expr.properties) {
+		if (
+			ts.isPropertyAssignment(prop) &&
+			ts.isIdentifier(prop.name) &&
+			prop.name.text === "components" &&
+			ts.isArrayLiteralExpression(prop.initializer)
+		)
+			return prop.initializer;
+	}
+	return null;
+}
+
+/**
+ * The component identifier of a `components` entry — the element itself when it's a bare reference
+ * (`Button`), or its `component` property when it's an options object (`{ component: Button, … }`).
+ */
+function componentIdentifierOf(element: ts.Expression): ts.Identifier | null {
+	if (ts.isIdentifier(element)) return element;
+	if (ts.isObjectLiteralExpression(element)) {
+		for (const prop of element.properties) {
+			if (
+				ts.isPropertyAssignment(prop) &&
+				ts.isIdentifier(prop.name) &&
+				prop.name.text === "component" &&
+				ts.isIdentifier(prop.initializer)
+			)
+				return prop.initializer;
+		}
+	}
+	return null;
+}
+
+/** Read literal `{ omit, pick, hideGroups, importFrom }` settings from a `components` entry object. */
+function readComponentSettings(
+	element: ts.Expression,
+): ComponentSettings | undefined {
+	if (!ts.isObjectLiteralExpression(element)) return undefined;
+	const settings: ComponentSettings = {};
+	for (const prop of element.properties) {
+		if (!ts.isPropertyAssignment(prop) || !ts.isIdentifier(prop.name)) continue;
+		const key = prop.name.text;
+		if (key === "omit" || key === "pick") {
+			const arr = readStringArray(prop.initializer);
+			if (arr) settings[key] = arr;
+		} else if (key === "hideGroups") {
+			const arr = readStringArray(prop.initializer);
+			if (arr) settings.hideGroups = arr as PropGroup[];
+		} else if (key === "importFrom" && ts.isStringLiteral(prop.initializer)) {
+			settings.importFrom = prop.initializer.text;
+		}
+	}
+	return Object.keys(settings).length > 0 ? settings : undefined;
+}
+
+/** An array literal of string literals → its values, or null when it isn't purely that. */
+function readStringArray(node: ts.Expression): string[] | null {
+	if (!ts.isArrayLiteralExpression(node)) return null;
+	const out: string[] = [];
+	for (const el of node.elements) {
+		if (!ts.isStringLiteral(el)) return null;
+		out.push(el.text);
+	}
+	return out;
 }
 
 /** The identifier node naming a declaration (function/class/variable), or null. */
