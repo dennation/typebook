@@ -15,7 +15,7 @@ const props = [
 	prop("onClick", "event:mouse"), // shown group
 	prop("aria-label", "aria"), // hidden group
 	prop("onPlay", "event:media"), // hidden group
-	prop("ref", "react"), // hidden group
+	prop("ref", "react"), // shown group (react is not hidden by default)
 ];
 
 describe("visibleProps", () => {
@@ -24,13 +24,14 @@ describe("visibleProps", () => {
 			"variant",
 			"disabled",
 			"onClick",
+			"ref",
 		]);
 	});
 
 	test("omit hides a prop that would otherwise show", () => {
 		expect(
 			visibleProps(props, { omit: ["disabled"] }).map((p) => p.name),
-		).toEqual(["variant", "onClick"]);
+		).toEqual(["variant", "onClick", "ref"]);
 	});
 
 	test("pick rescues a prop from a hidden group", () => {

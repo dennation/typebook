@@ -1,14 +1,13 @@
 import type { PropGroup, PropInfo } from "./types";
 
 /**
- * Groups hidden by default: ARIA, React internals (`ref`/`key`/…), capture-phase events, microdata,
- * RDFa, `data-*`, and every event category except the common interaction ones (mouse/keyboard/
- * focus/form). Shown by default: `global`, `element`, `svg`, those interaction events, and a
+ * Groups hidden by default: ARIA, capture-phase events, microdata, RDFa, `data-*`, and every event
+ * category except the common interaction ones (mouse/keyboard/focus/form). Shown by default:
+ * `global`, `element`, `svg`, `react` (`ref`/`key`/`children`/…), those interaction events, and a
  * component's own props (no group). Override per project (global) or per component.
  */
 export const DEFAULT_HIDDEN_GROUPS: PropGroup[] = [
 	"aria",
-	"react",
 	"capture",
 	"microdata",
 	"rdfa",
