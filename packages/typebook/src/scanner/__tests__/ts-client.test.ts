@@ -113,6 +113,51 @@ describe("React types", () => {
 	});
 });
 
+describe("optional props: redundant `| undefined` is stripped", () => {
+	let props: PropInfo[];
+
+	beforeAll(async () => {
+		props = (await extractProps(
+			"components/OptionalUndefined.tsx",
+			"OptionalUndefined",
+		))!;
+	});
+
+	test("alias union keeps the alias, drops `| undefined`", () => {
+		expect(findProp(props, "format")!.type).toEqual({
+			kind: "function",
+			raw: "Formatter",
+		});
+	});
+
+	test("nested `| undefined` (a function's return) is preserved", () => {
+		expect(findProp(props, "parse")!.type).toEqual({
+			kind: "function",
+			raw: "(value: string) => string | undefined",
+		});
+	});
+
+	test("mixed union drops the top-level `| undefined`, keeps members", () => {
+		expect(findProp(props, "token")!.type).toEqual({
+			kind: "unknown",
+			raw: "string | number | (() => void)",
+		});
+	});
+
+	test("REQUIRED prop keeps `| undefined` (it's a meaningful value there)", () => {
+		const prop = findProp(props, "requiredUndefinable")!;
+		expect(prop.optional).toBe(false);
+		expect(prop.type).toEqual({ kind: "unknown", raw: "string | undefined" });
+	});
+
+	test("REQUIRED mixed union keeps `| undefined`", () => {
+		expect(findProp(props, "requiredMixed")!.type).toEqual({
+			kind: "unknown",
+			raw: "string | number | undefined",
+		});
+	});
+});
+
 // --- Generics ---
 
 describe("generics", () => {
@@ -290,23 +335,32 @@ describe("nullable types", () => {
 		props = (await extractProps("components/WithNullable.tsx", "Nullable"))!;
 	});
 
-	test("string | null → string (null filtered)", () => {
-		expect(findProp(props, "value")!.type).toEqual({ kind: "string" });
+	test("required `string | null` keeps null", () => {
+		expect(findProp(props, "value")!.type).toEqual({
+			kind: "unknown",
+			raw: "string | null",
+		});
 	});
 
-	test("literal | undefined → literal (undefined filtered)", () => {
+	test("optional literal drops `| undefined`, no null present", () => {
 		expect(findProp(props, "status")!.type).toEqual({
 			kind: "literal",
 			values: ["active", "inactive"],
 		});
 	});
 
-	test("number | null | undefined → number", () => {
-		expect(findProp(props, "data")!.type).toEqual({ kind: "number" });
+	test("required `number | null | undefined` keeps both", () => {
+		expect(findProp(props, "data")!.type).toEqual({
+			kind: "unknown",
+			raw: "number | null | undefined",
+		});
 	});
 
-	test("boolean | null → boolean", () => {
-		expect(findProp(props, "flag")!.type).toEqual({ kind: "boolean" });
+	test("required `boolean | null` keeps null", () => {
+		expect(findProp(props, "flag")!.type).toEqual({
+			kind: "unknown",
+			raw: "boolean | null",
+		});
 	});
 });
 
