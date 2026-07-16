@@ -17,29 +17,10 @@ describe("collectDocs", () => {
 
 	afterAll(() => client.stop());
 
-	test("config drives the component set and applies per-component settings", async () => {
-		const docs = await collectDocs(client, FIXTURES, {
-			configFile: "typebook.config.tsx",
-		});
-
-		expect(docs.map((d) => d.name)).toEqual(["Basic", "WithChildren"]);
-		// the WithChildren entry carries `omit: ["icon"]`
-		const withChildren = docs.find((d) => d.name === "WithChildren")!;
-		expect(withChildren.props.map((p) => p.name)).not.toContain("icon");
-	});
-
-	test("keeps only the config-listed export of a multi-export file", async () => {
-		// WithInheritance.tsx exports ExtendedButton and IntersectionLink; the config lists only one
-		const docs = await collectDocs(client, FIXTURES, {
-			configFile: "typebook.config.one.tsx",
-		});
-		expect(docs.map((d) => d.name)).toEqual(["ExtendedButton"]);
-	});
-
-	test("default group policy hides noise groups, keeps own/global/element", async () => {
+	test("globs components and trims props by the default group policy", async () => {
 		// WithHtmlAttrs extends button attributes → inherited props across many groups
 		const [doc] = await collectDocs(client, FIXTURES, {
-			configFile: "typebook.config.groups.tsx",
+			components: "components/WithHtmlAttrs.tsx",
 		});
 		const names = doc.props.map((p) => p.name);
 
@@ -48,5 +29,17 @@ describe("collectDocs", () => {
 		expect(names).toContain("disabled"); // element
 		expect(names).not.toContain("aria-label"); // aria (hidden)
 		expect(names).not.toContain("onGotPointerCapture"); // event:pointer (hidden)
+	});
+
+	test("config.hideGroups overrides the default policy", async () => {
+		const [doc] = await collectDocs(client, FIXTURES, {
+			components: "components/WithHtmlAttrs.tsx",
+			hideGroups: ["element"], // hide only element → aria/etc now show
+		});
+		const names = doc.props.map((p) => p.name);
+
+		expect(names).toContain("variant"); // own, always shown
+		expect(names).not.toContain("disabled"); // element, now hidden
+		expect(names).toContain("aria-label"); // aria, not in the override set → shown
 	});
 });

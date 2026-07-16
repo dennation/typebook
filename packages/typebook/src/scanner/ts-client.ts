@@ -2,18 +2,13 @@ import { resolve } from "node:path";
 import ts from "typescript";
 import type { ComponentInfo } from "../types";
 import { extractComponentInfo } from "./extractComponentInfo";
-import {
-	type ResolvedConfigComponent,
-	resolveConfigComponents,
-} from "./resolveConfigComponents";
 
 /** Extensions TypeScript will accept as program root files. */
 const TS_SOURCE_EXT = /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/;
 
 /**
- * Owns one warm TypeScript LanguageService/program and exposes the two reads the scanner needs:
- * {@link TypeScriptClient.getExportedComponentInfos} (a file's exported components, by type) and
- * {@link TypeScriptClient.resolveConfigComponents} (a `typebook.config.ts`'s component list). All
+ * Owns one warm TypeScript LanguageService/program and exposes
+ * {@link TypeScriptClient.getExportedComponentInfos} — a file's exported components, by type. All
  * per-node extraction lives in sibling modules; this class only manages the program's lifecycle.
  */
 export class TypeScriptClient {
@@ -102,24 +97,6 @@ export class TypeScriptClient {
 			if (doc) docs.push(doc);
 		}
 		return docs;
-	}
-
-	/** Statically resolve a `typebook.config.ts`'s `components` list to their sources + settings. */
-	async resolveConfigComponents(
-		configPath: string,
-	): Promise<ResolvedConfigComponent[]> {
-		if (!this.program || !this.checker) await this.start();
-		const absPath = resolve(this.cwd, configPath);
-		// The config often lives at the project root, outside tsconfig's `include`; add it to the
-		// program so its imports resolve through the same warm checker.
-		if (!this.program?.getSourceFile(absPath)) {
-			this.fileVersions.set(absPath, 0);
-			this.refreshProgram();
-		}
-		const sourceFile = this.program?.getSourceFile(absPath);
-		const checker = this.checker;
-		if (!sourceFile || !checker) return [];
-		return resolveConfigComponents(checker, sourceFile);
 	}
 
 	/**
