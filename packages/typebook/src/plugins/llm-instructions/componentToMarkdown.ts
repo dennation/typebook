@@ -6,8 +6,8 @@ import { formatPropType } from "./formatPropType";
  * description, usage guidance (`@remarks`), deprecation note, and a props table. Intended as
  * AI-agent context (Claude Code / Codex), so it stays plain and link-free.
  *
- * Renders exactly the props it's given — which props to surface (the group policy + `omit`/`pick`)
- * is decided upstream (see `visibleProps`), so a card just presents the already-filtered set.
+ * Renders exactly the props it's given — which props to surface (the `filterProps` policy) is
+ * decided upstream, so a card just presents the already-filtered set.
  */
 export function componentToMarkdown(
 	doc: ComponentInfo,

@@ -39,20 +39,20 @@ async function run(options: Parameters<typeof llmInstructions>[0]) {
 }
 
 describe("llmInstructions: prop policy", () => {
-	test("a card hides default-hidden groups, keeps own + interaction events", async () => {
+	test("a card keeps own props, hides inherited groups by default", async () => {
 		const files = await run({ out: "out", indexFile: false });
 		const card = files["out/Button.md"];
 
 		expect(card).toContain("`variant`"); // own
-		expect(card).toContain("`onClick`"); // event:mouse (shown)
-		expect(card).not.toContain("`aria-label`"); // aria (hidden by default)
+		expect(card).not.toContain("`onClick`"); // event:mouse (hidden)
+		expect(card).not.toContain("`aria-label`"); // aria (hidden)
 	});
 
-	test("props.hiddenGroups overrides the default", async () => {
+	test("a custom filterProps overrides the default", async () => {
 		const files = await run({
 			out: "out",
 			indexFile: false,
-			props: { hiddenGroups: [] }, // hide nothing → aria now shows
+			filterProps: () => true, // hide nothing → aria now shows
 		});
 		expect(files["out/Button.md"]).toContain("`aria-label`");
 	});
