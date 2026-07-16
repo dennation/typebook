@@ -112,7 +112,7 @@ describe("componentToMarkdown", () => {
 				name: "className",
 				optional: true,
 				type: { kind: "string" },
-				inherited: true,
+				inheritedFrom: "@types/react",
 			},
 		],
 	};
