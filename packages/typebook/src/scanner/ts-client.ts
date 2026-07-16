@@ -203,14 +203,16 @@ export class TypeScriptClient {
 			);
 		}
 
-		const inherited = this.getInheritedPropNames(checker, componentNode);
+		const inherited = this.getInheritedPropSources(checker, componentNode);
 		const defaults = this.getParamDefaultProps(checker, componentNode);
 		return props.map((p) => {
 			let next = p;
-			// Origin gates classification: only framework-inherited attributes get a standard
-			// `group` (by name); a component's own prop stays ungrouped (its distinctive API).
-			if (inherited.has(p.name)) {
-				next = { ...next, inherited: true };
+			// Origin gates classification: only framework-inherited attributes carry an
+			// `inheritedFrom` package and a standard `group` (by name); a component's own prop
+			// stays ungrouped (its distinctive API).
+			const from = inherited.get(p.name);
+			if (from !== undefined) {
+				next = { ...next, inheritedFrom: from };
 				const group = classifyPropGroup(p.name);
 				if (group) next = { ...next, group };
 			}
@@ -287,14 +289,14 @@ export class TypeScriptClient {
 	}
 
 	/**
-	 * Get the original Props type from a component and classify each property
-	 * as inherited (all declarations in framework paths) or own.
+	 * Get the original Props type from a component and, for each inherited property (all
+	 * declarations in framework paths), map its name → the source npm package.
 	 */
-	private getInheritedPropNames(
+	private getInheritedPropSources(
 		checker: ts.TypeChecker,
 		componentNode: ts.Node,
-	): Set<string> {
-		const inherited = new Set<string>();
+	): Map<string, string> {
+		const inherited = new Map<string, string>();
 
 		const componentType = checker.getTypeAtLocation(componentNode);
 		const signatures = [
@@ -312,26 +314,32 @@ export class TypeScriptClient {
 		const propsType = checker.getTypeOfSymbol(propsParam);
 
 		for (const prop of propsType.getProperties()) {
-			if (this.isInheritedProp(prop)) {
-				inherited.add(prop.getName());
-			}
+			const from = this.inheritedSource(prop);
+			if (from !== null) inherited.set(prop.getName(), from);
 		}
 
 		return inherited;
 	}
 
 	/**
-	 * A prop is inherited if ALL its declarations come from excluded type packages.
-	 * Props with no declarations (synthetic) are considered own.
+	 * A prop is inherited if ALL its declarations come from excluded type packages; returns the
+	 * source package name (from the first declaration) when so, else `null`. Props with no
+	 * declarations (synthetic) are considered own.
 	 */
-	private isInheritedProp(symbol: ts.Symbol): boolean {
+	private inheritedSource(symbol: ts.Symbol): string | null {
 		const declarations = symbol.getDeclarations();
-		if (!declarations || declarations.length === 0) return false;
+		if (!declarations || declarations.length === 0) return null;
 
-		return declarations.every((decl) => {
+		const allInherited = declarations.every((decl) => {
 			const fileName = decl.getSourceFile().fileName;
 			return this.inheritedPaths.some((p) => fileName.includes(p));
 		});
+		if (!allInherited) return null;
+
+		return (
+			packageFromDeclarationPath(declarations[0].getSourceFile().fileName) ??
+			"unknown"
+		);
 	}
 
 	private extractPropsFromType(
@@ -477,6 +485,21 @@ export class TypeScriptClient {
 
 /** Extensions TypeScript will accept as program root files. */
 const TS_SOURCE_EXT = /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/;
+
+/**
+ * The npm package a declaration file belongs to, parsed from the last `node_modules/` segment
+ * (`…/node_modules/@types/react/index.d.ts` → `@types/react`; `…/node_modules/csstype/…` →
+ * `csstype`). Scoped packages keep their `@scope/name`. Returns null when not under node_modules.
+ */
+function packageFromDeclarationPath(fileName: string): string | null {
+	const marker = "/node_modules/";
+	const idx = fileName.lastIndexOf(marker);
+	if (idx === -1) return null;
+	const parts = fileName.slice(idx + marker.length).split("/");
+	if (parts[0].startsWith("@"))
+		return parts[1] ? `${parts[0]}/${parts[1]}` : null;
+	return parts[0] || null;
+}
 
 /** The identifier node naming a declaration (function/class/variable), or null. */
 function declarationNameNode(decl: ts.Declaration): ts.Node | null {

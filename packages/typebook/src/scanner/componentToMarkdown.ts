@@ -15,7 +15,7 @@ export function componentToMarkdown(
 ): string {
 	const props = options.includeInherited
 		? doc.props
-		: doc.props.filter((p) => !p.inherited);
+		: doc.props.filter((p) => !p.inheritedFrom);
 
 	const parts = [`## ${doc.name}`];
 	if (doc.description) parts.push(doc.description);

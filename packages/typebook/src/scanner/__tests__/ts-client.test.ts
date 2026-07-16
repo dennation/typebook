@@ -192,12 +192,31 @@ describe("group: origin-gated standard classification", () => {
 
 	test("own props are ungrouped even when the name collides with a standard attribute", () => {
 		const size = findProp(props, "size")!;
-		expect(size.inherited).toBeUndefined();
+		expect(size.inheritedFrom).toBeUndefined();
 		expect(size.group).toBeUndefined(); // `size` is an HTML attr name, but this one is own
 	});
 
 	test("own on* callback is ungrouped (not a DOM event)", () => {
 		expect(findProp(props, "onValueChange")!.group).toBeUndefined();
+	});
+});
+
+describe("inheritedFrom: source package of inherited props", () => {
+	let props: PropInfo[];
+
+	beforeAll(async () => {
+		props = (await extractProps(
+			"components/WithHtmlAttrs.tsx",
+			"WithHtmlAttrs",
+		))!;
+	});
+
+	test("own prop has no inheritedFrom", () => {
+		expect(findProp(props, "variant")!.inheritedFrom).toBeUndefined();
+	});
+
+	test("an HTML-attribute prop is inherited from @types/react", () => {
+		expect(findProp(props, "id")!.inheritedFrom).toBe("@types/react");
 	});
 });
 

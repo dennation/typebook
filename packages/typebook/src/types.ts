@@ -86,8 +86,12 @@ export interface PropInfo {
 	name: string;
 	optional: boolean;
 	type: PropType;
-	/** When true, the prop is inherited from framework types (e.g. React.HTMLAttributes) */
-	inherited?: boolean;
+	/**
+	 * The package the prop's declarations come from when it's inherited from framework types
+	 * (e.g. `"@types/react"`, `"csstype"`) — the npm package name parsed from the declaration path.
+	 * Its presence is what marks a prop as inherited; **absent for a component's own props**.
+	 */
+	inheritedFrom?: string;
 	/**
 	 * Standard group this prop's name belongs to (see {@link PropGroup}), or absent when the name
 	 * isn't a recognised standard attribute (the component's own API). Classified by name, so it's
