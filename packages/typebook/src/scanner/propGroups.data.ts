@@ -7,7 +7,7 @@ import type { PropGroup } from "../types";
 // manually-declared attribute (not inherited from React) is grouped the same as an inherited one.
 
 /** Event base name → category (from the `*EventHandler` type each `on*` uses in `DOMAttributes`). */
-const EVENT_CATEGORY: Record<string, PropGroup> = {};
+export const EVENT_CATEGORY: Record<string, PropGroup> = {};
 const putEvents = (group: PropGroup, names: string[]) => {
 	for (const n of names) EVENT_CATEGORY[n] = group;
 };
@@ -110,7 +110,7 @@ putEvents("event:media", [
 	"onWaiting",
 ]);
 
-const REACT = new Set([
+export const REACT = new Set([
 	"ref",
 	"key",
 	"children",
@@ -118,14 +118,14 @@ const REACT = new Set([
 	"suppressContentEditableWarning",
 	"suppressHydrationWarning",
 ]);
-const MICRODATA = new Set([
+export const MICRODATA = new Set([
 	"itemProp",
 	"itemScope",
 	"itemType",
 	"itemID",
 	"itemRef",
 ]);
-const RDFA = new Set([
+export const RDFA = new Set([
 	"about",
 	"datatype",
 	"inlist",
@@ -137,7 +137,7 @@ const RDFA = new Set([
 	"vocab",
 ]);
 // WHATWG global attributes (own members of React's `HTMLAttributes`, minus aria/events/microdata/rdfa).
-const GLOBAL = new Set([
+export const GLOBAL = new Set([
 	"accessKey",
 	"autoCapitalize",
 	"autoCorrect",
@@ -178,7 +178,7 @@ const GLOBAL = new Set([
 	"unselectable",
 ]);
 // Per-element content attributes (union of all `*HTMLAttributes` element interfaces).
-const ELEMENT = new Set([
+export const ELEMENT = new Set([
 	"abbr",
 	"accept",
 	"acceptCharset",
@@ -319,7 +319,7 @@ const ELEMENT = new Set([
 	"wrap",
 ]);
 // SVG presentation & structural attributes (own members of React's `SVGAttributes`).
-const SVG = new Set([
+export const SVG = new Set([
 	"accentHeight",
 	"accumulate",
 	"additive",
@@ -562,31 +562,3 @@ const SVG = new Set([
 	"z",
 	"zoomAndPan",
 ]);
-
-/**
- * Classify a prop by its NAME into a standard attribute/event group (see {@link PropGroup}), or
- * `undefined` when the name isn't a recognised standard attribute (the component's own API prop).
- * Checked hide-first so an attribute that appears in several specs lands in the more specific one.
- */
-export function classifyPropGroup(name: string): PropGroup | undefined {
-	if (/^on[A-Z]/.test(name)) {
-		const cat = EVENT_CATEGORY[name];
-		if (cat) return cat;
-		// A `<event>Capture` twin (capture phase) of a known event → the cross-cutting `capture` group.
-		if (
-			name.endsWith("Capture") &&
-			EVENT_CATEGORY[name.slice(0, -"Capture".length)]
-		)
-			return "capture";
-		return undefined;
-	}
-	if (name === "role" || name.startsWith("aria-")) return "aria";
-	if (name.startsWith("data-")) return "data";
-	if (REACT.has(name)) return "react";
-	if (MICRODATA.has(name)) return "microdata";
-	if (RDFA.has(name)) return "rdfa";
-	if (GLOBAL.has(name)) return "global";
-	if (ELEMENT.has(name)) return "element";
-	if (SVG.has(name)) return "svg";
-	return undefined;
-}
