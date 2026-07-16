@@ -1,4 +1,4 @@
-import { globSync } from "node:fs";
+import { existsSync, globSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { UnpluginFactory } from "unplugin";
@@ -72,13 +72,42 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 		return [...files];
 	};
 
+	const CONFIG_EXTS = ["ts", "mts", "cts", "tsx", "js", "mjs", "cjs"];
+	/** The `typebook.config.*` path — the explicit override, else auto-discovered at the root. */
+	const resolveConfigFile = (): string | null => {
+		if (config.configFile) {
+			const abs = path.resolve(cwd, config.configFile);
+			return existsSync(abs) ? abs : null;
+		}
+		for (const ext of CONFIG_EXTS) {
+			const abs = path.join(cwd, `typebook.config.${ext}`);
+			if (existsSync(abs)) return abs;
+		}
+		return null;
+	};
+
+	/**
+	 * The components to scan: from `typebook.config.ts` (imported references) when present, else the
+	 * `components` globs. The config lists specific exports, so a file's other exports are dropped.
+	 */
+	const collectDocs = async (c: TypeScriptClient) => {
+		const configFile = resolveConfigFile();
+		if (!configFile) return collectComponentInfos(c, resolveComponentFiles());
+
+		const wanted = await c.resolveConfigComponents(configFile);
+		const files = [...new Set(wanted.map((w) => w.file))];
+		const wantedKeys = new Set(wanted.map((w) => `${w.file}#${w.name}`));
+		const all = await collectComponentInfos(c, files);
+		return all.filter((d) => wantedKeys.has(`${d.file}#${d.name}`));
+	};
+
 	/** Scan configured files and run every sub-plugin with the full component set. */
 	const runGenerate = async (): Promise<void> => {
 		if (plugins.length === 0) return;
 		const c = await ensureClient();
 		if (!c) return;
 
-		const docs = await collectComponentInfos(c, resolveComponentFiles());
+		const docs = await collectDocs(c);
 		const ctx: GenerateCtx = { command, root: cwd, writeFile: writeFileAt };
 		for (const plugin of plugins) {
 			if (plugin.apply && plugin.apply !== command) continue;

@@ -5,6 +5,12 @@ export interface TypebookConfig {
 	 * consuming plugin). Omit to scan nothing (plugins then have no components to work with).
 	 */
 	components?: string | string[];
+	/**
+	 * Path to a `typebook.config.ts` listing components as imported references (type-checked). When
+	 * present it drives the scan instead of `components` globs. Omit to auto-discover
+	 * `typebook.config.{ts,mts,cts,js,mjs,cjs}` at the project root.
+	 */
+	configFile?: string;
 	/** Additional packages whose type declarations mark props as inherited (e.g. ['@heroui/theme']) */
 	inheritedProviders?: string[];
 	/**
