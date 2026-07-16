@@ -1,21 +1,15 @@
 import path from "node:path";
-import type {
-	ComponentInfo,
-	GenerateCtx,
-	PropGroup,
-	TypebookPlugin,
-} from "../../types";
+import type { ComponentInfo, GenerateCtx, TypebookPlugin } from "../../types";
 import { componentToMarkdown } from "./componentToMarkdown";
-import { DEFAULT_HIDDEN_GROUPS, visibleProps } from "./propPolicy";
+import { DEFAULT_PROP_FILTER, type PropFilter } from "./filterProps";
 
-/** Which props each card surfaces. */
-export interface PropsOptions {
-	/**
-	 * Standard prop groups to hide from every card (see {@link PropGroup}). Defaults to
-	 * {@link DEFAULT_HIDDEN_GROUPS} (ARIA, capture events, non-interaction events, microdata/rdfa/data).
-	 */
-	hiddenGroups?: PropGroup[];
-}
+export {
+	DEFAULT_HIDDEN_GROUPS,
+	DEFAULT_KEPT_PROPS,
+	DEFAULT_PROP_FILTER,
+	hideGroups,
+	type PropFilter,
+} from "./filterProps";
 
 export interface LlmInstructionsOptions {
 	/**
@@ -32,8 +26,12 @@ export interface LlmInstructionsOptions {
 	 * Omit to skip the import line.
 	 */
 	importFrom?: string | ((doc: ComponentInfo) => string);
-	/** Which props to surface in each card (group policy). */
-	props?: PropsOptions;
+	/**
+	 * Which props each card surfaces. Defaults to {@link DEFAULT_PROP_FILTER} (hides
+	 * {@link DEFAULT_HIDDEN_GROUPS}). Pass {@link hideGroups} to change the group set, or any
+	 * `(prop, component) => boolean` for arbitrary rules.
+	 */
+	filterProps?: PropFilter;
 	/** H1 title of the index / full file. Default: `"Components"`. */
 	title?: string;
 	/** Blockquote summary under the title (the `llms.txt` project summary). Optional. */
@@ -56,12 +54,11 @@ export function llmInstructions(
 		out,
 		indexFile,
 		importFrom,
-		props,
+		filterProps = DEFAULT_PROP_FILTER,
 		title = "Components",
 		description,
 	} = options;
 
-	const hiddenGroups = props?.hiddenGroups ?? DEFAULT_HIDDEN_GROUPS;
 	const cardPath = (doc: ComponentInfo): string =>
 		typeof out === "function"
 			? out(doc)
@@ -72,7 +69,7 @@ export function llmInstructions(
 	};
 	const renderCard = (doc: ComponentInfo): string =>
 		componentToMarkdown(
-			{ ...doc, props: visibleProps(doc.props, { hiddenGroups }) },
+			{ ...doc, props: doc.props.filter((p) => filterProps(p, doc)) },
 			{ importStatement: importStatement(doc) },
 		);
 
