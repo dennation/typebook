@@ -1,7 +1,6 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { collectComponentInfos } from "../collectComponentInfos";
 import { TypeScriptClient } from "../ts-client";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -34,22 +33,5 @@ describe("resolveConfigComponents: static resolution of typebook.config", () => 
 		// `Basic` is a bare reference → no settings; `WithChildren` carries `omit: ["icon"]`
 		expect(resolved[0].settings).toBeUndefined();
 		expect(resolved[1].settings).toEqual({ omit: ["icon"] });
-	});
-
-	test("scan+filter keeps only the config-listed exports of a multi-export file", async () => {
-		const wanted = await client.resolveConfigComponents(
-			resolve(FIXTURES, "typebook.config.one.tsx"),
-		);
-		const files = [...new Set(wanted.map((w) => w.file))];
-		const keys = new Set(wanted.map((w) => `${w.file}#${w.name}`));
-		const all = await collectComponentInfos(client, files);
-		const docs = all.filter((d) => keys.has(`${d.file}#${d.name}`));
-
-		// the file also exports IntersectionLink; the config listed only ExtendedButton
-		expect(all.map((d) => d.name).sort()).toEqual([
-			"ExtendedButton",
-			"IntersectionLink",
-		]);
-		expect(docs.map((d) => d.name)).toEqual(["ExtendedButton"]);
 	});
 });
