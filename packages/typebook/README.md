@@ -113,7 +113,7 @@ Built on [unplugin](https://unplugin.unjs.io), so the same `typebook()` factory 
 
 | Import | Description |
 |---|---|
-| `@dennation/typebook` | The scanner core — `collectComponentInfos`, `componentToMarkdown`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, … — plus the React-free types (`TypebookConfig`, `ComponentInfo`, `TypebookPlugin`, `PropInfo`, …). |
+| `@dennation/typebook` | The scanner core — `collectComponentInfos`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, … — plus the React-free types (`TypebookConfig`, `ComponentInfo`, `TypebookPlugin`, `PropInfo`, …). |
 | `@dennation/typebook/plugins/llm-instructions` | `llmInstructions()`, `LlmInstructionsOptions`. |
 | `@dennation/typebook/{vite,rollup,…}` | The `typebook()` bundler plugin. |
 

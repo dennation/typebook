@@ -63,12 +63,11 @@ packages/typebook/
     constants.ts              — PACKAGE_NAME, NPM_REACT_PACKAGE_NAME, LOG_PREFIX, …
     cli.ts                    — CLI entry: prints that codegen runs as a bundler plugin (no generate step)
     scanner/                  — React-free extraction core (re-exported from the base `.` entry — the library foundation)
-      index.ts                — Public exports: collectComponentInfos, componentToMarkdown, TypeScriptClient,
+      index.ts                — Public exports: collectComponentInfos, TypeScriptClient,
                                 scanMetaCalls, scanSnippets, parseProgram, injectMetaProps, applyEdits, …
       transform.ts            — injectMetaProps(program, filePath, code, tsClient) → Edit[] (props injection only);
                                 applyEdits(code, edits). The factory orchestrates one parse + these + transform plugins.
       collectComponentInfos.ts — collectComponentInfos(client, files) → ComponentInfo[] (export-based scan of configured files)
-      componentToMarkdown.ts  — componentToMarkdown(doc) → Markdown card (props table + description/deprecation)
       meta-scanner.ts        — oxc AST: scanMetaCalls(program) finds defineStories(Component, …) calls
                                 and the position to inject __props (into config object, or as a new config arg)
       snippet-scanner.ts      — oxc AST: scanSnippets(program, src) finds every <Snippet>{fn}</Snippet>, slices the
@@ -81,9 +80,10 @@ packages/typebook/
                                 → generate sub-plugins; and per-module transform (one parse → injectMetaProps +
                                 transform sub-plugins → applyEdits). Resolves `components` glob via fs.globSync.
       snippets.ts             — snippets() transform sub-plugin (<Snippet> injection) + SnippetNotInlineError. Opt-in.
-      llmInstructions.ts       — llmInstructions() generate sub-plugin: ComponentInfo[] → per-component Markdown
-                                cards (import line + description + @remarks usage + props table) + an llms.txt
-                                index (follows the llms.txt convention)
+      llm-instructions/       — llmInstructions() generate sub-plugin (its own folder; card rendering is plugin-local, not core):
+        index.ts              — llmInstructions(): ComponentInfo[] → per-component Markdown cards + an llms.txt index
+        componentToMarkdown.ts — componentToMarkdown(doc) → one Markdown card (import + description + @remarks + props table)
+        formatPropType.ts     — render a PropInfo's type as a string ("sm" | "md", …)
       vite.ts                 — typebook() Vite plugin
       rollup.ts               — typebook() Rollup plugin
       rolldown.ts             — typebook() Rolldown plugin
@@ -156,7 +156,7 @@ packages/typebook/
 
 ### Build entry points
 
-- **`index`** — the library **foundation**: the React-free **scanner core** (`collectComponentInfos`, `componentToMarkdown`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) + all React-free types (`TypebookConfig` incl. `components`/`plugins`, `ComponentInfo`, `TypebookPlugin`, `TransformCtx`, `GenerateCtx`, `PropInfo`, `PropType`, `VariantConfig`, …). Pulls `typescript` + `oxc-parser` at runtime; type-only imports stay weightless. Authoring API and React-coupled types live in `react/`.
+- **`index`** — the library **foundation**: the React-free **scanner core** (`collectComponentInfos`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) + all React-free types (`TypebookConfig` incl. `components`/`plugins`, `ComponentInfo`, `TypebookPlugin`, `TransformCtx`, `GenerateCtx`, `PropInfo`, `PropType`, `VariantConfig`, …). Pulls `typescript` + `oxc-parser` at runtime; type-only imports stay weightless. Authoring API and React-coupled types live in `react/`.
 - **`react/index`** — authoring API (`defineStories`) + `Layout`, `Snippet`, `ErrorBoundary` + the docs component kit (content set, `CodeBlock`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `PropsReference`, `propsToRows`). The internal `Story`/`Variants`/`Matrix` widgets are **not** exported standalone — they come out of `defineStories`. **No search** (a docs site wires its own — see `apps/website`).
 - **`plugins/{snippets,llm-instructions}`** — sub-plugins for `typebook({ plugins: [...] })`: `snippets()` (transform: `<Snippet>` injection) and `llmInstructions()` (generate: Markdown docs from the scan).
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
@@ -164,7 +164,7 @@ packages/typebook/
 
 ### Package exports
 
-- `@dennation/typebook` — the **foundation**: React-free **scanner core** (`collectComponentInfos`, `componentToMarkdown`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) + all React-free types (`TypebookConfig`, `ComponentInfo`, `TypebookPlugin`, `TransformCtx`, `GenerateCtx`, `PropInfo`, `PropType`, `MissingProps`, `VariantConfig`, …). No `react` import.
+- `@dennation/typebook` — the **foundation**: React-free **scanner core** (`collectComponentInfos`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) + all React-free types (`TypebookConfig`, `ComponentInfo`, `TypebookPlugin`, `TransformCtx`, `GenerateCtx`, `PropInfo`, `PropType`, `MissingProps`, `VariantConfig`, …). No `react` import.
 - `@dennation/typebook/plugins/snippets` — `snippets()`, `SnippetNotInlineError`.
 - `@dennation/typebook/plugins/llm-instructions` — `llmInstructions()`, `LlmInstructionsOptions`.
 - `@dennation/typebook/react` — **authoring API:** `defineStories` (+ its types `StoriesNamespace`/`StoryViewProps`/…). **storybook runtime:** `Layout`, `Snippet`, `ErrorBoundary` (story views come from `defineStories`, sharing `title` / `showSource` / `interactive`). **docs kit** (for consumer documentation sites): content set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps` (compound `Steps.Root` + `Steps.Step`), `Accordion`, `Cards`/`DocCard`, `Heading` (single component, `level={2|3}`), `Paragraph`/`Lead`/`List` (compound `List.Root` + `List.Item`)/`Blockquote`/`Divider`/`Strong`/`Emphasis`/`InlineCode`/`Link`/`ImagePlaceholder` (component-only prose set — every element carries its own styles; no `.doc-prose` container, no bare-tag styling)), `CodeBlock` (compound `CodeBlock.Root` + `CodeBlock.Tab`, always tabbed — per-tab filename/lang/icon/line numbers/highlight lines, no `code` prop; Shiki with the One Light / One Dark Pro theme pair, each token carrying both colors so highlighting follows the theme — any language, theme-aware colors, lazy-loaded grammars), `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`. Icons are **not** exported — they are imported directly from `lucide-react` (brand glyphs from `@tabler/icons-react`) at each call site.

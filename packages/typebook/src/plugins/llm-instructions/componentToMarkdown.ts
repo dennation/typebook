@@ -1,4 +1,4 @@
-import type { ComponentInfo, PropInfo } from "../types";
+import type { ComponentInfo, PropInfo } from "../../types";
 import { formatPropType } from "./formatPropType";
 
 /**

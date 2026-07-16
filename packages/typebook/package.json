@@ -13,8 +13,8 @@
 			"import": "./dist/index.mjs"
 		},
 		"./plugins/llm-instructions": {
-			"types": "./dist/plugins/llmInstructions.d.ts",
-			"import": "./dist/plugins/llmInstructions.mjs"
+			"types": "./dist/plugins/llm-instructions/index.d.ts",
+			"import": "./dist/plugins/llm-instructions/index.mjs"
 		},
 		"./vite": {
 			"types": "./dist/plugins/vite.d.ts",
