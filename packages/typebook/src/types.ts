@@ -6,11 +6,6 @@ export interface TypebookConfig {
 	 */
 	components?: string | string[];
 	/**
-	 * Standard prop groups to hide by default in every component (see {@link PropGroup}). Overrides
-	 * the built-in {@link DEFAULT_HIDDEN_GROUPS}.
-	 */
-	hideGroups?: PropGroup[];
-	/**
 	 * Sub-plugins that consume the project scan (e.g. `llmInstructions()`). Each `generate` runs
 	 * after every scan with the full set of components — build once, dev on change.
 	 */

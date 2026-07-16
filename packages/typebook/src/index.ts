@@ -5,11 +5,6 @@
 // artifacts. Bundler plugins live in `@dennation/typebook/{vite,rollup,…}`. Type-only imports
 // (e.g. `TypebookConfig` for a bundler config) stay weightless; the runtime pulls in `typescript`.
 export * from "./scanner";
-export {
-	DEFAULT_HIDDEN_GROUPS,
-	type PropPolicy,
-	visibleProps,
-} from "./propPolicy";
 export type {
 	GenerateCtx,
 	TypebookCommand,

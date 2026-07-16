@@ -1,6 +1,21 @@
 import path from "node:path";
+import type {
+	ComponentInfo,
+	GenerateCtx,
+	PropGroup,
+	TypebookPlugin,
+} from "../../types";
 import { componentToMarkdown } from "./componentToMarkdown";
-import type { ComponentInfo, GenerateCtx, TypebookPlugin } from "../../types";
+import { DEFAULT_HIDDEN_GROUPS, visibleProps } from "./propPolicy";
+
+/** Which props each card surfaces. */
+export interface PropsOptions {
+	/**
+	 * Standard prop groups to hide from every card (see {@link PropGroup}). Defaults to
+	 * {@link DEFAULT_HIDDEN_GROUPS} (ARIA, capture events, non-interaction events, microdata/rdfa/data).
+	 */
+	hiddenGroups?: PropGroup[];
+}
 
 export interface LlmInstructionsOptions {
 	/**
@@ -17,6 +32,8 @@ export interface LlmInstructionsOptions {
 	 * Omit to skip the import line.
 	 */
 	importFrom?: string | ((doc: ComponentInfo) => string);
+	/** Which props to surface in each card (group policy). */
+	props?: PropsOptions;
 	/** H1 title of the index / full file. Default: `"Components"`. */
 	title?: string;
 	/** Blockquote summary under the title (the `llms.txt` project summary). Optional. */
@@ -39,10 +56,12 @@ export function llmInstructions(
 		out,
 		indexFile,
 		importFrom,
+		props,
 		title = "Components",
 		description,
 	} = options;
 
+	const hiddenGroups = props?.hiddenGroups ?? DEFAULT_HIDDEN_GROUPS;
 	const cardPath = (doc: ComponentInfo): string =>
 		typeof out === "function"
 			? out(doc)
@@ -52,7 +71,10 @@ export function llmInstructions(
 		return src ? `import { ${doc.name} } from "${src}";` : undefined;
 	};
 	const renderCard = (doc: ComponentInfo): string =>
-		componentToMarkdown(doc, { importStatement: importStatement(doc) });
+		componentToMarkdown(
+			{ ...doc, props: visibleProps(doc.props, { hiddenGroups }) },
+			{ importStatement: importStatement(doc) },
+		);
 
 	return {
 		name: "llm-instructions",

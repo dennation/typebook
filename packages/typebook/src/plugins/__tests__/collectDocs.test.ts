@@ -17,29 +17,16 @@ describe("collectDocs", () => {
 
 	afterAll(() => client.stop());
 
-	test("globs components and trims props by the default group policy", async () => {
-		// WithHtmlAttrs extends button attributes → inherited props across many groups
+	test("globs the components and returns them with their full props (no filtering)", async () => {
 		const [doc] = await collectDocs(client, FIXTURES, {
 			components: "components/WithHtmlAttrs.tsx",
 		});
 		const names = doc.props.map((p) => p.name);
 
+		expect(doc.name).toBe("WithHtmlAttrs");
 		expect(names).toContain("variant"); // own
-		expect(names).toContain("id"); // global
-		expect(names).toContain("disabled"); // element
-		expect(names).not.toContain("aria-label"); // aria (hidden)
-		expect(names).not.toContain("onGotPointerCapture"); // event:pointer (hidden)
-	});
-
-	test("config.hideGroups overrides the default policy", async () => {
-		const [doc] = await collectDocs(client, FIXTURES, {
-			components: "components/WithHtmlAttrs.tsx",
-			hideGroups: ["element"], // hide only element → aria/etc now show
-		});
-		const names = doc.props.map((p) => p.name);
-
-		expect(names).toContain("variant"); // own, always shown
-		expect(names).not.toContain("disabled"); // element, now hidden
-		expect(names).toContain("aria-label"); // aria, not in the override set → shown
+		// collectDocs does NOT hide anything — the group policy is the plugin's job
+		expect(names).toContain("aria-label");
+		expect(names).toContain("onGotPointerCapture");
 	});
 });
