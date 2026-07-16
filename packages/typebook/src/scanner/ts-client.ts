@@ -139,6 +139,57 @@ export class TypeScriptClient {
 		return docs;
 	}
 
+	/**
+	 * Statically resolve the `components` list of a `typebook.config.ts` to `{ file, name }` pairs.
+	 * Reads the default export's (or `defineTypebook(...)`'s) `components` array from the AST and,
+	 * for each entry — a bare component identifier or `{ component: X }` — follows the import to the
+	 * component's declaration. The config is parsed, never executed, so type-erased runtime values
+	 * are irrelevant; the imported reference is only a type-checked pointer to a source file.
+	 */
+	async resolveConfigComponents(
+		configPath: string,
+	): Promise<{ file: string; name: string }[]> {
+		if (!this.program || !this.checker) await this.start();
+		const absPath = resolve(this.cwd, configPath);
+		// The config file often lives at the project root, outside tsconfig's `include`; add it to
+		// the program so its imports resolve through the same warm checker.
+		if (!this.program?.getSourceFile(absPath)) {
+			this.fileVersions.set(absPath, 0);
+			this.refreshProgram();
+		}
+		const sourceFile = this.program?.getSourceFile(absPath);
+		const checker = this.checker;
+		if (!sourceFile || !checker) return [];
+
+		const array = findComponentsArray(sourceFile);
+		if (!array) return [];
+
+		const out: { file: string; name: string }[] = [];
+		for (const el of array.elements) {
+			const idNode = componentIdentifierOf(el);
+			if (!idNode) continue;
+			const resolved = this.resolveIdentifierDeclaration(checker, idNode);
+			if (resolved) out.push(resolved);
+		}
+		return out;
+	}
+
+	/** Follow an identifier (possibly an import alias) to its declaring source file + export name. */
+	private resolveIdentifierDeclaration(
+		checker: ts.TypeChecker,
+		id: ts.Identifier,
+	): { file: string; name: string } | null {
+		const symbol = checker.getSymbolAtLocation(id);
+		if (!symbol) return null;
+		const resolved =
+			symbol.flags & ts.SymbolFlags.Alias
+				? checker.getAliasedSymbol(symbol)
+				: symbol;
+		const decl = resolved.getDeclarations()?.[0];
+		if (!decl) return null;
+		return { file: decl.getSourceFile().fileName, name: resolved.getName() };
+	}
+
 	/** Turn one module export into a {@link ComponentInfo}, or `null` when it isn't a component. */
 	private exportToComponentInfo(
 		checker: ts.TypeChecker,
@@ -518,6 +569,55 @@ function packageFromDeclarationPath(fileName: string): string | null {
 	if (parts[0].startsWith("@"))
 		return parts[1] ? `${parts[0]}/${parts[1]}` : null;
 	return parts[0] || null;
+}
+
+/**
+ * The `components: [...]` array literal of a config file's default export, whether written as
+ * `export default defineTypebook({ components: [...] })` or `export default { components: [...] }`.
+ */
+function findComponentsArray(
+	sourceFile: ts.SourceFile,
+): ts.ArrayLiteralExpression | null {
+	const exportAssignment = sourceFile.statements.find(
+		(s): s is ts.ExportAssignment => ts.isExportAssignment(s),
+	);
+	if (!exportAssignment) return null;
+
+	let expr = exportAssignment.expression;
+	if (ts.isCallExpression(expr) && expr.arguments.length > 0)
+		expr = expr.arguments[0]; // unwrap defineTypebook(...)
+	if (!ts.isObjectLiteralExpression(expr)) return null;
+
+	for (const prop of expr.properties) {
+		if (
+			ts.isPropertyAssignment(prop) &&
+			ts.isIdentifier(prop.name) &&
+			prop.name.text === "components" &&
+			ts.isArrayLiteralExpression(prop.initializer)
+		)
+			return prop.initializer;
+	}
+	return null;
+}
+
+/**
+ * The component identifier of a `components` entry — the element itself when it's a bare reference
+ * (`Button`), or its `component` property when it's an options object (`{ component: Button, … }`).
+ */
+function componentIdentifierOf(element: ts.Expression): ts.Identifier | null {
+	if (ts.isIdentifier(element)) return element;
+	if (ts.isObjectLiteralExpression(element)) {
+		for (const prop of element.properties) {
+			if (
+				ts.isPropertyAssignment(prop) &&
+				ts.isIdentifier(prop.name) &&
+				prop.name.text === "component" &&
+				ts.isIdentifier(prop.initializer)
+			)
+				return prop.initializer;
+		}
+	}
+	return null;
 }
 
 /** The identifier node naming a declaration (function/class/variable), or null. */
