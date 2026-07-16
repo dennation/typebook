@@ -17,8 +17,6 @@ export interface TypebookConfig {
 	 * this; `omit`/`pick` there refine individual props.
 	 */
 	hideGroups?: PropGroup[];
-	/** Additional packages whose type declarations mark props as inherited (e.g. ['@heroui/theme']) */
-	inheritedProviders?: string[];
 	/**
 	 * Sub-plugins that consume the project scan (e.g. `llmInstructions()`). Each `generate` runs
 	 * after every scan with the full set of components — build once, dev on change.

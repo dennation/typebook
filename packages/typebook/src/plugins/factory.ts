@@ -27,7 +27,7 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 
 	const ensureClient = async (): Promise<TypeScriptClient | null> => {
 		if (!client && !starting) {
-			const candidate = new TypeScriptClient(cwd, config.inheritedProviders);
+			const candidate = new TypeScriptClient(cwd);
 			starting = candidate
 				.start()
 				.then(() => {

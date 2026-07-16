@@ -3,7 +3,10 @@ import type { ComponentInfo, PropInfo } from "../types";
 import { classifyPropGroup } from "./classifyPropGroup";
 import { declarationName, isReactReturnType } from "./componentDetection";
 import { convertType } from "./convertType";
-import { inheritedPropSources } from "./inheritedProps";
+import {
+	inheritedPropSources,
+	packageFromDeclarationPath,
+} from "./inheritedProps";
 import {
 	symbolDefaultTag,
 	symbolDeprecation,
@@ -16,7 +19,6 @@ import { paramDefaults } from "./paramDefaults";
 export function extractComponentInfo(
 	checker: ts.TypeChecker,
 	exp: ts.Symbol,
-	inheritedPaths: string[],
 ): ComponentInfo | null {
 	const resolved =
 		exp.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exp) : exp;
@@ -26,7 +28,8 @@ export function extractComponentInfo(
 	const nameNode = declarationName(decl);
 	if (!nameNode) return null;
 
-	const props = extractComponentProps(checker, nameNode, inheritedPaths);
+	const ownPackage = packageFromDeclarationPath(decl.getSourceFile().fileName);
+	const props = extractComponentProps(checker, nameNode, ownPackage);
 	if (props === null) return null; // not a component
 
 	const info: ComponentInfo = {
@@ -53,7 +56,7 @@ export function extractComponentInfo(
 function extractComponentProps(
 	checker: ts.TypeChecker,
 	componentNode: ts.Node,
-	inheritedPaths: string[],
+	ownPackage: string | null,
 ): PropInfo[] | null {
 	const type = checker.getTypeAtLocation(componentNode);
 	const callSigs = type.getCallSignatures();
@@ -74,11 +77,7 @@ function extractComponentProps(
 		? extractProps(checker, checker.getTypeOfSymbol(propsParam))
 		: [];
 
-	const inherited = inheritedPropSources(
-		checker,
-		componentNode,
-		inheritedPaths,
-	);
+	const inherited = inheritedPropSources(checker, componentNode, ownPackage);
 	const defaults = paramDefaults(checker, componentNode);
 	return props.map((p) => {
 		let next = p;

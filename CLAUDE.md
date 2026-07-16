@@ -499,9 +499,7 @@ export default defineConfig({
       generatedRouteTree: './src/route-tree.gen.ts',
       autoCodeSplitting: true,
     }),
-    typebook({
-      // inheritedProviders: ['@heroui/theme'], // optional
-    }),
+    typebook(),
     react(),
   ],
 })

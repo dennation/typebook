@@ -37,8 +37,6 @@ export type ComponentEntry =
  */
 export interface TypebookFileConfig {
 	components: ComponentEntry[];
-	/** Additional packages whose declarations mark props as inherited (e.g. `['@heroui/theme']`). */
-	inheritedProviders?: string[];
 }
 
 /** Identity helper that types a `typebook.config.ts` default export. */
