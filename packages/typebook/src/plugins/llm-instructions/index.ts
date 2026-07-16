@@ -1,6 +1,6 @@
 import path from "node:path";
-import { componentToMarkdown } from "../scanner";
-import type { ComponentInfo, GenerateCtx, TypebookPlugin } from "../types";
+import { componentToMarkdown } from "./componentToMarkdown";
+import type { ComponentInfo, GenerateCtx, TypebookPlugin } from "../../types";
 
 export interface LlmInstructionsOptions {
 	/**
