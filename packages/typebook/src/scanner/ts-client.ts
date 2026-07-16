@@ -1,8 +1,16 @@
 import { resolve } from "node:path";
 import ts from "typescript";
+import type { ComponentSettings } from "../config";
 import { DEFAULT_INHERITED_PROVIDERS, LOG_PREFIX } from "../constants";
-import type { ComponentInfo, PropInfo, PropType } from "../types";
+import type { ComponentInfo, PropGroup, PropInfo, PropType } from "../types";
 import { classifyPropGroup } from "./propGroup";
+
+/** A component resolved from a `typebook.config.ts` entry: source location + its literal settings. */
+export interface ResolvedConfigComponent {
+	file: string;
+	name: string;
+	settings?: ComponentSettings;
+}
 
 export class TypeScriptClient {
 	private service: ts.LanguageService | null = null;
@@ -140,15 +148,15 @@ export class TypeScriptClient {
 	}
 
 	/**
-	 * Statically resolve the `components` list of a `typebook.config.ts` to `{ file, name }` pairs.
-	 * Reads the default export's (or `defineTypebook(...)`'s) `components` array from the AST and,
-	 * for each entry — a bare component identifier or `{ component: X }` — follows the import to the
-	 * component's declaration. The config is parsed, never executed, so type-erased runtime values
-	 * are irrelevant; the imported reference is only a type-checked pointer to a source file.
+	 * Statically resolve the `components` list of a `typebook.config.ts`. Reads the default export's
+	 * (or `defineTypebook(...)`'s) `components` array from the AST and, for each entry — a bare
+	 * component identifier or `{ component: X, ...settings }` — follows the import to the component's
+	 * declaration (`{ file, name }`) and reads its literal `settings`. The config is parsed, never
+	 * executed, so type-erased runtime values are irrelevant; the reference is a type-checked path.
 	 */
 	async resolveConfigComponents(
 		configPath: string,
-	): Promise<{ file: string; name: string }[]> {
+	): Promise<ResolvedConfigComponent[]> {
 		if (!this.program || !this.checker) await this.start();
 		const absPath = resolve(this.cwd, configPath);
 		// The config file often lives at the project root, outside tsconfig's `include`; add it to
@@ -164,12 +172,14 @@ export class TypeScriptClient {
 		const array = findComponentsArray(sourceFile);
 		if (!array) return [];
 
-		const out: { file: string; name: string }[] = [];
+		const out: ResolvedConfigComponent[] = [];
 		for (const el of array.elements) {
 			const idNode = componentIdentifierOf(el);
 			if (!idNode) continue;
 			const resolved = this.resolveIdentifierDeclaration(checker, idNode);
-			if (resolved) out.push(resolved);
+			if (!resolved) continue;
+			const settings = readComponentSettings(el);
+			out.push(settings ? { ...resolved, settings } : resolved);
 		}
 		return out;
 	}
@@ -618,6 +628,39 @@ function componentIdentifierOf(element: ts.Expression): ts.Identifier | null {
 		}
 	}
 	return null;
+}
+
+/** Read literal `{ omit, pick, hideGroups, importFrom }` settings from a `components` entry object. */
+function readComponentSettings(
+	element: ts.Expression,
+): ComponentSettings | undefined {
+	if (!ts.isObjectLiteralExpression(element)) return undefined;
+	const settings: ComponentSettings = {};
+	for (const prop of element.properties) {
+		if (!ts.isPropertyAssignment(prop) || !ts.isIdentifier(prop.name)) continue;
+		const key = prop.name.text;
+		if (key === "omit" || key === "pick") {
+			const arr = readStringArray(prop.initializer);
+			if (arr) settings[key] = arr;
+		} else if (key === "hideGroups") {
+			const arr = readStringArray(prop.initializer);
+			if (arr) settings.hideGroups = arr as PropGroup[];
+		} else if (key === "importFrom" && ts.isStringLiteral(prop.initializer)) {
+			settings.importFrom = prop.initializer.text;
+		}
+	}
+	return Object.keys(settings).length > 0 ? settings : undefined;
+}
+
+/** An array literal of string literals → its values, or null when it isn't purely that. */
+function readStringArray(node: ts.Expression): string[] | null {
+	if (!ts.isArrayLiteralExpression(node)) return null;
+	const out: string[] = [];
+	for (const el of node.elements) {
+		if (!ts.isStringLiteral(el)) return null;
+		out.push(el.text);
+	}
+	return out;
 }
 
 /** The identifier node naming a declaration (function/class/variable), or null. */

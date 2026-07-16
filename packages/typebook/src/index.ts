@@ -6,6 +6,11 @@
 // (e.g. `TypebookConfig` for a bundler config) stay weightless; the runtime pulls in `typescript`.
 export * from "./scanner";
 export { defineTypebook } from "./config";
+export {
+	DEFAULT_HIDDEN_GROUPS,
+	type PropPolicy,
+	visibleProps,
+} from "./propPolicy";
 export type {
 	ComponentEntry,
 	ComponentLike,

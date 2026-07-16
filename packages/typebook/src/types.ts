@@ -11,6 +11,12 @@ export interface TypebookConfig {
 	 * `typebook.config.{ts,mts,cts,js,mjs,cjs}` at the project root.
 	 */
 	configFile?: string;
+	/**
+	 * Standard prop groups to hide by default in every component (see {@link PropGroup}). Overrides
+	 * the built-in `DEFAULT_HIDDEN_GROUPS`. Per-component `hideGroups` in `typebook.config.ts` add to
+	 * this; `omit`/`pick` there refine individual props.
+	 */
+	hideGroups?: PropGroup[];
 	/** Additional packages whose type declarations mark props as inherited (e.g. ['@heroui/theme']) */
 	inheritedProviders?: string[];
 	/**

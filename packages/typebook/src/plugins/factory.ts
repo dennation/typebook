@@ -3,9 +3,16 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { UnpluginFactory } from "unplugin";
 import { createUnplugin } from "unplugin";
+import type { ComponentSettings } from "../config";
 import { LOG_PREFIX, PACKAGE_NAME } from "../constants";
+import { DEFAULT_HIDDEN_GROUPS, visibleProps } from "../propPolicy";
 import { collectComponentInfos, TypeScriptClient } from "../scanner";
-import type { GenerateCtx, TypebookCommand, TypebookConfig } from "../types";
+import type {
+	ComponentInfo,
+	GenerateCtx,
+	TypebookCommand,
+	TypebookConfig,
+} from "../types";
 
 /**
  * Shared unplugin factory — no bundler is privileged. Works across every bundler
@@ -86,19 +93,46 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 		return null;
 	};
 
+	/** Trim a component's props to the documented set: global group policy + per-component settings. */
+	const applyPolicy = (
+		doc: ComponentInfo,
+		settings?: ComponentSettings,
+	): ComponentInfo => {
+		const hiddenGroups = [
+			...(config.hideGroups ?? DEFAULT_HIDDEN_GROUPS),
+			...(settings?.hideGroups ?? []),
+		];
+		return {
+			...doc,
+			props: visibleProps(doc.props, {
+				hiddenGroups,
+				omit: settings?.omit,
+				pick: settings?.pick,
+			}),
+		};
+	};
+
 	/**
-	 * The components to scan: from `typebook.config.ts` (imported references) when present, else the
-	 * `components` globs. The config lists specific exports, so a file's other exports are dropped.
+	 * The components to document: from `typebook.config.ts` (imported references + per-component
+	 * settings) when present, else the `components` globs. The config lists specific exports, so a
+	 * file's other exports are dropped. Every component's props are trimmed by the group policy.
 	 */
-	const collectDocs = async (c: TypeScriptClient) => {
+	const collectDocs = async (c: TypeScriptClient): Promise<ComponentInfo[]> => {
 		const configFile = resolveConfigFile();
-		if (!configFile) return collectComponentInfos(c, resolveComponentFiles());
+		if (!configFile) {
+			const docs = await collectComponentInfos(c, resolveComponentFiles());
+			return docs.map((d) => applyPolicy(d));
+		}
 
 		const wanted = await c.resolveConfigComponents(configFile);
 		const files = [...new Set(wanted.map((w) => w.file))];
-		const wantedKeys = new Set(wanted.map((w) => `${w.file}#${w.name}`));
+		const settingsByKey = new Map(
+			wanted.map((w) => [`${w.file}#${w.name}`, w.settings]),
+		);
 		const all = await collectComponentInfos(c, files);
-		return all.filter((d) => wantedKeys.has(`${d.file}#${d.name}`));
+		return all
+			.filter((d) => settingsByKey.has(`${d.file}#${d.name}`))
+			.map((d) => applyPolicy(d, settingsByKey.get(`${d.file}#${d.name}`)));
 	};
 
 	/** Scan configured files and run every sub-plugin with the full component set. */

@@ -27,6 +27,15 @@ describe("resolveConfigComponents: static resolution of typebook.config", () => 
 		expect(resolved[1].file).toMatch(/components\/WithChildren\.tsx$/);
 	});
 
+	test("reads literal per-component settings from the object entry", async () => {
+		const resolved = await client.resolveConfigComponents(
+			resolve(FIXTURES, "typebook.config.tsx"),
+		);
+		// `Basic` is a bare reference → no settings; `WithChildren` carries `omit: ["icon"]`
+		expect(resolved[0].settings).toBeUndefined();
+		expect(resolved[1].settings).toEqual({ omit: ["icon"] });
+	});
+
 	test("scan+filter keeps only the config-listed exports of a multi-export file", async () => {
 		const wanted = await client.resolveConfigComponents(
 			resolve(FIXTURES, "typebook.config.one.tsx"),
