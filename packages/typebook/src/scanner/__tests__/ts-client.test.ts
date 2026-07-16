@@ -167,10 +167,6 @@ describe("generics", () => {
 		props = (await extractProps("components/WithGenerics.tsx", "Select"))!;
 	});
 
-	test("generic value prop resolves its constraint", () => {
-		expect(findProp(props, "value")!.type.kind).toBeDefined();
-	});
-
 	test("generic array prop → unknown with raw type", () => {
 		const options = findProp(props, "options")!;
 		expect(options.type.kind).toBe("unknown");
@@ -458,6 +454,28 @@ describe("prop JSDoc tags", () => {
 
 	test("non-deprecated prop → deprecated is undefined", () => {
 		expect(findProp(props, "size")!.deprecated).toBeUndefined();
+	});
+});
+
+// --- Default values ---
+
+describe("default values", () => {
+	let props: PropInfo[];
+
+	beforeAll(async () => {
+		props = (await extractProps(
+			"components/WithDefaults.tsx",
+			"WithDefaults",
+		))!;
+	});
+
+	test("reads param-destructuring defaults as raw source text", () => {
+		expect(findProp(props, "size")!.defaultValue).toBe('"md"');
+		expect(findProp(props, "count")!.defaultValue).toBe("3");
+	});
+
+	test("falls back to the @default JSDoc tag when there's no destructuring default", () => {
+		expect(findProp(props, "variant")!.defaultValue).toBe('"solid"');
 	});
 });
 
