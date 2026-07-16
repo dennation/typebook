@@ -1,6 +1,5 @@
 import { resolve } from "node:path";
 import ts from "typescript";
-import { DEFAULT_INHERITED_PROVIDERS } from "../constants";
 import type { ComponentInfo } from "../types";
 import { extractComponentInfo } from "./extractComponentInfo";
 import {
@@ -32,17 +31,7 @@ export class TypeScriptClient {
 	// same text keeps oxc and TypeScript offsets in lockstep; the file's imports still resolve.
 	private readonly overrides = new Map<string, string>();
 
-	private readonly inheritedPaths: string[];
-
-	constructor(
-		private cwd: string,
-		inheritedProviders?: string[],
-	) {
-		const userPaths = (inheritedProviders ?? []).map(
-			(pkg) => `/node_modules/${pkg}/`,
-		);
-		this.inheritedPaths = [...DEFAULT_INHERITED_PROVIDERS, ...userPaths];
-	}
+	constructor(private cwd: string) {}
 
 	async start(): Promise<void> {
 		if (!this.options) {
@@ -109,7 +98,7 @@ export class TypeScriptClient {
 
 		const docs: ComponentInfo[] = [];
 		for (const exp of checker.getExportsOfModule(moduleSymbol)) {
-			const doc = extractComponentInfo(checker, exp, this.inheritedPaths);
+			const doc = extractComponentInfo(checker, exp);
 			if (doc) docs.push(doc);
 		}
 		return docs;

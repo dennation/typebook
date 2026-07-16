@@ -2,13 +2,17 @@ import ts from "typescript";
 
 /**
  * For each of a component's props, map its name → the source npm package **when it's inherited** —
- * i.e. all its declarations come from one of `inheritedPaths` (framework type packages like
- * `@types/react`). A prop with any first-party declaration is own and absent from the map.
+ * i.e. every declaration comes from a package other than the component's own (`ownPackage`). A prop
+ * with any declaration in the component's own package/repo is its own API and absent from the map.
+ *
+ * `ownPackage` is the component's declaration package (from {@link packageFromDeclarationPath}) or
+ * `null` when the component is first-party. This is relative, so it's correct whether the library is
+ * the consumer's own source or a prebuilt package in `node_modules`.
  */
 export function inheritedPropSources(
 	checker: ts.TypeChecker,
 	componentNode: ts.Node,
-	inheritedPaths: string[],
+	ownPackage: string | null,
 ): Map<string, string> {
 	const sources = new Map<string, string>();
 
@@ -21,38 +25,35 @@ export function inheritedPropSources(
 	if (!propsParam) return sources;
 
 	for (const prop of checker.getTypeOfSymbol(propsParam).getProperties()) {
-		const from = inheritedSource(prop, inheritedPaths);
+		const from = inheritedSource(prop, ownPackage);
 		if (from !== null) sources.set(prop.getName(), from);
 	}
 	return sources;
 }
 
 /**
- * The source package of a prop when ALL its declarations are in `inheritedPaths`, else `null`.
- * Props with no declarations (synthetic) are own.
+ * The upstream package a prop is inherited from — non-null only when **none** of its declarations
+ * live in the component's own package (`ownPackage`). Props with no declarations (synthetic) or with
+ * any declaration in the own package are the component's own API → `null`.
  */
 function inheritedSource(
 	symbol: ts.Symbol,
-	inheritedPaths: string[],
+	ownPackage: string | null,
 ): string | null {
 	const declarations = symbol.getDeclarations();
 	if (!declarations || declarations.length === 0) return null;
 
-	const allInherited = declarations.every((decl) =>
-		inheritedPaths.some((p) => decl.getSourceFile().fileName.includes(p)),
+	const packages = declarations.map((decl) =>
+		packageFromDeclarationPath(decl.getSourceFile().fileName),
 	);
-	if (!allInherited) return null;
-
-	return (
-		packageFromDeclarationPath(declarations[0].getSourceFile().fileName) ??
-		"unknown"
-	);
+	if (packages.some((pkg) => pkg === ownPackage)) return null; // an own declaration → own
+	return packages[0]; // all upstream → inherited from the declaring package
 }
 
 /**
  * The npm package a declaration file belongs to, from the last `node_modules/` segment
  * (`…/node_modules/@types/react/index.d.ts` → `@types/react`; scoped packages keep `@scope/name`).
- * `null` when not under node_modules.
+ * `null` when not under node_modules (a first-party file).
  */
 export function packageFromDeclarationPath(fileName: string): string | null {
 	const marker = "/node_modules/";
