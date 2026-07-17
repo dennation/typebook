@@ -60,7 +60,8 @@ export function convertType(
 	// Keep the signature string so docs show `(e: MouseEvent) => void`, not a bare `function`.
 	if (isFunctionType(type)) return { kind: "function", raw: typeString };
 
-	if (isReactNodeType(type)) return { kind: "node" };
+	const nodeName = reactNodeName(type);
+	if (nodeName) return { kind: "node", name: nodeName };
 
 	return { kind: "unknown", raw: typeString };
 }
@@ -77,18 +78,19 @@ function isFunctionType(type: ts.Type): boolean {
 	);
 }
 
-const REACT_NODE_TYPE_NAMES = new Set([
-	"ReactNode",
-	"ReactElement",
-	"ReactPortal",
-]);
-
 /**
- * Whether the type itself is a React node — checked by its (alias) symbol name, not by matching
- * `"ReactNode"` in the rendered string, so a composite that merely *contains* a node (e.g.
- * `Record<string, ReactNode>`, `{ header: ReactNode }`) is not misread as one.
+ * The React-node type name (`ReactNode`/`ReactElement`/`ReactPortal`) when the type itself is one,
+ * else `undefined`. Checked by the type's (alias) symbol name, not by matching `"ReactNode"` in the
+ * rendered string, so a composite that merely *contains* a node (e.g. `Record<string, ReactNode>`,
+ * `{ header: ReactNode }`) is not misread as one.
  */
-function isReactNodeType(type: ts.Type): boolean {
+function reactNodeName(
+	type: ts.Type,
+): "ReactNode" | "ReactElement" | "ReactPortal" | undefined {
 	const name = type.aliasSymbol?.getName() ?? type.getSymbol()?.getName();
-	return name !== undefined && REACT_NODE_TYPE_NAMES.has(name);
+	return name === "ReactNode" ||
+		name === "ReactElement" ||
+		name === "ReactPortal"
+		? name
+		: undefined;
 }
