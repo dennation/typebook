@@ -20,10 +20,10 @@ export interface LlmInstructionsOptions {
 	/**
 	 * Where each component's Markdown card goes. A **string** is a directory —
 	 * `{out}/{name}.md`. A **function** returns the full path per component, so cards can sit next to
-	 * their source: `(doc) => doc.sourceFile.replace(/\.tsx$/, ".md")` (use `sourceFile`, the scanned
-	 * module, not `file`, which for a re-export points into `node_modules`).
+	 * their source: `(component) => component.sourceFile.replace(/\.tsx$/, ".md")` (use `sourceFile`,
+	 * the scanned module, not `file`, which for a re-export points into `node_modules`).
 	 */
-	out: string | ((doc: ComponentInfo) => string);
+	out: string | ((component: ComponentInfo) => string);
 	/** Index file in `llms.txt` format, listing every component; `false` to skip it. */
 	indexFile: string | false;
 	/**
@@ -38,7 +38,7 @@ export interface LlmInstructionsOptions {
 	 * every card (agents need the exact import). A string (`"@acme/ui"`) or a function per component.
 	 * Omit to skip the import line.
 	 */
-	importFrom?: string | ((doc: ComponentInfo) => string);
+	importFrom?: string | ((component: ComponentInfo) => string);
 	/**
 	 * Which props each card surfaces. Defaults to `DEFAULT_PROP_FILTER` (hides
 	 * `DEFAULT_HIDDEN_GROUPS`). Pass `hideGroups` to change the group set, or any
@@ -82,24 +82,26 @@ export function llmInstructions(
 		description,
 	} = options;
 
-	const cardPath = (doc: ComponentInfo): string =>
+	const cardPath = (component: ComponentInfo): string =>
 		typeof out === "function"
-			? out(doc)
-			: `${out}/${safeFileName(doc.name)}.md`;
+			? out(component)
+			: `${out}/${safeFileName(component.name)}.md`;
 
 	return {
 		name: "llm-instructions",
-		async generate(allDocs, ctx) {
-			const docs = filterComponents
-				? allDocs.filter(filterComponents)
-				: allDocs;
+		async generate(allComponents, ctx) {
+			const components = filterComponents
+				? allComponents.filter(filterComponents)
+				: allComponents;
 			await Promise.all(
-				docs.map((doc) => ctx.writeFile(cardPath(doc), format(doc))),
+				components.map((component) =>
+					ctx.writeFile(cardPath(component), format(component)),
+				),
 			);
 			if (indexFile !== false)
 				await ctx.writeFile(
 					indexFile,
-					buildIndex(docs, indexFile, cardPath, ctx, title, description),
+					buildIndex(components, indexFile, cardPath, ctx, title, description),
 				);
 		},
 	};
@@ -107,9 +109,9 @@ export function llmInstructions(
 
 /** The `llms.txt` index: H1 + blockquote summary + a `[name](href): desc` list, sorted by name. */
 function buildIndex(
-	docs: ComponentInfo[],
+	components: ComponentInfo[],
 	indexFile: string,
-	cardPath: (doc: ComponentInfo) => string,
+	cardPath: (component: ComponentInfo) => string,
 	ctx: GenerateCtx,
 	title: string,
 	description: string | undefined,
@@ -118,17 +120,18 @@ function buildIndex(
 		path.isAbsolute(p) ? p : path.join(ctx.root, p);
 	const indexDir = path.dirname(abs(indexFile));
 
-	const lines = [...docs]
+	const lines = [...components]
 		.sort((a, b) => a.name.localeCompare(b.name))
-		.map((doc) => {
+		.map((component) => {
 			// Normalise the OS path separator to "/" — a Markdown link is a URL, and a
 			// backslash href (`components\Button.md` on Windows) would not resolve.
 			const href = path
-				.relative(indexDir, abs(cardPath(doc)))
+				.relative(indexDir, abs(cardPath(component)))
 				.replaceAll(path.sep, "/");
-			const summary = firstLine(doc.description) || doc.name;
-			const deprecated = doc.deprecated !== undefined ? " (deprecated)" : "";
-			return `- [${doc.name}](${href}): ${summary}${deprecated}`;
+			const summary = firstLine(component.description) || component.name;
+			const deprecated =
+				component.deprecated !== undefined ? " (deprecated)" : "";
+			return `- [${component.name}](${href}): ${summary}${deprecated}`;
 		});
 
 	return `${heading(title, description)}## Components\n\n${lines.join("\n")}\n`;

@@ -62,7 +62,7 @@ import { llmInstructions } from "@dennation/typebook/plugins/llm-instructions";
 
 // inside typebook({ plugins: [ … ] })
 llmInstructions({
-  out: (doc) => doc.sourceFile.replace(/\.tsx$/, ".md"), // Button.tsx → Button.md
+  out: (component) => component.sourceFile.replace(/\.tsx$/, ".md"), // Button.tsx → Button.md
   indexFile: "llms.txt", // llms.txt index at the repo root
   importFrom: "@acme/ui", // the import line printed in each card
 });
@@ -104,10 +104,10 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 
 | Option | Type | Description |
 |---|---|---|
-| `out` **(required)** | `string \| (doc) => string` | Where each card goes: a function returning a full path per component — e.g. next to its source, `doc.sourceFile.replace(/\.tsx$/, ".md")` — or a directory string (`{out}/{Name}.md`). |
+| `out` **(required)** | `string \| (component) => string` | Where each card goes: a function returning a full path per component — e.g. next to its source, `component.sourceFile.replace(/\.tsx$/, ".md")` — or a directory string (`{out}/{Name}.md`). |
 | `indexFile` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
 | `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |
-| `importFrom` | `string \| (doc) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
+| `importFrom` | `string \| (component) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
 | `filterProps` | `(prop, component) => boolean` | Which props a card surfaces. Defaults to `DEFAULT_PROP_FILTER` (hides `DEFAULT_HIDDEN_GROUPS`); compose with `hideGroups(...)`. Configures the default `format` only. |
 | `format` | `(component) => string` | How each component becomes its file's contents. Defaults to `markdownFormat` (the card above). Pass your own for a different shape — full `ComponentInfo` in, string out. |
 | `title` / `description` | `string` | H1 title and blockquote summary of the `llms.txt` index. |
@@ -133,7 +133,7 @@ llmInstructions({ filterProps: hideGroups([...DEFAULT_HIDDEN_GROUPS, "element"])
 
 ```ts
 llmInstructions({
-  out: (doc) => doc.sourceFile.replace(/\.tsx$/, ".json"),
+  out: (c) => c.sourceFile.replace(/\.tsx$/, ".json"),
   format: (c) => JSON.stringify({ name: c.name, props: c.props }, null, 2),
 });
 ```
