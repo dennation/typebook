@@ -5,6 +5,7 @@ import { llmInstructions } from "../llm-instructions";
 const doc: ComponentInfo = {
 	name: "Button",
 	file: "/x/Button.tsx",
+	sourceFile: "/x/Button.tsx",
 	props: [
 		{ name: "variant", optional: true, type: { kind: "string" } }, // own
 		{

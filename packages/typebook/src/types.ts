@@ -122,8 +122,19 @@ export interface PropInfo {
 export interface ComponentInfo {
 	/** Component name (its export identifier). */
 	name: string;
-	/** Absolute path of the module where the component itself is declared. */
+	/**
+	 * Absolute path of the module where the component itself is **declared**. For a re-exported
+	 * third-party component (`export { Toaster } from "sonner"`) this points into `node_modules`,
+	 * not your source — derive output paths from {@link sourceFile} instead, and compare the two to
+	 * spot foreign re-exports (`file` outside your project, `sourceFile` inside it).
+	 */
 	file: string;
+	/**
+	 * Absolute path of the **scanned module** that surfaced this component — the file under your
+	 * `components` glob. Equals {@link file} for a component declared in its own module; differs for
+	 * a re-export. Use this for co-located output (`sourceFile.replace(/\.tsx$/, ".md")`).
+	 */
+	sourceFile: string;
 	/** JSDoc prose above the component declaration, if any. */
 	description?: string;
 	/**

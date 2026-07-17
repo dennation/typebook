@@ -83,4 +83,35 @@ describe("collectComponentInfos (export scan)", () => {
 	test("ignores class components (function components only)", () => {
 		expect(docs.map((d) => d.name)).not.toContain("ClassComponent");
 	});
+
+	test("sourceFile equals file for a component in its own module", () => {
+		const select = docs.find((d) => d.name === "Select");
+		expect(select?.sourceFile).toBe(select?.file);
+	});
+});
+
+// --- re-export: `file` (declaration) diverges from `sourceFile` (scanned module) ---
+
+describe("re-export scan", () => {
+	let client: TypeScriptClient;
+	let basic: ComponentInfo | undefined;
+
+	beforeAll(async () => {
+		client = new TypeScriptClient(FIXTURES);
+		await client.start();
+		const docs = await client.getExportedComponentInfos(
+			resolve(FIXTURES, "components/ReExport.tsx"),
+		);
+		basic = docs.find((d) => d.name === "Basic");
+	});
+
+	afterAll(() => client.stop());
+
+	test("file points at the component's own declaration", () => {
+		expect(basic?.file).toMatch(/components\/Basic\.tsx$/);
+	});
+
+	test("sourceFile points at the scanned re-exporting module", () => {
+		expect(basic?.sourceFile).toMatch(/components\/ReExport\.tsx$/);
+	});
 });
