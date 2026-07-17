@@ -56,8 +56,8 @@ export function extractComponentInfo(
  * Props of the component identified by its declaration name node, or `null` when the node isn't a
  * component. Only **function components** are recognised — a call signature returning a React node,
  * whose first parameter is the props type (class components are not supported). Each prop is then
- * annotated with its default, `inheritedFrom` package and standard `group` (origin-gated: only
- * framework-inherited attributes get a source + group; a component's own prop stays ungrouped).
+ * annotated with its default, standard `group` (by name — own props too) and, for props that come
+ * from framework/base types, an `inheritedFrom` package (the own/inherited signal).
  */
 function extractComponentProps(
 	checker: ts.TypeChecker,
@@ -78,11 +78,11 @@ function extractComponentProps(
 	return props.map((p) => {
 		let next = p;
 		const from = inherited.get(p.name);
-		if (from !== undefined) {
-			next = { ...next, inheritedFrom: from };
-			const group = classifyPropGroup(p.name);
-			if (group) next = { ...next, group };
-		}
+		if (from !== undefined) next = { ...next, inheritedFrom: from };
+		// Classify the group for every prop — own props too, so `keepOwnProps: false` can filter
+		// them by group. `inheritedFrom` (set above, inherited only) stays the own/inherited signal.
+		const group = classifyPropGroup(p.name);
+		if (group) next = { ...next, group };
 		const def = defaults.get(p.name);
 		if (def !== undefined) next = { ...next, defaultValue: def };
 		return next;

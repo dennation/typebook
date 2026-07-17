@@ -98,8 +98,9 @@ export interface PropInfo {
 	inheritedFrom?: string;
 	/**
 	 * Standard group this prop's name belongs to (see {@link PropGroup}), or absent when the name
-	 * isn't a recognised standard attribute (the component's own API). Classified by name, so it's
-	 * the same whether the attribute is inherited or declared manually.
+	 * isn't a recognised standard attribute. Classified by name, so it's the same whether the
+	 * attribute is inherited or the component declares it itself — use {@link inheritedFrom} to tell
+	 * own props from inherited ones.
 	 */
 	group?: PropGroup;
 	/**

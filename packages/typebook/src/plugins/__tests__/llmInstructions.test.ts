@@ -1,13 +1,19 @@
 import { describe, expect, test } from "vitest";
 import type { ComponentInfo, GenerateCtx } from "../../types";
-import { llmInstructions } from "../llm-instructions";
+import { DEFAULT_PROP_FILTER, llmInstructions } from "../llm-instructions";
 
 const doc: ComponentInfo = {
 	name: "Button",
 	file: "/x/Button.tsx",
 	sourceFile: "/x/Button.tsx",
 	props: [
-		{ name: "variant", optional: true, type: { kind: "string" } }, // own
+		{ name: "variant", optional: true, type: { kind: "string" } }, // own, ungrouped
+		{
+			name: "size",
+			optional: true,
+			type: { kind: "string" },
+			group: "element",
+		}, // own, grouped
 		{
 			name: "aria-label",
 			optional: true,
@@ -49,13 +55,37 @@ describe("llmInstructions: prop policy", () => {
 		expect(card).not.toContain("`aria-label`"); // aria (hidden)
 	});
 
-	test("a custom filterProps overrides the default", async () => {
+	test("a custom filterProps predicate overrides the default", async () => {
 		const files = await run({
 			out: "out",
 			indexFile: false,
-			filterProps: () => true, // hide nothing → aria now shows
+			filterProps: () => true, // hide nothing → inherited aria now shows
 		});
 		expect(files["out/Button.md"]).toContain("`aria-label`");
+	});
+
+	test("a filterProps map rescues one name, keeps the rest hidden", async () => {
+		const files = await run({
+			out: "out",
+			indexFile: false,
+			filterProps: { ...DEFAULT_PROP_FILTER, "aria-label": true },
+		});
+		const card = files["out/Button.md"];
+		expect(card).toContain("`aria-label`"); // rescued by name
+		expect(card).not.toContain("`onClick`"); // still hidden by its group
+	});
+
+	test("keepOwnProps: false filters own props by group too", async () => {
+		const shown = await run({ out: "out", indexFile: false }); // default: keepOwnProps true
+		expect(shown["out/Button.md"]).toContain("`size`"); // own element prop kept
+
+		const hidden = await run({
+			out: "out",
+			indexFile: false,
+			keepOwnProps: false,
+		});
+		expect(hidden["out/Button.md"]).not.toContain("`size`"); // now filtered by element group
+		expect(hidden["out/Button.md"]).toContain("`variant`"); // ungrouped own → still kept
 	});
 });
 
@@ -78,6 +108,6 @@ describe("llmInstructions: format", () => {
 			indexFile: false,
 			format: (c) => JSON.stringify({ name: c.name, props: c.props.length }),
 		});
-		expect(files["out/Button.json"]).toBe('{"name":"Button","props":3}');
+		expect(files["out/Button.json"]).toBe('{"name":"Button","props":4}');
 	});
 });

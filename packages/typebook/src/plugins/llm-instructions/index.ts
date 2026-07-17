@@ -9,6 +9,8 @@ export {
 	DEFAULT_PROP_FILTER,
 	hideGroups,
 	type PropFilter,
+	type PropFilterFn,
+	type PropFilterMap,
 } from "./filterProps";
 export {
 	type LlmFormat,
@@ -40,12 +42,17 @@ export interface LlmInstructionsOptions {
 	 */
 	importFrom?: string | ((doc: ComponentInfo) => string);
 	/**
-	 * Which props each card surfaces. Defaults to `DEFAULT_PROP_FILTER` (hides
-	 * `DEFAULT_HIDDEN_GROUPS`). Pass `hideGroups` to change the group set, or any
-	 * `(prop, component) => boolean` for arbitrary rules. Configures the default {@link markdownFormat}
-	 * only — ignored when a custom `format` is given.
+	 * Which props each card surfaces — a {@link PropFilter}: a **map** (`{ element: false, href: true }`,
+	 * keyed by group or prop name, prop name wins) or a **predicate** for arbitrary rules. Defaults to
+	 * `DEFAULT_PROP_FILTER`; spread it to override (`{ ...DEFAULT_PROP_FILTER, formEncType: true }`).
+	 * Configures the default {@link markdownFormat} only — ignored when a custom `format` is given.
 	 */
 	filterProps?: PropFilter;
+	/**
+	 * Keep a component's **own** props regardless of `filterProps`. Default `true` — a component's own
+	 * API always shows; `false` filters own props too. Configures the default `format` only.
+	 */
+	keepOwnProps?: boolean;
 	/**
 	 * How each scanned component becomes its instruction file — `(component) => string`. Defaults to
 	 * {@link markdownFormat} (the Markdown card). `importFrom`/`filterProps` configure that default;
@@ -76,8 +83,9 @@ export function llmInstructions(
 		indexFile,
 		importFrom,
 		filterProps,
+		keepOwnProps,
 		filterComponents,
-		format = markdownFormat({ importFrom, filterProps }),
+		format = markdownFormat({ importFrom, filterProps, keepOwnProps }),
 		title = "Components",
 		description,
 	} = options;
