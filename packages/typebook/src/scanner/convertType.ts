@@ -58,14 +58,37 @@ export function convertType(
 		return { kind: "number" };
 
 	// Keep the signature string so docs show `(e: MouseEvent) => void`, not a bare `function`.
-	if (type.getCallSignatures().length > 0)
-		return { kind: "function", raw: typeString };
+	if (isFunctionType(type)) return { kind: "function", raw: typeString };
 
-	if (
-		(typeString.includes("ReactNode") || typeString.includes("ReactElement")) &&
-		!typeString.endsWith("[]")
-	)
-		return { kind: "node" };
+	if (isReactNodeType(type)) return { kind: "node" };
 
 	return { kind: "unknown", raw: typeString };
+}
+
+/** Callable directly, or a `Fn | undefined | null` union whose only meaningful member is callable. */
+function isFunctionType(type: ts.Type): boolean {
+	if (type.getCallSignatures().length > 0) return true;
+	if (!type.isUnion()) return false;
+	const meaningful = type.types.filter(
+		(t) => !(t.flags & (ts.TypeFlags.Undefined | ts.TypeFlags.Null)),
+	);
+	return (
+		meaningful.length === 1 && meaningful[0].getCallSignatures().length > 0
+	);
+}
+
+const REACT_NODE_TYPE_NAMES = new Set([
+	"ReactNode",
+	"ReactElement",
+	"ReactPortal",
+]);
+
+/**
+ * Whether the type itself is a React node — checked by its (alias) symbol name, not by matching
+ * `"ReactNode"` in the rendered string, so a composite that merely *contains* a node (e.g.
+ * `Record<string, ReactNode>`, `{ header: ReactNode }`) is not misread as one.
+ */
+function isReactNodeType(type: ts.Type): boolean {
+	const name = type.aliasSymbol?.getName() ?? type.getSymbol()?.getName();
+	return name !== undefined && REACT_NODE_TYPE_NAMES.has(name);
 }

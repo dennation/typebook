@@ -17,10 +17,7 @@ export function inheritedPropSources(
 	const sources = new Map<string, string>();
 
 	const type = checker.getTypeAtLocation(componentNode);
-	const sig = [
-		...type.getCallSignatures(),
-		...type.getConstructSignatures(),
-	][0];
+	const sig = type.getCallSignatures()[0];
 	const propsParam = sig?.getParameters()[0];
 	if (!propsParam) return sources;
 

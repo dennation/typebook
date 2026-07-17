@@ -13,6 +13,8 @@ export interface OptionalUndefinedProps {
 	requiredUndefinable: string | undefined;
 	/** REQUIRED mixed union with undefined — kept, since the prop is required. */
 	requiredMixed: string | number | undefined;
+	/** REQUIRED callback unioned with `undefined` — kind is still `function`. */
+	requiredCallback: (() => void) | undefined;
 }
 
 export function OptionalUndefined(props: OptionalUndefinedProps) {

@@ -48,8 +48,8 @@ export function extractComponentInfo(
 
 /**
  * Props of the component identified by its declaration name node, or `null` when the node isn't a
- * component. A component has a call signature returning a React node (function component) or a
- * construct signature (class component); its first parameter is the props type. Each prop is then
+ * component. Only **function components** are recognised — a call signature returning a React node,
+ * whose first parameter is the props type (class components are not supported). Each prop is then
  * annotated with its default, `inheritedFrom` package and standard `group` (origin-gated: only
  * framework-inherited attributes get a source + group; a component's own prop stays ungrouped).
  */
@@ -59,18 +59,8 @@ function extractComponentProps(
 	ownPackage: string | null,
 ): PropInfo[] | null {
 	const type = checker.getTypeAtLocation(componentNode);
-	const callSigs = type.getCallSignatures();
-	const constructSigs = type.getConstructSignatures();
-
-	let sig: ts.Signature;
-	if (callSigs.length > 0) {
-		sig = callSigs[0];
-		if (!isReactReturnType(checker, sig.getReturnType())) return null;
-	} else if (constructSigs.length > 0) {
-		sig = constructSigs[0];
-	} else {
-		return null;
-	}
+	const sig = type.getCallSignatures()[0];
+	if (!sig || !isReactReturnType(checker, sig.getReturnType())) return null;
 
 	const propsParam = sig.getParameters()[0];
 	const props = propsParam

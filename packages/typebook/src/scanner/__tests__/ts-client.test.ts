@@ -111,6 +111,13 @@ describe("React types", () => {
 	test("render prop → function kind", () => {
 		expect(findProp(props, "renderFooter")!.type.kind).toBe("function");
 	});
+
+	test("a composite that only CONTAINS a node is not a node", () => {
+		expect(findProp(props, "slots")!.type).toEqual({
+			kind: "unknown",
+			raw: "Record<string, ReactNode>",
+		});
+	});
 });
 
 describe("optional props: redundant `| undefined` is stripped", () => {
@@ -154,6 +161,13 @@ describe("optional props: redundant `| undefined` is stripped", () => {
 		expect(findProp(props, "requiredMixed")!.type).toEqual({
 			kind: "unknown",
 			raw: "string | number | undefined",
+		});
+	});
+
+	test("REQUIRED function unioned with `undefined` is still a function", () => {
+		expect(findProp(props, "requiredCallback")!.type).toEqual({
+			kind: "function",
+			raw: "(() => void) | undefined",
 		});
 	});
 });
