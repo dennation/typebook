@@ -18,16 +18,27 @@ export {
 	markdownFormat,
 } from "./markdownFormat";
 
+/** Absolute base directories passed to {@link LlmInstructionsOptions.entryPath}. */
+export interface EntryPathContext {
+	/** The component's own folder — the directory of its `sourceFile`. */
+	componentDir: string;
+	/** The project root. */
+	root: string;
+}
+
 export interface LlmInstructionsOptions {
 	/**
-	 * Where each component's Markdown card goes. A **string** is a directory —
-	 * `{out}/{name}.md`. A **function** returns the full path per component, so cards can sit next to
-	 * their source: `(component) => component.sourceFile.replace(/\.tsx$/, ".md")` (use `sourceFile`,
-	 * the scanned module, not `file`, which for a re-export points into `node_modules`).
+	 * The full path of each component's card — you build it, so the filename is explicit and nothing
+	 * is appended. Receives the component and `{ componentDir, root }` (absolute base dirs); return an
+	 * absolute path (a relative one resolves against `root`):
+	 * - next to the component — `(c, { componentDir }) => path.join(componentDir, c.name + ".md")`
+	 * - from the project root — `(c, { root }) => path.join(root, "docs", c.name + ".md")`
 	 */
-	out: string | ((component: ComponentInfo) => string);
-	/** Index file in `llms.txt` format, listing every component; `false` to skip it. */
-	indexFile: string | false;
+	entryPath: (component: ComponentInfo, dirs: EntryPathContext) => string;
+	/**
+	 * The `llms.txt` index listing every component, relative to the project root; `false` to skip it.
+	 */
+	indexPath: string | false;
 	/**
 	 * Which components get a card (and an index entry) — `(component) => boolean`, `true` keeps it.
 	 * Runs before `format`, so a dropped component produces nothing. Use it to hide deprecated
@@ -72,15 +83,15 @@ export interface LlmInstructionsOptions {
  * description, usage guidance, deprecation, props table) plus an `llms.txt` index.
  * Regenerated in full on every scan (build once, dev on change).
  *
- * Output locations are explicit: `out` and `indexFile` are required (pass `false` to
- * `indexFile` to skip the index) — the plugin writes nowhere by default.
+ * Output locations are explicit: `entryPath` and `indexPath` are required (pass `false` to
+ * `indexPath` to skip it) — the plugin writes nowhere by default.
  */
 export function llmInstructions(
 	options: LlmInstructionsOptions,
 ): TypebookPlugin {
 	const {
-		out,
-		indexFile,
+		entryPath,
+		indexPath,
 		importFrom,
 		filterProps,
 		keepOwnProps,
@@ -90,26 +101,30 @@ export function llmInstructions(
 		description,
 	} = options;
 
-	const cardPath = (component: ComponentInfo): string =>
-		typeof out === "function"
-			? out(component)
-			: `${out}/${safeFileName(component.name)}.md`;
-
 	return {
 		name: "llm-instructions",
 		async generate(allComponents, ctx) {
 			const components = filterComponents
 				? allComponents.filter(filterComponents)
 				: allComponents;
+			// `entryPath` builds the full path from the component and its base dirs; a relative return
+			// resolves against the project root.
+			const cardPath = (component: ComponentInfo): string => {
+				const p = entryPath(component, {
+					componentDir: path.dirname(component.sourceFile),
+					root: ctx.root,
+				});
+				return path.isAbsolute(p) ? p : path.join(ctx.root, p);
+			};
 			await Promise.all(
 				components.map((component) =>
 					ctx.writeFile(cardPath(component), format(component)),
 				),
 			);
-			if (indexFile !== false)
+			if (indexPath !== false)
 				await ctx.writeFile(
-					indexFile,
-					buildIndex(components, indexFile, cardPath, ctx, title, description),
+					indexPath,
+					buildIndex(components, indexPath, cardPath, ctx, title, description),
 				);
 		},
 	};
@@ -118,7 +133,7 @@ export function llmInstructions(
 /** The `llms.txt` index: H1 + blockquote summary + a `[name](href): desc` list, sorted by name. */
 function buildIndex(
 	components: ComponentInfo[],
-	indexFile: string,
+	indexPath: string,
 	cardPath: (component: ComponentInfo) => string,
 	ctx: GenerateCtx,
 	title: string,
@@ -126,7 +141,7 @@ function buildIndex(
 ): string {
 	const abs = (p: string): string =>
 		path.isAbsolute(p) ? p : path.join(ctx.root, p);
-	const indexDir = path.dirname(abs(indexFile));
+	const indexDir = path.dirname(abs(indexPath));
 
 	const lines = [...components]
 		.sort((a, b) => a.name.localeCompare(b.name))
@@ -152,9 +167,4 @@ function heading(title: string, description: string | undefined): string {
 
 function firstLine(text: string | undefined): string {
 	return text?.split("\n")[0].trim() ?? "";
-}
-
-/** Keep a component name safe as a filename (generics, spaces, punctuation → `_`). */
-function safeFileName(name: string): string {
-	return name.replace(/[^\w.-]+/g, "_");
 }

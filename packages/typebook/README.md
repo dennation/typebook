@@ -59,16 +59,18 @@ Writes documentation for AI coding agents (Claude Code, Codex, Cursor) following
 
 ```ts
 import { llmInstructions } from "@dennation/typebook/plugins/llm-instructions";
+import path from "node:path";
 
 // inside typebook({ plugins: [ … ] })
 llmInstructions({
-  out: (component) => component.sourceFile.replace(/\.tsx$/, ".md"), // Button.tsx → Button.md
-  indexFile: "llms.txt", // llms.txt index at the repo root
+  // you build the full path — next to the component: components/Button.tsx → components/Button.md
+  entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.md`),
+  indexPath: "llms.txt", // the index, relative to the project root
   importFrom: "@acme/ui", // the import line printed in each card
 });
 ```
 
-Point your agent's memory (`CLAUDE.md`, `AGENTS.md`) at the `indexFile`; it reads the card it needs on demand. For a **published** package, the docs travel differently — see [Shipping to a consumer project](#shipping-to-a-consumer-project).
+Point your agent's memory (`CLAUDE.md`, `AGENTS.md`) at the `indexPath`; it reads the card it needs on demand. For a **published** package, the docs travel differently — see [Shipping to a consumer project](#shipping-to-a-consumer-project).
 
 Each card is self-contained — import line, description, `@remarks` usage guidance, deprecation, and a props table with exhaustive union values:
 
@@ -104,8 +106,8 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 
 | Option | Type | Description |
 |---|---|---|
-| `out` **(required)** | `string \| (component) => string` | Where each card goes: a function returning a full path per component — e.g. next to its source, `component.sourceFile.replace(/\.tsx$/, ".md")` — or a directory string (`{out}/{Name}.md`). |
-| `indexFile` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
+| `entryPath` **(required)** | `(component, { componentDir, root }) => string` | The full path of each card — you build it (the filename is explicit). Join `componentDir` for co-location or `root` for a central folder; return an absolute path (a relative one resolves against `root`). |
+| `indexPath` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
 | `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |
 | `importFrom` | `string \| (component) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
 | `filterProps` | `PropFilter` (map or predicate) | Which props a card surfaces. A **map** keyed by group or prop name (`{ element: false, href: true }`, prop name wins, unlisted kept) or a predicate. Defaults to `DEFAULT_PROP_FILTER`; spread to override. Configures the default `format` only. |
@@ -114,6 +116,17 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 | `title` / `description` | `string` | H1 title and blockquote summary of the `llms.txt` index. |
 
 #### Recipes
+
+**Choose where cards land** — `entryPath` gets `componentDir` and `root`, so pick the base:
+
+```ts
+import path from "node:path";
+
+// next to each component
+entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.md`),
+// or all in one folder at the project root
+entryPath: (c, { root }) => path.join(root, "docs", `${c.name}.md`),
+```
 
 **Drop only some components** — hide deprecated ones, or re-exports you don't own:
 
@@ -137,11 +150,11 @@ llmInstructions({
 
 For arbitrary logic, pass a predicate instead — `(prop, component) => boolean`. Own props stay visible either way unless you set `keepOwnProps: false`.
 
-**Emit a different format** — `format` takes the scanned `ComponentInfo` and returns the file body, so you can produce JSON, MDX, anything (match the extension in `out`):
+**Emit a different format** — `format` takes the scanned `ComponentInfo` and returns the file body, so you can produce JSON, MDX, anything (match the extension in `entryPath`):
 
 ```ts
 llmInstructions({
-  out: (c) => c.sourceFile.replace(/\.tsx$/, ".json"),
+  entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.json`),
   format: (c) => JSON.stringify({ name: c.name, props: c.props }, null, 2),
 });
 ```
@@ -163,15 +176,15 @@ llmInstructions({ title: "Acme UI", description: "Components for the Acme design
 
 #### Shipping to a consumer project
 
-When your components are a published package, the generated docs are just files — ship them, then point the *consumer's* agent at the index. The name `llms.txt` triggers nothing on its own: no agent scans `node_modules` (or a website) for it. Two steps make the docs reach a downstream project:
+The generated docs are ordinary source files — cards co-located next to each component plus `llms.txt` at the root. Commit them (they're derived, so add a CI check that regenerating leaves the tree unchanged), then reach a downstream project in two steps. The name `llms.txt` triggers nothing on its own: no agent scans `node_modules` (or a website) for it.
 
-1. **Include the files in the package.** Generate into a published folder and list it in `package.json#files` so it lands in the npm tarball:
+1. **Include the docs in the package.** List their locations in `package.json#files` so npm packs them (it includes any listed committed file, not just `dist`):
 
    ```jsonc
-   "files": ["dist", "llms.txt", "llms/"]
+   "files": ["dist", "llms.txt", "components/**/*.md"]
    ```
 
-   The index links cards by relative path, so `node_modules/@acme/ui/llms.txt` → `node_modules/@acme/ui/llms/Button.md` resolves as-is.
+   The index links each card by relative path, so `node_modules/@acme/ui/llms.txt` resolves to the co-located cards as-is.
 
 2. **Reference the index from the consumer's agent memory** — the file the agent auto-loads:
 
