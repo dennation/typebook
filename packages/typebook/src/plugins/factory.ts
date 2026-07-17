@@ -12,8 +12,9 @@ import { collectDocs } from "./collectDocs";
  * unplugin supports (Vite, Rollup, Rolldown, webpack, Rspack, esbuild, Farm).
  *
  * It owns one warm {@link TypeScriptClient}, scans the `components` config into
- * {@link ComponentInfo}s (a single by-type export scan), and runs each `generate` sub-plugin
- * with the full set — once at `buildStart` (dev + build) and again on each change in dev.
+ * {@link ComponentInfo}s (a single by-type export scan), and runs each `generate` sub-plugin with
+ * the full set. In dev it emits at `buildStart` and re-emits on each change; in build it emits at
+ * `writeBundle` — after the bundler has emptied `outDir`, so cards written there aren't wiped.
  */
 export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 	config = {},
@@ -83,18 +84,41 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 		regenTimer = setTimeout(() => void runGenerate(), 150);
 	};
 
+	const stopClient = (): void => {
+		client?.stop();
+		client = null;
+		starting = null;
+	};
+
+	// One emit per build. `writeBundle` fires once per output; re-armed by `buildStart`.
+	let emitted = false;
+
 	return {
 		name: PACKAGE_NAME,
 		enforce: "pre",
 
 		async buildStart() {
-			await runGenerate();
+			emitted = false;
+			// Dev: emit now, the watcher re-emits on change. Build: defer to `writeBundle` —
+			// emitting here lands before the bundler empties `outDir`, wiping cards written into it.
+			if (command === "dev") await runGenerate();
 		},
 
 		buildEnd() {
-			client?.stop();
-			client = null;
-			starting = null;
+			// Dev only: in build the client is still needed by `writeBundle` (which runs after
+			// `buildEnd`), so its teardown moves there.
+			if (command === "dev") stopClient();
+		},
+
+		// Build output phase — runs after `outDir` is emptied and the bundle written, so cards
+		// emitted into `outDir` survive. Not reached by a Vite dev server (no bundle).
+		async writeBundle() {
+			if (command !== "build" || emitted) return;
+			emitted = true;
+			await runGenerate();
+			// ponytail: re-inits the client on the next `vite build --watch` rebuild; fine, that's
+			// not a typical consumer path (dev uses the server, CI a one-shot build).
+			stopClient();
 		},
 
 		vite: {
