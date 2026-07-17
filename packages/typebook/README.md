@@ -63,14 +63,14 @@ import path from "node:path";
 
 // inside typebook({ plugins: [ … ] })
 llmInstructions({
-  // you build the full path — next to the component: components/Button.tsx → components/Button.md
-  entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.md`),
-  indexPath: "components.md", // the index, relative to the project root
+  // you build the full path — one generated folder keeps the cards out of your source tree
+  entryPath: (c, { root }) => path.join(root, "generated/components", `${c.name}.md`),
+  indexPath: "generated/components/index.md",
   importFrom: "@acme/ui", // the import line printed in each card
 });
 ```
 
-Point your agent's memory (`CLAUDE.md`, `AGENTS.md`) at the `indexPath`; it reads the card it needs on demand. For a **published** package, the docs travel differently — see [Shipping to a consumer project](#shipping-to-a-consumer-project).
+`entryPath` is a function, so the cards go wherever you build the path — a central `generated/` folder (recommended: `.gitignore` it, or commit it with a CI freshness check) or next to each component (see the recipe below). Then point your agent's memory (`CLAUDE.md`, `AGENTS.md`) at the `indexPath`; it reads the card it needs on demand. For a **published** package, the docs travel differently — see [Shipping to a consumer project](#shipping-to-a-consumer-project).
 
 Each card is self-contained — import line, description, `@remarks` usage guidance, deprecation, and a props table with exhaustive union values:
 
@@ -106,7 +106,7 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 
 | Option | Type | Description |
 |---|---|---|
-| `entryPath` **(required)** | `(component, { componentDir, root }) => string` | The full path of each card — you build it (the filename is explicit). Join `componentDir` for co-location or `root` for a central folder; return an absolute path (a relative one resolves against `root`). |
+| `entryPath` **(required)** | `(component, { componentDir, root }) => string` | The full path of each card — you build it (the filename is explicit). Join `root` for a central folder (recommended) or `componentDir` to co-locate; return an absolute path (a relative one resolves against `root`). |
 | `indexPath` **(required)** | `string \| false` | Path of the Markdown component index (relative to the project root), or `false` to skip it. Reference it from your `AGENTS.md`/`CLAUDE.md`. |
 | `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |
 | `importFrom` | `string \| (component) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
@@ -123,18 +123,20 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 ```ts
 import path from "node:path";
 
-// next to each component
-entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.md`),
-// or all in one folder at the project root
-entryPath: (c, { root }) => path.join(root, "docs", `${c.name}.md`),
+// recommended: one generated folder — clean to .gitignore/ship, no source clutter
+entryPath: (c, { root }) => path.join(root, "generated/components", `${c.name}.md`),
+// or co-located, marked as generated (so it doesn't clash with an authored Button.md)
+entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.gen.md`),
 ```
+
+A flat central folder assumes component names are unique; co-location avoids that but scatters the cards through your source.
 
 **Ship a copy in the build output** — keep the main output committed in source (for review), and add a published copy in the bundler's output dir with one line:
 
 ```ts
 llmInstructions({
-  entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.md`),
-  indexPath: "components.md",
+  entryPath: (c, { root }) => path.join(root, "generated/components", `${c.name}.md`),
+  indexPath: "generated/components/index.md",
   emitToOutDir: "docs", // → {outDir}/docs/{Name}.md + {outDir}/docs/index.md, on `build`
 });
 ```
@@ -189,20 +191,22 @@ llmInstructions({ title: "Acme UI", description: "Components for the Acme design
 
 #### Shipping to a consumer project
 
-The generated docs are ordinary source files — cards co-located next to each component plus `components.md` at the root. Commit them (they're derived, so add a CI check that regenerating leaves the tree unchanged), then reach a downstream project in two steps. Nothing auto-discovers the index: no agent scans `node_modules` for it, so you reference it (step 2).
+The generated docs are ordinary source files — the cards and their index in one `generated/` folder. Commit them (they're derived, so add a CI check that regenerating leaves the tree unchanged), then reach a downstream project in two steps. Nothing auto-discovers the index: no agent scans `node_modules` for it, so you reference it (step 2).
 
-1. **Include the docs in the package.** List their locations in `package.json#files` so npm packs them (it includes any listed committed file, not just `dist`):
+> Prefer to keep generated files out of git? Use [`emitToOutDir`](#options) instead — the docs are built into `dist` and ship with it, no committed copy.
+
+1. **Include the docs in the package.** List the folder in `package.json#files` so npm packs it (it includes any listed committed file, not just `dist`):
 
    ```jsonc
-   "files": ["dist", "components.md", "components/**/*.md"]
+   "files": ["dist", "generated/components"]
    ```
 
-   The index links each card by relative path, so `node_modules/@acme/ui/components.md` resolves to the co-located cards as-is.
+   The index links each card by relative path, so `node_modules/@acme/ui/generated/components/index.md` resolves to the cards as-is.
 
 2. **Reference the index from the consumer's agent memory** — the file the agent auto-loads:
 
-   - **CLAUDE.md** — `@import` inlines it into context: `@./node_modules/@acme/ui/components.md`
-   - **AGENTS.md** — no import mechanism; a pointer line the agent opens on demand: `` UI component reference (props, imports, usage): `./node_modules/@acme/ui/components.md` ``
+   - **CLAUDE.md** — `@import` inlines it into context: `@./node_modules/@acme/ui/generated/components/index.md`
+   - **AGENTS.md** — no import mechanism; a pointer line the agent opens on demand: `` UI component reference (props, imports, usage): `./node_modules/@acme/ui/generated/components/index.md` ``
 
 ## Every bundler
 

@@ -23,8 +23,8 @@ console.log(`
           components: 'src/components/**/*.tsx',
           plugins: [
             llmInstructions({
-              entryPath: (c, { componentDir }) => path.join(componentDir, c.name + '.md'),
-              indexPath: 'components.md',
+              entryPath: (c, { root }) => path.join(root, 'generated/components', c.name + '.md'),
+              indexPath: 'generated/components/index.md',
             }),
           ],
         }),
