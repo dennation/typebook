@@ -1,89 +1,70 @@
 import { describe, expect, test } from "vitest";
-import type { PropInfo } from "../../types";
-import type { PropFilter } from "../llm-instructions";
+import type { PropGroup, PropInfo } from "../../types";
 import { DEFAULT_PROP_FILTER, hideGroups } from "../llm-instructions";
+import {
+	asPropFilterFn,
+	type PropFilter,
+} from "../llm-instructions/filterProps";
 
-const props: PropInfo[] = [
-	{ name: "variant", optional: true, type: { kind: "string" } }, // own, no group
-	{
-		name: "aria-label",
-		optional: true,
-		type: { kind: "string" },
-		group: "aria",
-	},
-	{
-		name: "onClick",
-		optional: true,
-		type: { kind: "function" },
-		group: "event:mouse",
-	},
-	{
-		name: "className",
-		optional: true,
-		type: { kind: "string" },
-		group: "global",
-	},
-];
+const prop = (name: string, group?: PropGroup): PropInfo => ({
+	name,
+	optional: true,
+	type: { kind: "string" },
+	...(group ? { group } : {}),
+});
 
-const keep = (filter: PropFilter) =>
-	props.filter((p) => filter(p, {} as never)).map((p) => p.name);
+const keep = (filter: PropFilter, p: PropInfo) =>
+	asPropFilterFn(filter)(p, {} as never);
 
 describe("hideGroups", () => {
-	test("drops props in the given groups, keeps own props", () => {
-		expect(keep(hideGroups(["aria"]))).toEqual([
-			"variant",
-			"onClick",
-			"className",
-		]);
+	test("maps each group to false", () => {
+		expect(hideGroups(["aria", "element"])).toEqual({
+			aria: false,
+			element: false,
+		});
+	});
+});
+
+describe("asPropFilterFn (map)", () => {
+	test("a group flag hides props in that group", () => {
+		expect(keep({ element: false }, prop("disabled", "element"))).toBe(false);
 	});
 
-	test("keeps everything when no group matches", () => {
-		expect(keep(hideGroups(["event:media"]))).toEqual([
-			"variant",
-			"aria-label",
-			"onClick",
-			"className",
-		]);
+	test("a prop name wins over its group", () => {
+		expect(
+			keep({ element: false, disabled: true }, prop("disabled", "element")),
+		).toBe(true);
 	});
 
-	test("except rescues a name out of a hidden group", () => {
-		expect(keep(hideGroups(["global"], { except: ["className"] }))).toEqual([
-			"variant",
-			"aria-label",
-			"onClick",
-			"className",
-		]);
-		expect(keep(hideGroups(["global"]))).not.toContain("className");
+	test("an unlisted prop is kept", () => {
+		expect(keep({ element: false }, prop("variant"))).toBe(true);
+	});
+
+	test("passes a predicate through unchanged", () => {
+		const only = (p: PropInfo) => p.name === "keepme";
+		expect(keep(only, prop("keepme"))).toBe(true);
+		expect(keep(only, prop("other"))).toBe(false);
 	});
 });
 
 describe("DEFAULT_PROP_FILTER", () => {
-	test("keeps own props + className, hides aria and events", () => {
-		expect(keep(DEFAULT_PROP_FILTER)).toEqual(["variant", "className"]);
-	});
-
-	test("hides the react group but keeps children", () => {
-		const react = (name: string): PropInfo => ({
-			name,
-			optional: true,
-			type: { kind: "string" },
-			group: "react",
-		});
-		expect(DEFAULT_PROP_FILTER(react("ref"), {} as never)).toBe(false);
-		expect(DEFAULT_PROP_FILTER(react("children"), {} as never)).toBe(true);
-	});
-
-	test("hides the inherited element group except the useful natives", () => {
-		const element = (name: string): PropInfo => ({
-			name,
-			optional: true,
-			type: { kind: "string" },
-			group: "element",
-		});
-		expect(DEFAULT_PROP_FILTER(element("formEncType"), {} as never)).toBe(
+	test("hides the element / aria / event groups", () => {
+		expect(keep(DEFAULT_PROP_FILTER, prop("formEncType", "element"))).toBe(
 			false,
 		);
-		expect(DEFAULT_PROP_FILTER(element("disabled"), {} as never)).toBe(true);
-		expect(DEFAULT_PROP_FILTER(element("href"), {} as never)).toBe(true);
+		expect(keep(DEFAULT_PROP_FILTER, prop("aria-label", "aria"))).toBe(false);
+		expect(keep(DEFAULT_PROP_FILTER, prop("onClick", "event:mouse"))).toBe(
+			false,
+		);
+	});
+
+	test("keeps the rescued natives and children", () => {
+		expect(keep(DEFAULT_PROP_FILTER, prop("disabled", "element"))).toBe(true);
+		expect(keep(DEFAULT_PROP_FILTER, prop("href", "element"))).toBe(true);
+		expect(keep(DEFAULT_PROP_FILTER, prop("children", "react"))).toBe(true);
+	});
+
+	test("keeps an ungrouped prop", () => {
+		expect(keep(DEFAULT_PROP_FILTER, prop("variant"))).toBe(true);
 	});
 });

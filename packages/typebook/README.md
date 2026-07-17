@@ -108,7 +108,8 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 | `indexFile` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
 | `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |
 | `importFrom` | `string \| (component) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
-| `filterProps` | `(prop, component) => boolean` | Which props a card surfaces. Defaults to `DEFAULT_PROP_FILTER` (hides `DEFAULT_HIDDEN_GROUPS`); compose with `hideGroups(...)`. Configures the default `format` only. |
+| `filterProps` | `PropFilter` (map or predicate) | Which props a card surfaces. A **map** keyed by group or prop name (`{ element: false, href: true }`, prop name wins, unlisted kept) or a predicate. Defaults to `DEFAULT_PROP_FILTER`; spread to override. Configures the default `format` only. |
+| `keepOwnProps` | `boolean` | Keep a component's own props regardless of `filterProps`. Default `true`; `false` filters own props too. |
 | `format` | `(component) => string` | How each component becomes its file's contents. Defaults to `markdownFormat` (the card above). Pass your own for a different shape — full `ComponentInfo` in, string out. |
 | `title` / `description` | `string` | H1 title and blockquote summary of the `llms.txt` index. |
 
@@ -120,16 +121,21 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 llmInstructions({ filterComponents: (c) => c.deprecated === undefined });
 ```
 
-**Tune the prop filter** — the default surfaces a component's own props plus a few broadly useful native names (`disabled`, `type`, `href`, … in `DEFAULT_KEPT_PROPS`) and hides the rest. Compose the exported defaults to keep an extra inherited attribute, or to surface a whole hidden group:
+**Tune the prop filter** — `filterProps` is a map keyed by group or prop name (`true` keeps, `false` hides; a prop name wins over its group, anything unlisted is kept). The default surfaces a component's own props plus a few broadly useful native names (`disabled`, `type`, `href`, …) and hides the rest. Spread `DEFAULT_PROP_FILTER` to adjust:
 
 ```ts
-import { DEFAULT_HIDDEN_GROUPS, DEFAULT_KEPT_PROPS, hideGroups } from "@dennation/typebook/plugins/llm-instructions";
+import { DEFAULT_PROP_FILTER } from "@dennation/typebook/plugins/llm-instructions";
 
-// also keep the inherited `maxLength` attribute
 llmInstructions({
-  filterProps: hideGroups(DEFAULT_HIDDEN_GROUPS, { except: [...DEFAULT_KEPT_PROPS, "maxLength"] }),
+  filterProps: {
+    ...DEFAULT_PROP_FILTER,
+    maxLength: true, // keep an inherited attribute the default drops
+    onClick: false, // hide a specific prop
+  },
 });
 ```
+
+For arbitrary logic, pass a predicate instead — `(prop, component) => boolean`. Own props stay visible either way unless you set `keepOwnProps: false`.
 
 **Emit a different format** — `format` takes the scanned `ComponentInfo` and returns the file body, so you can produce JSON, MDX, anything (match the extension in `out`):
 
@@ -185,7 +191,7 @@ Built on [unplugin](https://unplugin.unjs.io), so the same `typebook()` factory 
 | Import | Description |
 |---|---|
 | `@dennation/typebook` | The scanner core — `collectComponentInfos`, `TypeScriptClient`, `classifyPropGroup` — plus the React-free types (`TypebookConfig`, `ComponentInfo`, `TypebookPlugin`, `PropInfo`, …). |
-| `@dennation/typebook/plugins/llm-instructions` | `llmInstructions()`, `markdownFormat()`, `hideGroups()`, `DEFAULT_PROP_FILTER`, and the `LlmInstructionsOptions` / `LlmFormat` types. |
+| `@dennation/typebook/plugins/llm-instructions` | `llmInstructions()`, `markdownFormat()`, `hideGroups()`, `DEFAULT_PROP_FILTER`, `DEFAULT_KEPT_PROPS`, and the `LlmInstructionsOptions` / `LlmFormat` / `PropFilter` types. |
 | `@dennation/typebook/{vite,rollup,…}` | The `typebook()` bundler plugin, one entry per bundler. |
 
 ## Requirements

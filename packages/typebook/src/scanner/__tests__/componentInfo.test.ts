@@ -88,6 +88,15 @@ describe("collectComponentInfos (export scan)", () => {
 		const select = docs.find((d) => d.name === "Select");
 		expect(select?.sourceFile).toBe(select?.file);
 	});
+
+	test("classifies own standard-named props by group (no inheritedFrom)", () => {
+		// `disabled` is declared by Basic itself — grouped by name, but not inherited.
+		const disabled = docs
+			.find((d) => d.name === "Basic")
+			?.props.find((p) => p.name === "disabled");
+		expect(disabled?.group).toBe("element");
+		expect(disabled?.inheritedFrom).toBeUndefined();
+	});
 });
 
 // --- re-export: `file` (declaration) diverges from `sourceFile` (scanned module) ---

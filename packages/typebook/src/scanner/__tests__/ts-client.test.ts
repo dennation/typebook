@@ -231,7 +231,7 @@ describe("inheritance: extends", () => {
 	});
 });
 
-describe("group: origin-gated standard classification", () => {
+describe("group: standard classification by name", () => {
 	let props: PropInfo[];
 
 	beforeAll(async () => {
@@ -248,13 +248,13 @@ describe("group: origin-gated standard classification", () => {
 		expect(findProp(props, "onClickCapture")!.group).toBe("capture");
 	});
 
-	test("own props are ungrouped even when the name collides with a standard attribute", () => {
+	test("an own prop is grouped by name too, but stays not-inherited", () => {
 		const size = findProp(props, "size")!;
-		expect(size.inheritedFrom).toBeUndefined();
-		expect(size.group).toBeUndefined(); // `size` is an HTML attr name, but this one is own
+		expect(size.group).toBe("element"); // `size` is a standard HTML attr name
+		expect(size.inheritedFrom).toBeUndefined(); // …but this one is the component's own
 	});
 
-	test("own on* callback is ungrouped (not a DOM event)", () => {
+	test("own on* callback that isn't a DOM event stays ungrouped", () => {
 		expect(findProp(props, "onValueChange")!.group).toBeUndefined();
 	});
 });
