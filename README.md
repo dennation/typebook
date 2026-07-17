@@ -24,7 +24,6 @@ A pnpm workspace monorepo:
 | Path | Package | What it is |
 |------|---------|------------|
 | `packages/typebook` | `@dennation/typebook` | Component documentation library + bundler plugin. Scans `register()` calls, extracts prop types via the TypeScript Compiler API, renders stories, variant grids, matrices, and playgrounds. |
-| `packages/menu` | `@dennation/menu` | Router-agnostic navigation menu with a React renderer and a TanStack Router adapter. |
 | `examples/tanstack-router` | — | Minimal example: TanStack Router + typebook. |
 | `examples/tanstack-router-mdx` | — | Same, with MDX pages. |
 | `apps/website` | — | The [marketing landing site](https://dennation.github.io/typebook/), deployed to GitHub Pages. |
