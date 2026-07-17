@@ -84,7 +84,7 @@ export class TypeScriptClient {
 
 		const docs: ComponentInfo[] = [];
 		for (const exp of checker.getExportsOfModule(moduleSymbol)) {
-			const doc = extractComponentInfo(checker, exp);
+			const doc = extractComponentInfo(checker, exp, sourceFile.fileName);
 			if (doc) docs.push(doc);
 		}
 		return docs;

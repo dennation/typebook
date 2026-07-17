@@ -19,8 +19,9 @@ export {
 export interface LlmInstructionsOptions {
 	/**
 	 * Where each component's Markdown card goes. A **string** is a directory —
-	 * `{out}/{name}.md`. A **function** returns the full path per component, so cards can
-	 * sit next to their source: `(doc) => doc.file.replace(/\.tsx$/, ".md")`.
+	 * `{out}/{name}.md`. A **function** returns the full path per component, so cards can sit next to
+	 * their source: `(doc) => doc.sourceFile.replace(/\.tsx$/, ".md")` (use `sourceFile`, the scanned
+	 * module, not `file`, which for a re-export points into `node_modules`).
 	 */
 	out: string | ((doc: ComponentInfo) => string);
 	/** Index file in `llms.txt` format, listing every component; `false` to skip it. */

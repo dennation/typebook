@@ -15,10 +15,15 @@ import {
 } from "./jsdoc";
 import { paramDefaults } from "./paramDefaults";
 
-/** Turn one module export into a {@link ComponentInfo}, or `null` when it isn't a component. */
+/**
+ * Turn one module export into a {@link ComponentInfo}, or `null` when it isn't a component.
+ * `sourceFile` is the scanned module the export was found in (the glob-matched file), distinct from
+ * the component's own declaration `file` when the export is a re-export.
+ */
 export function extractComponentInfo(
 	checker: ts.TypeChecker,
 	exp: ts.Symbol,
+	sourceFile: string,
 ): ComponentInfo | null {
 	const resolved =
 		exp.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exp) : exp;
@@ -35,6 +40,7 @@ export function extractComponentInfo(
 	const info: ComponentInfo = {
 		name: exp.getName(),
 		file: decl.getSourceFile().fileName,
+		sourceFile,
 		props,
 	};
 	const description = symbolDescription(checker, resolved);
