@@ -95,12 +95,15 @@ describe("React types", () => {
 	});
 
 	test("ReactNode → node kind", () => {
-		expect(findProp(props, "children")!.type).toEqual({ kind: "node" });
+		expect(findProp(props, "children")!.type).toEqual({
+			kind: "node",
+			name: "ReactNode",
+		});
 	});
 
-	test("ReactElement → node kind", () => {
+	test("ReactElement → node kind, carries the exact name", () => {
 		const icon = findProp(props, "icon")!;
-		expect(icon.type).toEqual({ kind: "node" });
+		expect(icon.type).toEqual({ kind: "node", name: "ReactElement" });
 		expect(icon.optional).toBe(true);
 	});
 

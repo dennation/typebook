@@ -42,7 +42,7 @@ export type PropType =
 	| { kind: "boolean" }
 	| { kind: "string" }
 	| { kind: "number" }
-	| { kind: "node" }
+	| { kind: "node"; name: "ReactNode" | "ReactElement" | "ReactPortal" }
 	| { kind: "function"; raw?: string }
 	| { kind: "unknown"; raw: string };
 

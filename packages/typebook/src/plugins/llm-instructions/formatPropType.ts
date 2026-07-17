@@ -7,6 +7,6 @@ export function formatPropType(prop: PropInfo): string {
 		return type.values.map((v) => `"${v}"`).join(" | ");
 	if (type.kind === "unknown" && type.raw) return type.raw;
 	if (type.kind === "function" && type.raw) return type.raw;
-	if (type.kind === "node") return "ReactNode";
+	if (type.kind === "node") return type.name;
 	return type.kind;
 }
