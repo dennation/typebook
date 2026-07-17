@@ -17,6 +17,9 @@ importers:
 
   packages/typebook:
     dependencies:
+      tinyglobby:
+        specifier: ^0.2.15
+        version: 0.2.15
       typescript:
         specifier: '>=5.0.0'
         version: 5.9.3

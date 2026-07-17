@@ -84,7 +84,7 @@ export class TypeScriptClient {
 		const absPath = resolve(this.cwd, filePath);
 		if (content !== undefined) this.setOverride(absPath, content);
 
-		const sourceFile = this.program?.getSourceFile(absPath);
+		const sourceFile = this.ensureSourceFile(absPath);
 		const checker = this.checker;
 		if (!sourceFile || !checker) return [];
 
@@ -146,6 +146,20 @@ export class TypeScriptClient {
 			directoryExists: ts.sys.directoryExists,
 			getDirectories: ts.sys.getDirectories,
 		};
+	}
+
+	/**
+	 * The source file for `absPath`, adding it as a program root first if the tsconfig didn't already
+	 * include it. A `components` glob can match files outside the tsconfig `include`; without this they
+	 * would silently yield no components. Returns undefined only when the file can't be read.
+	 */
+	private ensureSourceFile(absPath: string): ts.SourceFile | undefined {
+		const existing = this.program?.getSourceFile(absPath);
+		if (existing) return existing;
+		if (this.fileVersions.has(absPath)) return undefined; // already a root but unreadable/non-existent
+		this.fileVersions.set(absPath, 0);
+		this.refreshProgram();
+		return this.program?.getSourceFile(absPath);
 	}
 
 	/** Pull the latest warm program from the service. */

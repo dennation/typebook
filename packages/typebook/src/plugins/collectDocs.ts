@@ -1,5 +1,4 @@
-import { globSync } from "node:fs";
-import path from "node:path";
+import { globSync } from "tinyglobby";
 import { collectComponentInfos, type TypeScriptClient } from "../scanner";
 import type { ComponentInfo, TypebookConfig } from "../types";
 
@@ -16,17 +15,11 @@ export async function collectDocs(
 	return collectComponentInfos(client, componentFiles(cwd, config));
 }
 
-/** The `components` config (path / list / globs) resolved to an absolute file list. */
+/** The `components` config (path / list / globs) resolved to an absolute, de-duplicated file list. */
 function componentFiles(cwd: string, config: TypebookConfig): string[] {
-	const patterns =
-		config.components == null
-			? []
-			: Array.isArray(config.components)
-				? config.components
-				: [config.components];
-	const files = new Set<string>();
-	for (const pattern of patterns)
-		for (const match of globSync(pattern, { cwd }))
-			files.add(path.resolve(cwd, match.toString()));
-	return [...files];
+	if (config.components == null) return [];
+	const patterns = Array.isArray(config.components)
+		? config.components
+		: [config.components];
+	return globSync(patterns, { cwd, absolute: true });
 }
