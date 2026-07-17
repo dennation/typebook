@@ -120,13 +120,15 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 llmInstructions({ filterComponents: (c) => c.deprecated === undefined });
 ```
 
-**Tune the prop filter** — the default keeps only a component's own props plus the native `element` attributes; compose the exported defaults to hide those too, or surface a hidden group:
+**Tune the prop filter** — the default surfaces a component's own props plus a few broadly useful native names (`disabled`, `type`, `href`, … in `DEFAULT_KEPT_PROPS`) and hides the rest. Compose the exported defaults to keep an extra inherited attribute, or to surface a whole hidden group:
 
 ```ts
-import { DEFAULT_HIDDEN_GROUPS, hideGroups } from "@dennation/typebook/plugins/llm-instructions";
+import { DEFAULT_HIDDEN_GROUPS, DEFAULT_KEPT_PROPS, hideGroups } from "@dennation/typebook/plugins/llm-instructions";
 
-// also drop native <button> attributes (the `element` group) — keep only your own props
-llmInstructions({ filterProps: hideGroups([...DEFAULT_HIDDEN_GROUPS, "element"]) });
+// also keep the inherited `maxLength` attribute
+llmInstructions({
+  filterProps: hideGroups(DEFAULT_HIDDEN_GROUPS, { except: [...DEFAULT_KEPT_PROPS, "maxLength"] }),
+});
 ```
 
 **Emit a different format** — `format` takes the scanned `ComponentInfo` and returns the file body, so you can produce JSON, MDX, anything (match the extension in `out`):
