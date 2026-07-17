@@ -16,11 +16,7 @@
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"resolveJsonModule": true,
-		"isolatedModules": true,
-		"paths": {
-			"@/*": ["./src/*"],
-			"@react/*": ["./src/react/*"]
-		}
+		"isolatedModules": true
 	},
 	"include": ["src"],
 	"exclude": ["node_modules", "dist"]
