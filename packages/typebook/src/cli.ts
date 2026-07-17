@@ -14,13 +14,19 @@ console.log(`
 
     import { typebook } from '@dennation/${PACKAGE_NAME}/vite'
     import { llmInstructions } from '@dennation/${PACKAGE_NAME}/plugins/llm-instructions'
+    import path from 'node:path'
     // typebook is also exported from /rollup, /rolldown, /webpack, /rspack, /esbuild, /farm
 
     export default defineConfig({
       plugins: [
         typebook({
           components: 'src/components/**/*.tsx',
-          plugins: [llmInstructions({ entryPath: '.', indexPath: 'llms.txt' })],
+          plugins: [
+            llmInstructions({
+              entryPath: (c, { componentDir }) => path.join(componentDir, c.name + '.md'),
+              indexPath: 'llms.txt',
+            }),
+          ],
         }),
       ],
     })

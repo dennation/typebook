@@ -59,11 +59,13 @@ Writes documentation for AI coding agents (Claude Code, Codex, Cursor) following
 
 ```ts
 import { llmInstructions } from "@dennation/typebook/plugins/llm-instructions";
+import path from "node:path";
 
 // inside typebook({ plugins: [ … ] })
 llmInstructions({
-  entryPath: ".", // card next to the component: components/Button.tsx → components/Button.md
-  indexPath: "llms.txt", // llms.txt index at the repo root
+  // you build the full path — next to the component: components/Button.tsx → components/Button.md
+  entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.md`),
+  indexPath: "llms.txt", // the index, relative to the project root
   importFrom: "@acme/ui", // the import line printed in each card
 });
 ```
@@ -104,7 +106,7 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 
 | Option | Type | Description |
 |---|---|---|
-| `entryPath` **(required)** | `string \| (component) => string` | Where each card goes, **relative to the component's own folder**. A string is a subdirectory (`{entryPath}/{Name}.md`) — `"."` sits it next to the component, `"__llms__"` in a sibling folder. A function returns a path per component (relative → the component's folder; absolute → as-is). |
+| `entryPath` **(required)** | `(component, { componentDir, root }) => string` | The full path of each card — you build it (the filename is explicit). Join `componentDir` for co-location or `root` for a central folder; return an absolute path (a relative one resolves against `root`). |
 | `indexPath` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
 | `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |
 | `importFrom` | `string \| (component) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
@@ -114,6 +116,17 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 | `title` / `description` | `string` | H1 title and blockquote summary of the `llms.txt` index. |
 
 #### Recipes
+
+**Choose where cards land** — `entryPath` gets `componentDir` and `root`, so pick the base:
+
+```ts
+import path from "node:path";
+
+// next to each component
+entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.md`),
+// or all in one folder at the project root
+entryPath: (c, { root }) => path.join(root, "docs", `${c.name}.md`),
+```
 
 **Drop only some components** — hide deprecated ones, or re-exports you don't own:
 
@@ -141,7 +154,7 @@ For arbitrary logic, pass a predicate instead — `(prop, component) => boolean`
 
 ```ts
 llmInstructions({
-  entryPath: (c) => `${c.name}.json`, // next to the component (relative to its folder)
+  entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.json`),
   format: (c) => JSON.stringify({ name: c.name, props: c.props }, null, 2),
 });
 ```

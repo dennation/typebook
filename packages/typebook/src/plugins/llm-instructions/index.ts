@@ -18,15 +18,23 @@ export {
 	markdownFormat,
 } from "./markdownFormat";
 
+/** Absolute base directories passed to {@link LlmInstructionsOptions.entryPath}. */
+export interface EntryPathContext {
+	/** The component's own folder — the directory of its `sourceFile`. */
+	componentDir: string;
+	/** The project root. */
+	root: string;
+}
+
 export interface LlmInstructionsOptions {
 	/**
-	 * Where each component's card goes, **relative to the component's own folder** (the directory of
-	 * its `sourceFile`). A **string** is a subdirectory — `{entryPath}/{Name}.md` — so `"."` puts the
-	 * card next to the component and `"__llms__"` in a sibling folder. A **function** returns a path
-	 * per component; a relative one resolves against the component's folder, an absolute one is used
-	 * as-is.
+	 * The full path of each component's card — you build it, so the filename is explicit and nothing
+	 * is appended. Receives the component and `{ componentDir, root }` (absolute base dirs); return an
+	 * absolute path (a relative one resolves against `root`):
+	 * - next to the component — `(c, { componentDir }) => path.join(componentDir, c.name + ".md")`
+	 * - from the project root — `(c, { root }) => path.join(root, "docs", c.name + ".md")`
 	 */
-	entryPath: string | ((component: ComponentInfo) => string);
+	entryPath: (component: ComponentInfo, dirs: EntryPathContext) => string;
 	/**
 	 * The `llms.txt` index listing every component, relative to the project root; `false` to skip it.
 	 */
@@ -93,24 +101,21 @@ export function llmInstructions(
 		description,
 	} = options;
 
-	// A card path resolves relative to the component's own folder (the dir of its `sourceFile`), so
-	// `entryPath: "."` puts the card next to the component; an absolute path is used as-is.
-	const cardPath = (component: ComponentInfo): string => {
-		const rel =
-			typeof entryPath === "function"
-				? entryPath(component)
-				: `${entryPath}/${safeFileName(component.name)}.md`;
-		return path.isAbsolute(rel)
-			? rel
-			: path.join(path.dirname(component.sourceFile), rel);
-	};
-
 	return {
 		name: "llm-instructions",
 		async generate(allComponents, ctx) {
 			const components = filterComponents
 				? allComponents.filter(filterComponents)
 				: allComponents;
+			// `entryPath` builds the full path from the component and its base dirs; a relative return
+			// resolves against the project root.
+			const cardPath = (component: ComponentInfo): string => {
+				const p = entryPath(component, {
+					componentDir: path.dirname(component.sourceFile),
+					root: ctx.root,
+				});
+				return path.isAbsolute(p) ? p : path.join(ctx.root, p);
+			};
 			await Promise.all(
 				components.map((component) =>
 					ctx.writeFile(cardPath(component), format(component)),
@@ -162,9 +167,4 @@ function heading(title: string, description: string | undefined): string {
 
 function firstLine(text: string | undefined): string {
 	return text?.split("\n")[0].trim() ?? "";
-}
-
-/** Keep a component name safe as a filename (generics, spaces, punctuation → `_`). */
-function safeFileName(name: string): string {
-	return name.replace(/[^\w.-]+/g, "_");
 }

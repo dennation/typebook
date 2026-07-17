@@ -1,6 +1,16 @@
 import { describe, expect, test } from "vitest";
 import type { ComponentInfo, GenerateCtx } from "../../types";
-import { DEFAULT_PROP_FILTER, llmInstructions } from "../llm-instructions";
+import {
+	DEFAULT_PROP_FILTER,
+	type EntryPathContext,
+	llmInstructions,
+} from "../llm-instructions";
+
+/** entryPath that writes `{sub}{Name}.md` next to the component. */
+const entry =
+	(sub = "") =>
+	(c: ComponentInfo, { componentDir }: EntryPathContext) =>
+		`${componentDir}/${sub}${c.name}.md`;
 
 const doc: ComponentInfo = {
 	name: "Button",
@@ -48,12 +58,12 @@ async function run(options: Parameters<typeof llmInstructions>[0]) {
 describe("llmInstructions: out path", () => {
 	test("resolves relative to the component's folder", async () => {
 		// sourceFile is /x/Button.tsx → `.` puts the card next to it, a subdir nests beside it.
-		expect(await run({ entryPath: ".", indexPath: false })).toHaveProperty([
+		expect(await run({ entryPath: entry(), indexPath: false })).toHaveProperty([
 			"/x/Button.md",
 		]);
-		expect(await run({ entryPath: "docs", indexPath: false })).toHaveProperty([
-			"/x/docs/Button.md",
-		]);
+		expect(
+			await run({ entryPath: entry("docs/"), indexPath: false }),
+		).toHaveProperty(["/x/docs/Button.md"]);
 	});
 
 	test("an absolute path from a function is used as-is", async () => {
@@ -67,7 +77,7 @@ describe("llmInstructions: out path", () => {
 
 describe("llmInstructions: prop policy", () => {
 	test("a card keeps own props, hides inherited groups by default", async () => {
-		const files = await run({ entryPath: "out", indexPath: false });
+		const files = await run({ entryPath: entry("out/"), indexPath: false });
 		const card = files["/x/out/Button.md"];
 
 		expect(card).toContain("`variant`"); // own
@@ -77,7 +87,7 @@ describe("llmInstructions: prop policy", () => {
 
 	test("a custom filterProps predicate overrides the default", async () => {
 		const files = await run({
-			entryPath: "out",
+			entryPath: entry("out/"),
 			indexPath: false,
 			filterProps: () => true, // hide nothing → inherited aria now shows
 		});
@@ -86,7 +96,7 @@ describe("llmInstructions: prop policy", () => {
 
 	test("a filterProps map rescues one name, keeps the rest hidden", async () => {
 		const files = await run({
-			entryPath: "out",
+			entryPath: entry("out/"),
 			indexPath: false,
 			filterProps: { ...DEFAULT_PROP_FILTER, "aria-label": true },
 		});
@@ -96,11 +106,11 @@ describe("llmInstructions: prop policy", () => {
 	});
 
 	test("keepOwnProps: false filters own props by group too", async () => {
-		const shown = await run({ entryPath: "out", indexPath: false }); // default: keepOwnProps true
+		const shown = await run({ entryPath: entry("out/"), indexPath: false }); // default: keepOwnProps true
 		expect(shown["/x/out/Button.md"]).toContain("`size`"); // own element prop kept
 
 		const hidden = await run({
-			entryPath: "out",
+			entryPath: entry("out/"),
 			indexPath: false,
 			keepOwnProps: false,
 		});
@@ -112,7 +122,7 @@ describe("llmInstructions: prop policy", () => {
 describe("llmInstructions: filterComponents", () => {
 	test("a dropped component produces no card and no index entry", async () => {
 		const files = await run({
-			entryPath: "out",
+			entryPath: entry("out/"),
 			indexPath: "llms.txt",
 			filterComponents: (c) => c.name !== "Button",
 		});
@@ -124,7 +134,7 @@ describe("llmInstructions: filterComponents", () => {
 describe("llmInstructions: format", () => {
 	test("a custom format replaces the default card", async () => {
 		const files = await run({
-			entryPath: (c) => `out/${c.name}.json`,
+			entryPath: (c, { componentDir }) => `${componentDir}/out/${c.name}.json`,
 			indexPath: false,
 			format: (c) => JSON.stringify({ name: c.name, props: c.props.length }),
 		});
