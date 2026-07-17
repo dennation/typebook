@@ -58,6 +58,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
+		"tinyglobby": "^0.2.15",
 		"unplugin": "^3.0.0"
 	},
 	"devDependencies": {
