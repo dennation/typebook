@@ -72,4 +72,18 @@ describe("DEFAULT_PROP_FILTER", () => {
 		expect(DEFAULT_PROP_FILTER(react("ref"), {} as never)).toBe(false);
 		expect(DEFAULT_PROP_FILTER(react("children"), {} as never)).toBe(true);
 	});
+
+	test("hides the inherited element group except the useful natives", () => {
+		const element = (name: string): PropInfo => ({
+			name,
+			optional: true,
+			type: { kind: "string" },
+			group: "element",
+		});
+		expect(DEFAULT_PROP_FILTER(element("formEncType"), {} as never)).toBe(
+			false,
+		);
+		expect(DEFAULT_PROP_FILTER(element("disabled"), {} as never)).toBe(true);
+		expect(DEFAULT_PROP_FILTER(element("href"), {} as never)).toBe(true);
+	});
 });
