@@ -62,13 +62,14 @@ describe("DEFAULT_PROP_FILTER", () => {
 		expect(keep(DEFAULT_PROP_FILTER)).toEqual(["variant", "className"]);
 	});
 
-	test("shows the react group by default", () => {
-		const ref: PropInfo = {
-			name: "ref",
+	test("hides the react group but keeps children", () => {
+		const react = (name: string): PropInfo => ({
+			name,
 			optional: true,
 			type: { kind: "string" },
 			group: "react",
-		};
-		expect(DEFAULT_PROP_FILTER(ref, {} as never)).toBe(true);
+		});
+		expect(DEFAULT_PROP_FILTER(react("ref"), {} as never)).toBe(false);
+		expect(DEFAULT_PROP_FILTER(react("children"), {} as never)).toBe(true);
 	});
 });

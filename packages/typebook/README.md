@@ -51,7 +51,7 @@ export default defineConfig({
 
 ## Plugins
 
-A plugin receives the scan result (`ComponentInfo[]`) and produces artifacts. Enable it under `typebook({ plugins: [...] })`.
+A plugin receives the scan result (`ComponentInfo[]`) and produces artifacts. Enable it under `typebook({ plugins: [...] })`. A failing plugin only warns and leaves the build green by default; pass `typebook({ failOnError: true })` to fail the build in CI when generation breaks.
 
 ### `llm-instructions`
 
@@ -106,6 +106,7 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 |---|---|---|
 | `out` **(required)** | `string \| (doc) => string` | Where each card goes: a function returning a full path per component — e.g. next to its source, `doc.file.replace(/\.tsx$/, ".md")` — or a directory string (`{out}/{Name}.md`). |
 | `indexFile` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
+| `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |
 | `importFrom` | `string \| (doc) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
 | `filterProps` | `(prop, component) => boolean` | Which props a card surfaces. Defaults to `DEFAULT_PROP_FILTER` (hides `DEFAULT_HIDDEN_GROUPS`); compose with `hideGroups(...)`. Configures the default `format` only. |
 | `format` | `(component) => string` | How each component becomes its file's contents. Defaults to `markdownFormat` (the card above). Pass your own for a different shape — full `ComponentInfo` in, string out. |
@@ -113,15 +114,19 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 
 #### Recipes
 
-**Surface more props** — the default hides most attribute groups; drop one back in (or hide extras) by composing the exported defaults:
+**Drop only some components** — hide deprecated ones, or re-exports you don't own:
 
 ```ts
-import { DEFAULT_HIDDEN_GROUPS, DEFAULT_KEPT_PROPS, hideGroups } from "@dennation/typebook/plugins/llm-instructions";
+llmInstructions({ filterComponents: (c) => c.deprecated === undefined });
+```
 
-// also hide the react group (ref / key / children), keeping the standard names
-llmInstructions({
-  filterProps: hideGroups([...DEFAULT_HIDDEN_GROUPS, "react"], { except: DEFAULT_KEPT_PROPS }),
-});
+**Tune the prop filter** — the default keeps only a component's own props plus the native `element` attributes; compose the exported defaults to hide those too, or surface a hidden group:
+
+```ts
+import { DEFAULT_HIDDEN_GROUPS, hideGroups } from "@dennation/typebook/plugins/llm-instructions";
+
+// also drop native <button> attributes (the `element` group) — keep only your own props
+llmInstructions({ filterProps: hideGroups([...DEFAULT_HIDDEN_GROUPS, "element"]) });
 ```
 
 **Emit a different format** — `format` takes the scanned `ComponentInfo` and returns the file body, so you can produce JSON, MDX, anything (match the extension in `out`):

@@ -58,6 +58,18 @@ describe("llmInstructions: prop policy", () => {
 	});
 });
 
+describe("llmInstructions: filterComponents", () => {
+	test("a dropped component produces no card and no index entry", async () => {
+		const files = await run({
+			out: "out",
+			indexFile: "llms.txt",
+			filterComponents: (c) => c.name !== "Button",
+		});
+		expect(files["out/Button.md"]).toBeUndefined();
+		expect(files["llms.txt"]).not.toContain("Button");
+	});
+});
+
 describe("llmInstructions: format", () => {
 	test("a custom format replaces the default card", async () => {
 		const files = await run({

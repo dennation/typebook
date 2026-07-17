@@ -10,6 +10,12 @@ export interface TypebookConfig {
 	 * after every scan with the full set of components — build once, dev on change.
 	 */
 	plugins?: TypebookPlugin[];
+	/**
+	 * Fail the build when a plugin's `generate` throws, instead of logging a warning and continuing.
+	 * Off by default (a dev-server keeps running on error); turn it on in CI so a broken generation
+	 * doesn't pass silently. Only applies in `build` — `dev` always warns and keeps serving.
+	 */
+	failOnError?: boolean;
 }
 
 /** Which command the bundler is running — mirrors Vite's `command` (`serve` → `dev`). */
