@@ -104,7 +104,11 @@ function buildIndex(
 	const lines = [...docs]
 		.sort((a, b) => a.name.localeCompare(b.name))
 		.map((doc) => {
-			const href = path.relative(indexDir, abs(cardPath(doc)));
+			// Normalise the OS path separator to "/" — a Markdown link is a URL, and a
+			// backslash href (`components\Button.md` on Windows) would not resolve.
+			const href = path
+				.relative(indexDir, abs(cardPath(doc)))
+				.replaceAll(path.sep, "/");
 			const summary = firstLine(doc.description) || doc.name;
 			const deprecated = doc.deprecated !== undefined ? " (deprecated)" : "";
 			return `- [${doc.name}](${href}): ${summary}${deprecated}`;
