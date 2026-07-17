@@ -10,17 +10,18 @@ import { formatPropType } from "./formatPropType";
  * decided upstream, so a card just presents the already-filtered set.
  */
 export function componentToMarkdown(
-	doc: ComponentInfo,
+	component: ComponentInfo,
 	options: { importStatement?: string } = {},
 ): string {
-	const props = doc.props;
+	const props = component.props;
 
-	const parts = [`## ${doc.name}`];
-	if (doc.description) parts.push(doc.description);
+	const parts = [`## ${component.name}`];
+	if (component.description) parts.push(component.description);
 	if (options.importStatement)
 		parts.push(`\`\`\`tsx\n${options.importStatement}\n\`\`\``);
-	if (doc.remarks) parts.push(`**Usage**\n\n${doc.remarks}`);
-	if (doc.deprecated !== undefined) parts.push(deprecationNote(doc.deprecated));
+	if (component.remarks) parts.push(`**Usage**\n\n${component.remarks}`);
+	if (component.deprecated !== undefined)
+		parts.push(deprecationNote(component.deprecated));
 	parts.push(props.length ? propsTable(props) : "_No documented props._");
 
 	return parts.join("\n\n");
