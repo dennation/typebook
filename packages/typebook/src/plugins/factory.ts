@@ -21,6 +21,7 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 ) => {
 	let cwd = process.cwd();
 	let command: TypebookCommand = "build";
+	let outDir: string | undefined;
 	let client: TypeScriptClient | null = null;
 	let starting: Promise<void> | null = null;
 
@@ -63,7 +64,12 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 		if (!c) return;
 
 		const docs = await collectDocs(c, cwd, config);
-		const ctx: GenerateCtx = { command, root: cwd, writeFile: writeFileAt };
+		const ctx: GenerateCtx = {
+			command,
+			root: cwd,
+			outDir,
+			writeFile: writeFileAt,
+		};
 		for (const plugin of plugins) {
 			if (plugin.apply && plugin.apply !== command) continue;
 			try {
@@ -128,6 +134,9 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 			configResolved(resolved) {
 				cwd = resolved.root;
 				command = resolved.command === "serve" ? "dev" : "build";
+				outDir = resolved.build?.outDir
+					? path.resolve(resolved.root, resolved.build.outDir)
+					: undefined;
 			},
 
 			configureServer(server) {

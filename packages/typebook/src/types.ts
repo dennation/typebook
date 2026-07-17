@@ -27,6 +27,11 @@ export interface GenerateCtx {
 	command: TypebookCommand;
 	/** Project root — relative `writeFile` paths resolve against it. */
 	root: string;
+	/**
+	 * Absolute path of the bundler's output directory (Vite `build.outDir`), when known — `build`
+	 * only, and only for bundlers that expose it. `undefined` in dev and for the rest.
+	 */
+	outDir?: string;
 	/** Write a file (parent dirs created). Path is absolute or relative to {@link GenerateCtx.root}. */
 	writeFile(path: string, content: string): Promise<void>;
 }
