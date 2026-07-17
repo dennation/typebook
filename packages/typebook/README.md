@@ -101,7 +101,26 @@ Usage guidance comes from the component's `@remarks` JSDoc tag; the exhaustive p
 | `indexFile` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
 | `importFrom` | `string \| (doc) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
 | `title` / `description` | `string` | H1 title and blockquote summary of the index/full file. |
-| `includeInherited` | `boolean` | Include framework-inherited props (DOM attributes). Default `false`. |
+| `filterProps` | `(prop, component) => boolean` | Which props each card surfaces. Defaults to `DEFAULT_PROP_FILTER` (hides `DEFAULT_HIDDEN_GROUPS`); pass `hideGroups(...)` to change the group set, or any predicate. |
+
+**Shipping to a consumer project**
+
+When your components are a published package, the generated docs are just files — ship them, then point the *consumer's* agent at the index. The name `llms.txt` triggers nothing on its own: no agent scans `node_modules` (or a website) for it. Two steps make the docs reach a downstream project:
+
+1. **Include the files in the package.** Generate into a published folder and list it in `package.json#files` so it lands in the npm tarball:
+
+   ```jsonc
+   "files": ["dist", "llms.txt", "llms/"]
+   ```
+
+   The index links cards by relative path, so `node_modules/@acme/ui/llms.txt` → `node_modules/@acme/ui/llms/Button.md` resolves as-is.
+
+2. **Reference the index from the consumer's agent memory** — the file the agent auto-loads:
+
+   - **CLAUDE.md** — `@import` inlines it into context: `@./node_modules/@acme/ui/llms.txt`
+   - **AGENTS.md** — no import mechanism; a pointer line the agent opens on demand: `` UI component API (props, imports, usage): `./node_modules/@acme/ui/llms.txt` ``
+
+Hosting the same `llms.txt` on your docs site is a second channel — a canonical URL for humans and URL-ingesting tools. Both come from one generation; write to both places.
 
 ## Every bundler
 
