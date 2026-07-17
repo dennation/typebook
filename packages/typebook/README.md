@@ -104,7 +104,7 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 
 | Option | Type | Description |
 |---|---|---|
-| `out` **(required)** | `string \| (doc) => string` | Where each card goes: a directory (`{out}/{Name}.md`), or a function returning a full path per component — e.g. next to its source. |
+| `out` **(required)** | `string \| (doc) => string` | Where each card goes: a function returning a full path per component — e.g. next to its source, `doc.file.replace(/\.tsx$/, ".md")` — or a directory string (`{out}/{Name}.md`). |
 | `indexFile` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
 | `importFrom` | `string \| (doc) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
 | `filterProps` | `(prop, component) => boolean` | Which props a card surfaces. Defaults to `DEFAULT_PROP_FILTER` (hides `DEFAULT_HIDDEN_GROUPS`); compose with `hideGroups(...)`. Configures the default `format` only. |
@@ -112,12 +112,6 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 | `title` / `description` | `string` | H1 title and blockquote summary of the `llms.txt` index. |
 
 #### Recipes
-
-**Emit to one directory** instead of alongside the source:
-
-```ts
-llmInstructions({ out: ".ai/components", indexFile: "llms.txt" }); // .ai/components/Button.md
-```
 
 **Surface more props** — the default hides most attribute groups; drop one back in (or hide extras) by composing the exported defaults:
 
