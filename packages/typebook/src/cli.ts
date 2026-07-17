@@ -24,7 +24,7 @@ console.log(`
           plugins: [
             llmInstructions({
               entryPath: (c, { componentDir }) => path.join(componentDir, c.name + '.md'),
-              indexPath: 'llms.txt',
+              indexPath: 'components.md',
             }),
           ],
         }),

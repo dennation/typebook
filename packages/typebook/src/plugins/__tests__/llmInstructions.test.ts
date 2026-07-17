@@ -123,11 +123,11 @@ describe("llmInstructions: filterComponents", () => {
 	test("a dropped component produces no card and no index entry", async () => {
 		const files = await run({
 			entryPath: entry("out/"),
-			indexPath: "llms.txt",
+			indexPath: "components.md",
 			filterComponents: (c) => c.name !== "Button",
 		});
 		expect(files["/x/out/Button.md"]).toBeUndefined();
-		expect(files["llms.txt"]).not.toContain("Button");
+		expect(files["components.md"]).not.toContain("Button");
 	});
 });
 
