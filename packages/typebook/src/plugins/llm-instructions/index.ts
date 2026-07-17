@@ -1,7 +1,7 @@
 import path from "node:path";
 import type { ComponentInfo, GenerateCtx, TypebookPlugin } from "../../types";
-import { componentToMarkdown } from "./componentToMarkdown";
-import { DEFAULT_PROP_FILTER, type PropFilter } from "./filterProps";
+import type { PropFilter } from "./filterProps";
+import { type LlmFormat, markdownFormat } from "./markdownFormat";
 
 export {
 	DEFAULT_HIDDEN_GROUPS,
@@ -10,6 +10,11 @@ export {
 	hideGroups,
 	type PropFilter,
 } from "./filterProps";
+export {
+	type LlmFormat,
+	type MarkdownFormatOptions,
+	markdownFormat,
+} from "./markdownFormat";
 
 export interface LlmInstructionsOptions {
 	/**
@@ -27,11 +32,19 @@ export interface LlmInstructionsOptions {
 	 */
 	importFrom?: string | ((doc: ComponentInfo) => string);
 	/**
-	 * Which props each card surfaces. Defaults to {@link DEFAULT_PROP_FILTER} (hides
-	 * {@link DEFAULT_HIDDEN_GROUPS}). Pass {@link hideGroups} to change the group set, or any
-	 * `(prop, component) => boolean` for arbitrary rules.
+	 * Which props each card surfaces. Defaults to `DEFAULT_PROP_FILTER` (hides
+	 * `DEFAULT_HIDDEN_GROUPS`). Pass `hideGroups` to change the group set, or any
+	 * `(prop, component) => boolean` for arbitrary rules. Configures the default {@link markdownFormat}
+	 * only — ignored when a custom `format` is given.
 	 */
 	filterProps?: PropFilter;
+	/**
+	 * How each scanned component becomes its instruction file — `(component) => string`. Defaults to
+	 * {@link markdownFormat} (the Markdown card). `importFrom`/`filterProps` configure that default;
+	 * a custom `format` receives the full {@link ComponentInfo} and owns the output — emit JSON, MDX,
+	 * a different Markdown layout, anything.
+	 */
+	format?: LlmFormat;
 	/** H1 title of the index / full file. Default: `"Components"`. */
 	title?: string;
 	/** Blockquote summary under the title (the `llms.txt` project summary). Optional. */
@@ -54,7 +67,8 @@ export function llmInstructions(
 		out,
 		indexFile,
 		importFrom,
-		filterProps = DEFAULT_PROP_FILTER,
+		filterProps,
+		format = markdownFormat({ importFrom, filterProps }),
 		title = "Components",
 		description,
 	} = options;
@@ -63,21 +77,12 @@ export function llmInstructions(
 		typeof out === "function"
 			? out(doc)
 			: `${out}/${safeFileName(doc.name)}.md`;
-	const importStatement = (doc: ComponentInfo): string | undefined => {
-		const src = typeof importFrom === "function" ? importFrom(doc) : importFrom;
-		return src ? `import { ${doc.name} } from "${src}";` : undefined;
-	};
-	const renderCard = (doc: ComponentInfo): string =>
-		componentToMarkdown(
-			{ ...doc, props: doc.props.filter((p) => filterProps(p, doc)) },
-			{ importStatement: importStatement(doc) },
-		);
 
 	return {
 		name: "llm-instructions",
 		async generate(docs, ctx) {
 			await Promise.all(
-				docs.map((doc) => ctx.writeFile(cardPath(doc), renderCard(doc))),
+				docs.map((doc) => ctx.writeFile(cardPath(doc), format(doc))),
 			);
 			if (indexFile !== false)
 				await ctx.writeFile(

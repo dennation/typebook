@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { llmInstructions } from "../llm-instructions";
 import type { ComponentInfo, GenerateCtx } from "../../types";
+import { llmInstructions } from "../llm-instructions";
 
 const doc: ComponentInfo = {
 	name: "Button",
@@ -55,5 +55,16 @@ describe("llmInstructions: prop policy", () => {
 			filterProps: () => true, // hide nothing → aria now shows
 		});
 		expect(files["out/Button.md"]).toContain("`aria-label`");
+	});
+});
+
+describe("llmInstructions: format", () => {
+	test("a custom format replaces the default card", async () => {
+		const files = await run({
+			out: (c) => `out/${c.name}.json`,
+			indexFile: false,
+			format: (c) => JSON.stringify({ name: c.name, props: c.props.length }),
+		});
+		expect(files["out/Button.json"]).toBe('{"name":"Button","props":3}');
 	});
 });
