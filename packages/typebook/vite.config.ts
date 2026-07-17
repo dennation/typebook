@@ -3,11 +3,6 @@ import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 
 export default defineConfig({
-	resolve: {
-		alias: {
-			"@": resolve(__dirname, "src"),
-		},
-	},
 	build: {
 		target: "esnext",
 		lib: {
@@ -29,29 +24,9 @@ export default defineConfig({
 			formats: ["es"],
 		},
 		rollupOptions: {
-			external: [
-				"react",
-				"react-dom",
-				"react/jsx-runtime",
-				"vite",
-				"unplugin",
-				"webpack",
-				"esbuild",
-				"rollup",
-				"fsevents",
-				"typescript",
-				"tinyglobby",
-				"glob",
-				"oxc-parser",
-				"picomatch",
-				"shiki",
-				/^node:/,
-				/^unplugin/,
-				/^@oxc-parser/,
-				/^@shikijs/,
-				/^@rspack\//,
-				/^@farmfe\//,
-			],
+			// The only runtime imports: the peer `typescript`, the `tinyglobby` glob, and `unplugin`
+			// (+ its submodules) — everything else the plugins touch is provided by the host bundler.
+			external: ["typescript", "tinyglobby", /^node:/, /^unplugin/],
 			output: {
 				entryFileNames: "[name].mjs",
 				chunkFileNames: "[name]-[hash].mjs",

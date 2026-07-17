@@ -5,7 +5,7 @@ import type { TypeScriptClient } from "./ts-client";
  * Scan the given files for exported React components and extract a {@link ComponentInfo} for each —
  * the single source of truth every consuming plugin reads (instructions, stories, …). Files come
  * from the `components` config (resolved from globs by the caller); each file's exports are
- * inspected by type, so no `getComponentMeta` wrapper is required.
+ * inspected by type, so no wrapper call or registration is required.
  *
  * The same component reachable from several files (re-exports) collapses to one entry, keyed by its
  * declaring file + name. Runs whole every time (build once, dev on change) so the result is complete.
