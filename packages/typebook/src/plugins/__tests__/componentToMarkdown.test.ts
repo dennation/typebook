@@ -9,6 +9,7 @@ describe("componentToMarkdown", () => {
 		name: "Button",
 		file: "/x/Button.tsx",
 		sourceFile: "/x/Button.tsx",
+		dir: "/x",
 		description: "Primary action button.",
 		remarks: "Use for the main action; don't nest buttons.",
 		deprecated: "use `Action`",
