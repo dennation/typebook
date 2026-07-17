@@ -4,11 +4,11 @@
 > **AI-instructions** plugin (`@dennation/typebook` + `@dennation/typebook/plugins/ai-instructions`
 > + the `typebook()` bundler plugins). Everything else lives on the **`dev`** branch and is **not**
 > on `main`: the stories API (`defineStories`, `@dennation/typebook/react`), the `snippets` plugin,
-> the docs-kit runtime, the `@dennation/menu` package, the marketing/docs **website** and the
-> **examples**. Much of the detail below (the `react/` runtime, `widgets/`, `packages/menu`,
-> `apps/website`, `examples/*`, `defineStories`/`Snippet`/stories injection) describes the **full
-> product on `dev`** — on `main` those files don't exist. When working on `main`, treat this file's
-> `react`/menu/website/examples/stories sections as dev-only context.
+> the docs-kit runtime, the marketing/docs **website** and the **examples**. Much of the detail
+> below (the `react/` runtime, `widgets/`, `apps/website`, `examples/*`,
+> `defineStories`/`Snippet`/stories injection) describes the **full product on `dev`** — on `main`
+> those files don't exist. When working on `main`, treat this file's `react`/website/examples/stories
+> sections as dev-only context.
 
 pnpm workspace monorepo.
 
@@ -26,7 +26,6 @@ pnpm run typecheck   # Type-check all packages
 ```
 packages/
   typebook/             — @dennation/typebook (library + Vite plugin)
-  menu/                 — @dennation/menu (router-agnostic navigation menu)
 examples/
   tanstack-router/      — @dennation/example-tanstack-router
   tanstack-router-mdx/  — @dennation/example-tanstack-router-mdx
@@ -174,8 +173,6 @@ packages/typebook/
 
 > **Design system.** The package ships one OKLCH token system in `src/react/shared/config/theme.css` (`--bg`/`--fg`/`--accent`/… with a `[data-theme="dark"]` block), re-exported into Tailwind utilities via `@theme inline` (`bg-bg`, `text-fg-muted`, `border-border`, `text-accent`, `bg-accent-soft`, …) and including the `.reveal` scroll-driven animation helper, the `.tb-tok` live-highlight rule + keyframes. The old `st:`-prefixed token set is gone; the storybook UI and any consumer site read these tokens. `shared/config/styles.css` (`@import "tailwindcss"` + theme + `@source`) is injected at runtime by `<Layout>`; a consumer that renders its own page (not via `<Layout>`) supplies the CSS itself by importing the shared `theme.css` and `@source`-scanning its components (see `apps/website`).
 
-> Navigation menus live in a **separate package**, `@dennation/menu` — see its section below. Typebook no longer exports `defineMenu`/`Menu`/`menuFromRouteTree`.
-
 ### defineStories() API
 
 ```ts
@@ -260,81 +257,6 @@ button.stories.tsx:
 - **`defineStories` namespace** — `defineStories(Component, config?)` returns `{ Story, Variants, Matrix, props }` with the component baked in (no `of`). Type-safety comes from its generics (return type `StoriesNamespace<Props>` carries `Props` first, which is also the injection seam), so plain `tsc` works without the plugin. Axes are prop names (`keyof`), not `allOf`/`values`/`generate` calls.
 - **No runtime provider** — handles and snippets carry their own data (injected at build time), so there is nothing to provide via context; the package exposes no `TypebookProvider`. Routing, history strategy, and route tree generation are the consumer's (`vite.config.ts` + `App.tsx`), which keeps any TanStack Router dependency out of the library.
 - **Type extraction via TS Compiler API** — `ts-client.ts` resolves prop types as strings via `ts.TypeChecker`, extracts default values from destructuring patterns, and reads JSDoc via `symbol.getDocumentationComment()`. It extracts against the transform's `code` (via an in-memory snapshot override) so oxc and TS character offsets agree even when an earlier plugin already rewrote the module.
-
----
-
-## packages/menu
-
-`@dennation/menu` — a standalone, router-agnostic navigation menu (the data behind a sidebar/navbar) plus a React renderer and a TanStack Router adapter. It has **no dependency on typebook** and is **never codegen'd** — a `Menu` is authored or adapter-generated, not produced by a builder pipeline.
-
-### Commands
-
-```bash
-pnpm --filter @dennation/menu build       # Build with Vite (3 entry points)
-pnpm --filter @dennation/menu dev         # Build in watch mode
-pnpm --filter @dennation/menu typecheck   # Type-check without emit
-pnpm --filter @dennation/menu test        # Run vitest
-```
-
-### Architecture
-
-```
-packages/menu/
-  package.json
-  tsconfig.json
-  vite.config.ts
-  src/
-    index.ts                  — `defineMenu` + menu types
-    types.ts                  — Menu, MenuItem, MenuInput, MenuItemInput, MenuItemBase, MenuSlot, MenuItemState
-    defineMenu.ts             — defineMenu(input) — resolves a keyed MenuInput into a nested Menu
-    react/
-      index.ts                — re-exports the renderer
-      Menu.tsx                — <Menu menu={…} components={{ Container, Item }} /> — router-agnostic renderer
-    tanstack-router/
-      index.ts                — menuFromRouteTree() adapter + RouteMenuMeta
-```
-
-### Build entry points / package exports
-
-- `@dennation/menu` — `defineMenu`, types (`Menu`, `MenuItem`, `MenuInput`, `MenuItemInput`, `MenuItemBase`, `MenuSlot`, `MenuItemState`)
-- `@dennation/menu/react` — `Menu`, `MenuProps`, `MenuComponents`, `MenuContainerProps`, `MenuItemProps`, `CollapsibleMenuItemProps`, `StaticMenuItemProps`
-- `@dennation/menu/tanstack-router` — `menuFromRouteTree()`, `RouteMenuMeta`, `MenuFromRouteTreeOptions`, `RouteMenuInput` (optional peer: `@tanstack/react-router`)
-
-### Menu API
-
-```tsx
-import { defineMenu } from '@dennation/menu'
-import { menuFromRouteTree } from '@dennation/menu/tanstack-router'
-import { routeTree } from './route-tree.gen'
-
-const menu = defineMenu({
-  ...menuFromRouteTree(routeTree, { omit: ['/about'] }),
-  // add a custom child into a generated section — `parent` is type-checked against the routes:
-  '/changelog': { title: 'Changelog', parent: '/components' },
-  '/button': { title: 'Button', icon: <Cube /> }, // overrides the generated /button entry
-  'https://github.com/dennation/ui-studio': { title: 'GitHub' },
-})
-```
-
-- **Keyed input, nested output.** The *input* (`MenuInput`) is an **object keyed by identity** — the entry's `href` by default, or an arbitrary id for a non-navigable container (`href: false`). Hierarchy is expressed by `parent` (another key), not by nesting. `defineMenu` resolves `parent` into the nested *output* (`MenuItem`, the renderer's model: a node with `items` is a collapsible section, one with `href` is a link, both → clickable section).
-- **Override and child-injection are native object ops.** Keys are unique, so an override is just re-stating a key on spread (`{ ...generated, '/button': { … } }` — later wins, the key keeps its original position); adding a custom child is one new key pointing `parent` at a generated key. No de-dup pass.
-- **`parent` is type-checked** via `keyof` the input — including route paths flowing in from the adapter *through the spread* (object spread preserves keys in the type, unlike an array, so no phantom brand is needed). It degrades to `string` for a dynamically-typed `Record<string, MenuItemInput>`.
-- **No "group"/"separator" node type.** Custom JSX goes in the `before`/`after` render slots (`(item, { open, level }) => ReactNode`). Active-state highlighting lives entirely in the consumer's `Item` (the renderer knows nothing about the current path).
-- **Opaque per-item `meta`, generic.** Items carry consumer metadata (badge, deprecated flag, counters — anything) via a generic `M` that threads through the whole chain (`MenuItem<M>` → `Menu<M>` → `MenuItemInput<Parent, M>` → `MenuItemProps<M>`/`MenuComponents<M>`). `M` defaults to **`never`** — a menu with no meta type has no usable `meta` (it's `undefined`). Give a shape via `defineMenu<MyMeta>(…)` (the generic is the **first** type param so `parent`-checking key inference still works) and `meta` is **that type everywhere, input and output** — no asymmetry, nothing synthesized. It's **required by default** (so the consumer's `Item`, typed `MenuItemProps<MyMeta>`, reads `item.meta.badge` with no optional chaining); to make it **optional/omittable per item**, give a type that admits `undefined` — `defineMenu<MyMeta | undefined>` (then `Item` reads `item.meta?.badge`). `meta` passes through verbatim — the renderer and `defineMenu` never read or synthesize it; the resolver stays meta-agnostic (internals run at `unknown`, the result is cast to `Menu<M>`). `menuFromRouteTree` reads it from `RouteMenuMeta<M>.meta`.
-- **`defineMenu(input)`** resolves `parent` into the tree, sorts siblings by `order` (then insertion order; `order` stripped), resolves `href` (the key by default) onto each node, hoists unknown-parent items to the top level (dev warning), and returns a plain `Menu`.
-- **`menuFromRouteTree(routeTree, options?)`** walks a TanStack route tree into a `MenuInput` keyed by `fullPath`: root and pathless/layout routes are transparent (children attach to the nearest navigable ancestor), a route with a `path` becomes an entry (`parent` = ancestor), and routes in `omit` (typed via `RoutePaths`) are dropped with their subtree. Per-route metadata (`title`/`order`/`icon`) is read by `getMeta` (default: `route.options.staticData?.menu?.meta`, typed via `RouteMenuMeta`) and describes how the route presents itself; composition (exclude/override/order) lives in the authoring layer, not in route metadata. Title falls back to a title-cased last path segment.
-- **`<Menu>` is the renderer.** Pass it a `Menu` plus consumer-supplied `Container` and `Item` components. `<Menu>` owns the open/closed state of collapsible sections and the recursion; the `Item` owns the link/icon/active state (it talks to its own router). Router stays the consumer's responsibility — the adapter only *reads* a route tree.
-
-### Per-route metadata augmentation
-
-`@dennation/menu/tanstack-router` augments TanStack's `StaticDataRouteOption` so each route can describe itself:
-
-```tsx
-createFileRoute('/button')({
-  component: ButtonPage,
-  staticData: { menu: { meta: { title: 'Button', order: 2 } } },
-})
-```
 
 ---
 
