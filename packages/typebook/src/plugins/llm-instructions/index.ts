@@ -26,6 +26,13 @@ export interface LlmInstructionsOptions {
 	/** Index file in `llms.txt` format, listing every component; `false` to skip it. */
 	indexFile: string | false;
 	/**
+	 * Which components get a card (and an index entry) — `(component) => boolean`, `true` keeps it.
+	 * Runs before `format`, so a dropped component produces nothing. Use it to hide deprecated
+	 * components (`(c) => c.deprecated === undefined`) or re-exports you don't own. Defaults to
+	 * keeping every scanned component.
+	 */
+	filterComponents?: (component: ComponentInfo) => boolean;
+	/**
 	 * Module each component is imported from — used to print an `import { X } from "…"` line in
 	 * every card (agents need the exact import). A string (`"@acme/ui"`) or a function per component.
 	 * Omit to skip the import line.
@@ -68,6 +75,7 @@ export function llmInstructions(
 		indexFile,
 		importFrom,
 		filterProps,
+		filterComponents,
 		format = markdownFormat({ importFrom, filterProps }),
 		title = "Components",
 		description,
@@ -80,7 +88,10 @@ export function llmInstructions(
 
 	return {
 		name: "llm-instructions",
-		async generate(docs, ctx) {
+		async generate(allDocs, ctx) {
+			const docs = filterComponents
+				? allDocs.filter(filterComponents)
+				: allDocs;
 			await Promise.all(
 				docs.map((doc) => ctx.writeFile(cardPath(doc), format(doc))),
 			);
