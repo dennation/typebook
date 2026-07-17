@@ -114,6 +114,7 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 | `keepOwnProps` | `boolean` | Keep a component's own props regardless of `filterProps`. Default `true`; `false` filters own props too. |
 | `format` | `(component) => string` | How each component becomes its file's contents. Defaults to `markdownFormat` (the card above). Pass your own for a different shape — full `ComponentInfo` in, string out. |
 | `title` / `description` | `string` | H1 title and blockquote summary of the index. |
+| `emitToOutDir` | `boolean \| string` | Also emit a published copy into the bundler's output dir (`build` only). `true` → its root, a string → a subdirectory. Flat layout (`{Name}.md` + `index.md`), same content. Default `false`. |
 
 #### Recipes
 
@@ -127,6 +128,18 @@ entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.md`),
 // or all in one folder at the project root
 entryPath: (c, { root }) => path.join(root, "docs", `${c.name}.md`),
 ```
+
+**Ship a copy in the build output** — keep the main output committed in source (for review), and add a published copy in the bundler's output dir with one line:
+
+```ts
+llmInstructions({
+  entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.md`),
+  indexPath: "components.md",
+  emitToOutDir: "docs", // → {outDir}/docs/{Name}.md + {outDir}/docs/index.md, on `build`
+});
+```
+
+The copy is written at `writeBundle`, so it survives `emptyOutDir`. Vite only — a bundler that doesn't expose its output dir warns and skips (fails with `failOnError`).
 
 **Drop only some components** — hide deprecated ones, or re-exports you don't own:
 

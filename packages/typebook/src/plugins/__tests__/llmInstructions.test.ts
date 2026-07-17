@@ -42,7 +42,10 @@ const doc: ComponentInfo = {
 };
 
 /** Run the plugin against one doc and return the written files by path. */
-async function run(options: Parameters<typeof llmInstructions>[0]) {
+async function run(
+	options: Parameters<typeof llmInstructions>[0],
+	ctxOverrides: Partial<GenerateCtx> = {},
+) {
 	const files: Record<string, string> = {};
 	const ctx: GenerateCtx = {
 		command: "build",
@@ -50,6 +53,7 @@ async function run(options: Parameters<typeof llmInstructions>[0]) {
 		writeFile: async (p, c) => {
 			files[p] = c;
 		},
+		...ctxOverrides,
 	};
 	await llmInstructions(options).generate([doc], ctx);
 	return files;
@@ -139,5 +143,63 @@ describe("llmInstructions: format", () => {
 			format: (c) => JSON.stringify({ name: c.name, props: c.props.length }),
 		});
 		expect(files["/x/out/Button.json"]).toBe('{"name":"Button","props":4}');
+	});
+});
+
+describe("llmInstructions: emitToOutDir", () => {
+	const outDir = "/proj/dist";
+
+	test("build: writes a flat published copy to the output dir root", async () => {
+		const files = await run(
+			{ entryPath: entry(), indexPath: "components.md", emitToOutDir: true },
+			{ outDir },
+		);
+		expect(files["/x/Button.md"]).toBeDefined(); // main co-located output
+		expect(files["components.md"]).toBeDefined(); // main index
+		expect(files["/proj/dist/Button.md"]).toBeDefined(); // published copy
+		expect(files["/proj/dist/index.md"]).toBeDefined(); // published index
+	});
+
+	test("a string value nests the copy in a subdirectory", async () => {
+		const files = await run(
+			{ entryPath: entry(), indexPath: false, emitToOutDir: "docs" },
+			{ outDir },
+		);
+		expect(files["/proj/dist/docs/Button.md"]).toBeDefined();
+		expect(files["/proj/dist/docs/index.md"]).toBeDefined();
+	});
+
+	test("copy card content is identical to the main output", async () => {
+		const files = await run(
+			{ entryPath: entry(), indexPath: false, emitToOutDir: true },
+			{ outDir },
+		);
+		expect(files["/proj/dist/Button.md"]).toBe(files["/x/Button.md"]);
+	});
+
+	test("copy index links each card relatively (flat)", async () => {
+		const files = await run(
+			{ entryPath: entry(), indexPath: false, emitToOutDir: true },
+			{ outDir },
+		);
+		expect(files["/proj/dist/index.md"]).toContain("(Button.md)");
+	});
+
+	test("dev: does not write to the output dir", async () => {
+		const files = await run(
+			{ entryPath: entry(), indexPath: false, emitToOutDir: true },
+			{ command: "dev", outDir },
+		);
+		expect(files["/x/Button.md"]).toBeDefined(); // main still written
+		expect(files["/proj/dist/Button.md"]).toBeUndefined();
+	});
+
+	test("throws when the output dir is unknown", async () => {
+		await expect(
+			run(
+				{ entryPath: entry(), indexPath: false, emitToOutDir: true },
+				{ outDir: undefined },
+			),
+		).rejects.toThrow(/output directory is unknown/);
 	});
 });

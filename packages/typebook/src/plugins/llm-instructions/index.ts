@@ -76,6 +76,15 @@ export interface LlmInstructionsOptions {
 	title?: string;
 	/** Blockquote summary under the index title. Optional. */
 	description?: string;
+	/**
+	 * Also emit a **published copy** into the bundler's output directory — `build` only, ignored in
+	 * dev. The main `entryPath`/`indexPath` output is your committed-in-source copy (for review); this
+	 * is the copy that ships. `true` writes to the output dir's root, a string to a subdirectory of it.
+	 * Flat layout: `{component.name}.md` per component + `index.md`, same content as the main output.
+	 * Default `false`. If the output directory is unknown (a non-Vite bundler), it warns and skips
+	 * (fails when `failOnError` is set).
+	 */
+	emitToOutDir?: boolean | string;
 }
 
 /**
@@ -99,6 +108,7 @@ export function llmInstructions(
 		format = markdownFormat({ importFrom, filterProps, keepOwnProps }),
 		title = "Components",
 		description,
+		emitToOutDir = false,
 	} = options;
 
 	return {
@@ -126,6 +136,38 @@ export function llmInstructions(
 					indexPath,
 					buildIndex(components, indexPath, cardPath, ctx, title, description),
 				);
+
+			// Optional published copy in the build output dir — same content, flat layout, so it
+			// survives `emptyOutDir` (the factory runs `generate` at `writeBundle` in build).
+			if (emitToOutDir !== false && ctx.command === "build") {
+				if (!ctx.outDir)
+					throw new Error(
+						"emitToOutDir is set but the bundler's output directory is unknown (only Vite exposes it)",
+					);
+				const base =
+					typeof emitToOutDir === "string"
+						? path.join(ctx.outDir, emitToOutDir)
+						: ctx.outDir;
+				const outCardPath = (component: ComponentInfo): string =>
+					path.join(base, `${component.name}.md`);
+				await Promise.all(
+					components.map((component) =>
+						ctx.writeFile(outCardPath(component), format(component)),
+					),
+				);
+				const outIndexPath = path.join(base, "index.md");
+				await ctx.writeFile(
+					outIndexPath,
+					buildIndex(
+						components,
+						outIndexPath,
+						outCardPath,
+						ctx,
+						title,
+						description,
+					),
+				);
+			}
 		},
 	};
 }
