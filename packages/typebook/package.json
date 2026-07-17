@@ -3,6 +3,22 @@
 	"version": "0.1.0",
 	"description": "A toolkit for documenting React components from their TypeScript types — one bundler-plugin scan, plugins turn it into artifacts (AI-agent docs and more)",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/dennation/typebook.git",
+		"directory": "packages/typebook"
+	},
+	"homepage": "https://github.com/dennation/typebook#readme",
+	"bugs": "https://github.com/dennation/typebook/issues",
+	"keywords": [
+		"react",
+		"typescript",
+		"documentation",
+		"components",
+		"llms-txt",
+		"unplugin",
+		"ai-agents"
+	],
 	"type": "module",
 	"bin": {
 		"typebook": "./dist/cli/index.mjs"
