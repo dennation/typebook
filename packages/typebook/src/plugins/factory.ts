@@ -68,6 +68,9 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 			try {
 				await plugin.generate(docs, ctx);
 			} catch (err) {
+				// In build, `failOnError` turns a broken generation into a hard failure so CI
+				// notices; in dev we always warn and keep the server running.
+				if (config.failOnError && command === "build") throw err;
 				console.warn(
 					LOG_PREFIX,
 					`plugin "${plugin.name}" failed:`,
