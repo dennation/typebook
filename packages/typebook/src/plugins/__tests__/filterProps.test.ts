@@ -61,4 +61,14 @@ describe("DEFAULT_PROP_FILTER", () => {
 	test("keeps own props + className, hides aria and events", () => {
 		expect(keep(DEFAULT_PROP_FILTER)).toEqual(["variant", "className"]);
 	});
+
+	test("shows the react group by default", () => {
+		const ref: PropInfo = {
+			name: "ref",
+			optional: true,
+			type: { kind: "string" },
+			group: "react",
+		};
+		expect(DEFAULT_PROP_FILTER(ref, {} as never)).toBe(true);
+	});
 });
