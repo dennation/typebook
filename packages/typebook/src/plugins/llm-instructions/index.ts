@@ -36,7 +36,8 @@ export interface LlmInstructionsOptions {
 	 */
 	entryPath: (component: ComponentInfo, dirs: EntryPathContext) => string;
 	/**
-	 * The `llms.txt` index listing every component, relative to the project root; `false` to skip it.
+	 * The Markdown index listing every component (with a link to each card), relative to the project
+	 * root; `false` to skip it. Reference it from your `AGENTS.md` / `CLAUDE.md` so an agent finds it.
 	 */
 	indexPath: string | false;
 	/**
@@ -71,17 +72,16 @@ export interface LlmInstructionsOptions {
 	 * a different Markdown layout, anything.
 	 */
 	format?: LlmFormat;
-	/** H1 title of the index / full file. Default: `"Components"`. */
+	/** H1 title of the index. Default: `"Components"`. */
 	title?: string;
-	/** Blockquote summary under the title (the `llms.txt` project summary). Optional. */
+	/** Blockquote summary under the index title. Optional. */
 	description?: string;
 }
 
 /**
- * `typebook()` sub-plugin: writes AI-agent docs from the component scan, following the
- * [`llms.txt`](https://llmstxt.org) convention — one Markdown card per component (import,
- * description, usage guidance, deprecation, props table) plus an `llms.txt` index.
- * Regenerated in full on every scan (build once, dev on change).
+ * `typebook()` sub-plugin: writes AI-agent docs from the component scan — one Markdown card per
+ * component (import, description, usage guidance, deprecation, props table) plus a Markdown index
+ * linking them all. Regenerated in full on every scan (build once, dev on change).
  *
  * Output locations are explicit: `entryPath` and `indexPath` are required (pass `false` to
  * `indexPath` to skip it) — the plugin writes nowhere by default.
@@ -130,7 +130,7 @@ export function llmInstructions(
 	};
 }
 
-/** The `llms.txt` index: H1 + blockquote summary + a `[name](href): desc` list, sorted by name. */
+/** The component index: H1 + blockquote summary + a `[name](href): desc` list, sorted by name. */
 function buildIndex(
 	components: ComponentInfo[],
 	indexPath: string,
@@ -160,7 +160,7 @@ function buildIndex(
 	return `${heading(title, description)}## Components\n\n${lines.join("\n")}\n`;
 }
 
-/** `# title` + optional `> description` blockquote (the `llms.txt` header). */
+/** `# title` + optional `> description` blockquote (the index header). */
 function heading(title: string, description: string | undefined): string {
 	return description ? `# ${title}\n\n> ${description}\n\n` : `# ${title}\n\n`;
 }
