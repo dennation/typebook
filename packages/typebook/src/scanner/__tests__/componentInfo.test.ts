@@ -79,4 +79,8 @@ describe("collectComponentInfos (export scan)", () => {
 		const basic = docs.find((d) => d.name === "Basic");
 		expect(basic?.props.map((p) => p.name)).toContain("size");
 	});
+
+	test("ignores class components (function components only)", () => {
+		expect(docs.map((d) => d.name)).not.toContain("ClassComponent");
+	});
 });

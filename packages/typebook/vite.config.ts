@@ -40,6 +40,7 @@ export default defineConfig({
 				"rollup",
 				"fsevents",
 				"typescript",
+				"tinyglobby",
 				"glob",
 				"oxc-parser",
 				"picomatch",

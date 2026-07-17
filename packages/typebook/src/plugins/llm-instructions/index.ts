@@ -1,6 +1,15 @@
 import path from "node:path";
-import { componentToMarkdown } from "./componentToMarkdown";
 import type { ComponentInfo, GenerateCtx, TypebookPlugin } from "../../types";
+import { componentToMarkdown } from "./componentToMarkdown";
+import { DEFAULT_PROP_FILTER, type PropFilter } from "./filterProps";
+
+export {
+	DEFAULT_HIDDEN_GROUPS,
+	DEFAULT_KEPT_PROPS,
+	DEFAULT_PROP_FILTER,
+	hideGroups,
+	type PropFilter,
+} from "./filterProps";
 
 export interface LlmInstructionsOptions {
 	/**
@@ -17,6 +26,12 @@ export interface LlmInstructionsOptions {
 	 * Omit to skip the import line.
 	 */
 	importFrom?: string | ((doc: ComponentInfo) => string);
+	/**
+	 * Which props each card surfaces. Defaults to {@link DEFAULT_PROP_FILTER} (hides
+	 * {@link DEFAULT_HIDDEN_GROUPS}). Pass {@link hideGroups} to change the group set, or any
+	 * `(prop, component) => boolean` for arbitrary rules.
+	 */
+	filterProps?: PropFilter;
 	/** H1 title of the index / full file. Default: `"Components"`. */
 	title?: string;
 	/** Blockquote summary under the title (the `llms.txt` project summary). Optional. */
@@ -39,6 +54,7 @@ export function llmInstructions(
 		out,
 		indexFile,
 		importFrom,
+		filterProps = DEFAULT_PROP_FILTER,
 		title = "Components",
 		description,
 	} = options;
@@ -52,7 +68,10 @@ export function llmInstructions(
 		return src ? `import { ${doc.name} } from "${src}";` : undefined;
 	};
 	const renderCard = (doc: ComponentInfo): string =>
-		componentToMarkdown(doc, { importStatement: importStatement(doc) });
+		componentToMarkdown(
+			{ ...doc, props: doc.props.filter((p) => filterProps(p, doc)) },
+			{ importStatement: importStatement(doc) },
+		);
 
 	return {
 		name: "llm-instructions",
@@ -85,7 +104,11 @@ function buildIndex(
 	const lines = [...docs]
 		.sort((a, b) => a.name.localeCompare(b.name))
 		.map((doc) => {
-			const href = path.relative(indexDir, abs(cardPath(doc)));
+			// Normalise the OS path separator to "/" — a Markdown link is a URL, and a
+			// backslash href (`components\Button.md` on Windows) would not resolve.
+			const href = path
+				.relative(indexDir, abs(cardPath(doc)))
+				.replaceAll(path.sep, "/");
 			const summary = firstLine(doc.description) || doc.name;
 			const deprecated = doc.deprecated !== undefined ? " (deprecated)" : "";
 			return `- [${doc.name}](${href}): ${summary}${deprecated}`;
