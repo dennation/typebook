@@ -1,3 +1,4 @@
+import path from "node:path";
 import ts from "typescript";
 import type { ComponentInfo, PropInfo } from "../types";
 import { classifyPropGroup } from "./classifyPropGroup";
@@ -41,6 +42,7 @@ export function extractComponentInfo(
 		name: exp.getName(),
 		file: decl.getSourceFile().fileName,
 		sourceFile,
+		dir: path.dirname(sourceFile),
 		props,
 	};
 	const description = symbolDescription(checker, resolved);
