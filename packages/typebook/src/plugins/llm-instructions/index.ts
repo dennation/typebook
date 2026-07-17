@@ -21,14 +21,16 @@ export {
 export interface LlmInstructionsOptions {
 	/**
 	 * Where each component's card goes, **relative to the component's own folder** (the directory of
-	 * its `sourceFile`). A **string** is a subdirectory — `{out}/{Name}.md` — so `"."` puts the card
-	 * right next to the component and `"__llms__"` in a sibling folder. A **function** returns a path
+	 * its `sourceFile`). A **string** is a subdirectory — `{entryPath}/{Name}.md` — so `"."` puts the
+	 * card next to the component and `"__llms__"` in a sibling folder. A **function** returns a path
 	 * per component; a relative one resolves against the component's folder, an absolute one is used
 	 * as-is.
 	 */
-	out: string | ((component: ComponentInfo) => string);
-	/** Index file in `llms.txt` format, listing every component; `false` to skip it. */
-	indexFile: string | false;
+	entryPath: string | ((component: ComponentInfo) => string);
+	/**
+	 * The `llms.txt` index listing every component, relative to the project root; `false` to skip it.
+	 */
+	indexPath: string | false;
 	/**
 	 * Which components get a card (and an index entry) — `(component) => boolean`, `true` keeps it.
 	 * Runs before `format`, so a dropped component produces nothing. Use it to hide deprecated
@@ -73,15 +75,15 @@ export interface LlmInstructionsOptions {
  * description, usage guidance, deprecation, props table) plus an `llms.txt` index.
  * Regenerated in full on every scan (build once, dev on change).
  *
- * Output locations are explicit: `out` and `indexFile` are required (pass `false` to
- * `indexFile` to skip the index) — the plugin writes nowhere by default.
+ * Output locations are explicit: `entryPath` and `indexPath` are required (pass `false` to
+ * `indexPath` to skip it) — the plugin writes nowhere by default.
  */
 export function llmInstructions(
 	options: LlmInstructionsOptions,
 ): TypebookPlugin {
 	const {
-		out,
-		indexFile,
+		entryPath,
+		indexPath,
 		importFrom,
 		filterProps,
 		keepOwnProps,
@@ -92,12 +94,12 @@ export function llmInstructions(
 	} = options;
 
 	// A card path resolves relative to the component's own folder (the dir of its `sourceFile`), so
-	// `out: "."` puts the card next to the component; an absolute path is used as-is.
+	// `entryPath: "."` puts the card next to the component; an absolute path is used as-is.
 	const cardPath = (component: ComponentInfo): string => {
 		const rel =
-			typeof out === "function"
-				? out(component)
-				: `${out}/${safeFileName(component.name)}.md`;
+			typeof entryPath === "function"
+				? entryPath(component)
+				: `${entryPath}/${safeFileName(component.name)}.md`;
 		return path.isAbsolute(rel)
 			? rel
 			: path.join(path.dirname(component.sourceFile), rel);
@@ -114,10 +116,10 @@ export function llmInstructions(
 					ctx.writeFile(cardPath(component), format(component)),
 				),
 			);
-			if (indexFile !== false)
+			if (indexPath !== false)
 				await ctx.writeFile(
-					indexFile,
-					buildIndex(components, indexFile, cardPath, ctx, title, description),
+					indexPath,
+					buildIndex(components, indexPath, cardPath, ctx, title, description),
 				);
 		},
 	};
@@ -126,7 +128,7 @@ export function llmInstructions(
 /** The `llms.txt` index: H1 + blockquote summary + a `[name](href): desc` list, sorted by name. */
 function buildIndex(
 	components: ComponentInfo[],
-	indexFile: string,
+	indexPath: string,
 	cardPath: (component: ComponentInfo) => string,
 	ctx: GenerateCtx,
 	title: string,
@@ -134,7 +136,7 @@ function buildIndex(
 ): string {
 	const abs = (p: string): string =>
 		path.isAbsolute(p) ? p : path.join(ctx.root, p);
-	const indexDir = path.dirname(abs(indexFile));
+	const indexDir = path.dirname(abs(indexPath));
 
 	const lines = [...components]
 		.sort((a, b) => a.name.localeCompare(b.name))

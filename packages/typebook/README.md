@@ -62,13 +62,13 @@ import { llmInstructions } from "@dennation/typebook/plugins/llm-instructions";
 
 // inside typebook({ plugins: [ … ] })
 llmInstructions({
-  out: ".", // card next to the component: components/Button.tsx → components/Button.md
-  indexFile: "llms.txt", // llms.txt index at the repo root
+  entryPath: ".", // card next to the component: components/Button.tsx → components/Button.md
+  indexPath: "llms.txt", // llms.txt index at the repo root
   importFrom: "@acme/ui", // the import line printed in each card
 });
 ```
 
-Point your agent's memory (`CLAUDE.md`, `AGENTS.md`) at the `indexFile`; it reads the card it needs on demand. For a **published** package, the docs travel differently — see [Shipping to a consumer project](#shipping-to-a-consumer-project).
+Point your agent's memory (`CLAUDE.md`, `AGENTS.md`) at the `indexPath`; it reads the card it needs on demand. For a **published** package, the docs travel differently — see [Shipping to a consumer project](#shipping-to-a-consumer-project).
 
 Each card is self-contained — import line, description, `@remarks` usage guidance, deprecation, and a props table with exhaustive union values:
 
@@ -104,8 +104,8 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 
 | Option | Type | Description |
 |---|---|---|
-| `out` **(required)** | `string \| (component) => string` | Where each card goes, **relative to the component's own folder**. A string is a subdirectory (`{out}/{Name}.md`) — `"."` sits it next to the component, `"__llms__"` in a sibling folder. A function returns a path per component (relative → the component's folder; absolute → as-is). |
-| `indexFile` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
+| `entryPath` **(required)** | `string \| (component) => string` | Where each card goes, **relative to the component's own folder**. A string is a subdirectory (`{entryPath}/{Name}.md`) — `"."` sits it next to the component, `"__llms__"` in a sibling folder. A function returns a path per component (relative → the component's folder; absolute → as-is). |
+| `indexPath` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
 | `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |
 | `importFrom` | `string \| (component) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
 | `filterProps` | `PropFilter` (map or predicate) | Which props a card surfaces. A **map** keyed by group or prop name (`{ element: false, href: true }`, prop name wins, unlisted kept) or a predicate. Defaults to `DEFAULT_PROP_FILTER`; spread to override. Configures the default `format` only. |
@@ -137,11 +137,11 @@ llmInstructions({
 
 For arbitrary logic, pass a predicate instead — `(prop, component) => boolean`. Own props stay visible either way unless you set `keepOwnProps: false`.
 
-**Emit a different format** — `format` takes the scanned `ComponentInfo` and returns the file body, so you can produce JSON, MDX, anything (match the extension in `out`):
+**Emit a different format** — `format` takes the scanned `ComponentInfo` and returns the file body, so you can produce JSON, MDX, anything (match the extension in `entryPath`):
 
 ```ts
 llmInstructions({
-  out: (c) => `${c.name}.json`, // next to the component (relative to its folder)
+  entryPath: (c) => `${c.name}.json`, // next to the component (relative to its folder)
   format: (c) => JSON.stringify({ name: c.name, props: c.props }, null, 2),
 });
 ```

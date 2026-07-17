@@ -20,7 +20,7 @@ console.log(`
       plugins: [
         typebook({
           components: 'src/components/**/*.tsx',
-          plugins: [llmInstructions({ out: '.ai/components', indexFile: 'llms.txt' })],
+          plugins: [llmInstructions({ entryPath: '.', indexPath: 'llms.txt' })],
         }),
       ],
     })
