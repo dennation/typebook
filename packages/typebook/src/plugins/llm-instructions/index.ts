@@ -20,10 +20,11 @@ export {
 
 export interface LlmInstructionsOptions {
 	/**
-	 * Where each component's Markdown card goes. A **string** is a directory —
-	 * `{out}/{name}.md`. A **function** returns the full path per component, so cards can sit next to
-	 * their source: `(component) => component.sourceFile.replace(/\.tsx$/, ".md")` (use `sourceFile`,
-	 * the scanned module, not `file`, which for a re-export points into `node_modules`).
+	 * Where each component's card goes, **relative to the component's own folder** (the directory of
+	 * its `sourceFile`). A **string** is a subdirectory — `{out}/{Name}.md` — so `"."` puts the card
+	 * right next to the component and `"__llms__"` in a sibling folder. A **function** returns a path
+	 * per component; a relative one resolves against the component's folder, an absolute one is used
+	 * as-is.
 	 */
 	out: string | ((component: ComponentInfo) => string);
 	/** Index file in `llms.txt` format, listing every component; `false` to skip it. */
@@ -90,10 +91,17 @@ export function llmInstructions(
 		description,
 	} = options;
 
-	const cardPath = (component: ComponentInfo): string =>
-		typeof out === "function"
-			? out(component)
-			: `${out}/${safeFileName(component.name)}.md`;
+	// A card path resolves relative to the component's own folder (the dir of its `sourceFile`), so
+	// `out: "."` puts the card next to the component; an absolute path is used as-is.
+	const cardPath = (component: ComponentInfo): string => {
+		const rel =
+			typeof out === "function"
+				? out(component)
+				: `${out}/${safeFileName(component.name)}.md`;
+		return path.isAbsolute(rel)
+			? rel
+			: path.join(path.dirname(component.sourceFile), rel);
+	};
 
 	return {
 		name: "llm-instructions",

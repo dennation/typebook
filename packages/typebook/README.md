@@ -62,7 +62,7 @@ import { llmInstructions } from "@dennation/typebook/plugins/llm-instructions";
 
 // inside typebook({ plugins: [ … ] })
 llmInstructions({
-  out: (component) => component.sourceFile.replace(/\.tsx$/, ".md"), // Button.tsx → Button.md
+  out: ".", // card next to the component: components/Button.tsx → components/Button.md
   indexFile: "llms.txt", // llms.txt index at the repo root
   importFrom: "@acme/ui", // the import line printed in each card
 });
@@ -104,7 +104,7 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 
 | Option | Type | Description |
 |---|---|---|
-| `out` **(required)** | `string \| (component) => string` | Where each card goes: a function returning a full path per component — e.g. next to its source, `component.sourceFile.replace(/\.tsx$/, ".md")` — or a directory string (`{out}/{Name}.md`). |
+| `out` **(required)** | `string \| (component) => string` | Where each card goes, **relative to the component's own folder**. A string is a subdirectory (`{out}/{Name}.md`) — `"."` sits it next to the component, `"__llms__"` in a sibling folder. A function returns a path per component (relative → the component's folder; absolute → as-is). |
 | `indexFile` **(required)** | `string \| false` | Path of the `llms.txt` index, or `false` to skip it. |
 | `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |
 | `importFrom` | `string \| (component) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
@@ -141,7 +141,7 @@ For arbitrary logic, pass a predicate instead — `(prop, component) => boolean`
 
 ```ts
 llmInstructions({
-  out: (c) => c.sourceFile.replace(/\.tsx$/, ".json"),
+  out: (c) => `${c.name}.json`, // next to the component (relative to its folder)
   format: (c) => JSON.stringify({ name: c.name, props: c.props }, null, 2),
 });
 ```
@@ -163,15 +163,15 @@ llmInstructions({ title: "Acme UI", description: "Components for the Acme design
 
 #### Shipping to a consumer project
 
-When your components are a published package, the generated docs are just files — ship them, then point the *consumer's* agent at the index. The name `llms.txt` triggers nothing on its own: no agent scans `node_modules` (or a website) for it. Two steps make the docs reach a downstream project:
+The generated docs are ordinary source files — cards co-located next to each component plus `llms.txt` at the root. Commit them (they're derived, so add a CI check that regenerating leaves the tree unchanged), then reach a downstream project in two steps. The name `llms.txt` triggers nothing on its own: no agent scans `node_modules` (or a website) for it.
 
-1. **Include the files in the package.** Generate into a published folder and list it in `package.json#files` so it lands in the npm tarball:
+1. **Include the docs in the package.** List their locations in `package.json#files` so npm packs them (it includes any listed committed file, not just `dist`):
 
    ```jsonc
-   "files": ["dist", "llms.txt", "llms/"]
+   "files": ["dist", "llms.txt", "components/**/*.md"]
    ```
 
-   The index links cards by relative path, so `node_modules/@acme/ui/llms.txt` → `node_modules/@acme/ui/llms/Button.md` resolves as-is.
+   The index links each card by relative path, so `node_modules/@acme/ui/llms.txt` resolves to the co-located cards as-is.
 
 2. **Reference the index from the consumer's agent memory** — the file the agent auto-loads:
 
