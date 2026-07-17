@@ -24,15 +24,19 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      # Trusted publishing (OIDC) needs npm >= 11.5.1; Node 22 ships npm 10.
+      - run: npm install -g npm@11
+
       - run: pnpm install --frozen-lockfile
 
       # Opens/updates a "Version Packages" PR when changesets exist;
       # once that PR is merged (versions bumped, changesets consumed) it runs `release` to publish.
+      # No NPM_TOKEN: publishing authenticates via OIDC trusted publishing (configured on the npm
+      # package), so id-token: write above is the only credential.
       - uses: changesets/action@v1
         with:
           version: pnpm version-packages
           publish: pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
