@@ -77,7 +77,7 @@ function extractComponentProps(
 
 	const inherited = inheritedPropSources(checker, componentNode, ownPackage);
 	const defaults = paramDefaults(checker, componentNode);
-	return props.map((p) => {
+	const annotated = props.map((p) => {
 		let next = p;
 		const from = inherited.get(p.name);
 		if (from !== undefined) next = { ...next, inheritedFrom: from };
@@ -89,12 +89,20 @@ function extractComponentProps(
 		if (def !== undefined) next = { ...next, defaultValue: def };
 		return next;
 	});
+	// `extractProps` already put the props in a stable declaration order; a final **stable** partition
+	// keeps a component's own API first, then inherited props — without disturbing that order within
+	// each group. Array.sort is stable, so equal keys retain their declaration-order positions.
+	return annotated.sort(
+		(a, b) =>
+			(a.inheritedFrom === undefined ? 0 : 1) -
+			(b.inheritedFrom === undefined ? 0 : 1),
+	);
 }
 
 /** Raw {@link PropInfo}s (name, optionality, type, JSDoc description/default/deprecation) of a type. */
 function extractProps(checker: ts.TypeChecker, type: ts.Type): PropInfo[] {
 	const props: PropInfo[] = [];
-	for (const prop of type.getProperties()) {
+	for (const prop of orderedProperties(type)) {
 		// `getTypeOfSymbol` (not declarations) so mapped types like `Pick<T, K>` resolve.
 		const isOptional = (prop.flags & ts.SymbolFlags.Optional) !== 0;
 		const info: PropInfo = {
@@ -111,4 +119,39 @@ function extractProps(checker: ts.TypeChecker, type: ts.Type): PropInfo[] {
 		props.push(info);
 	}
 	return props;
+}
+
+/**
+ * A type's properties in a **stable, build-independent order**. `Type.getProperties()` walks the
+ * checker's member tables, whose order for mapped/utility types (`Omit`, `Pick`, `Partial`) and
+ * merged intersections depends on the warm program's resolution/cache state — which shifts with the
+ * scan order between builds, reordering props in the generated docs for no real change. Sorting by
+ * each property's declaration site (source file, then position) pins the order to how the props are
+ * authored, so the same input always yields the same order. Synthetic props (no declaration) sort
+ * last, deterministically by name.
+ */
+function orderedProperties(type: ts.Type): ts.Symbol[] {
+	return [...type.getProperties()].sort((a, b) => {
+		const ka = declarationSortKey(a);
+		const kb = declarationSortKey(b);
+		if (ka === null || kb === null) {
+			if (ka === kb) return a.getName().localeCompare(b.getName());
+			return ka === null ? 1 : -1; // synthetic (no declaration) last
+		}
+		return ka.file < kb.file ? -1 : ka.file > kb.file ? 1 : ka.pos - kb.pos;
+	});
+}
+
+/** The earliest declaration site of a symbol — `null` when it has none (synthetic). */
+function declarationSortKey(
+	symbol: ts.Symbol,
+): { file: string; pos: number } | null {
+	let key: { file: string; pos: number } | null = null;
+	for (const decl of symbol.getDeclarations() ?? []) {
+		const file = decl.getSourceFile().fileName;
+		const pos = decl.pos;
+		if (key === null || file < key.file || (file === key.file && pos < key.pos))
+			key = { file, pos };
+	}
+	return key;
 }
