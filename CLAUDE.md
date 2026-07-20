@@ -12,6 +12,12 @@
 
 pnpm workspace monorepo.
 
+## Changesets
+
+Keep them **short** — one or two sentences naming only the key change or fix (what changed / what was
+fixed), not the reasoning, internals, or a play-by-play. Details belong in the PR/commit, not the
+changeset.
+
 ## Commands (root)
 
 ```bash
