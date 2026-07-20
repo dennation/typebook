@@ -1,5 +1,11 @@
 # @dennation/typebook
 
+## 0.5.1
+
+### Patch Changes
+
+- 0d5d950: Scanner: props and their literal-union values now emit in a stable, build-independent order — no more spurious reordering in the generated docs between builds.
+
 ## 0.5.0
 
 ### Minor Changes
