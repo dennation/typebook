@@ -104,6 +104,83 @@ describe("collectComponentInfos (export scan)", () => {
 	});
 });
 
+// --- deterministic prop order: same input → same order, whatever the scan order ---
+
+describe("deterministic prop order", () => {
+	/** Prop names of a component after scanning the fixtures in the given file order. */
+	async function propOrder(
+		fileOrder: string[],
+		name: string,
+	): Promise<string[]> {
+		const client = new TypeScriptClient(FIXTURES);
+		await client.start();
+		let names: string[] = [];
+		for (const file of fileOrder) {
+			for (const doc of await client.getExportedComponentInfos(file)) {
+				if (doc.name === name) names = doc.props.map((p) => p.name);
+			}
+		}
+		client.stop();
+		return names;
+	}
+
+	test("utility-type props keep declaration order regardless of scan order", async () => {
+		// `Omit<FullProps, "c">` — the checker's member order for mapped types depends on the warm
+		// program's cache state, so scanning the same files in a different order used to reorder these
+		// props in the generated docs. Sorting by declaration site pins it to the authored order.
+		const dir = resolve(FIXTURES, "components");
+		const files = readdirSync(dir)
+			.filter((f) => f.endsWith(".tsx"))
+			.map((f) => resolve(dir, f));
+
+		const forward = await propOrder(files, "OmittedComponent");
+		const backward = await propOrder([...files].reverse(), "OmittedComponent");
+
+		expect(forward).toEqual(["a", "b", "d"]);
+		expect(backward).toEqual(forward);
+	});
+
+	/** The literal values of a component's prop after scanning the fixtures in the given order. */
+	async function literalValues(
+		fileOrder: string[],
+		name: string,
+		prop: string,
+	): Promise<string[]> {
+		const client = new TypeScriptClient(FIXTURES);
+		await client.start();
+		let values: string[] = [];
+		for (const file of fileOrder) {
+			for (const doc of await client.getExportedComponentInfos(file)) {
+				if (doc.name !== name) continue;
+				const type = doc.props.find((p) => p.name === prop)?.type;
+				if (type?.kind === "literal") values = type.values;
+			}
+		}
+		client.stop();
+		return values;
+	}
+
+	test("literal-union values keep authored order regardless of scan order", async () => {
+		// `variant?: "solid" | "outline" | "ghost"` — the checker's union member order is cache-state
+		// dependent too, so a different scan order used to reshuffle a prop's allowed values. The
+		// authored source order is recovered from the declaration and pinned.
+		const dir = resolve(FIXTURES, "components");
+		const files = readdirSync(dir)
+			.filter((f) => f.endsWith(".tsx"))
+			.map((f) => resolve(dir, f));
+
+		const forward = await literalValues(files, "Basic", "variant");
+		const backward = await literalValues(
+			[...files].reverse(),
+			"Basic",
+			"variant",
+		);
+
+		expect(forward).toEqual(["solid", "outline", "ghost"]);
+		expect(backward).toEqual(forward);
+	});
+});
+
 // --- re-export: `file` (declaration) diverges from `sourceFile` (scanned module) ---
 
 describe("re-export scan", () => {
