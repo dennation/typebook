@@ -1,21 +1,18 @@
 import { describe, expect, test } from "vitest";
 import type { ComponentInfo, GenerateCtx } from "../../types";
-import {
-	DEFAULT_PROP_FILTER,
-	type EntryPathContext,
-	llmInstructions,
-} from "../llm-instructions";
+import { DEFAULT_PROP_FILTER, llmInstructions } from "../llm-instructions";
 
 /** entryPath that writes `{sub}{Name}.md` next to the component. */
 const entry =
 	(sub = "") =>
-	(c: ComponentInfo, { componentDir }: EntryPathContext) =>
-		`${componentDir}/${sub}${c.name}.md`;
+	(c: ComponentInfo) =>
+		`${c.dir}/${sub}${c.name}.md`;
 
 const doc: ComponentInfo = {
 	name: "Button",
 	file: "/x/Button.tsx",
 	sourceFile: "/x/Button.tsx",
+	dir: "/x",
 	props: [
 		{ name: "variant", optional: true, type: { kind: "string" } }, // own, ungrouped
 		{
@@ -138,11 +135,25 @@ describe("llmInstructions: filterComponents", () => {
 describe("llmInstructions: format", () => {
 	test("a custom format replaces the default card", async () => {
 		const files = await run({
-			entryPath: (c, { componentDir }) => `${componentDir}/out/${c.name}.json`,
+			entryPath: (c) => `${c.dir}/out/${c.name}.json`,
 			indexPath: false,
 			format: (c) => JSON.stringify({ name: c.name, props: c.props.length }),
 		});
 		expect(files["/x/out/Button.json"]).toBe('{"name":"Button","props":4}');
+	});
+});
+
+describe("llmInstructions: importFrom", () => {
+	test("a function receives componentDir and root", async () => {
+		// sourceFile /x/Button.tsx, ctx.root "/" → componentDir "/x", root "/".
+		const files = await run({
+			entryPath: entry(),
+			indexPath: false,
+			importFrom: (c, { root }) => `pkg[root=${root}][dir=${c.dir}]`,
+		});
+		expect(files["/x/Button.md"]).toContain(
+			'import { Button } from "pkg[root=/][dir=/x]"',
+		);
 	});
 });
 

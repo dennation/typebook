@@ -1,7 +1,11 @@
 import path from "node:path";
 import type { ComponentInfo, GenerateCtx, TypebookPlugin } from "../../types";
 import type { PropFilter } from "./filterProps";
-import { type LlmFormat, markdownFormat } from "./markdownFormat";
+import {
+	type EntryPathContext,
+	type LlmFormat,
+	markdownFormat,
+} from "./markdownFormat";
 
 export {
 	DEFAULT_HIDDEN_GROUPS,
@@ -13,28 +17,21 @@ export {
 	type PropFilterMap,
 } from "./filterProps";
 export {
+	type EntryPathContext,
 	type LlmFormat,
 	type MarkdownFormatOptions,
 	markdownFormat,
 } from "./markdownFormat";
 
-/** Absolute base directories passed to {@link LlmInstructionsOptions.entryPath}. */
-export interface EntryPathContext {
-	/** The component's own folder — the directory of its `sourceFile`. */
-	componentDir: string;
-	/** The project root. */
-	root: string;
-}
-
 export interface LlmInstructionsOptions {
 	/**
 	 * The full path of each component's card — you build it, so the filename is explicit and nothing
-	 * is appended. Receives the component and `{ componentDir, root }` (absolute base dirs); return an
+	 * is appended. Gets the component (its folder is `component.dir`) and `{ root }`; return an
 	 * absolute path (a relative one resolves against `root`):
-	 * - next to the component — `(c, { componentDir }) => path.join(componentDir, c.name + ".md")`
+	 * - next to the component — `(c) => path.join(c.dir, c.name + ".md")`
 	 * - from the project root — `(c, { root }) => path.join(root, "docs", c.name + ".md")`
 	 */
-	entryPath: (component: ComponentInfo, dirs: EntryPathContext) => string;
+	entryPath: (component: ComponentInfo, ctx: EntryPathContext) => string;
 	/**
 	 * The Markdown index listing every component (with a link to each card), relative to the project
 	 * root; `false` to skip it. Reference it from your `AGENTS.md` / `CLAUDE.md` so an agent finds it.
@@ -48,11 +45,14 @@ export interface LlmInstructionsOptions {
 	 */
 	filterComponents?: (component: ComponentInfo) => boolean;
 	/**
-	 * Module each component is imported from — used to print an `import { X } from "…"` line in
-	 * every card (agents need the exact import). A string (`"@acme/ui"`) or a function per component.
-	 * Omit to skip the import line.
+	 * Module each component is imported from — prints an `import { X } from "…"` line in every card
+	 * (agents need the exact import). A string (`"@acme/ui"`), or a function that gets the same
+	 * `{ root }` as `entryPath` — e.g. derive a subpath from where the component lives:
+	 * `(c, { root }) => `@acme/ui/${path.relative(root, c.dir)}``. Omit to skip it.
 	 */
-	importFrom?: string | ((component: ComponentInfo) => string);
+	importFrom?:
+		| string
+		| ((component: ComponentInfo, ctx: EntryPathContext) => string);
 	/**
 	 * Which props each card surfaces — a {@link PropFilter}: a **map** (`{ element: false, href: true }`,
 	 * keyed by group or prop name, prop name wins) or a **predicate** for arbitrary rules. Defaults to
@@ -105,7 +105,7 @@ export function llmInstructions(
 		filterProps,
 		keepOwnProps,
 		filterComponents,
-		format = markdownFormat({ importFrom, filterProps, keepOwnProps }),
+		format,
 		title = "Components",
 		description,
 		emitToOutDir = false,
@@ -117,18 +117,25 @@ export function llmInstructions(
 			const components = filterComponents
 				? allComponents.filter(filterComponents)
 				: allComponents;
-			// `entryPath` builds the full path from the component and its base dirs; a relative return
-			// resolves against the project root.
-			const cardPath = (component: ComponentInfo): string => {
-				const p = entryPath(component, {
-					componentDir: path.dirname(component.sourceFile),
+			// Built here (not at plugin init) so the default format can pass `ctx.root` to an
+			// `importFrom` function; a custom `format` owns its output and gets neither.
+			const render =
+				format ??
+				markdownFormat({
+					importFrom,
+					filterProps,
+					keepOwnProps,
 					root: ctx.root,
 				});
+			// `entryPath` builds the full path (the component's folder is `component.dir`); a relative
+			// return resolves against the project root.
+			const cardPath = (component: ComponentInfo): string => {
+				const p = entryPath(component, { root: ctx.root });
 				return path.isAbsolute(p) ? p : path.join(ctx.root, p);
 			};
 			await Promise.all(
 				components.map((component) =>
-					ctx.writeFile(cardPath(component), format(component)),
+					ctx.writeFile(cardPath(component), render(component)),
 				),
 			);
 			if (indexPath !== false)
@@ -152,7 +159,7 @@ export function llmInstructions(
 					path.join(base, `${component.name}.md`);
 				await Promise.all(
 					components.map((component) =>
-						ctx.writeFile(outCardPath(component), format(component)),
+						ctx.writeFile(outCardPath(component), render(component)),
 					),
 				);
 				const outIndexPath = path.join(base, "index.md");

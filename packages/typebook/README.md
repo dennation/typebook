@@ -106,10 +106,10 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 
 | Option | Type | Description |
 |---|---|---|
-| `entryPath` **(required)** | `(component, { componentDir, root }) => string` | The full path of each card — you build it (the filename is explicit). Join `root` for a central folder (recommended) or `componentDir` to co-locate; return an absolute path (a relative one resolves against `root`). |
+| `entryPath` **(required)** | `(component, { root }) => string` | The full path of each card — you build it (the filename is explicit). Join `root` for a central folder (recommended) or `component.dir` to co-locate; return an absolute path (a relative one resolves against `root`). |
 | `indexPath` **(required)** | `string \| false` | Path of the Markdown component index (relative to the project root), or `false` to skip it. Reference it from your `AGENTS.md`/`CLAUDE.md`. |
 | `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |
-| `importFrom` | `string \| (component) => string` | Module each component is imported from — prints the `import { X } from "…"` line. Omit to skip it. |
+| `importFrom` | `string \| (component, { root }) => string` | Module each component is imported from — prints the `import { X } from "…"` line. A string, or a function that gets the same `{ root }` as `entryPath` (derive a subpath from `component.dir`: `` (c, { root }) => `@acme/ui/${path.relative(root, c.dir)}` ``). Omit to skip it. |
 | `filterProps` | `PropFilter` (map or predicate) | Which props a card surfaces. A **map** keyed by group or prop name (`{ element: false, href: true }`, prop name wins, unlisted kept) or a predicate. Defaults to `DEFAULT_PROP_FILTER`; spread to override. Configures the default `format` only. |
 | `keepOwnProps` | `boolean` | Keep a component's own props regardless of `filterProps`. Default `true`; `false` filters own props too. |
 | `format` | `(component) => string` | How each component becomes its file's contents. Defaults to `markdownFormat` (the card above). Pass your own for a different shape — full `ComponentInfo` in, string out. |
@@ -118,7 +118,7 @@ The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop 
 
 #### Recipes
 
-**Choose where cards land** — `entryPath` gets `componentDir` and `root`, so pick the base:
+**Choose where cards land** — `entryPath` gets `{ root }`, and the component's folder is `component.dir`, so pick the base:
 
 ```ts
 import path from "node:path";
@@ -126,7 +126,7 @@ import path from "node:path";
 // recommended: one generated folder — clean to .gitignore/ship, no source clutter
 entryPath: (c, { root }) => path.join(root, "generated/components", `${c.name}.md`),
 // or co-located, marked as generated (so it doesn't clash with an authored Button.md)
-entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.gen.md`),
+entryPath: (c) => path.join(c.dir, `${c.name}.gen.md`),
 ```
 
 A flat central folder assumes component names are unique; co-location avoids that but scatters the cards through your source.
@@ -169,7 +169,7 @@ For arbitrary logic, pass a predicate instead — `(prop, component) => boolean`
 
 ```ts
 llmInstructions({
-  entryPath: (c, { componentDir }) => path.join(componentDir, `${c.name}.json`),
+  entryPath: (c) => path.join(c.dir, `${c.name}.json`),
   format: (c) => JSON.stringify({ name: c.name, props: c.props }, null, 2),
 });
 ```

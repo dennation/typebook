@@ -144,9 +144,14 @@ export interface ComponentInfo {
 	/**
 	 * Absolute path of the **scanned module** that surfaced this component — the file under your
 	 * `components` glob. Equals {@link file} for a component declared in its own module; differs for
-	 * a re-export. Use this for co-located output (`sourceFile.replace(/\.tsx$/, ".md")`).
+	 * a re-export. Use this for co-located output.
 	 */
 	sourceFile: string;
+	/**
+	 * Absolute path of the component's own folder — the directory of {@link sourceFile}. Handy for
+	 * building co-located output or an import subpath without deriving it from `sourceFile` by hand.
+	 */
+	dir: string;
 	/** JSDoc prose above the component declaration, if any. */
 	description?: string;
 	/**

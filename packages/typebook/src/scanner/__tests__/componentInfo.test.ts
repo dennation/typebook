@@ -89,6 +89,11 @@ describe("collectComponentInfos (export scan)", () => {
 		expect(select?.sourceFile).toBe(select?.file);
 	});
 
+	test("dir is the folder of the scanned module", () => {
+		const basic = docs.find((d) => d.name === "Basic");
+		expect(basic?.dir).toBe(resolve(FIXTURES, "components"));
+	});
+
 	test("classifies own standard-named props by group (no inheritedFrom)", () => {
 		// `disabled` is declared by Basic itself — grouped by name, but not inherited.
 		const disabled = docs
