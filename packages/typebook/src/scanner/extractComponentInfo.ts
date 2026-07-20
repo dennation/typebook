@@ -1,6 +1,6 @@
 import path from "node:path";
 import ts from "typescript";
-import type { ComponentInfo, PropInfo } from "../types";
+import type { ComponentInfo, PropInfo, PropType } from "../types";
 import { classifyPropGroup } from "./classifyPropGroup";
 import { declarationName, isReactReturnType } from "./componentDetection";
 import { convertType } from "./convertType";
@@ -108,7 +108,11 @@ function extractProps(checker: ts.TypeChecker, type: ts.Type): PropInfo[] {
 		const info: PropInfo = {
 			name: prop.getName(),
 			optional: isOptional,
-			type: convertType(checker, checker.getTypeOfSymbol(prop), isOptional),
+			type: stableLiteralOrder(
+				convertType(checker, checker.getTypeOfSymbol(prop), isOptional),
+				prop,
+				checker,
+			),
 		};
 		const description = symbolDescription(checker, prop);
 		if (description) info.description = description;
@@ -119,6 +123,80 @@ function extractProps(checker: ts.TypeChecker, type: ts.Type): PropInfo[] {
 		props.push(info);
 	}
 	return props;
+}
+
+/**
+ * Pin a literal union's member order so it's **stable across builds**. `checker.typeToString` and
+ * `Type.types` render union members in the checker's internal (type-id) order, which — like property
+ * order — depends on the warm program's cache state and drifts with the scan order between builds,
+ * reshuffling a prop's allowed values in the generated docs for no real change. When the prop's
+ * declared type is written as an inline `"a" | "b" | …` union we recover that **authored** order from
+ * its AST (resolving one level of type alias); any remaining values (derived unions like
+ * `Extract`/`Exclude`, template-literal unions — no source order to read) fall back to alphabetical,
+ * which is at least deterministic. Non-literal types pass through untouched.
+ */
+function stableLiteralOrder(
+	type: PropType,
+	prop: ts.Symbol,
+	checker: ts.TypeChecker,
+): PropType {
+	if (type.kind !== "literal" || type.values.length < 2) return type;
+	const authored = authoredUnionOrder(prop, checker);
+	const rank = (v: string): number => {
+		const i = authored.indexOf(v);
+		return i === -1 ? authored.length : i;
+	};
+	const values = [...type.values].sort(
+		(a, b) => rank(a) - rank(b) || a.localeCompare(b),
+	);
+	return { ...type, values };
+}
+
+/**
+ * The string-literal members of a prop's declared union in **source order**, or `[]` when the type
+ * isn't written as an inline union (a derived/computed union has no authored order to read). Follows
+ * a single `type X = "a" | "b"` alias so a named union keeps its order too.
+ */
+function authoredUnionOrder(
+	prop: ts.Symbol,
+	checker: ts.TypeChecker,
+	depth = 0,
+): string[] {
+	for (const decl of prop.getDeclarations() ?? []) {
+		const typeNode = (decl as { type?: ts.TypeNode }).type;
+		const order = typeNode && unionOrderFromNode(typeNode, checker, depth);
+		if (order && order.length) return order;
+	}
+	return [];
+}
+
+/** String-literal members of a `UnionTypeNode` in source order; resolves a type-alias reference once. */
+function unionOrderFromNode(
+	node: ts.TypeNode,
+	checker: ts.TypeChecker,
+	depth: number,
+): string[] | null {
+	if (ts.isUnionTypeNode(node)) {
+		const out: string[] = [];
+		for (const member of node.types) {
+			if (ts.isLiteralTypeNode(member) && ts.isStringLiteral(member.literal))
+				out.push(member.literal.text);
+		}
+		return out;
+	}
+	// `variant?: Size` where `type Size = "a" | "b"` — follow the alias once to keep its order.
+	if (depth < 1 && ts.isTypeReferenceNode(node)) {
+		const symbol = checker.getSymbolAtLocation(node.typeName);
+		const aliased =
+			symbol && symbol.flags & ts.SymbolFlags.Alias
+				? checker.getAliasedSymbol(symbol)
+				: symbol;
+		for (const decl of aliased?.getDeclarations() ?? []) {
+			if (ts.isTypeAliasDeclaration(decl))
+				return unionOrderFromNode(decl.type, checker, depth + 1);
+		}
+	}
+	return null;
 }
 
 /**
