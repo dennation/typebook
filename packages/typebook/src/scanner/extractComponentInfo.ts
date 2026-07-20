@@ -129,11 +129,10 @@ function extractProps(checker: ts.TypeChecker, type: ts.Type): PropInfo[] {
  * Pin a literal union's member order so it's **stable across builds**. `checker.typeToString` and
  * `Type.types` render union members in the checker's internal (type-id) order, which — like property
  * order — depends on the warm program's cache state and drifts with the scan order between builds,
- * reshuffling a prop's allowed values in the generated docs for no real change. When the prop's
- * declared type is written as an inline `"a" | "b" | …` union we recover that **authored** order from
- * its AST (resolving one level of type alias); any remaining values (derived unions like
- * `Extract`/`Exclude`, template-literal unions — no source order to read) fall back to alphabetical,
- * which is at least deterministic. Non-literal types pass through untouched.
+ * reshuffling a prop's allowed values in the generated docs for no real change. Values keep their
+ * **authored** source order when the prop is written as an inline `"a" | "b" | …` union (one type
+ * alias hop is followed); the rest — derived unions (`Extract`/`Exclude`), template-literal and enum
+ * unions with no source order to read — fall back to alphabetical, which is at least deterministic.
  */
 function stableLiteralOrder(
 	type: PropType,
@@ -153,50 +152,39 @@ function stableLiteralOrder(
 }
 
 /**
- * The string-literal members of a prop's declared union in **source order**, or `[]` when the type
- * isn't written as an inline union (a derived/computed union has no authored order to read). Follows
- * a single `type X = "a" | "b"` alias so a named union keeps its order too.
+ * String-literal members of a prop's declared union in **source order**, or `[]` when the type isn't
+ * an inline `"a" | "b"` union (a derived/computed union has no authored order to read). One `type X =
+ * …` alias hop is followed so a named union keeps its order too.
  */
 function authoredUnionOrder(
 	prop: ts.Symbol,
 	checker: ts.TypeChecker,
-	depth = 0,
 ): string[] {
+	const fromNode = (node: ts.TypeNode, aliasHopsLeft: number): string[] => {
+		if (ts.isUnionTypeNode(node))
+			return node.types.flatMap((m) =>
+				ts.isLiteralTypeNode(m) && ts.isStringLiteral(m.literal)
+					? [m.literal.text]
+					: [],
+			);
+		// `variant?: Size` where `type Size = "a" | "b"` — follow the alias once.
+		if (aliasHopsLeft > 0 && ts.isTypeReferenceNode(node)) {
+			const sym = checker.getSymbolAtLocation(node.typeName);
+			const alias =
+				sym && sym.flags & ts.SymbolFlags.Alias
+					? checker.getAliasedSymbol(sym)
+					: sym;
+			const decl = alias?.getDeclarations()?.find(ts.isTypeAliasDeclaration);
+			if (decl) return fromNode(decl.type, aliasHopsLeft - 1);
+		}
+		return [];
+	};
 	for (const decl of prop.getDeclarations() ?? []) {
-		const typeNode = (decl as { type?: ts.TypeNode }).type;
-		const order = typeNode && unionOrderFromNode(typeNode, checker, depth);
+		const node = (decl as { type?: ts.TypeNode }).type;
+		const order = node && fromNode(node, 1);
 		if (order && order.length) return order;
 	}
 	return [];
-}
-
-/** String-literal members of a `UnionTypeNode` in source order; resolves a type-alias reference once. */
-function unionOrderFromNode(
-	node: ts.TypeNode,
-	checker: ts.TypeChecker,
-	depth: number,
-): string[] | null {
-	if (ts.isUnionTypeNode(node)) {
-		const out: string[] = [];
-		for (const member of node.types) {
-			if (ts.isLiteralTypeNode(member) && ts.isStringLiteral(member.literal))
-				out.push(member.literal.text);
-		}
-		return out;
-	}
-	// `variant?: Size` where `type Size = "a" | "b"` — follow the alias once to keep its order.
-	if (depth < 1 && ts.isTypeReferenceNode(node)) {
-		const symbol = checker.getSymbolAtLocation(node.typeName);
-		const aliased =
-			symbol && symbol.flags & ts.SymbolFlags.Alias
-				? checker.getAliasedSymbol(symbol)
-				: symbol;
-		for (const decl of aliased?.getDeclarations() ?? []) {
-			if (ts.isTypeAliasDeclaration(decl))
-				return unionOrderFromNode(decl.type, checker, depth + 1);
-		}
-	}
-	return null;
 }
 
 /**
