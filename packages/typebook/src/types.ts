@@ -1,3 +1,6 @@
+import type { Program } from "./scanner/ast";
+import type { TypeScriptClient } from "./scanner/ts-client";
+
 export interface TypebookConfig {
 	/**
 	 * Files to scan for components — a path, list of paths, or globs. Each file's exported
@@ -6,8 +9,10 @@ export interface TypebookConfig {
 	 */
 	components?: string | string[];
 	/**
-	 * Sub-plugins that consume the project scan (e.g. `llmInstructions()`). Each `generate` runs
-	 * after every scan with the full set of components — build once, dev on change.
+	 * Sub-plugins that extend `typebook()`. Two kinds, distinguished by which hook they define:
+	 * a **`generate`** plugin consumes the whole project scan (e.g. `llmInstructions()`); a
+	 * **`transform`** plugin rewrites each module in place (e.g. `snippets()` injecting
+	 * `__snippetSource`). A plugin may define either or both.
 	 */
 	plugins?: TypebookPlugin[];
 	/**
@@ -37,15 +42,42 @@ export interface GenerateCtx {
 }
 
 /**
- * A sub-plugin of `typebook()`: consumes the whole project scan and emits artifacts (docs, AI
- * instructions, …). `apply` gates the command it runs in (like Vite's `apply`).
+ * Passed to a {@link TypebookPlugin}'s `transform` for one module. The module is already parsed
+ * once by the factory (`program`) and shared across all transform plugins, so a plugin never
+ * re-parses. Instead of returning code, a plugin records insertions via `inject`; the factory
+ * applies them all back-to-front and returns the rewritten module.
+ */
+export interface TransformCtx {
+	/** The module's source text. */
+	code: string;
+	/** The module's absolute path. */
+	filePath: string;
+	/** The parsed module (oxc), shared across transform plugins — do not re-parse. */
+	program: Program;
+	/** The warm TypeScript client for cross-module resolution, or `null` when unavailable. */
+	tsClient: TypeScriptClient | null;
+	/** Queue an insertion of `text` at character offset `at`. */
+	inject(at: number, text: string): void;
+	/** Declare a file this module's output depends on (e.g. a resolved cross-module reference). */
+	addWatchFile(file: string): void;
+}
+
+/**
+ * A sub-plugin of `typebook()`. Mirrors Vite's plugin shape — `apply` gates the command it runs in.
+ * Define **`generate`** to consume the whole project scan (artifact codegen), **`transform`** to
+ * rewrite each module (per-module injection), or both. `mayTransform` is a cheap string pre-check
+ * so a module the plugin can't touch is skipped before the (shared) parse.
  */
 export interface TypebookPlugin {
 	name: string;
 	/** Run only in this command (like Vite's `apply`). Omit to run in both dev and build. */
 	apply?: TypebookCommand;
 	/** Consume every scanned component after each project scan (build once; dev on change). */
-	generate(docs: ComponentInfo[], ctx: GenerateCtx): void | Promise<void>;
+	generate?(docs: ComponentInfo[], ctx: GenerateCtx): void | Promise<void>;
+	/** Cheap pre-check: return false to skip a module before parsing. Omit to always consider it. */
+	mayTransform?(code: string): boolean;
+	/** Rewrite one module via {@link TransformCtx.inject}. Runs per module. */
+	transform?(ctx: TransformCtx): void | Promise<void>;
 }
 
 export type PropType =

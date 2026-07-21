@@ -12,6 +12,8 @@ export default defineConfig({
 					__dirname,
 					"src/plugins/llm-instructions/index.ts",
 				),
+				"plugins/snippets": resolve(__dirname, "src/plugins/snippets.ts"),
+				"react/index": resolve(__dirname, "src/react/index.ts"),
 				"plugins/vite": resolve(__dirname, "src/plugins/vite.ts"),
 				"plugins/rollup": resolve(__dirname, "src/plugins/rollup.ts"),
 				"plugins/rolldown": resolve(__dirname, "src/plugins/rolldown.ts"),
@@ -24,9 +26,21 @@ export default defineConfig({
 			formats: ["es"],
 		},
 		rollupOptions: {
-			// The only runtime imports: the peer `typescript`, the `tinyglobby` glob, and `unplugin`
-			// (+ its submodules) — everything else the plugins touch is provided by the host bundler.
-			external: ["typescript", "tinyglobby", /^node:/, /^unplugin/],
+			// Runtime imports kept external: the peer `typescript`, the `tinyglobby` glob, `unplugin`
+			// (+ submodules), the `oxc-parser` native binding (loaded lazily by the snippet scanner),
+			// and `react` (+ its jsx-runtime) for the `<Snippet>` runtime — everything else the plugins
+			// touch is provided by the host bundler.
+			external: [
+				"typescript",
+				"tinyglobby",
+				"oxc-parser",
+				"react",
+				"react-dom",
+				/^react\//,
+				/^react-dom\//,
+				/^node:/,
+				/^unplugin/,
+			],
 			output: {
 				entryFileNames: "[name].mjs",
 				chunkFileNames: "[name]-[hash].mjs",

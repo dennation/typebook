@@ -1,14 +1,17 @@
 # @dennation/typebook — monorepo
 
-> **Branch scope — `main` is release-only.** `main` ships just the **scanner core** +
+> **Branch scope — `main` is release-only.** `main` ships the **scanner core** +
 > **AI-instructions** plugin (`@dennation/typebook` + `@dennation/typebook/plugins/llm-instructions`
-> + the `typebook()` bundler plugins). Everything else lives on the **`dev`** branch and is **not**
-> on `main`: the stories API (`defineStories`, `@dennation/typebook/react`), the `snippets` plugin,
-> the docs-kit runtime, the marketing/docs **website** and the **examples**. Much of the detail
-> below (the `react/` runtime, `widgets/`, `apps/website`, `examples/*`,
-> `defineStories`/`Snippet`/stories injection) describes the **full product on `dev`** — on `main`
-> those files don't exist. When working on `main`, treat this file's `react`/website/examples/stories
-> sections as dev-only context.
+> + the `typebook()` bundler plugins), plus the opt-in **`snippets` plugin**
+> (`@dennation/typebook/plugins/snippets`) and a **dependency-free `@dennation/typebook/react`
+> `<Snippet>` runtime** (React only — no docs-kit, no Shiki, no design system). The rest lives on
+> the **`dev`** branch and is **not** on `main`: the stories API (`defineStories`), the **full**
+> docs-kit `react/` runtime (`widgets/`, content set, `CodeBlock`, …), the marketing/docs **website**
+> and the **examples**. Much of the detail below (`defineStories`, `widgets/`, `apps/website`,
+> `examples/*`, the full docs-kit `react/` runtime) describes the **full product on `dev`** — on
+> `main` those files don't exist. When working on `main`, treat this file's website/examples/stories
+> and full-docs-kit sections as dev-only context; the `snippets` plugin and the minimal `<Snippet>`
+> runtime **are** on `main`.
 
 pnpm workspace monorepo.
 

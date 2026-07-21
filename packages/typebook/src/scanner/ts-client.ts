@@ -2,9 +2,19 @@ import { resolve } from "node:path";
 import ts from "typescript";
 import type { ComponentInfo } from "../types";
 import { extractComponentInfo } from "./extractComponentInfo";
+import { functionLikeOf } from "./paramDefaults";
+import { dedent } from "./source-slice";
 
 /** Extensions TypeScript will accept as program root files. */
 const TS_SOURCE_EXT = /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/;
+
+/** A function source resolved from a `<Snippet source={ref}>` reference. */
+export interface SnippetSource {
+	/** The function body, sliced 1:1 then dedented — the text shown as the snippet. */
+	source: string;
+	/** Absolute path of the file the reference resolved to (registered as a watch dependency). */
+	file: string;
+}
 
 /**
  * Owns one warm TypeScript LanguageService/program and exposes
@@ -21,6 +31,10 @@ export class TypeScriptClient {
 	// The program's root files mapped to their versions. Backs the LanguageServiceHost: bumping a
 	// file's version tells the service its snapshot changed, so it re-reads and reparses only that one.
 	private readonly fileVersions = new Map<string, number>();
+	// In-memory content overlays keyed by absolute path. A `transform` hook resolves a snippet
+	// against the module's *current* (possibly already-rewritten) `code`, not what's on disk — so
+	// the overlay is applied as the file's snapshot while the reference is resolved.
+	private readonly overrides = new Map<string, string>();
 
 	constructor(private cwd: string) {}
 
@@ -64,6 +78,7 @@ export class TypeScriptClient {
 		this.checker = null;
 		this.options = null;
 		this.fileVersions.clear();
+		this.overrides.clear();
 	}
 
 	/**
@@ -90,6 +105,61 @@ export class TypeScriptClient {
 		return docs;
 	}
 
+	/**
+	 * Resolve a `<Snippet source={ref}>` reference to the body source of the function it names.
+	 * `identifierOffset` is the character offset of the `ref` identifier (in `content`/`filePath`).
+	 * The symbol is resolved through the warm program — following an import alias into another file —
+	 * to its declaration; if that declaration is (or initializes to) a function, its body is sliced
+	 * exactly as the inline scanner would. Returns the sliced source plus the file it came from (so
+	 * the caller can register a watch dependency), or `null` when the reference can't be resolved to
+	 * a function literal.
+	 */
+	async getSnippetSource(
+		filePath: string,
+		identifierOffset: number,
+		content?: string,
+	): Promise<SnippetSource | null> {
+		if (!this.program || !this.checker) await this.start();
+
+		const absPath = resolve(this.cwd, filePath);
+		if (content !== undefined) this.setOverride(absPath, content);
+
+		const sourceFile = this.program?.getSourceFile(absPath);
+		const checker = this.checker;
+		if (!sourceFile || !checker) return null;
+
+		const ident = findIdentifierAt(sourceFile, identifierOffset);
+		if (!ident) return null;
+
+		const symbol = checker.getSymbolAtLocation(ident);
+		if (!symbol) return null;
+		const resolved =
+			symbol.flags & ts.SymbolFlags.Alias
+				? checker.getAliasedSymbol(symbol)
+				: symbol;
+
+		for (const decl of resolved.getDeclarations() ?? []) {
+			const fn = functionLikeOf(decl);
+			const source = fn && sliceFunctionBody(fn);
+			if (source != null) {
+				return { source, file: decl.getSourceFile().fileName };
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Overlay `content` as the in-memory snapshot for `absPath` and refresh the warm program so the
+	 * file is reparsed from it. A no-op when the content is unchanged, so repeated extraction of an
+	 * untouched file doesn't churn the program.
+	 */
+	private setOverride(absPath: string, content: string): void {
+		if (this.overrides.get(absPath) === content) return;
+		this.overrides.set(absPath, content);
+		this.fileVersions.set(absPath, (this.fileVersions.get(absPath) ?? 0) + 1);
+		this.refreshProgram();
+	}
+
 	/** Re-read the given changed files on the next refresh, then refresh the warm program. */
 	async notifyChange(changedFiles: string[] = []): Promise<void> {
 		if (!this.service) {
@@ -105,6 +175,9 @@ export class TypeScriptClient {
 			getScriptFileNames: () => [...this.fileVersions.keys()],
 			getScriptVersion: (f) => String(this.fileVersions.get(f) ?? 0),
 			getScriptSnapshot: (f) => {
+				const override = this.overrides.get(f);
+				if (override !== undefined)
+					return ts.ScriptSnapshot.fromString(override);
 				const text = ts.sys.readFile(f);
 				return text === undefined
 					? undefined
@@ -153,4 +226,45 @@ export class TypeScriptClient {
 			this.fileVersions.set(abs, (this.fileVersions.get(abs) ?? 0) + 1);
 		}
 	}
+}
+
+/** Find the Identifier node that starts exactly at `offset` (matching the scanner's oxc offset). */
+function findIdentifierAt(
+	sourceFile: ts.SourceFile,
+	offset: number,
+): ts.Identifier | null {
+	let found: ts.Identifier | null = null;
+	const visit = (node: ts.Node): void => {
+		if (found) return;
+		if (ts.isIdentifier(node) && node.getStart(sourceFile) === offset) {
+			found = node;
+			return;
+		}
+		ts.forEachChild(node, visit);
+	};
+	visit(sourceFile);
+	return found;
+}
+
+/**
+ * Slice a function-like declaration's body, mirroring the inline scanner: a block body yields its
+ * statements (braces stripped); an expression body yields the expression (parens unwrapped). Read
+ * from the declaration's own source file, so a cross-module reference shows that file's text.
+ * Returns null when the node has no body (e.g. an overload signature).
+ */
+function sliceFunctionBody(fn: ts.SignatureDeclaration): string | null {
+	const body = (fn as ts.FunctionLikeDeclaration).body;
+	if (!body) return null;
+
+	const text = fn.getSourceFile().text;
+
+	if (ts.isBlock(body)) {
+		// Strip the wrapping braces, keep the statements (incl. `return`).
+		return dedent(text.slice(body.getStart() + 1, body.getEnd() - 1));
+	}
+
+	// Expression body: unwrap `() => ( … )` parens so the shown source is just the expression.
+	let expr: ts.Expression = body;
+	while (ts.isParenthesizedExpression(expr)) expr = expr.expression;
+	return dedent(text.slice(expr.getStart(), expr.getEnd()));
 }

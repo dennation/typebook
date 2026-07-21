@@ -3,9 +3,23 @@ import path from "node:path";
 import type { UnpluginFactory } from "unplugin";
 import { createUnplugin } from "unplugin";
 import { LOG_PREFIX, PACKAGE_NAME } from "../constants";
-import { TypeScriptClient } from "../scanner";
-import type { GenerateCtx, TypebookCommand, TypebookConfig } from "../types";
+import {
+	applyEdits,
+	type Edit,
+	parseProgram,
+	TypeScriptClient,
+} from "../scanner";
+import type {
+	GenerateCtx,
+	TransformCtx,
+	TypebookCommand,
+	TypebookConfig,
+	TypebookPlugin,
+} from "../types";
 import { collectDocs } from "./collectDocs";
+
+/** Source files the plugin will consider rewriting in its `transform` hook. */
+const TRANSFORM_ID = /\.(tsx|ts|jsx|js|mts|cts|mjs|cjs)(\?.*)?$/;
 
 /**
  * Shared unplugin factory — no bundler is privileged. Works across every bundler
@@ -26,6 +40,20 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 	let starting: Promise<void> | null = null;
 
 	const plugins = config.plugins ?? [];
+	const generatePlugins = plugins.filter(
+		(
+			p,
+		): p is TypebookPlugin & {
+			generate: NonNullable<TypebookPlugin["generate"]>;
+		} => typeof p.generate === "function",
+	);
+	const transformPlugins = plugins.filter(
+		(
+			p,
+		): p is TypebookPlugin & {
+			transform: NonNullable<TypebookPlugin["transform"]>;
+		} => typeof p.transform === "function",
+	);
 
 	const ensureClient = async (): Promise<TypeScriptClient | null> => {
 		if (!client && !starting) {
@@ -57,9 +85,9 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 		await writeFile(abs, content, "utf8");
 	};
 
-	/** Scan the configured components and run every sub-plugin with the full set. */
+	/** Scan the configured components and run every `generate` sub-plugin with the full set. */
 	const runGenerate = async (): Promise<void> => {
-		if (plugins.length === 0) return;
+		if (generatePlugins.length === 0) return;
 		const c = await ensureClient();
 		if (!c) return;
 
@@ -70,7 +98,7 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 			outDir,
 			writeFile: writeFileAt,
 		};
-		for (const plugin of plugins) {
+		for (const plugin of generatePlugins) {
 			if (plugin.apply && plugin.apply !== command) continue;
 			try {
 				await plugin.generate(docs, ctx);
@@ -102,9 +130,46 @@ export const unpluginFactory: UnpluginFactory<TypebookConfig | undefined> = (
 	// One emit per build. `writeBundle` fires once per output; re-armed by `buildStart`.
 	let emitted = false;
 
+	/** Transform sub-plugins active for the current command. */
+	const activeTransformPlugins = (): typeof transformPlugins =>
+		transformPlugins.filter((p) => !p.apply || p.apply === command);
+
 	return {
 		name: PACKAGE_NAME,
 		enforce: "pre",
+
+		transformInclude(id) {
+			return !id.includes("/node_modules/") && TRANSFORM_ID.test(id);
+		},
+
+		async transform(code, id) {
+			const active = activeTransformPlugins();
+			if (active.length === 0) return undefined;
+
+			// Cheap string gate before parsing: does any transform plugin have work here?
+			const wants = active.filter((p) => p.mayTransform?.(code) ?? true);
+			if (wants.length === 0) return undefined;
+
+			const filePath = id.split("?")[0];
+			const tsClient = await ensureClient();
+			const program = await parseProgram(filePath, code); // one parse, shared below
+			const edits: Edit[] = [];
+			const watchFiles = new Set<string>();
+			const ctx: TransformCtx = {
+				code,
+				filePath,
+				program,
+				tsClient,
+				inject: (at, text) => edits.push({ at, insert: text }),
+				addWatchFile: (file) => watchFiles.add(file),
+			};
+
+			for (const plugin of wants) await plugin.transform(ctx);
+
+			if (edits.length === 0) return undefined;
+			for (const file of watchFiles) this.addWatchFile(file);
+			return { code: applyEdits(code, edits), map: null };
+		},
 
 		async buildStart() {
 			emitted = false;

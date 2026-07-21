@@ -29,7 +29,9 @@ export function paramDefaults(
 }
 
 /** The function-like node whose parameters to inspect (function/arrow decl or `const X = () => …`). */
-function functionLikeOf(decl: ts.Declaration): ts.SignatureDeclaration | null {
+export function functionLikeOf(
+	decl: ts.Declaration,
+): ts.SignatureDeclaration | null {
 	if (
 		ts.isFunctionDeclaration(decl) ||
 		ts.isFunctionExpression(decl) ||

@@ -52,7 +52,8 @@ async function run(
 		},
 		...ctxOverrides,
 	};
-	await llmInstructions(options).generate([doc], ctx);
+	// biome-ignore lint/style/noNonNullAssertion: llmInstructions is a generate plugin by construction.
+	await llmInstructions(options).generate!([doc], ctx);
 	return files;
 }
 
