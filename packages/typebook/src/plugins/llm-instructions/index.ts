@@ -1,7 +1,7 @@
 import path from "node:path";
 import { LOG_PREFIX } from "../../constants";
 import type { CommandCtx, ComponentInfo, TypebookPlugin } from "../../types";
-import { type FileMap, normalize, staleFiles, writeFiles } from "./files";
+import { diffFiles, type FileMap, normalize, writeFiles } from "./files";
 import type { PropFilter } from "./filterProps";
 import {
 	type ImportFromContext,
@@ -94,7 +94,11 @@ export interface LlmInstructionsOptions {
 export function llmInstructions(
 	options: LlmInstructionsOptions,
 ): TypebookPlugin {
-	const build = (ctx: CommandCtx) => buildFiles(options, ctx);
+	const build = (ctx: CommandCtx) =>
+		buildFiles(options, ctx).then((files) => ({
+			files,
+			dir: absolute(options.outDir, ctx.root),
+		}));
 
 	return {
 		name: "llm-instructions",
@@ -102,25 +106,34 @@ export function llmInstructions(
 			"llm-instructions:generate": {
 				describe: "write the component cards and their index",
 				async run(ctx) {
-					const files = await build(ctx);
-					await writeFiles(files);
-					console.log(LOG_PREFIX, `wrote ${files.size} file(s)`);
+					const { files, dir } = await build(ctx);
+					const { extra } = await diffFiles(files, dir);
+					await writeFiles(files, dir);
+					console.log(
+						LOG_PREFIX,
+						`wrote ${files.size} file(s)` +
+							(extra.length ? `, removed ${extra.length}` : ""),
+					);
 				},
 			},
 			"llm-instructions:check": {
 				describe: "fail if the cards are out of date, writing nothing",
 				async run(ctx) {
-					const files = await build(ctx);
-					const stale = await staleFiles(files);
-					if (stale.length === 0) {
+					const { files, dir } = await build(ctx);
+					const { stale, extra } = await diffFiles(files, dir);
+					if (stale.length === 0 && extra.length === 0) {
 						console.log(LOG_PREFIX, `${files.size} file(s) up to date`);
 						return;
 					}
+					const rel = (file: string) => `  ${path.relative(ctx.root, file)}`;
 					throw new StaleCardsError(
-						`${stale.length} file(s) out of date — run \`llm-instructions:generate\`:\n` +
-							stale
-								.map((file) => `  ${path.relative(ctx.root, file)}`)
-								.join("\n"),
+						[
+							`${stale.length + extra.length} file(s) out of date — run \`llm-instructions:generate\`:`,
+							...stale.map(rel),
+							// A card nobody produced is just as wrong: an agent would read documentation
+							// for a component that no longer exists.
+							...extra.map((file) => `${rel(file)} (no longer generated)`),
+						].join("\n"),
 					);
 				},
 			},
