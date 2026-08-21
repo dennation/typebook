@@ -6,7 +6,7 @@ export function symbolDescription(
 	symbol: ts.Symbol,
 ): string {
 	const parts = symbol.getDocumentationComment(checker);
-	return parts.length === 0 ? "" : ts.displayPartsToString(parts).trim();
+	return parts.length === 0 ? "" : jsDocText(parts);
 }
 
 /** A symbol's `@remarks` tag (usage guidance / do-don't), or `""` when absent. */
@@ -49,8 +49,26 @@ function jsDocTagText(
 	...names: string[]
 ): string | undefined {
 	for (const tag of symbol.getJsDocTags(checker)) {
-		if (names.includes(tag.name))
-			return ts.displayPartsToString(tag.text).trim();
+		if (names.includes(tag.name)) return jsDocText(tag.text);
 	}
 	return undefined;
+}
+
+/**
+ * JSDoc prose as text, with trailing whitespace stripped from **every** line.
+ *
+ * Trimming only the whole string leaves spaces at the ends of inner lines, and those travel into
+ * every artifact built from the scan. They're invisible while editing, so whether a given line has
+ * them depends on whose editor last saved the file — the same source then produces different output,
+ * which reads as a phantom diff and misses any cache keyed on content. (It also means a two-space
+ * Markdown line break written inside a JSDoc comment won't survive; deliberate ones there are rare
+ * enough that stable output is the better trade.)
+ */
+function jsDocText(parts: readonly ts.SymbolDisplayPart[] | undefined): string {
+	return ts
+		.displayPartsToString([...(parts ?? [])])
+		.split("\n")
+		.map((line) => line.trimEnd())
+		.join("\n")
+		.trim();
 }
