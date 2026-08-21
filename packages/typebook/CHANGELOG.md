@@ -1,5 +1,11 @@
 # @dennation/typebook
 
+## 0.6.1
+
+### Patch Changes
+
+- b48a743: `llm-instructions:generate` now deletes cards it no longer produces, and `:check` reports them as out of date. Previously a removed component left its card behind forever, and `check` stayed green.
+
 ## 0.6.0
 
 ### Minor Changes
