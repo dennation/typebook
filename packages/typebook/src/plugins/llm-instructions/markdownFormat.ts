@@ -9,9 +9,9 @@ import {
 /** Turns one scanned component into the contents of its instruction file. */
 export type LlmFormat = (component: ComponentInfo) => string;
 
-/** Build context passed to `entryPath` and `importFrom` — the project root (the component's own
+/** Build context passed to `importFrom` — the project root (the component's own
  * folder is on `component.dir`). */
-export interface EntryPathContext {
+export interface ImportFromContext {
 	/** The project root. */
 	root: string;
 }
@@ -24,7 +24,7 @@ export interface MarkdownFormatOptions {
 	 */
 	importFrom?:
 		| string
-		| ((component: ComponentInfo, ctx: EntryPathContext) => string);
+		| ((component: ComponentInfo, ctx: ImportFromContext) => string);
 	/** Which props to surface — a {@link PropFilter} map or predicate. Defaults to {@link DEFAULT_PROP_FILTER}. */
 	filterProps?: PropFilter;
 	/**
