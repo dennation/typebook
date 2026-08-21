@@ -97,8 +97,9 @@ packages/typebook/
       llm-instructions/       — llmInstructions() generate sub-plugin (its own folder; card rendering is plugin-local, not core):
         index.ts              — llmInstructions(): registers `llm-instructions:generate` / `:check`; builds the
                                 per-component Markdown cards + index from ctx.components()
-        files.ts              — the plugin's own file I/O: writeFiles (skips unchanged, mkdir before the first
-                                write), staleFiles (compare without writing), normalize (LF + one trailing \n)
+        files.ts              — the plugin's own file I/O: diffFiles(files, dir) → {stale, extra};
+                                writeFiles makes dir hold exactly `files` (writes changed, deletes extra,
+                                prunes empty dirs); normalize (LF + one trailing \n)
         componentToMarkdown.ts — componentToMarkdown(doc) → one Markdown card (import + description + @remarks + props table)
         formatPropType.ts     — render a PropInfo's type as a string ("sm" | "md", …)
       vite.ts                 — typebook() Vite plugin
@@ -280,6 +281,7 @@ button.stories.tsx:
 
 - **One scan, many artifacts** — the `components` config drives a single by-type export scan (`ComponentInfo[]`); every sub-plugin reads that one result (a component is never parsed twice). `llmInstructions()` returns Markdown; `snippets()` and the `defineStories` `__props` injection are per-module transform work sharing the same warm `TypeScriptClient`.
 - **The config file is the single source of truth** — `typebook.config.{ts,mts,mjs,js}`; the plugin takes a path (`configFile`), never the config itself, so the CLI and a bundler run can't drift apart and a task runner can treat that one file as an input. `.ts` loads natively (Node ≥22.18 strips types), so there is no loader dependency.
+- **A generated directory mirrors the scan, both ways** — `llm-instructions:generate` makes `outDir` hold *exactly* the current cards, deleting ones it no longer produces, and `:check` reports a leftover as out of date. Only comparing the expected set lets a deleted component keep its card forever, which an agent then reads as current. Safe because `outDir` belongs to one generator: a card's name may not escape it.
 - **The core scans; plugins do everything else** — the core loads a config, extracts `ComponentInfo[]`, and dispatches commands. It has no commands of its own, no notion of files, and no opinion about artifacts: a plugin is a `name` plus the `commands` it contributes, and each command does its own work (`llmInstructions` carries its own `writeFiles`/`staleFiles` in `files.ts`). A name belongs to exactly one plugin — two claiming it is an error, and a good name says what it does and whose it is (`llm-instructions:check`, not `check`).
 - **Timing is config, not plugin** — `dev: [...]` / `build: [...]` name which commands a bundler repeats. Empty by default, so a bundler does nothing unless asked. **A build should verify, not write**: the final stage editing tracked source dirties CI's tree, discards changes nobody commits, and re-invalidates its own cache — hence `build: ["llm-instructions:check"]` rather than the generate command.
 - **The scan is lazy and shared** — `ctx.components()` runs it on first call and hands the same result to every other command in the run, so a command that needs no components costs nothing and N commands still mean one TypeScript program (measured: 0ms vs ~460ms).

@@ -226,14 +226,20 @@ It registers two commands:
 
 | Command | What it does |
 |---|---|
-| `llm-instructions:generate` | writes the cards and their index |
-| `llm-instructions:check` | fails with the list of stale files, writing nothing — run it in CI |
+| `llm-instructions:generate` | makes `outDir` hold exactly the current cards and index |
+| `llm-instructions:check` | fails with the list of differences, writing nothing — run it in CI |
+
+> **`outDir` belongs to the plugin.** `generate` makes it match the scan exactly, which means
+> deleting files it no longer produces — otherwise a deleted component would leave its card
+> behind forever, and an agent would find it and read documentation for something that no
+> longer exists. `check` counts such a leftover as out of date too. Point `outDir` at a
+> directory only this plugin writes to; don't mix hand-written pages in.
 
 #### Options
 
 | Option | Type | Description |
 |---|---|---|
-| `outDir` **(required)** | `string` | The directory everything lands in — absolute, or relative to the project root. |
+| `outDir` **(required)** | `string` | The directory everything lands in — absolute, or relative to the project root. Owned by the plugin: `generate` deletes anything in it that it no longer produces. |
 | `indexName` | `string \| false` | Filename of the Markdown index. Default `"index.md"`; `false` skips it. Reference it from your `AGENTS.md`/`CLAUDE.md`. |
 | `fileName` | `(component, { root }) => string` | Filename of a card, relative to `outDir`. Default `` `${c.name}.md` ``. May nest (`` (c) => `forms/${c.name}.md` ``), may not escape the directory. |
 | `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |

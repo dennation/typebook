@@ -1,4 +1,4 @@
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import nodePath from "node:path";
 import { describe, expect, test } from "vitest";
@@ -99,6 +99,60 @@ describe("llmInstructions: commands", () => {
 		expect(
 			Object.keys(llmInstructions({ outDir: "docs" }).commands ?? {}),
 		).toEqual(["llm-instructions:generate", "llm-instructions:check"]);
+	});
+
+	// A card for a component that no longer exists is worse than a missing one: an agent finds it
+	// and reads documentation for something that isn't there any more.
+	test("generate removes cards nothing produces any more", async () => {
+		const root = await tmp();
+		const gone: ComponentInfo = { ...doc, name: "Gone" };
+		await invoke("llm-instructions:generate", { outDir: "docs" }, [doc, gone], {
+			root,
+		});
+		expect(
+			await readFile(nodePath.join(root, "docs/Gone.md"), "utf8"),
+		).toBeTruthy();
+
+		await invoke("llm-instructions:generate", { outDir: "docs" }, [doc], {
+			root,
+		});
+
+		await expect(
+			readFile(nodePath.join(root, "docs/Gone.md"), "utf8"),
+		).rejects.toThrow();
+		expect(
+			await readFile(nodePath.join(root, "docs/Button.md"), "utf8"),
+		).toBeTruthy();
+	});
+
+	test("check counts a leftover card as out of date", async () => {
+		const root = await tmp();
+		const gone: ComponentInfo = { ...doc, name: "Gone" };
+		await invoke("llm-instructions:generate", { outDir: "docs" }, [doc, gone], {
+			root,
+		});
+
+		await expect(
+			invoke("llm-instructions:check", { outDir: "docs" }, [doc], { root }),
+		).rejects.toThrow(/Gone\.md \(no longer generated\)/);
+	});
+
+	test("a removed group leaves no empty directory behind", async () => {
+		const root = await tmp();
+		const gone: ComponentInfo = { ...doc, name: "Gone" };
+		const options = {
+			outDir: "docs",
+			indexName: false as const,
+			fileName: (c: ComponentInfo) => `${c.name}/card.md`,
+		};
+		await invoke("llm-instructions:generate", options, [doc, gone], { root });
+
+		await invoke("llm-instructions:generate", options, [doc], { root });
+
+		await expect(
+			readFile(nodePath.join(root, "docs/Gone/card.md"), "utf8"),
+		).rejects.toThrow();
+		expect(await readdir(nodePath.join(root, "docs"))).toEqual(["Button"]);
 	});
 
 	test("check fails on missing cards and writes nothing", async () => {

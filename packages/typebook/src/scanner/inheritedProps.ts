@@ -1,4 +1,4 @@
-import ts from "typescript";
+import type ts from "typescript";
 
 /**
  * For each of a component's props, map its name → the source npm package **when it's inherited** —
