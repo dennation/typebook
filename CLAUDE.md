@@ -66,7 +66,15 @@ packages/typebook/
     types.ts                  — Shared **React-free** types (TypebookConfig incl. components/plugins, ComponentInfo, TypebookPlugin, PropInfo, PropType, VariantConfig, MissingProps, …)
     resolve.ts                — resolveVariantConfig() — resolves VariantConfig markers into arrays
     constants.ts              — PACKAGE_NAME, NPM_REACT_PACKAGE_NAME, LOG_PREFIX, …
-    cli.ts                    — CLI entry: prints that codegen runs as a bundler plugin (no generate step)
+    cli.ts                    — CLI entry: dispatches whatever command the configured plugins registered
+    generate/                 — The core, and all of it (re-exported from the base `.` entry)
+      scan.ts                 — scan({root, components, client?}) → ComponentInfo[]; lazyScan() (internal)
+                                defers it until a command asks and shares one result across commands
+      runCommands.ts          — runCommands({config, root, names, trigger}) — resolve names to the plugins
+                                that registered them and run each; resolveCommand/listCommands for the CLI
+      resolveComponentFiles.ts — `components` globs → absolute, **sorted** file list (order decides re-export winners)
+      loadConfig.ts           — loads typebook.config.{ts,mts,mjs,js}; `.ts` natively (Node ≥22.18 strips types)
+      defineConfig.ts         — identity helper typing a config file
     scanner/                  — React-free extraction core (re-exported from the base `.` entry — the library foundation)
       index.ts                — Public exports: collectComponentInfos, TypeScriptClient,
                                 scanMetaCalls, scanSnippets, parseProgram, injectMetaProps, applyEdits, …
@@ -81,12 +89,16 @@ packages/typebook/
                                 Extracts PropInfo[], defaults, JSDoc; getExportedComponentInfos finds components by type.
       ast.ts                  — Shared oxc-parser helpers (parseProgram → Program, walk) used by both scanners
     plugins/                  — unplugin-based bundler integration + sub-plugins
-      factory.ts              — unpluginFactory + createUnplugin. Orchestrates: project scan (buildStart/dev-watch)
-                                → generate sub-plugins; and per-module transform (one parse → injectMetaProps +
-                                transform sub-plugins → applyEdits). Resolves `components` glob via fs.globSync.
+      factory.ts              — unpluginFactory + createUnplugin. Runs the commands the config names in
+                                `dev` / `build` at `buildStart` (before compilation, so a command may
+                                generate *source*). Takes only `{ configFile? }`. Keeps one warm
+                                TypeScriptClient and re-runs on dev-watch changes.
       snippets.ts             — snippets() transform sub-plugin (<Snippet> injection) + SnippetNotInlineError. Opt-in.
       llm-instructions/       — llmInstructions() generate sub-plugin (its own folder; card rendering is plugin-local, not core):
-        index.ts              — llmInstructions(): ComponentInfo[] → per-component Markdown cards + an llms.txt index
+        index.ts              — llmInstructions(): registers `llm-instructions:generate` / `:check`; builds the
+                                per-component Markdown cards + index from ctx.components()
+        files.ts              — the plugin's own file I/O: writeFiles (skips unchanged, mkdir before the first
+                                write), staleFiles (compare without writing), normalize (LF + one trailing \n)
         componentToMarkdown.ts — componentToMarkdown(doc) → one Markdown card (import + description + @remarks + props table)
         formatPropType.ts     — render a PropInfo's type as a string ("sm" | "md", …)
       vite.ts                 — typebook() Vite plugin
@@ -161,15 +173,15 @@ packages/typebook/
 
 ### Build entry points
 
-- **`index`** — the library **foundation**: the React-free **scanner core** (`collectComponentInfos`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) + all React-free types (`TypebookConfig` incl. `components`/`plugins`, `ComponentInfo`, `TypebookPlugin`, `TransformCtx`, `GenerateCtx`, `PropInfo`, `PropType`, `VariantConfig`, …). Pulls `typescript` + `oxc-parser` at runtime; type-only imports stay weightless. Authoring API and React-coupled types live in `react/`.
+- **`index`** — the **core**: `scan()` (+ internal `lazyScan`), `loadConfig` / `defineConfig`, `resolveComponentFiles`, the command dispatcher (`runCommands`, `resolveCommand`, `listCommands`), the scanner internals (`collectComponentInfos`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) + all React-free types (`TypebookConfig`, `TypebookPlugin`, `PluginCommand`, `CommandCtx`, `ComponentInfo`, `PropInfo`, `PropType`, …). Nothing here needs a bundler, and nothing here produces artifacts. Pulls `typescript` + `oxc-parser` at runtime; type-only imports stay weightless. Authoring API and React-coupled types live in `react/`.
 - **`react/index`** — authoring API (`defineStories`) + `Layout`, `Snippet`, `ErrorBoundary` + the docs component kit (content set, `CodeBlock`, `DocsSidebar`, `DocsToc`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `PropsReference`, `propsToRows`). The internal `Story`/`Variants`/`Matrix` widgets are **not** exported standalone — they come out of `defineStories`. **No search** (a docs site wires its own — see `apps/website`).
 - **`plugins/{snippets,llm-instructions}`** — sub-plugins for `typebook({ plugins: [...] })`: `snippets()` (transform: `<Snippet>` injection) and `llmInstructions()` (generate: Markdown docs from the scan).
 - **`plugins/vite`** (and `plugins/{rollup,rolldown,webpack,rspack,esbuild,farm}`) — `typebook()` plugin for each bundler, built from one shared `unpluginFactory`.
-- **`cli/index`** — `npx @dennation/typebook` (prints plugin usage; there is no codegen step).
+- **`cli/index`** — `typebook <command>`: dispatches whatever the configured plugins registered. With no arguments it lists them. Exits 1 on an unknown command or a failing one.
 
 ### Package exports
 
-- `@dennation/typebook` — the **foundation**: React-free **scanner core** (`collectComponentInfos`, `TypeScriptClient`, `scanMetaCalls`, `parseProgram`, `injectMetaProps`, …) + all React-free types (`TypebookConfig`, `ComponentInfo`, `TypebookPlugin`, `TransformCtx`, `GenerateCtx`, `PropInfo`, `PropType`, `MissingProps`, `VariantConfig`, …). No `react` import.
+- `@dennation/typebook` — the **core**: `scan()`, `loadConfig`, `defineConfig`, `resolveComponentFiles`, `runCommands` / `resolveCommand` / `listCommands`, the scanner internals, and the React-free types (`TypebookConfig`, `TypebookPlugin`, `PluginCommand`, `CommandCtx`, `ComponentInfo`, `PropInfo`, …). No `react` import, no bundler, no artifacts of its own.
 - `@dennation/typebook/plugins/snippets` — `snippets()`, `SnippetNotInlineError`.
 - `@dennation/typebook/plugins/llm-instructions` — `llmInstructions()`, `LlmInstructionsOptions`.
 - `@dennation/typebook/react` — **authoring API:** `defineStories` (+ its types `StoriesNamespace`/`StoryViewProps`/…). **storybook runtime:** `Layout`, `Snippet`, `ErrorBoundary` (story views come from `defineStories`, sharing `title` / `showSource` / `interactive`). **docs kit** (for consumer documentation sites): content set (`Callout`, `MDTable`, `PropsReference`, `Tabs`, `Steps` (compound `Steps.Root` + `Steps.Step`), `Accordion`, `Cards`/`DocCard`, `Heading` (single component, `level={2|3}`), `Paragraph`/`Lead`/`List` (compound `List.Root` + `List.Item`)/`Blockquote`/`Divider`/`Strong`/`Emphasis`/`InlineCode`/`Link`/`ImagePlaceholder` (component-only prose set — every element carries its own styles; no `.doc-prose` container, no bare-tag styling)), `CodeBlock` (compound `CodeBlock.Root` + `CodeBlock.Tab`, always tabbed — per-tab filename/lang/icon/line numbers/highlight lines, no `code` prop; Shiki with the One Light / One Dark Pro theme pair, each token carrying both colors so highlighting follows the theme — any language, theme-aware colors, lazy-loaded grammars), `DocsSidebar`/`DocsNavSection`, `DocsToc`/`useDocHeadings`/`DocsHeading`, `Breadcrumbs`, `PrevNextNav`, `CopyCommand`, `propsToRows` (maps a handle's extracted `props` into `PropsReference` rows for an auto props table), `slugify`/`childText`. **universal primitives:** `Button`/`buttonClass`/`ARROW_CLASS`, `ThemeToggle`, `cx`. Icons are **not** exported — they are imported directly from `lucide-react` (brand glyphs from `@tabler/icons-react`) at each call site.
@@ -242,13 +254,21 @@ import { Snippet } from '@dennation/typebook/react'
 ### Data flow
 
 ```
-vite.config.ts: typebook({ components, plugins })
-  ├── buildStart / dev-watch: project scan (React-free)
-  │     └── collectComponentInfos(client, glob(components))  → ComponentInfo[] (props + JSDoc + deprecated)
-  │           └── generate sub-plugins: llmInstructions() → writes .md; (others) → own artifacts
-  └── transform hook, per module (enforce: 'pre')  → parse once, collect edits, apply
-        ├── injectMetaProps: finds defineStories(Component, …) + injects `__props: [...]` into its config
-        └── snippets() transform plugin: finds <Snippet>{fn}</Snippet> + injects `__snippetSource={"…"}`
+typebook.config.ts: { components, plugins, dev, build }     ← the single source of truth
+  │
+  ├── `typebook <command>`                        ─┐
+  └── typebook() bundler plugin (buildStart)       │   dev → config.dev[], build → config.build[]
+      runs the command names in config.dev/build  ─┤
+                                                   ↓
+     runCommands({ config, root, names, trigger })
+       ├── resolveCommand(name) → the one plugin that registered it (two = error)
+       └── run it with ctx = { root, args, trigger, components() }
+                                                   ↓
+     ctx.components()  → lazy: scans on first call, shared by every command in the run
+                       → resolveComponentFiles (sorted) → collectComponentInfos
+
+  the command does the rest itself — llm-instructions builds a Map of paths and either
+  writes it (`:generate`) or compares it and throws (`:check`), using its own files.ts
 
 button.stories.tsx:
   export const ButtonStories = defineStories(Button, { /* __props injected here */ })
@@ -258,7 +278,14 @@ button.stories.tsx:
 
 ### Key design decisions
 
-- **One scan, many artifacts** — the `components` config drives a single by-type export scan (`ComponentInfo[]`); every sub-plugin reads that one result (a component is never parsed twice). `llmInstructions()` writes Markdown; `snippets()` and the `defineStories` `__props` injection are per-module transform work sharing the same warm `TypeScriptClient`.
+- **One scan, many artifacts** — the `components` config drives a single by-type export scan (`ComponentInfo[]`); every sub-plugin reads that one result (a component is never parsed twice). `llmInstructions()` returns Markdown; `snippets()` and the `defineStories` `__props` injection are per-module transform work sharing the same warm `TypeScriptClient`.
+- **The config file is the single source of truth** — `typebook.config.{ts,mts,mjs,js}`; the plugin takes a path (`configFile`), never the config itself, so the CLI and a bundler run can't drift apart and a task runner can treat that one file as an input. `.ts` loads natively (Node ≥22.18 strips types), so there is no loader dependency.
+- **The core scans; plugins do everything else** — the core loads a config, extracts `ComponentInfo[]`, and dispatches commands. It has no commands of its own, no notion of files, and no opinion about artifacts: a plugin is a `name` plus the `commands` it contributes, and each command does its own work (`llmInstructions` carries its own `writeFiles`/`staleFiles` in `files.ts`). A name belongs to exactly one plugin — two claiming it is an error, and a good name says what it does and whose it is (`llm-instructions:check`, not `check`).
+- **Timing is config, not plugin** — `dev: [...]` / `build: [...]` name which commands a bundler repeats. Empty by default, so a bundler does nothing unless asked. **A build should verify, not write**: the final stage editing tracked source dirties CI's tree, discards changes nobody commits, and re-invalidates its own cache — hence `build: ["llm-instructions:check"]` rather than the generate command.
+- **The scan is lazy and shared** — `ctx.components()` runs it on first call and hands the same result to every other command in the run, so a command that needs no components costs nothing and N commands still mean one TypeScript program (measured: 0ms vs ~460ms).
+- **No cache file** — tried and rejected: a stale cache makes `check` pass when it should fail, and honest invalidation needs the transitive type closure, not just the `components` globs. Turborepo already caches at the task level and does it correctly. `lazyScan` is the seam if this is ever revisited.
+- **Deterministic output** — the same source produces byte-identical files: `resolveComponentFiles` sorts (an unsorted, filesystem-dependent order changes which module wins for a re-exported component), the index sorts by code unit rather than `localeCompare` (locale-dependent), and every file is normalised to LF with exactly one trailing newline. Non-determinism shows up as a phantom diff and as a cache miss for anything hashing the output.
+- **One generation, one target** — there is no "also copy it to the output dir" option. A second copy is a copy step in the consumer's build (or a path under `public/`), which every bundler and npm already have a mechanism for.
 - **Injection over a generated file** — the plugin rewrites each module in its `transform` hook (injecting `__props` into `defineStories()`, `__snippetSource` onto `<Snippet>`) instead of emitting registry/`snippets.gen.ts`. Data lives at the call site; re-transformation is the bundler's own module invalidation.
 - **`defineStories` namespace** — `defineStories(Component, config?)` returns `{ Story, Variants, Matrix, props }` with the component baked in (no `of`). Type-safety comes from its generics (return type `StoriesNamespace<Props>` carries `Props` first, which is also the injection seam), so plain `tsc` works without the plugin. Axes are prop names (`keyof`), not `allOf`/`values`/`generate` calls.
 - **No runtime provider** — handles and snippets carry their own data (injected at build time), so there is nothing to provide via context; the package exposes no `TypebookProvider`. Routing, history strategy, and route tree generation are the consumer's (`vite.config.ts` + `App.tsx`), which keeps any TanStack Router dependency out of the library.
@@ -375,17 +402,99 @@ apps/website/
 
 ## User-facing API
 
+### typebook.config.ts
+
+One config file drives everything — the CLI and every bundler plugin read it, so
+they cannot drift apart and a task runner can treat it as an input. Its directory
+is the project `root` that relative output paths resolve against.
+
+```ts
+import { defineConfig } from '@dennation/typebook'
+import { llmInstructions } from '@dennation/typebook/plugins/llm-instructions'
+
+export default defineConfig({
+  components: ['src/components/**/*.tsx', '!src/components/**/*.stories.tsx'],
+  plugins: [
+    llmInstructions({
+      outDir: 'docs/components',
+      importFrom: '@acme/ui',
+    }),
+  ],
+  dev: [],                             // command names a dev server repeats
+  build: ['llm-instructions:check'],   // …and what a build does; both empty by default
+})
+```
+
+`.ts`, `.mts`, `.mjs` and `.js` all work; a `.ts` config is imported natively
+(Node ≥22.18 strips types), so there is no loader dependency.
+
+### CLI
+
+The core contributes **no commands**; `typebook` dispatches whatever the configured
+plugins registered, and with no arguments lists them:
+
+```bash
+typebook                             # what this project can do
+typebook llm-instructions:generate   # write the cards
+typebook llm-instructions:check      # exit 1 if they are stale — writes nothing
+```
+
+No bundler is involved, which is what lets each command be its own task in a build
+orchestrator (see **With a task runner** in the package README) and lets CI verify
+committed output instead of regenerating it into the working tree.
+
+Programmatically:
+
+```ts
+import { loadConfig, runCommands, scan } from '@dennation/typebook'
+
+const { config, root } = await loadConfig()
+await runCommands({ config, root, names: ['llm-instructions:check'], trigger: 'cli' })
+
+// or just the scan, if you are writing a plugin's guts
+const components = await scan({ root, components: config.components })
+```
+
+### With a task runner (Turborepo)
+
+Generation is a command, so it is a task like any other — with its own cache, its own
+inputs and outputs, and no bundler involved:
+
+```jsonc
+// packages/ui/package.json
+{ "scripts": {
+    "docs": "typebook llm-instructions:generate",
+    "docs:check": "typebook llm-instructions:check" } }
+
+// turbo.json
+{ "tasks": {
+    "docs": { "inputs": ["$TURBO_DEFAULT$", "!docs/**"], "outputs": ["docs/**"] },
+    "docs:check": {} } }
+```
+
+Measured: first run 993ms, unchanged 5ms (FULL TURBO), `docs/` deleted → 26ms restored from
+cache without running the task, component edited → miss and regenerate.
+
+Do **not** narrow `inputs` beyond `!docs/**`: Turborepo's default (every Git-tracked file in
+the package + lockfile + internal deps) is what keeps the cache correct, because the scan
+resolves types through the whole import graph — a `src/components/**` whitelist would miss a
+base type edited next door and serve stale docs. And keep `dev`/`build` empty in the config
+so the bundler stays out of it entirely; verification is `docs:check`, its own task.
+
 ### Bundler plugin (unplugin)
 
 The plugin is built on [unplugin](https://unplugin.unjs.io), so the **same**
-`typebook(config?)` factory is published per bundler — no bundler is privileged.
-Work happens in the universal `transform` hook (`enforce: 'pre'`): each module
-matching `*.{ts,tsx,js,jsx,…}` is scanned and rewritten in place, injecting
-`__props` / `__snippetSource`. A single warm `TypeScriptClient` (lazily started on
-the first transform) does the type extraction. The Vite entry additionally wires
-the dev-server watcher to `notifyChange` the client so its warm program stays
-fresh; a module re-injects through Vite's normal module invalidation. Other
-bundlers re-run `transform` on each rebuild.
+`typebook({ configFile? })` factory is published per bundler — no bundler is
+privileged. It runs the command **names** listed in the config's `dev` / `build` at
+`buildStart` — before compilation, so a command may generate source the same build
+compiles — and nothing else: both lists are empty by default, so a bundler does
+nothing until asked. A single warm `TypeScriptClient` does the type extraction; the
+Vite entry wires the dev-server watcher to `notifyChange` it and re-run on change,
+skipping files that cannot affect a type (`.ts`/`.tsx`/`.json` only). Other bundlers
+re-run `buildStart` on each rebuild.
+
+Per-module `transform` work (`__props` / `__snippetSource` injection) is a
+**dev-branch** concern and is described in the sections above.
 
 ```ts
 // vite      → @dennation/typebook/vite
@@ -408,7 +517,7 @@ import typebook from '@dennation/typebook/rspack'
 ```ts
 // rspack.config.js
 const { typebook } = require('@dennation/typebook/rspack')
-module.exports = { plugins: [typebook({ /* TypebookConfig */ })] }
+module.exports = { plugins: [typebook()] }   // config comes from typebook.config.ts
 ```
 
 The repo's examples happen to use Vite, so a full Vite config looks like:
