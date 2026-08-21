@@ -1,8 +1,10 @@
 import path from "node:path";
-import type { ComponentInfo, GenerateCtx, TypebookPlugin } from "../../types";
+import { LOG_PREFIX } from "../../constants";
+import type { CommandCtx, ComponentInfo, TypebookPlugin } from "../../types";
+import { type FileMap, normalize, staleFiles, writeFiles } from "./files";
 import type { PropFilter } from "./filterProps";
 import {
-	type EntryPathContext,
+	type ImportFromContext,
 	type LlmFormat,
 	markdownFormat,
 } from "./markdownFormat";
@@ -17,7 +19,7 @@ export {
 	type PropFilterMap,
 } from "./filterProps";
 export {
-	type EntryPathContext,
+	type ImportFromContext,
 	type LlmFormat,
 	type MarkdownFormatOptions,
 	markdownFormat,
@@ -25,24 +27,23 @@ export {
 
 export interface LlmInstructionsOptions {
 	/**
-	 * The full path of each component's card — you build it, so the filename is explicit and nothing
-	 * is appended. Gets the component (its folder is `component.dir`) and `{ root }`; return an
-	 * absolute path (a relative one resolves against `root`):
-	 * - next to the component — `(c) => path.join(c.dir, c.name + ".md")`
-	 * - from the project root — `(c, { root }) => path.join(root, "docs", c.name + ".md")`
+	 * The directory every file lands in — absolute, or relative to the project root. Cards go in its
+	 * root and the index sits beside them, linking each card by a path relative to itself, so the
+	 * directory is **self-contained**: copy or publish it anywhere and the links still resolve.
 	 */
-	entryPath: (component: ComponentInfo, ctx: EntryPathContext) => string;
+	outDir: string;
 	/**
-	 * The Markdown index listing every component (with a link to each card), relative to the project
-	 * root; `false` to skip it. Reference it from your `AGENTS.md` / `CLAUDE.md` so an agent finds it.
+	 * Filename of the Markdown index listing every component. Default `"index.md"`; `false` skips it.
+	 * Reference it from your `AGENTS.md` / `CLAUDE.md` so an agent finds the cards.
 	 */
-	indexPath: string | false;
+	indexName?: string | false;
 	/**
-	 * Which components get a card (and an index entry) — `(component) => boolean`, `true` keeps it.
-	 * Runs before `format`, so a dropped component produces nothing. Use it to hide deprecated
-	 * components (`(c) => c.deprecated === undefined`) or re-exports you don't own. Defaults to
-	 * keeping every scanned component.
+	 * Filename of a component's card, relative to {@link outDir} — default `` `${component.name}.md` ``.
+	 * Gets the same `{ root }` as `importFrom` (the component's own folder is `component.dir`), so it
+	 * can mirror your source layout: `` (c, { root }) => `${path.relative(root, c.dir)}/${c.name}.md` ``.
+	 * May nest, but may not escape the directory — that is what keeps the output copyable as a unit.
 	 */
+	fileName?: (component: ComponentInfo, ctx: ImportFromContext) => string;
 	filterComponents?: (component: ComponentInfo) => boolean;
 	/**
 	 * Module each component is imported from — prints an `import { X } from "…"` line in every card
@@ -52,7 +53,7 @@ export interface LlmInstructionsOptions {
 	 */
 	importFrom?:
 		| string
-		| ((component: ComponentInfo, ctx: EntryPathContext) => string);
+		| ((component: ComponentInfo, ctx: ImportFromContext) => string);
 	/**
 	 * Which props each card surfaces — a {@link PropFilter}: a **map** (`{ element: false, href: true }`,
 	 * keyed by group or prop name, prop name wins) or a **predicate** for arbitrary rules. Defaults to
@@ -76,31 +77,71 @@ export interface LlmInstructionsOptions {
 	title?: string;
 	/** Blockquote summary under the index title. Optional. */
 	description?: string;
-	/**
-	 * Also emit a **published copy** into the bundler's output directory — `build` only, ignored in
-	 * dev. The main `entryPath`/`indexPath` output is your committed-in-source copy (for review); this
-	 * is the copy that ships. `true` writes to the output dir's root, a string to a subdirectory of it.
-	 * Flat layout: `{component.name}.md` per component + `index.md`, same content as the main output.
-	 * Default `false`. If the output directory is unknown (a non-Vite bundler), it warns and skips
-	 * (fails when `failOnError` is set).
-	 */
-	emitToOutDir?: boolean | string;
 }
 
 /**
- * `typebook()` sub-plugin: writes AI-agent docs from the component scan — one Markdown card per
- * component (import, description, usage guidance, deprecation, props table) plus a Markdown index
- * linking them all. Regenerated in full on every scan (build once, dev on change).
+ * `typebook()` sub-plugin: AI-agent docs from the component scan — one Markdown card per component
+ * (import, description, usage guidance, deprecation, props table) plus a Markdown index linking them
+ * all. Regenerated in full on every scan (build once, dev on change).
  *
- * Output locations are explicit: `entryPath` and `indexPath` are required (pass `false` to
- * `indexPath` to skip it) — the plugin writes nowhere by default.
+ * Everything lands in one `outDir`, with the index linking each card relative to itself — so the
+ * directory is a self-contained unit you can copy into `dist`, publish with the package, or serve
+ * as static files, and the links keep working. Need it in two places? That's a copy step in your
+ * build, not an option here.
+ *
+ * Returns the files rather than writing them, so the caller decides: persist, compare, or assert.
  */
 export function llmInstructions(
 	options: LlmInstructionsOptions,
 ): TypebookPlugin {
+	const build = (ctx: CommandCtx) => buildFiles(options, ctx);
+
+	return {
+		name: "llm-instructions",
+		commands: {
+			"llm-instructions:generate": {
+				describe: "write the component cards and their index",
+				async run(ctx) {
+					const files = await build(ctx);
+					await writeFiles(files);
+					console.log(LOG_PREFIX, `wrote ${files.size} file(s)`);
+				},
+			},
+			"llm-instructions:check": {
+				describe: "fail if the cards are out of date, writing nothing",
+				async run(ctx) {
+					const files = await build(ctx);
+					const stale = await staleFiles(files);
+					if (stale.length === 0) {
+						console.log(LOG_PREFIX, `${files.size} file(s) up to date`);
+						return;
+					}
+					throw new StaleCardsError(
+						`${stale.length} file(s) out of date — run \`llm-instructions:generate\`:\n` +
+							stale
+								.map((file) => `  ${path.relative(ctx.root, file)}`)
+								.join("\n"),
+					);
+				},
+			},
+		},
+	};
+}
+
+/** Thrown by `check` when the written cards no longer match the source. */
+export class StaleCardsError extends Error {
+	name = "StaleCardsError";
+}
+
+/** The cards and their index, as a {@link FileMap} — nothing is written here. */
+async function buildFiles(
+	options: LlmInstructionsOptions,
+	ctx: CommandCtx,
+): Promise<FileMap> {
 	const {
-		entryPath,
-		indexPath,
+		outDir,
+		indexName = "index.md",
+		fileName = (component: ComponentInfo) => `${component.name}.md`,
 		importFrom,
 		filterProps,
 		keepOwnProps,
@@ -108,98 +149,107 @@ export function llmInstructions(
 		format,
 		title = "Components",
 		description,
-		emitToOutDir = false,
 	} = options;
 
-	return {
-		name: "llm-instructions",
-		async generate(allComponents, ctx) {
-			const components = filterComponents
-				? allComponents.filter(filterComponents)
-				: allComponents;
-			// Built here (not at plugin init) so the default format can pass `ctx.root` to an
-			// `importFrom` function; a custom `format` owns its output and gets neither.
-			const render =
-				format ??
-				markdownFormat({
-					importFrom,
-					filterProps,
-					keepOwnProps,
-					root: ctx.root,
-				});
-			// `entryPath` builds the full path (the component's folder is `component.dir`); a relative
-			// return resolves against the project root.
-			const cardPath = (component: ComponentInfo): string => {
-				const p = entryPath(component, { root: ctx.root });
-				return path.isAbsolute(p) ? p : path.join(ctx.root, p);
-			};
-			await Promise.all(
-				components.map((component) =>
-					ctx.writeFile(cardPath(component), render(component)),
-				),
-			);
-			if (indexPath !== false)
-				await ctx.writeFile(
-					indexPath,
-					buildIndex(components, indexPath, cardPath, ctx, title, description),
-				);
+	const scanned = await ctx.components();
+	const components = filterComponents
+		? scanned.filter(filterComponents)
+		: scanned;
+	// Built here (not at plugin init) so the default format can pass `ctx.root` to an
+	// `importFrom` function; a custom `format` owns its output and gets neither.
+	const render =
+		format ??
+		markdownFormat({ importFrom, filterProps, keepOwnProps, root: ctx.root });
 
-			// Optional published copy in the build output dir — same content, flat layout, so it
-			// survives `emptyOutDir` (the factory runs `generate` at `writeBundle` in build).
-			if (emitToOutDir !== false && ctx.command === "build") {
-				if (!ctx.outDir)
-					throw new Error(
-						"emitToOutDir is set but the bundler's output directory is unknown (only Vite exposes it)",
-					);
-				const base =
-					typeof emitToOutDir === "string"
-						? path.join(ctx.outDir, emitToOutDir)
-						: ctx.outDir;
-				const outCardPath = (component: ComponentInfo): string =>
-					path.join(base, `${component.name}.md`);
-				await Promise.all(
-					components.map((component) =>
-						ctx.writeFile(outCardPath(component), render(component)),
-					),
-				);
-				const outIndexPath = path.join(base, "index.md");
-				await ctx.writeFile(
-					outIndexPath,
-					buildIndex(
-						components,
-						outIndexPath,
-						outCardPath,
-						ctx,
-						title,
-						description,
-					),
-				);
-			}
-		},
-	};
+	const dir = absolute(outDir, ctx.root);
+	const names = assignNames(components, fileName, ctx.root, indexName);
+
+	const files: FileMap = new Map(
+		[...names].map(([component, name]) => [
+			path.join(dir, name),
+			normalize(render(component)),
+		]),
+	);
+	if (indexName !== false)
+		files.set(
+			path.join(dir, entry(indexName)),
+			normalize(buildIndex(names, indexName, title, description)),
+		);
+	return files;
+}
+
+/**
+ * Each component's filename, verified to be unique.
+ *
+ * Two same-named components in different folders (`forms/Button`, `toolbar/Button`) would otherwise
+ * collapse onto one card: the last one silently wins, and the index lists both under the same link —
+ * so an agent following the entry for one gets the other's props. Wrong docs are worse than none, so
+ * this fails instead, naming both and how to separate them.
+ */
+function assignNames(
+	components: ComponentInfo[],
+	fileName: (component: ComponentInfo, ctx: ImportFromContext) => string,
+	root: string,
+	indexName: string | false,
+): Map<ComponentInfo, string> {
+	const names = new Map<ComponentInfo, string>();
+	const taken = new Map<string, ComponentInfo | null>(
+		indexName === false ? [] : [[entry(indexName), null]],
+	);
+	const where = (component: ComponentInfo | null): string =>
+		component
+			? `"${component.name}" (${path.relative(root, component.sourceFile)})`
+			: "the index";
+
+	for (const component of components) {
+		const name = entry(fileName(component, { root }));
+		if (taken.has(name))
+			throw new Error(
+				`${where(taken.get(name) ?? null)} and ${where(component)} both map to "${name}" — ` +
+					"give `fileName` something unique, e.g. group by folder: " +
+					'(c) => path.basename(c.dir) + "/" + c.name + ".md"',
+			);
+		taken.set(name, component);
+		names.set(component, name);
+	}
+	return names;
+}
+
+/**
+ * A filename validated to stay inside the output directory — the guarantee the whole layout rests
+ * on. An absolute path or a `../` escape would break it silently at copy time, so it fails here.
+ */
+function entry(name: string): string {
+	const normalised = path.normalize(name);
+	if (path.isAbsolute(normalised) || normalised.startsWith(".."))
+		throw new Error(
+			`"${name}" escapes the output directory — a card's name must stay inside it`,
+		);
+	return normalised;
+}
+
+/** A path as given (absolute) or resolved against the project root. */
+function absolute(target: string, root: string): string {
+	return path.isAbsolute(target) ? target : path.join(root, target);
 }
 
 /** The component index: H1 + blockquote summary + a `[name](href): desc` list, sorted by name. */
 function buildIndex(
-	components: ComponentInfo[],
-	indexPath: string,
-	cardPath: (component: ComponentInfo) => string,
-	ctx: GenerateCtx,
+	names: Map<ComponentInfo, string>,
+	indexName: string,
 	title: string,
 	description: string | undefined,
 ): string {
-	const abs = (p: string): string =>
-		path.isAbsolute(p) ? p : path.join(ctx.root, p);
-	const indexDir = path.dirname(abs(indexPath));
+	const indexDir = path.dirname(indexName);
 
-	const lines = [...components]
-		.sort((a, b) => a.name.localeCompare(b.name))
-		.map((component) => {
-			// Normalise the OS path separator to "/" — a Markdown link is a URL, and a
-			// backslash href (`components\Button.md` on Windows) would not resolve.
-			const href = path
-				.relative(indexDir, abs(cardPath(component)))
-				.replaceAll(path.sep, "/");
+	// Sorted by code unit, not `localeCompare` — the latter varies with the runtime's locale data,
+	// which would reorder the index between machines for no reason.
+	const lines = [...names]
+		.sort(([a], [b]) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+		.map(([component, name]) => {
+			// Relative to the index, which lives in the same directory — so the whole directory stays
+			// copyable. "/" not the OS separator: a Markdown link is a URL.
+			const href = path.relative(indexDir, name).replaceAll(path.sep, "/");
 			const summary = firstLine(component.description) || component.name;
 			const deprecated =
 				component.deprecated !== undefined ? " (deprecated)" : "";

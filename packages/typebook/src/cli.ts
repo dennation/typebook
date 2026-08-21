@@ -1,33 +1,72 @@
-import { PACKAGE_NAME } from "./constants";
+#!/usr/bin/env node
+import { LOG_PREFIX, PACKAGE_NAME } from "./constants";
+import {
+	listCommands,
+	loadConfig,
+	resolveCommand,
+	runCommands,
+} from "./generate";
+import type { TypebookConfig } from "./types";
 
-/**
- * There is no codegen step: `typebook()` runs as a bundler plugin that scans the configured
- * components and lets its sub-plugins emit artifacts at build time. This CLI only prints how to wire
- * it up.
- */
-console.log(`
-  @dennation/${PACKAGE_NAME}
+/** Minimal argv read: the command, then everything after it, minus `--config <path>`. */
+function parseArgs(argv: string[]): {
+	name?: string;
+	args: string[];
+	configFile?: string;
+} {
+	const flag = argv.indexOf("--config");
+	const rest =
+		flag === -1 ? argv : [...argv.slice(0, flag), ...argv.slice(flag + 2)];
+	const [name, ...args] = rest;
+	return {
+		name,
+		args,
+		configFile: flag === -1 ? undefined : argv[flag + 1],
+	};
+}
 
-  This tool runs as a bundler plugin — there is no separate codegen step.
-  Add the plugin for your bundler, point it at your components, and its
-  sub-plugins (e.g. llmInstructions) write their artifacts on build:
+/** What this project can do — which is whatever its plugins registered. */
+function usage(config: TypebookConfig): string {
+	const commands = listCommands(config);
+	const width = Math.max(0, ...commands.map((c) => c.name.length));
+	const lines = commands.length
+		? commands.map(
+				(c) => `    ${c.name.padEnd(width)}  ${c.describe}  [${c.plugin}]`,
+			)
+		: ["    (none — no configured plugin registers a command)"];
+	return `
+  ${PACKAGE_NAME} — artifacts from your components' TypeScript types
 
-    import { typebook } from '@dennation/${PACKAGE_NAME}/vite'
-    import { llmInstructions } from '@dennation/${PACKAGE_NAME}/plugins/llm-instructions'
-    import path from 'node:path'
-    // typebook is also exported from /rollup, /rolldown, /webpack, /rspack, /esbuild, /farm
+  Usage:
+    ${PACKAGE_NAME} <command> [args] [--config <path>]
 
-    export default defineConfig({
-      plugins: [
-        typebook({
-          components: 'src/components/**/*.tsx',
-          plugins: [
-            llmInstructions({
-              entryPath: (c, { root }) => path.join(root, 'generated/components', c.name + '.md'),
-              indexPath: 'generated/components/index.md',
-            }),
-          ],
-        }),
-      ],
-    })
-`);
+  Commands:
+${lines.join("\n")}
+
+  Commands come from the plugins in ${PACKAGE_NAME}.config.{ts,mts,mjs,js}; the core only
+  scans your components and hands the result to whichever command you named.
+`;
+}
+
+async function main(): Promise<void> {
+	const { name, args, configFile } = parseArgs(process.argv.slice(2));
+	const { config, root } = await loadConfig(process.cwd(), configFile);
+
+	if (!name) {
+		console.log(usage(config));
+		return;
+	}
+	if (!resolveCommand(config, name)) {
+		console.error(LOG_PREFIX, `unknown command "${name}"`);
+		console.error(usage(config));
+		process.exitCode = 1;
+		return;
+	}
+
+	await runCommands({ config, root, names: [name], trigger: "cli", args });
+}
+
+main().catch((err: Error) => {
+	console.error(LOG_PREFIX, err.message);
+	process.exitCode = 1;
+});

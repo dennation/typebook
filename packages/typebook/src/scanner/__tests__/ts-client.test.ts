@@ -538,6 +538,48 @@ describe("edge cases", () => {
 		}
 	});
 
+	// Trailing spaces inside a JSDoc comment are invisible while editing, so whether they exist
+	// depends on whose editor last saved the file. Letting them through would make the same source
+	// produce different artifacts — a phantom diff, and a miss for any cache keyed on content.
+	test("JSDoc keeps no trailing whitespace on any line", async () => {
+		const file = resolve(FIXTURES, "components/_MessyJsDoc.tsx");
+		const SP = "\u0020"; // written as an escape so no formatter can strip it
+		const fresh = new TypeScriptClient(FIXTURES);
+		await fresh.start();
+		try {
+			writeFileSync(
+				file,
+				`/**\n` +
+					` * A messy component.${SP}${SP}\n` +
+					` *\n` +
+					` * A padded second line.${SP}\n` +
+					` *\n` +
+					` * @remarks\n` +
+					` * Use carefully.${SP}${SP}\n` +
+					` * Second line, padded.${SP}\n` +
+					` */\n` +
+					`export function MessyJsDoc(props: {\n` +
+					`\t/** The label.${SP}${SP}\n\t * Continued, padded.${SP} */\n` +
+					`\tlabel: string;\n` +
+					`}) {\n\treturn <span>{props.label}</span>;\n}\n`,
+			);
+			await fresh.notifyChange([file]);
+			const [doc] = await fresh.getExportedComponentInfos(file);
+
+			const padded = (text: string | undefined) =>
+				(text ?? "").split("\n").filter((line) => /[ \t]$/.test(line));
+
+			expect(padded(doc.description)).toEqual([]);
+			expect(padded(doc.remarks)).toEqual([]);
+			expect(padded(findProp(doc.props, "label")?.description)).toEqual([]);
+			// still multi-line, so the fix trims rather than collapsing
+			expect(doc.description).toContain("\n");
+		} finally {
+			rmSync(file, { force: true });
+			fresh.stop();
+		}
+	});
+
 	test("file created after start → extracted once notifyChange adds it as a root", async () => {
 		const newFile = resolve(FIXTURES, "components/_DynamicallyAdded.tsx");
 		const fresh = new TypeScriptClient(FIXTURES);

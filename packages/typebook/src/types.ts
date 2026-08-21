@@ -1,51 +1,56 @@
 export interface TypebookConfig {
 	/**
 	 * Files to scan for components — a path, list of paths, or globs. Each file's exported
-	 * React components are extracted into {@link ComponentInfo}s (one scan, shared by every
-	 * consuming plugin). Omit to scan nothing (plugins then have no components to work with).
+	 * React components are extracted into {@link ComponentInfo}s. Omit to scan nothing.
+	 *
+	 * A `!` pattern excludes, which is how you keep neighbours out of the scan:
+	 * `["src/components/**\/*.tsx", "!src/components/**\/*.stories.tsx"]`.
 	 */
 	components?: string | string[];
 	/**
-	 * Sub-plugins that consume the project scan (e.g. `llmInstructions()`). Each `generate` runs
-	 * after every scan with the full set of components — build once, dev on change.
+	 * The plugins whose commands this project uses. A plugin brings its own commands — the core
+	 * only dispatches them, and knows nothing about what they produce.
 	 */
 	plugins?: TypebookPlugin[];
-	/**
-	 * Fail the build when a plugin's `generate` throws, instead of logging a warning and continuing.
-	 * Off by default (a dev-server keeps running on error); turn it on in CI so a broken generation
-	 * doesn't pass silently. Only applies in `build` — `dev` always warns and keeps serving.
-	 */
-	failOnError?: boolean;
-}
-
-/** Which command the bundler is running — mirrors Vite's `command` (`serve` → `dev`). */
-export type TypebookCommand = "dev" | "build";
-
-/** Passed to a {@link TypebookPlugin}'s `generate` on each (re)generation. */
-export interface GenerateCtx {
-	/** The command in progress, so a plugin can behave differently in dev vs build. */
-	command: TypebookCommand;
-	/** Project root — relative `writeFile` paths resolve against it. */
-	root: string;
-	/**
-	 * Absolute path of the bundler's output directory (Vite `build.outDir`), when known — `build`
-	 * only, and only for bundlers that expose it. `undefined` in dev and for the rest.
-	 */
-	outDir?: string;
-	/** Write a file (parent dirs created). Path is absolute or relative to {@link GenerateCtx.root}. */
-	writeFile(path: string, content: string): Promise<void>;
+	/** Commands a bundler runs on a dev server, by name. Omit to run nothing. */
+	dev?: string[];
+	/** Commands a bundler runs on `build`, by name. Omit to run nothing. */
+	build?: string[];
 }
 
 /**
- * A sub-plugin of `typebook()`: consumes the whole project scan and emits artifacts (docs, AI
- * instructions, …). `apply` gates the command it runs in (like Vite's `apply`).
+ * A plugin: a name and the commands it contributes. Everything a plugin does happens inside its
+ * commands — the core scans, dispatches, and has no opinion about the rest.
  */
 export interface TypebookPlugin {
 	name: string;
-	/** Run only in this command (like Vite's `apply`). Omit to run in both dev and build. */
-	apply?: TypebookCommand;
-	/** Consume every scanned component after each project scan (build once; dev on change). */
-	generate(docs: ComponentInfo[], ctx: GenerateCtx): void | Promise<void>;
+	/** Commands this plugin adds, keyed by the name they're invoked with. */
+	commands?: Record<string, PluginCommand>;
+}
+
+/** One command contributed by a plugin. */
+export interface PluginCommand {
+	/** One line shown in `typebook` with no arguments. */
+	describe: string;
+	run(ctx: CommandCtx): Promise<void> | void;
+}
+
+/** What a command gets from the core. */
+export interface CommandCtx {
+	/** Project root — the directory holding the config. Relative paths resolve against it. */
+	root: string;
+	/**
+	 * Every scanned component, with its full set of props.
+	 *
+	 * **Lazy and shared**: the scan is the expensive part, so it runs on the first call and every
+	 * later caller — including other plugins' commands in the same run — gets the same result. A
+	 * command that needs no components never triggers it.
+	 */
+	components(): Promise<ComponentInfo[]>;
+	/** Whatever followed the command name on the command line. */
+	args: string[];
+	/** What invoked this command, for a plugin that wants to behave differently. */
+	trigger: "cli" | "dev" | "build";
 }
 
 export type PropType =

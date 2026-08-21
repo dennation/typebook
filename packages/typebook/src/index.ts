@@ -1,13 +1,24 @@
-// Base entry — the library's foundation: the React-free **scanner core** (`collectComponentInfos`,
-// `TypeScriptClient`) plus all shared types. It reads the components named
-// by the `components` config and extracts each exported component's props, defaults and JSDoc by
-// type via the TypeScript Compiler API; sub-plugins (e.g. `llmInstructions`) turn the result into
-// artifacts. Bundler plugins live in `@dennation/typebook/{vite,rollup,…}`. Type-only imports
-// (e.g. `TypebookConfig` for a bundler config) stay weightless; the runtime pulls in `typescript`.
+// The core, and all of it: load a config, scan components for their props, dispatch the commands
+// plugins brought. It produces nothing itself — files, diagnostics, whatever else are the plugins'
+// business, and it has no opinion about them.
+//
+// Pulls in `typescript` at runtime; type-only imports stay weightless.
+export {
+	defineConfig,
+	type LoadedConfig,
+	listCommands,
+	loadConfig,
+	type RunCommandsOptions,
+	resolveCommand,
+	resolveComponentFiles,
+	runCommands,
+	type ScanOptions,
+	scan,
+} from "./generate";
 export * from "./scanner";
 export type {
-	GenerateCtx,
-	TypebookCommand,
+	CommandCtx,
+	PluginCommand,
 	TypebookConfig,
 	TypebookPlugin,
 } from "./types";
