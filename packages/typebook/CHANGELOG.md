@@ -1,5 +1,11 @@
 # @dennation/typebook
 
+## 0.6.2
+
+### Patch Changes
+
+- 353065b: `paramDefaults` reads destructuring defaults through `forwardRef` / `memo` wrappers, so a wrapped component's defaults no longer go missing from the generated docs.
+
 ## 0.6.1
 
 ### Patch Changes
