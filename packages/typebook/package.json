@@ -1,6 +1,6 @@
 {
 	"name": "@dennation/typebook",
-	"version": "0.6.1",
+	"version": "0.6.2",
 	"description": "A toolkit for documenting React components from their TypeScript types — one bundler-plugin scan, plugins turn it into artifacts (AI-agent docs and more)",
 	"license": "MIT",
 	"repository": {
