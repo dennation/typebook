@@ -494,6 +494,24 @@ describe("default values", () => {
 	test("falls back to the @default JSDoc tag when there's no destructuring default", () => {
 		expect(findProp(props, "variant")!.defaultValue).toBe('"solid"');
 	});
+
+	test("reads defaults through a forwardRef wrapper", async () => {
+		const wrapped = (await extractProps(
+			"components/WithWrappedDefaults.tsx",
+			"WithWrappedDefaults",
+		))!;
+		expect(findProp(wrapped, "size")!.defaultValue).toBe('"md"');
+		expect(findProp(wrapped, "count")!.defaultValue).toBe("3");
+	});
+
+	test("reads defaults through nested memo(forwardRef(…)) wrappers", async () => {
+		const wrapped = (await extractProps(
+			"components/WithWrappedDefaults.tsx",
+			"WithMemoWrappedDefaults",
+		))!;
+		expect(findProp(wrapped, "size")!.defaultValue).toBe('"md"');
+		expect(findProp(wrapped, "count")!.defaultValue).toBe("3");
+	});
 });
 
 // --- Edge cases ---
