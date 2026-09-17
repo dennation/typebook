@@ -28,18 +28,25 @@ export function paramDefaults(
 	return defaults;
 }
 
-/** The function-like node whose parameters to inspect (function/arrow decl or `const X = () => …`). */
-function functionLikeOf(decl: ts.Declaration): ts.SignatureDeclaration | null {
+/**
+ * The function-like node whose parameters to inspect. Unwraps a `const X = …` initializer and, for a
+ * wrapped component (`forwardRef(fn)`, `memo(fn)`, `memo(forwardRef(fn))`), recurses through the call
+ * to its first function argument — that render function holds the destructured props.
+ */
+function functionLikeOf(node: ts.Node): ts.SignatureDeclaration | null {
 	if (
-		ts.isFunctionDeclaration(decl) ||
-		ts.isFunctionExpression(decl) ||
-		ts.isArrowFunction(decl)
+		ts.isFunctionDeclaration(node) ||
+		ts.isFunctionExpression(node) ||
+		ts.isArrowFunction(node)
 	)
-		return decl;
-	if (ts.isVariableDeclaration(decl) && decl.initializer) {
-		const init = decl.initializer;
-		if (ts.isArrowFunction(init) || ts.isFunctionExpression(init)) return init;
-	}
+		return node;
+	if (ts.isVariableDeclaration(node) && node.initializer)
+		return functionLikeOf(node.initializer);
+	if (ts.isCallExpression(node))
+		for (const arg of node.arguments) {
+			const fn = functionLikeOf(arg);
+			if (fn) return fn;
+		}
 	return null;
 }
 
