@@ -48,6 +48,22 @@ keep stories, tests or fixtures out of the scan:
 components: ["src/components/**/*.tsx", "!src/components/**/*.stories.tsx"],
 ```
 
+**Scan what you export, not every file.** The scan reads a module's exports, so pointing
+`components` at your public entries documents exactly the API a consumer gets — including
+compound components, whose members become `Parent.Member`:
+
+```ts
+// src/components/tabs/index.ts
+export const Tabs = { Root: TabsRoot, List: TabsList, Tab: TabsTab };
+```
+
+```ts
+components: "src/components/*/index.ts",   // → Tabs.Root, Tabs.List, Tabs.Tab — imported as `Tabs`
+```
+
+`Object.assign(Root, { Tab })` and `Tabs.Tab = TabsTab` are read the same way. A glob over
+`**/*.tsx` would instead surface the internal `TabsTab` under a name nobody can import.
+
 Then run one of the commands your plugins registered:
 
 ```bash
@@ -243,7 +259,7 @@ It registers two commands:
 | `indexName` | `string \| false` | Filename of the Markdown index. Default `"index.md"`; `false` skips it. Reference it from your `AGENTS.md`/`CLAUDE.md`. |
 | `fileName` | `(component, { root }) => string` | Filename of a card, relative to `outDir`. Default `` `${c.name}.md` ``. May nest (`` (c) => `forms/${c.name}.md` ``), may not escape the directory. |
 | `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |
-| `importFrom` | `string \| (component, { root }) => string` | Module each component is imported from — prints the `import { X } from "…"` line. A string, or a function that gets `{ root }` (derive a subpath from `component.dir`: `` (c, { root }) => `@acme/ui/${path.relative(root, c.dir)}` ``). Omit to skip it. |
+| `importFrom` | `string \| (component, { root }) => string` | Module each component is imported from — prints the `import { X } from "…"` line (a compound member `Tabs.Tab` imports its parent, `Tabs`). A string, or a function that gets `{ root }` (derive a subpath from `component.dir`: `` (c, { root }) => `@acme/ui/${path.relative(root, c.dir)}` ``). Omit to skip it. |
 | `filterProps` | `PropFilter` (map or predicate) | Which props a card surfaces. A **map** keyed by group or prop name (`{ element: false, href: true }`, prop name wins, unlisted kept) or a predicate. Defaults to `DEFAULT_PROP_FILTER`; spread to override. Configures the default `format` only. |
 | `keepOwnProps` | `boolean` | Keep a component's own props regardless of `filterProps`. Default `true`; `false` filters own props too. |
 | `format` | `(component) => string` | How each component becomes its file's contents. Defaults to `markdownFormat` (the card above). Pass your own for a different shape — full `ComponentInfo` in, string out. |

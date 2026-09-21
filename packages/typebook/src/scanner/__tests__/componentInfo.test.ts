@@ -206,3 +206,65 @@ describe("re-export scan", () => {
 		expect(basic?.sourceFile).toMatch(/components\/ReExport\.tsx$/);
 	});
 });
+
+// --- compound exports: members become `Parent.Member` components with `parent` set ---
+
+describe("compound exports", () => {
+	let client: TypeScriptClient;
+	let docs: ComponentInfo[];
+	const named = (name: string) => docs.find((d) => d.name === name);
+
+	beforeAll(async () => {
+		client = new TypeScriptClient(FIXTURES);
+		await client.start();
+		docs = await client.getExportedComponentInfos(
+			resolve(FIXTURES, "components/Compound.tsx"),
+		);
+	});
+
+	afterAll(() => client.stop());
+
+	test("an object namespace yields its members, not itself", () => {
+		expect(named("Tabs")).toBeUndefined();
+		expect(named("Tabs.Root")?.parent).toBe("Tabs");
+		expect(named("Tabs.Tab")?.parent).toBe("Tabs");
+	});
+
+	test("a member's props, defaults and JSDoc come from the assigned component", () => {
+		const tab = named("Tabs.Tab");
+		expect(tab?.description).toBe("One tab.");
+		expect(tab?.remarks).toBe("Put it inside `Tabs.Root`.");
+		expect(tab?.props.find((p) => p.name === "disabled")?.defaultValue).toBe(
+			"false",
+		);
+	});
+
+	test("shorthand and inline members are read too", () => {
+		expect(named("Tabs.TabsTab")?.description).toBe("One tab.");
+		expect(
+			named("Tabs.inline")?.props.find((p) => p.name === "label")?.defaultValue,
+		).toBe('"x"');
+	});
+
+	test("a foreign member keeps its declaration as file (so a consumer can filter it)", () => {
+		expect(named("Tabs.Frag")?.file).toMatch(/node_modules\/@types\/react\//);
+	});
+
+	test("Object.assign(Root, members) yields the root and its members", () => {
+		expect(named("Card")?.parent).toBeUndefined();
+		expect(named("Card.Header")?.parent).toBe("Card");
+	});
+
+	test("an expando member on a function declaration", () => {
+		expect(named("Menu.Item")?.parent).toBe("Menu");
+	});
+
+	test("a framework wrapper's own properties are not members", () => {
+		expect(named("Memoized")).toBeDefined();
+		expect(named("Memoized.type")).toBeUndefined();
+	});
+
+	test("a top-level component has no parent", () => {
+		expect(named("Menu")?.parent).toBeUndefined();
+	});
+});

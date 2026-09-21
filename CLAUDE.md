@@ -81,6 +81,8 @@ packages/typebook/
       transform.ts            — injectMetaProps(program, filePath, code, tsClient) → Edit[] (props injection only);
                                 applyEdits(code, edits). The factory orchestrates one parse + these + transform plugins.
       collectComponentInfos.ts — collectComponentInfos(client, files) → ComponentInfo[] (export-based scan of configured files)
+      extractComponentInfo.ts — one export → ComponentInfo[]: itself if a component + each component member of
+                                a compound export (`{ Tab }`, `Object.assign`, expando) as `Parent.Member` with `parent`
       meta-scanner.ts        — oxc AST: scanMetaCalls(program) finds defineStories(Component, …) calls
                                 and the position to inject __props (into config object, or as a new config arg)
       snippet-scanner.ts      — oxc AST: scanSnippets(program, src) finds every <Snippet>{fn}</Snippet>, slices the

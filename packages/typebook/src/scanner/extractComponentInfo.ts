@@ -17,18 +17,32 @@ import {
 import { paramDefaults } from "./paramDefaults";
 
 /**
- * Turn one module export into a {@link ComponentInfo}, or `null` when it isn't a component.
- * `sourceFile` is the scanned module the export was found in (the glob-matched file), distinct from
- * the component's own declaration `file` when the export is a re-export.
+ * The components one module export contributes: the export itself when it's a component, plus every
+ * component hanging off its value — a compound's members (`export const Tabs = { Tab, … }`,
+ * `Object.assign(Root, { Tab })`, `Tabs.Tab = Tab`) as `Parent.Member` with `parent` set. Empty when
+ * the export is neither. `sourceFile` is the scanned module the export was found in (the glob-matched
+ * file), distinct from a component's own declaration `file` when the export is a re-export.
  */
 export function extractComponentInfo(
 	checker: ts.TypeChecker,
 	exp: ts.Symbol,
 	sourceFile: string,
+): ComponentInfo[] {
+	const resolved = resolveAlias(checker, exp);
+	const name = exp.getName();
+	const self = componentInfo(checker, resolved, name, sourceFile);
+	const members = memberComponents(checker, resolved, name, sourceFile);
+	return self ? [self, ...members] : members;
+}
+
+/** A {@link ComponentInfo} for a symbol under the given JSX name, or `null` when it isn't a component. */
+function componentInfo(
+	checker: ts.TypeChecker,
+	symbol: ts.Symbol,
+	name: string,
+	sourceFile: string,
 ): ComponentInfo | null {
-	const resolved =
-		exp.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exp) : exp;
-	const decl = resolved.getDeclarations()?.[0];
+	const decl = symbol.getDeclarations()?.[0];
 	if (!decl) return null;
 
 	const nameNode = declarationName(decl);
@@ -39,19 +53,83 @@ export function extractComponentInfo(
 	if (props === null) return null; // not a component
 
 	const info: ComponentInfo = {
-		name: exp.getName(),
+		name,
 		file: decl.getSourceFile().fileName,
 		sourceFile,
 		dir: path.dirname(sourceFile),
 		props,
 	};
-	const description = symbolDescription(checker, resolved);
+	const description = symbolDescription(checker, symbol);
 	if (description) info.description = description;
-	const remarks = symbolRemarks(checker, resolved);
+	const remarks = symbolRemarks(checker, symbol);
 	if (remarks) info.remarks = remarks;
-	const deprecated = symbolDeprecation(checker, resolved);
+	const deprecated = symbolDeprecation(checker, symbol);
 	if (deprecated !== undefined) info.deprecated = deprecated;
 	return info;
+}
+
+/**
+ * The components among an export's value properties, named `Parent.Member`. Only members the
+ * parent's own package declares count: a framework wrapper's properties (`memo(X).type`,
+ * `defaultProps`) come from `@types/react` and are not part of the author's compound.
+ */
+function memberComponents(
+	checker: ts.TypeChecker,
+	symbol: ts.Symbol,
+	parent: string,
+	sourceFile: string,
+): ComponentInfo[] {
+	const parentDecl = symbol.getDeclarations()?.[0];
+	if (!parentDecl) return [];
+	const ownPackage = packageFromDeclarationPath(
+		parentDecl.getSourceFile().fileName,
+	);
+
+	const members: ComponentInfo[] = [];
+	for (const member of checker.getTypeOfSymbol(symbol).getProperties()) {
+		const decl = member.getDeclarations()?.[0];
+		if (
+			!decl ||
+			packageFromDeclarationPath(decl.getSourceFile().fileName) !== ownPackage
+		)
+			continue;
+		const info = componentInfo(
+			checker,
+			memberValue(checker, member, decl),
+			`${parent}.${member.getName()}`,
+			sourceFile,
+		);
+		if (info) members.push({ ...info, parent });
+	}
+	return members;
+}
+
+/**
+ * The symbol a member is assigned from (`Tab: TabsTab` → `TabsTab`), so its props, defaults and
+ * JSDoc come from the component's own declaration. The member itself when the value is inline.
+ */
+function memberValue(
+	checker: ts.TypeChecker,
+	member: ts.Symbol,
+	decl: ts.Declaration,
+): ts.Symbol {
+	if (ts.isShorthandPropertyAssignment(decl)) {
+		const value = checker.getShorthandAssignmentValueSymbol(decl);
+		return value ? resolveAlias(checker, value) : member;
+	}
+	const value = ts.isPropertyAssignment(decl)
+		? decl.initializer
+		: ts.isBinaryExpression(decl)
+			? decl.right
+			: undefined;
+	const target = value && checker.getSymbolAtLocation(value);
+	return target ? resolveAlias(checker, target) : member;
+}
+
+function resolveAlias(checker: ts.TypeChecker, symbol: ts.Symbol): ts.Symbol {
+	return symbol.flags & ts.SymbolFlags.Alias
+		? checker.getAliasedSymbol(symbol)
+		: symbol;
 }
 
 /**

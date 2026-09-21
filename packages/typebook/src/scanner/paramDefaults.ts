@@ -29,8 +29,8 @@ export function paramDefaults(
 }
 
 /**
- * The function-like node whose parameters to inspect. Unwraps a `const X = …` initializer and, for a
- * wrapped component (`forwardRef(fn)`, `memo(fn)`, `memo(forwardRef(fn))`), recurses through the call
+ * The function-like node whose parameters to inspect. Unwraps a `const X = …` / `X: …` initializer
+ * and, for a wrapped component (`forwardRef(fn)`, `memo(fn)`, `memo(forwardRef(fn))`), recurses through the call
  * to its first function argument — that render function holds the destructured props.
  */
 function functionLikeOf(node: ts.Node): ts.SignatureDeclaration | null {
@@ -40,7 +40,10 @@ function functionLikeOf(node: ts.Node): ts.SignatureDeclaration | null {
 		ts.isArrowFunction(node)
 	)
 		return node;
-	if (ts.isVariableDeclaration(node) && node.initializer)
+	if (
+		(ts.isVariableDeclaration(node) || ts.isPropertyAssignment(node)) &&
+		node.initializer
+	)
 		return functionLikeOf(node.initializer);
 	if (ts.isCallExpression(node))
 		for (const arg of node.arguments) {

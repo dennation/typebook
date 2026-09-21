@@ -72,5 +72,7 @@ function importStatement(
 		typeof importFrom === "function"
 			? importFrom(component, { root })
 			: importFrom;
-	return src ? `import { ${component.name} } from "${src}";` : undefined;
+	// A compound member (`Tabs.Tab`) is reached through its parent binding — that's what's imported.
+	const binding = component.parent ?? component.name;
+	return src ? `import { ${binding} } from "${src}";` : undefined;
 }
