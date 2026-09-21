@@ -137,8 +137,16 @@ export interface PropInfo {
  * Produced by the scanner (from the `components` scan) and handed to {@link TypebookPlugin}s. React-free.
  */
 export interface ComponentInfo {
-	/** Component name (its export identifier). */
+	/**
+	 * The name the component is used by in JSX: its export identifier (`Button`), or `Parent.Member`
+	 * for a member of a compound export (`Tabs.Tab` from `export const Tabs = { Tab, … }`).
+	 */
 	name: string;
+	/**
+	 * For a member of a compound export, the export it hangs off (`"Tabs"` for `Tabs.Tab`) — the
+	 * binding to import. Absent for a top-level component.
+	 */
+	parent?: string;
 	/**
 	 * Absolute path of the module where the component itself is **declared**. For a re-exported
 	 * third-party component (`export { Toaster } from "sonner"`) this points into `node_modules`,

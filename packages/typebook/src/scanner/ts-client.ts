@@ -69,7 +69,7 @@ export class TypeScriptClient {
 	/**
 	 * Every exported React component in a file — the scan surface for `components`-configured files.
 	 * Each export is inspected by type; the ones that are function components (a call signature
-	 * returning a React node) yield a doc.
+	 * returning a React node) yield a doc, and a compound export yields one per member (`Tabs.Tab`).
 	 */
 	async getExportedComponentInfos(filePath: string): Promise<ComponentInfo[]> {
 		if (!this.program || !this.checker) await this.start();
@@ -83,10 +83,8 @@ export class TypeScriptClient {
 		if (!moduleSymbol) return [];
 
 		const docs: ComponentInfo[] = [];
-		for (const exp of checker.getExportsOfModule(moduleSymbol)) {
-			const doc = extractComponentInfo(checker, exp, sourceFile.fileName);
-			if (doc) docs.push(doc);
-		}
+		for (const exp of checker.getExportsOfModule(moduleSymbol))
+			docs.push(...extractComponentInfo(checker, exp, sourceFile.fileName));
 		return docs;
 	}
 

@@ -395,3 +395,18 @@ describe("llmInstructions: importFrom", () => {
 		);
 	});
 });
+
+describe("llmInstructions: compound members", () => {
+	test("a member's card imports its parent binding", async () => {
+		const tab: ComponentInfo = {
+			...doc,
+			name: "Tabs.Tab",
+			parent: "Tabs",
+		};
+		const files = await run({ outDir: "docs", importFrom: "@acme/ui" }, [tab]);
+		expect(files["/proj/docs/Tabs.Tab.md"]).toContain("## Tabs.Tab");
+		expect(files["/proj/docs/Tabs.Tab.md"]).toContain(
+			'import { Tabs } from "@acme/ui";',
+		);
+	});
+});
