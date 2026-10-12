@@ -1,5 +1,11 @@
 # @dennation/typebook
 
+## 0.7.1
+
+### Patch Changes
+
+- c750d2f: Nested unions in prop types (e.g. `Omit<Props, "a" | "b">`) print in a stable order and in full, so scanning an unrelated component no longer changes another component's generated docs.
+
 ## 0.7.0
 
 ### Minor Changes
