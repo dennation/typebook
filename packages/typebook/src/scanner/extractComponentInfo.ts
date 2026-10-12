@@ -2,6 +2,7 @@ import path from "node:path";
 import ts from "typescript";
 import type { ComponentInfo, PropInfo, PropType } from "../types";
 import { classifyPropGroup } from "./classifyPropGroup";
+import { compareStrings } from "./compareStrings";
 import { declarationName, isReactReturnType } from "./componentDetection";
 import { convertType } from "./convertType";
 import {
@@ -320,9 +321,4 @@ function stringLiterals(union: ts.UnionTypeNode): string[] {
 			texts.push(member.literal.text);
 	}
 	return texts;
-}
-
-/** Locale-independent string order (code-unit), so the result is identical on every machine. */
-function compareStrings(a: string, b: string): number {
-	return a < b ? -1 : a > b ? 1 : 0;
 }
