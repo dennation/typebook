@@ -1,5 +1,6 @@
 import ts from "typescript";
 import type { PropType } from "../types";
+import { printType } from "./printType";
 
 /**
  * Convert a TypeScript type into a {@link PropType} — a literal union, boolean/string/number, a
@@ -16,17 +17,6 @@ export function convertType(
 	isOptional: boolean,
 ): PropType {
 	const flags = type.flags;
-
-	let typeString = checker.typeToString(type);
-	if (
-		isOptional &&
-		type.isUnion() &&
-		type.types.some((t) => t.flags & ts.TypeFlags.Undefined)
-	) {
-		typeString = typeString
-			.replace(/\s*\|\s*undefined$/, "")
-			.replace(/^undefined\s*\|\s*/, "");
-	}
 
 	if (flags & ts.TypeFlags.Any) return { kind: "unknown", raw: "any" };
 
@@ -58,12 +48,16 @@ export function convertType(
 		return { kind: "number" };
 
 	// Keep the signature string so docs show `(e: MouseEvent) => void`, not a bare `function`.
-	if (isFunctionType(type)) return { kind: "function", raw: typeString };
+	if (isFunctionType(type))
+		return {
+			kind: "function",
+			raw: printType(checker, type, isOptional),
+		};
 
 	const nodeName = reactNodeName(type);
 	if (nodeName) return { kind: "node", name: nodeName };
 
-	return { kind: "unknown", raw: typeString };
+	return { kind: "unknown", raw: printType(checker, type, isOptional) };
 }
 
 /** Callable directly, or a `Fn | undefined | null` union whose only meaningful member is callable. */

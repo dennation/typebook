@@ -2,6 +2,7 @@ import { readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { componentToMarkdown } from "../../plugins/llm-instructions/componentToMarkdown";
 import type { ComponentInfo } from "../../types";
 import { collectComponentInfos } from "../collectComponentInfos";
 import { TypeScriptClient } from "../ts-client";
@@ -178,6 +179,48 @@ describe("deterministic prop order", () => {
 
 		expect(forward).toEqual(["solid", "outline", "ghost"]);
 		expect(backward).toEqual(forward);
+	});
+
+	/** `UnionOrderTarget`'s info after scanning exactly the given fixtures, in this order. */
+	async function unionOrderTarget(names: string[]): Promise<ComponentInfo> {
+		const client = new TypeScriptClient(FIXTURES);
+		const files = names.map((n) => resolve(FIXTURES, "components", `${n}.tsx`));
+		const docs = await collectComponentInfos(client, files);
+		client.stop();
+		return docs.find((d) => d.name === "UnionOrderTarget")!;
+	}
+
+	test("nested unions print the same regardless of scan order", async () => {
+		// The checker orders union members by type id, i.e. by creation order — so scanning a
+		// component that mentions `"disabled"` first used to flip `Omit<…, "error" | "disabled">`.
+		const alone = await unionOrderTarget(["UnionOrderTarget"]);
+		const after = await unionOrderTarget([
+			"UnionOrderUnrelated",
+			"UnionOrderTarget",
+		]);
+		const before = await unionOrderTarget([
+			"UnionOrderTarget",
+			"UnionOrderUnrelated",
+		]);
+
+		expect(after).toEqual(alone);
+		expect(before).toEqual(alone);
+		expect(componentToMarkdown(after)).toBe(componentToMarkdown(alone));
+		expect(alone.props.find((p) => p.name === "fieldProps")?.type).toEqual({
+			kind: "unknown",
+			raw: 'Omit<FieldProps, "disabled" | "error"> & { extra?: string | undefined; }',
+		});
+	});
+
+	test("a long nested union is printed whole, not elided", async () => {
+		// The checker elides a long union's middle members in its own type-id order, which no later
+		// sorting can undo — so the full union is printed and then sorted.
+		const doc = await unionOrderTarget(["UnionOrderTarget"]);
+		const letters = doc.props.find((p) => p.name === "letters")?.type;
+		expect(letters?.kind === "unknown" && letters.raw).toMatch(
+			/^\("alfa" \| "bravo" \| .* \| "zulu"\)\[\]$/,
+		);
+		expect(letters?.kind === "unknown" && letters.raw).not.toContain("more");
 	});
 });
 
