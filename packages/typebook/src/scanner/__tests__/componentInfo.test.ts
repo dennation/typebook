@@ -311,3 +311,49 @@ describe("compound exports", () => {
 		expect(named("Menu")?.parent).toBeUndefined();
 	});
 });
+
+// An annotation types an export by signatures, not by the assignments that hold its members — each
+// member must still be read from its component, wherever that is declared.
+describe("annotated compound exports", () => {
+	let client: TypeScriptClient;
+	let docs: ComponentInfo[];
+	const named = (name: string) => docs.find((d) => d.name === name);
+
+	beforeAll(async () => {
+		client = new TypeScriptClient(FIXTURES);
+		await client.start();
+		docs = [
+			...(await client.getExportedComponentInfos(
+				resolve(FIXTURES, "components/annotated/index.ts"),
+			)),
+			...(await client.getExportedComponentInfos(
+				resolve(FIXTURES, "components/annotated/declared.d.ts"),
+			)),
+		];
+	});
+
+	afterAll(() => client.stop());
+
+	test.each([
+		"ByTypeof",
+		"ByInterface",
+		"BySignature",
+		"ByAssertion",
+	])("%s.Item is read from the component, not the annotation", (parent) => {
+		const item = named(`${parent}.Item`);
+		expect(item?.parent).toBe(parent);
+		expect(item?.file).toMatch(/components\/annotated\/Item\.tsx$/);
+		expect(item?.description).toBe("One list item.");
+		expect(item?.remarks).toBe("Put it inside a list.");
+		expect(item?.props.find((p) => p.name === "selected")?.defaultValue).toBe(
+			"false",
+		);
+	});
+
+	test("a declaration file's `typeof` member is read from the declared component", () => {
+		expect(named("Steps.Step")?.description).toBe("One step.");
+		expect(named("Steps.Step")?.remarks).toBe(
+			"Declared in a declaration file.",
+		);
+	});
+});
