@@ -96,7 +96,7 @@ function memberComponents(
 			continue;
 		const info = componentInfo(
 			checker,
-			memberValue(checker, member, decl),
+			memberValue(checker, member, symbol),
 			`${parent}.${member.getName()}`,
 			sourceFile,
 		);
@@ -108,23 +108,73 @@ function memberComponents(
 /**
  * The symbol a member is assigned from (`Tab: TabsTab` → `TabsTab`), so its props, defaults and
  * JSDoc come from the component's own declaration. The member itself when the value is inline.
+ *
+ * An annotated export (`Tabs: TabsParts = { Tab }`, `{ Tab } as TabsParts`) is typed by its
+ * annotation, so its members are declared by signatures there rather than by the assignments. A
+ * `Tab: typeof TabsTab` signature still names the component; a bare one (`Tab: FC<TabProps>`) names
+ * nothing, so the member is looked up on the value `owner` was initialized with instead.
  */
 function memberValue(
 	checker: ts.TypeChecker,
 	member: ts.Symbol,
-	decl: ts.Declaration,
+	owner?: ts.Symbol,
 ): ts.Symbol {
-	if (ts.isShorthandPropertyAssignment(decl)) {
-		const value = checker.getShorthandAssignmentValueSymbol(decl);
-		return value ? resolveAlias(checker, value) : member;
-	}
+	const decl = member.getDeclarations()?.[0];
+	if (!decl) return member;
+	const target = referencedSymbol(checker, decl);
+	if (target) return resolveAlias(checker, target);
+	const assigned =
+		owner && ts.isTypeElement(decl)
+			? initializerType(checker, owner)?.getProperty(member.getName())
+			: undefined;
+	return assigned ? memberValue(checker, assigned) : member;
+}
+
+/**
+ * The symbol a member declaration refers to: `{ Tab }`, `Tab: TabsTab`, `Tabs.Tab = TabsTab`, or
+ * `Tab: typeof TabsTab` — the form a declaration file always records a compound's members in.
+ */
+function referencedSymbol(
+	checker: ts.TypeChecker,
+	decl: ts.Declaration,
+): ts.Symbol | undefined {
+	if (ts.isShorthandPropertyAssignment(decl))
+		return checker.getShorthandAssignmentValueSymbol(decl);
+	if (
+		ts.isPropertySignature(decl) &&
+		decl.type &&
+		ts.isTypeQueryNode(decl.type)
+	)
+		return checker.getSymbolAtLocation(decl.type.exprName);
 	const value = ts.isPropertyAssignment(decl)
 		? decl.initializer
 		: ts.isBinaryExpression(decl)
 			? decl.right
 			: undefined;
-	const target = value && checker.getSymbolAtLocation(value);
-	return target ? resolveAlias(checker, target) : member;
+	return value && checker.getSymbolAtLocation(value);
+}
+
+/**
+ * The type of the value an export was initialized with, past any annotation or assertion — the
+ * object literal (or `Object.assign` call) whose members are the assignments themselves.
+ * `undefined` without an initializer: a function declaration, a declaration file.
+ */
+function initializerType(
+	checker: ts.TypeChecker,
+	symbol: ts.Symbol,
+): ts.Type | undefined {
+	const decl = symbol.valueDeclaration;
+	if (!decl || !ts.isVariableDeclaration(decl) || !decl.initializer)
+		return undefined;
+	let value = decl.initializer;
+	while (
+		ts.isAssertionExpression(value) ||
+		ts.isSatisfiesExpression(value) ||
+		ts.isParenthesizedExpression(value) ||
+		ts.isNonNullExpression(value)
+	)
+		value = value.expression;
+	return checker.getTypeAtLocation(value);
 }
 
 function resolveAlias(checker: ts.TypeChecker, symbol: ts.Symbol): ts.Symbol {

@@ -61,7 +61,8 @@ export const Tabs = { Root: TabsRoot, List: TabsList, Tab: TabsTab };
 components: "src/components/*/index.ts",   // → Tabs.Root, Tabs.List, Tabs.Tab — imported as `Tabs`
 ```
 
-`Object.assign(Root, { Tab })` and `Tabs.Tab = TabsTab` are read the same way. A glob over
+`Object.assign(Root, { Tab })` and `Tabs.Tab = TabsTab` are read the same way, and so is an
+annotated export (`Tabs: TabsParts = { … }`) or a declaration file. A glob over
 `**/*.tsx` would instead surface the internal `TabsTab` under a name nobody can import.
 
 Then run one of the commands your plugins registered:
