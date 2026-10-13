@@ -1,5 +1,11 @@
 # @dennation/typebook
 
+## 0.7.2
+
+### Patch Changes
+
+- 9a68d5b: Members of an annotated compound export (`Tabs: { Tab: typeof TabsTab } = { … }`, `… as TabsParts`, a declaration file) keep their component's description, `@remarks`, defaults and `file`.
+
 ## 0.7.1
 
 ### Patch Changes
