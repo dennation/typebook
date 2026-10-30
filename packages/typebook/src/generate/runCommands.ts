@@ -1,5 +1,10 @@
-import type { TypeScriptClient } from "../scanner";
-import type { CommandCtx, TypebookConfig, TypebookPlugin } from "../types";
+import { collectModuleInfos, type TypeScriptClient } from "../scanner";
+import type {
+	CommandCtx,
+	ModuleInfo,
+	TypebookConfig,
+	TypebookPlugin,
+} from "../types";
 import { lazyScan } from "./scan";
 
 export interface RunCommandsOptions {
@@ -25,11 +30,17 @@ export async function runCommands(options: RunCommandsOptions): Promise<void> {
 		.filter((command) => command !== null);
 	if (commands.length === 0) return;
 
+	const components = lazyScan({ root, components: config.components, client });
+	let modules: Promise<ModuleInfo[]> | null = null;
 	const ctx: CommandCtx = {
 		root,
 		args,
 		trigger,
-		components: lazyScan({ root, components: config.components, client }),
+		components,
+		modules: () => {
+			modules ??= components().then(collectModuleInfos);
+			return modules;
+		},
 	};
 	for (const { run } of commands) await run(ctx);
 }

@@ -76,11 +76,15 @@ packages/typebook/
       loadConfig.ts           — loads typebook.config.{ts,mts,mjs,js}; `.ts` natively (Node ≥22.18 strips types)
       defineConfig.ts         — identity helper typing a config file
     scanner/                  — React-free extraction core (re-exported from the base `.` entry — the library foundation)
-      index.ts                — Public exports: collectComponentInfos, TypeScriptClient,
+      index.ts                — Public exports: collectComponentInfos, collectModuleInfos, TypeScriptClient,
                                 scanMetaCalls, scanSnippets, parseProgram, injectMetaProps, applyEdits, …
       transform.ts            — injectMetaProps(program, filePath, code, tsClient) → Edit[] (props injection only);
                                 applyEdits(code, edits). The factory orchestrates one parse + these + transform plugins.
       collectComponentInfos.ts — collectComponentInfos(client, files) → ComponentInfo[] (export-based scan of configured files)
+      collectModuleInfos.ts   — collectModuleInfos(components) → ModuleInfo[]: groups by sourceFile (one module per
+                                scanned file, named after its folder) + readModuleDoc; moduleBindings → `parent ?? name`
+      readModuleDoc.ts        — the file's JSDoc block tagged `@module` → { description, examples } — the only source
+                                of module prose (standalone ts.createSourceFile parse; reads every block via `jsDoc`)
       extractComponentInfo.ts — one export → ComponentInfo[]: itself if a component + each component member of
                                 a compound export (`{ Tab }`, `Object.assign`, expando — annotated or not) as `Parent.Member` with `parent`
       meta-scanner.ts        — oxc AST: scanMetaCalls(program) finds defineStories(Component, …) calls
@@ -97,12 +101,15 @@ packages/typebook/
                                 TypeScriptClient and re-runs on dev-watch changes.
       snippets.ts             — snippets() transform sub-plugin (<Snippet> injection) + SnippetNotInlineError. Opt-in.
       llm-instructions/       — llmInstructions() generate sub-plugin (its own folder; card rendering is plugin-local, not core):
-        index.ts              — llmInstructions(): registers `llm-instructions:generate` / `:check`; builds the
-                                per-component Markdown cards + index from ctx.components()
+        index.ts              — llmInstructions(): registers `llm-instructions:generate` / `:check`; builds one
+                                Markdown card per module + the index from ctx.modules() (filterComponents first)
         files.ts              — the plugin's own file I/O: diffFiles(files, dir) → {stale, extra};
                                 writeFiles makes dir hold exactly `files` (writes changed, deletes extra,
                                 prunes empty dirs); normalize (LF + one trailing \n)
-        componentToMarkdown.ts — componentToMarkdown(doc) → one Markdown card (import + description + @remarks + props table)
+        moduleToMarkdown.ts   — moduleToMarkdown(module) → one card (`@module` prose + import + examples + parts)
+        componentToMarkdown.ts — componentToMarkdown(doc) → one `###` part (description + @remarks + deprecation + props table)
+        buildIndex.ts         — the index: one line per module, the import as the link text (+ summary · parts · deprecated)
+        importStatement.ts    — `import { A, B } from "…"` for a module's bindings (card and index share it)
         formatPropType.ts     — render a PropInfo's type as a string ("sm" | "md", …)
       vite.ts                 — typebook() Vite plugin
       rollup.ts               — typebook() Rollup plugin
@@ -265,10 +272,11 @@ typebook.config.ts: { components, plugins, dev, build }     ← the single sourc
                                                    ↓
      runCommands({ config, root, names, trigger })
        ├── resolveCommand(name) → the one plugin that registered it (two = error)
-       └── run it with ctx = { root, args, trigger, components() }
+       └── run it with ctx = { root, args, trigger, components(), modules() }
                                                    ↓
      ctx.components()  → lazy: scans on first call, shared by every command in the run
                        → resolveComponentFiles (sorted) → collectComponentInfos
+     ctx.modules()     → lazy too: components() grouped by scanned file + each file's `@module` block
 
   the command does the rest itself — llm-instructions builds a Map of paths and either
   writes it (`:generate`) or compares it and throws (`:check`), using its own files.ts

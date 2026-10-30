@@ -2,23 +2,17 @@ import type { ComponentInfo, PropInfo } from "../../types";
 import { formatPropType } from "./formatPropType";
 
 /**
- * Render a scanned {@link ComponentInfo} as a self-contained Markdown card — heading, import,
- * description, usage guidance (`@remarks`), deprecation note, and a props table. Intended as
- * AI-agent context (Claude Code / Codex), so it stays plain and link-free.
+ * Render a scanned {@link ComponentInfo} as one part of its module's card — heading, description,
+ * usage guidance (`@remarks`), deprecation note, and a props table.
  *
  * Renders exactly the props it's given — which props to surface (the `filterProps` policy) is
- * decided upstream, so a card just presents the already-filtered set.
+ * decided upstream, so a part just presents the already-filtered set.
  */
-export function componentToMarkdown(
-	component: ComponentInfo,
-	options: { importStatement?: string } = {},
-): string {
+export function componentToMarkdown(component: ComponentInfo): string {
 	const props = component.props;
 
-	const parts = [`## ${component.name}`];
+	const parts = [`### ${component.name}`];
 	if (component.description) parts.push(component.description);
-	if (options.importStatement)
-		parts.push(`\`\`\`tsx\n${options.importStatement}\n\`\`\``);
 	if (component.remarks) parts.push(`**Usage**\n\n${component.remarks}`);
 	if (component.deprecated !== undefined)
 		parts.push(deprecationNote(component.deprecated));
