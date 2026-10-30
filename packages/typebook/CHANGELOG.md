@@ -1,5 +1,11 @@
 # @dennation/typebook
 
+## 0.8.1
+
+### Patch Changes
+
+- 39fc3b8: `llm-instructions:generate` no longer deletes a card whose filename changed only in case on a case-insensitive file system (macOS, Windows).
+
 ## 0.8.0
 
 ### Minor Changes
