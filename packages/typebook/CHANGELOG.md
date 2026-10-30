@@ -1,5 +1,11 @@
 # @dennation/typebook
 
+## 0.8.0
+
+### Minor Changes
+
+- b027abe: `llm-instructions` documents modules instead of components: one card and one index line per scanned file, with prose and examples from its `@module` JSDoc block. `fileName`, `importFrom` and `format` now receive a `ModuleInfo`; commands get `ctx.modules()`.
+
 ## 0.7.2
 
 ### Patch Changes
