@@ -1,6 +1,13 @@
 import path from "node:path";
 import { LOG_PREFIX } from "../../constants";
-import type { CommandCtx, ComponentInfo, TypebookPlugin } from "../../types";
+import { moduleBindings } from "../../scanner/moduleBindings";
+import type {
+	CommandCtx,
+	ComponentInfo,
+	ModuleInfo,
+	TypebookPlugin,
+} from "../../types";
+import { buildIndex } from "./buildIndex";
 import { diffFiles, type FileMap, normalize, writeFiles } from "./files";
 import type { PropFilter } from "./filterProps";
 import {
@@ -33,27 +40,32 @@ export interface LlmInstructionsOptions {
 	 */
 	outDir: string;
 	/**
-	 * Filename of the Markdown index listing every component. Default `"index.md"`; `false` skips it.
+	 * Filename of the Markdown index listing every module. Default `"index.md"`; `false` skips it.
 	 * Reference it from your `AGENTS.md` / `CLAUDE.md` so an agent finds the cards.
 	 */
 	indexName?: string | false;
 	/**
-	 * Filename of a component's card, relative to {@link outDir} — default `` `${component.name}.md` ``.
-	 * Gets the same `{ root }` as `importFrom` (the component's own folder is `component.dir`), so it
-	 * can mirror your source layout: `` (c, { root }) => `${path.relative(root, c.dir)}/${c.name}.md` ``.
-	 * May nest, but may not escape the directory — that is what keeps the output copyable as a unit.
+	 * Filename of a module's card, relative to {@link outDir} — default `` `${module.name}.md` `` (the
+	 * name of the scanned file's folder). Gets the same `{ root }` as `importFrom` (the module's own
+	 * folder is `module.dir`), so it can mirror your source layout:
+	 * `` (m, { root }) => `${path.relative(root, m.dir)}.md` ``. May nest, but may not escape the
+	 * directory — that is what keeps the output copyable as a unit.
 	 */
-	fileName?: (component: ComponentInfo, ctx: ImportFromContext) => string;
+	fileName?: (module: ModuleInfo, ctx: ImportFromContext) => string;
+	/**
+	 * Which components are documented (`true` keeps). Applied before grouping: a module left with
+	 * no components gets no card and no index line, and its import drops the bindings filtered out.
+	 */
 	filterComponents?: (component: ComponentInfo) => boolean;
 	/**
-	 * Module each component is imported from — prints an `import { X } from "…"` line in every card
-	 * (agents need the exact import). A string (`"@acme/ui"`), or a function that gets the same
-	 * `{ root }` as `entryPath` — e.g. derive a subpath from where the component lives:
-	 * `(c, { root }) => `@acme/ui/${path.relative(root, c.dir)}``. Omit to skip it.
+	 * Where each module is imported from — prints one `import { A, B } from "…"` line with all of the
+	 * module's bindings, in its card and as its index link (agents need the exact import). A string
+	 * (`"@acme/ui"`), or a function that gets `{ root }` — e.g. derive a subpath from where the
+	 * module lives: `(m, { root }) => `@acme/ui/${path.relative(root, m.dir)}``. Omit to skip it.
 	 */
 	importFrom?:
 		| string
-		| ((component: ComponentInfo, ctx: ImportFromContext) => string);
+		| ((module: ModuleInfo, ctx: ImportFromContext) => string);
 	/**
 	 * Which props each card surfaces — a {@link PropFilter}: a **map** (`{ element: false, href: true }`,
 	 * keyed by group or prop name, prop name wins) or a **predicate** for arbitrary rules. Defaults to
@@ -67,10 +79,10 @@ export interface LlmInstructionsOptions {
 	 */
 	keepOwnProps?: boolean;
 	/**
-	 * How each scanned component becomes its instruction file — `(component) => string`. Defaults to
+	 * How each module becomes its instruction file — `(module) => string`. Defaults to
 	 * {@link markdownFormat} (the Markdown card). `importFrom`/`filterProps` configure that default;
-	 * a custom `format` receives the full {@link ComponentInfo} and owns the output — emit JSON, MDX,
-	 * a different Markdown layout, anything.
+	 * a custom `format` receives the full {@link ModuleInfo} (filtered by `filterComponents`) and
+	 * owns the output — emit JSON, MDX, a different Markdown layout, anything.
 	 */
 	format?: LlmFormat;
 	/** H1 title of the index. Default: `"Components"`. */
@@ -80,9 +92,10 @@ export interface LlmInstructionsOptions {
 }
 
 /**
- * `typebook()` sub-plugin: AI-agent docs from the component scan — one Markdown card per component
- * (import, description, usage guidance, deprecation, props table) plus a Markdown index linking them
- * all. Regenerated in full on every scan (build once, dev on change).
+ * `typebook()` sub-plugin: AI-agent docs from the component scan — one Markdown card per module
+ * (the components of one scanned file: `@module` prose, import, examples, then each component's
+ * description, usage guidance, deprecation and props table) plus a Markdown index with one line per
+ * module. Regenerated in full on every scan (build once, dev on change).
  *
  * Everything lands in one `outDir`, with the index linking each card relative to itself — so the
  * directory is a self-contained unit you can copy into `dist`, publish with the package, or serve
@@ -104,7 +117,7 @@ export function llmInstructions(
 		name: "llm-instructions",
 		commands: {
 			"llm-instructions:generate": {
-				describe: "write the component cards and their index",
+				describe: "write the module cards and their index",
 				async run(ctx) {
 					const { files, dir } = await build(ctx);
 					const { extra } = await diffFiles(files, dir);
@@ -154,7 +167,7 @@ async function buildFiles(
 	const {
 		outDir,
 		indexName = "index.md",
-		fileName = (component: ComponentInfo) => `${component.name}.md`,
+		fileName = (module: ModuleInfo) => `${module.name}.md`,
 		importFrom,
 		filterProps,
 		keepOwnProps,
@@ -164,10 +177,13 @@ async function buildFiles(
 		description,
 	} = options;
 
-	const scanned = await ctx.components();
-	const components = filterComponents
-		? scanned.filter(filterComponents)
-		: scanned;
+	const modules = (await ctx.modules()).flatMap((module) => {
+		if (!filterComponents) return [module];
+		const components = module.components.filter(filterComponents);
+		return components.length > 0
+			? [{ ...module, components, bindings: moduleBindings(components) }]
+			: [];
+	});
 	// Built here (not at plugin init) so the default format can pass `ctx.root` to an
 	// `importFrom` function; a custom `format` owns its output and gets neither.
 	const render =
@@ -175,55 +191,63 @@ async function buildFiles(
 		markdownFormat({ importFrom, filterProps, keepOwnProps, root: ctx.root });
 
 	const dir = absolute(outDir, ctx.root);
-	const names = assignNames(components, fileName, ctx.root, indexName);
+	const names = assignNames(modules, fileName, ctx.root, indexName);
 
 	const files: FileMap = new Map(
-		[...names].map(([component, name]) => [
+		[...names].map(([module, name]) => [
 			path.join(dir, name),
-			normalize(render(component)),
+			normalize(render(module)),
 		]),
 	);
 	if (indexName !== false)
 		files.set(
 			path.join(dir, entry(indexName)),
-			normalize(buildIndex(names, indexName, title, description)),
+			normalize(
+				buildIndex(names, {
+					indexName,
+					title,
+					description,
+					importFrom,
+					root: ctx.root,
+				}),
+			),
 		);
 	return files;
 }
 
 /**
- * Each component's filename, verified to be unique.
+ * Each module's filename, verified to be unique.
  *
- * Two same-named components in different folders (`forms/Button`, `toolbar/Button`) would otherwise
- * collapse onto one card: the last one silently wins, and the index lists both under the same link —
- * so an agent following the entry for one gets the other's props. Wrong docs are worse than none, so
- * this fails instead, naming both and how to separate them.
+ * Two same-named modules in different folders (`components/dialog`, `deprecated/dialog`) would
+ * otherwise collapse onto one card: the last one silently wins, and the index lists both under the
+ * same link — so an agent following the line for one gets the other's props. Wrong docs are worse
+ * than none, so this fails instead, naming both and how to separate them.
  */
 function assignNames(
-	components: ComponentInfo[],
-	fileName: (component: ComponentInfo, ctx: ImportFromContext) => string,
+	modules: ModuleInfo[],
+	fileName: (module: ModuleInfo, ctx: ImportFromContext) => string,
 	root: string,
 	indexName: string | false,
-): Map<ComponentInfo, string> {
-	const names = new Map<ComponentInfo, string>();
-	const taken = new Map<string, ComponentInfo | null>(
+): Map<ModuleInfo, string> {
+	const names = new Map<ModuleInfo, string>();
+	const taken = new Map<string, ModuleInfo | null>(
 		indexName === false ? [] : [[entry(indexName), null]],
 	);
-	const where = (component: ComponentInfo | null): string =>
-		component
-			? `"${component.name}" (${path.relative(root, component.sourceFile)})`
+	const where = (module: ModuleInfo | null): string =>
+		module
+			? `"${module.name}" (${path.relative(root, module.sourceFile)})`
 			: "the index";
 
-	for (const component of components) {
-		const name = entry(fileName(component, { root }));
+	for (const module of modules) {
+		const name = entry(fileName(module, { root }));
 		if (taken.has(name))
 			throw new Error(
-				`${where(taken.get(name) ?? null)} and ${where(component)} both map to "${name}" — ` +
-					"give `fileName` something unique, e.g. group by folder: " +
-					'(c) => path.basename(c.dir) + "/" + c.name + ".md"',
+				`${where(taken.get(name) ?? null)} and ${where(module)} both map to "${name}" — ` +
+					"give `fileName` something unique, e.g. mirror the source layout: " +
+					'(m, { root }) => path.relative(root, m.dir) + ".md"',
 			);
-		taken.set(name, component);
-		names.set(component, name);
+		taken.set(name, module);
+		names.set(module, name);
 	}
 	return names;
 }
@@ -244,39 +268,4 @@ function entry(name: string): string {
 /** A path as given (absolute) or resolved against the project root. */
 function absolute(target: string, root: string): string {
 	return path.isAbsolute(target) ? target : path.join(root, target);
-}
-
-/** The component index: H1 + blockquote summary + a `[name](href): desc` list, sorted by name. */
-function buildIndex(
-	names: Map<ComponentInfo, string>,
-	indexName: string,
-	title: string,
-	description: string | undefined,
-): string {
-	const indexDir = path.dirname(indexName);
-
-	// Sorted by code unit, not `localeCompare` — the latter varies with the runtime's locale data,
-	// which would reorder the index between machines for no reason.
-	const lines = [...names]
-		.sort(([a], [b]) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
-		.map(([component, name]) => {
-			// Relative to the index, which lives in the same directory — so the whole directory stays
-			// copyable. "/" not the OS separator: a Markdown link is a URL.
-			const href = path.relative(indexDir, name).replaceAll(path.sep, "/");
-			const summary = firstLine(component.description) || component.name;
-			const deprecated =
-				component.deprecated !== undefined ? " (deprecated)" : "";
-			return `- [${component.name}](${href}): ${summary}${deprecated}`;
-		});
-
-	return `${heading(title, description)}## Components\n\n${lines.join("\n")}\n`;
-}
-
-/** `# title` + optional `> description` blockquote (the index header). */
-function heading(title: string, description: string | undefined): string {
-	return description ? `# ${title}\n\n> ${description}\n\n` : `# ${title}\n\n`;
-}
-
-function firstLine(text: string | undefined): string {
-	return text?.split("\n")[0].trim() ?? "";
 }

@@ -65,8 +65,12 @@ function jsDocTagText(
  * enough that stable output is the better trade.)
  */
 function jsDocText(parts: readonly ts.SymbolDisplayPart[] | undefined): string {
-	return ts
-		.displayPartsToString([...(parts ?? [])])
+	return trimLines(ts.displayPartsToString([...(parts ?? [])]));
+}
+
+/** Text with trailing whitespace stripped from every line, then trimmed — see {@link jsDocText}. */
+export function trimLines(text: string): string {
+	return text
 		.split("\n")
 		.map((line) => line.trimEnd())
 		.join("\n")

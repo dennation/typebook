@@ -47,6 +47,8 @@ export interface CommandCtx {
 	 * command that needs no components never triggers it.
 	 */
 	components(): Promise<ComponentInfo[]>;
+	/** {@link components} grouped by the scanned file that surfaced them. Lazy and shared the same way. */
+	modules(): Promise<ModuleInfo[]>;
 	/** Whatever followed the command name on the command line. */
 	args: string[];
 	/** What invoked this command, for a plugin that wants to behave differently. */
@@ -175,4 +177,25 @@ export interface ComponentInfo {
 	/** `@deprecated` on the component: the tag's note, `true` for a bare tag, absent otherwise. */
 	deprecated?: boolean | string;
 	props: PropInfo[];
+}
+
+/**
+ * The components of one scanned file — the unit an agent imports and uses together. Its prose
+ * comes only from a JSDoc block tagged `@module` in that file; without one there is none.
+ */
+export interface ModuleInfo {
+	/** Name of the scanned file's folder: `form` for `src/components/form/index.ts`. */
+	name: string;
+	/** The scanned file's folder. */
+	dir: string;
+	/** The scanned file: `…/src/components/form/index.ts`. */
+	sourceFile: string;
+	/** The module's components in export order, compound members (`Form.Root`) included. */
+	components: ComponentInfo[];
+	/** What to import: each component's `parent ?? name`, deduplicated — `["Form"]`. */
+	bindings: string[];
+	/** Text of the `@module` block, tags excluded. */
+	description?: string;
+	/** Bodies of the `@module` block's `@example` tags. */
+	examples?: string[];
 }

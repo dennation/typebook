@@ -1,16 +1,17 @@
-import type { ComponentInfo } from "../../types";
-import { componentToMarkdown } from "./componentToMarkdown";
+import type { ModuleInfo } from "../../types";
 import {
 	asPropFilterFn,
 	DEFAULT_PROP_FILTER,
 	type PropFilter,
 } from "./filterProps";
+import { importStatement } from "./importStatement";
+import { moduleToMarkdown } from "./moduleToMarkdown";
 
-/** Turns one scanned component into the contents of its instruction file. */
-export type LlmFormat = (component: ComponentInfo) => string;
+/** Turns one module into the contents of its instruction file. */
+export type LlmFormat = (module: ModuleInfo) => string;
 
-/** Build context passed to `importFrom` — the project root (the component's own
- * folder is on `component.dir`). */
+/** Build context passed to `importFrom` / `fileName` — the project root (the module's own folder
+ * is on `module.dir`). */
 export interface ImportFromContext {
 	/** The project root. */
 	root: string;
@@ -18,13 +19,13 @@ export interface ImportFromContext {
 
 export interface MarkdownFormatOptions {
 	/**
-	 * Module each component is imported from — prints an `import { X } from "…"` line. A string
-	 * (`"@acme/ui"`) or a function `(component, { root }) => string` (the component's folder is on
-	 * `component.dir`). Omit to skip it.
+	 * Where a module is imported from — prints one `import { A, B } from "…"` line with all of its
+	 * bindings. A string (`"@acme/ui"`) or a function `(module, { root }) => string` (the module's
+	 * folder is on `module.dir`). Omit to skip it.
 	 */
 	importFrom?:
 		| string
-		| ((component: ComponentInfo, ctx: ImportFromContext) => string);
+		| ((module: ModuleInfo, ctx: ImportFromContext) => string);
 	/** Which props to surface — a {@link PropFilter} map or predicate. Defaults to {@link DEFAULT_PROP_FILTER}. */
 	filterProps?: PropFilter;
 	/**
@@ -38,8 +39,9 @@ export interface MarkdownFormatOptions {
 }
 
 /**
- * The built-in {@link LlmFormat}: renders a component as the Markdown card (import line,
- * description, `@remarks` usage, deprecation, props table). Wrap it to extend the default output.
+ * The built-in {@link LlmFormat}: renders a module as the Markdown card (`@module` prose, import
+ * line, examples, then each component's description, `@remarks` usage, deprecation and props
+ * table). Wrap it to extend the default output.
  */
 export function markdownFormat(options: MarkdownFormatOptions = {}): LlmFormat {
 	const {
@@ -49,30 +51,19 @@ export function markdownFormat(options: MarkdownFormatOptions = {}): LlmFormat {
 		root = "",
 	} = options;
 	const keep = asPropFilterFn(filterProps);
-	return (component) =>
-		componentToMarkdown(
+	return (module) =>
+		moduleToMarkdown(
 			{
-				...component,
-				props: component.props.filter(
-					(p) =>
-						(keepOwnProps && p.inheritedFrom === undefined) ||
-						keep(p, component),
-				),
+				...module,
+				components: module.components.map((component) => ({
+					...component,
+					props: component.props.filter(
+						(p) =>
+							(keepOwnProps && p.inheritedFrom === undefined) ||
+							keep(p, component),
+					),
+				})),
 			},
-			{ importStatement: importStatement(importFrom, component, root) },
+			{ importStatement: importStatement(importFrom, module, root) },
 		);
-}
-
-function importStatement(
-	importFrom: MarkdownFormatOptions["importFrom"],
-	component: ComponentInfo,
-	root: string,
-): string | undefined {
-	const src =
-		typeof importFrom === "function"
-			? importFrom(component, { root })
-			: importFrom;
-	// A compound member (`Tabs.Tab`) is reached through its parent binding — that's what's imported.
-	const binding = component.parent ?? component.name;
-	return src ? `import { ${binding} } from "${src}";` : undefined;
 }

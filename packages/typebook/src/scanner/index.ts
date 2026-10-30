@@ -7,8 +7,15 @@
 // Pulls in `typescript` only; type-only imports stay weightless.
 
 // ── React-free metadata types the scanner produces ──────────────────────────
-export type { ComponentInfo, PropGroup, PropInfo, PropType } from "../types";
+export type {
+	ComponentInfo,
+	ModuleInfo,
+	PropGroup,
+	PropInfo,
+	PropType,
+} from "../types";
 // ── Component extraction ─────────────────────────────────────────────────────
 export { classifyPropGroup } from "./classifyPropGroup";
 export { collectComponentInfos } from "./collectComponentInfos";
+export { collectModuleInfos } from "./collectModuleInfos";
 export { TypeScriptClient } from "./ts-client";

@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import type { ComponentInfo } from "../../types";
 import { componentToMarkdown } from "../llm-instructions/componentToMarkdown";
 
-// --- componentToMarkdown: pure rendering (the llm-instructions card) ---
+// --- componentToMarkdown: pure rendering (one part of a module's card) ---
 
 describe("componentToMarkdown", () => {
 	const doc: ComponentInfo = {
@@ -37,7 +37,7 @@ describe("componentToMarkdown", () => {
 
 	test("renders heading, description, deprecation note", () => {
 		const md = componentToMarkdown(doc);
-		expect(md).toContain("## Button");
+		expect(md).toContain("### Button");
 		expect(md).toContain("Primary action button.");
 		expect(md).toContain("> ⚠️ **Deprecated:** use `Action`");
 	});
@@ -54,11 +54,9 @@ describe("componentToMarkdown", () => {
 		expect(componentToMarkdown(doc)).toContain("`className`");
 	});
 
-	test("renders the import statement and @remarks usage section", () => {
-		const md = componentToMarkdown(doc, {
-			importStatement: 'import { Button } from "@acme/ui";',
-		});
-		expect(md).toContain('import { Button } from "@acme/ui";');
+	test("renders the @remarks usage section and no import (that's the module's)", () => {
+		const md = componentToMarkdown(doc);
+		expect(md).not.toContain("import");
 		expect(md).toContain("**Usage**");
 		expect(md).toContain("don't nest buttons");
 	});

@@ -78,7 +78,7 @@ plugins actually brought:
 ```
   Commands:
     llm-instructions:check     fail if the cards are out of date, writing nothing
-    llm-instructions:generate  write the component cards and their index
+    llm-instructions:generate  write the module cards and their index
 ```
 
 Command names are the plugin's to choose, and a good one says what it does and whose it is —
@@ -175,6 +175,7 @@ A plugin is a name and the commands it contributes. Its commands get the scan re
       describe: "one line shown in `typebook` with no arguments",
       async run(ctx) {
         const components = await ctx.components()   // lazy: costs nothing if unused
+        const modules = await ctx.modules()         // the same, grouped by scanned file
         // …produce whatever you produce
       },
     },
@@ -188,7 +189,7 @@ listing it under `plugins` in the config.
 
 ### `llm-instructions`
 
-Writes documentation for AI coding agents (Claude Code, Codex, Cursor) so they work from your components' **real** APIs instead of guessing. It emits one Markdown card per component plus a Markdown index linking them all.
+Writes documentation for AI coding agents (Claude Code, Codex, Cursor) so they work from your components' **real** APIs instead of guessing. It emits one Markdown card per **module** plus a Markdown index with one line per module.
 
 ```ts
 import { llmInstructions } from "@dennation/typebook/plugins/llm-instructions";
@@ -196,12 +197,12 @@ import { llmInstructions } from "@dennation/typebook/plugins/llm-instructions";
 // inside the config's `plugins: [ … ]`
 llmInstructions({
   outDir: "docs/components",
-  importFrom: "@acme/ui", // the import line printed in each card
+  importFrom: (m) => `@acme/ui/${m.name}`, // the import printed in each card and index line
 });
 ```
 
-That writes `docs/components/{Name}.md` per component plus `docs/components/index.md`
-linking them. Everything lands in that one directory and the index links each card
+That writes `docs/components/{module}.md` per module plus `docs/components/index.md`
+listing them. Everything lands in that one directory and the index links each card
 relative to itself, so it's **self-contained** — copy it into `dist`, publish it with
 the package, or serve it as static files, and the links keep working.
 
@@ -209,35 +210,117 @@ Then point your agent's memory (`CLAUDE.md`, `AGENTS.md`) at the index; it reads
 card it needs on demand. For a **published** package, see [Shipping to a consumer
 project](#shipping-to-a-consumer-project).
 
-Each card is self-contained — import line, description, `@remarks` usage guidance, deprecation, and a props table with exhaustive union values:
+#### Modules
+
+A **module** is the components of one scanned file — the file your `components` glob
+matched, e.g. `src/components/form/index.ts`. Its name is that file's folder (`form`).
+An agent uses a module's parts together and imports them in one line, so that is the
+unit it gets: one card, one index line — not `Form.Root`, `Form.Field` and `Form.Input`
+on three cards with nothing saying how they fit.
+
+A module's description and examples come **only** from a JSDoc block tagged `@module`
+in that file. No block — no module description and no example; nothing is borrowed
+from a component:
+
+````ts
+// src/components/form/index.ts
+/**
+ * Native form with a field grid.
+ *
+ * Two columns. `Form.Field` and every `Form.*` span both; any other child takes one —
+ * give it `col-span-full`.
+ *
+ * @example
+ * ```tsx
+ * <Form.Root>
+ * 	<Form.Input name="email" label="Email" />
+ * 	<Button type="submit" className="col-span-full">Send</Button>
+ * </Form.Root>
+ * ```
+ * @module
+ */
+export { Form } from "./ui/Form";
+````
+
+- `@example` may repeat. A body with its own ` ``` ` fence is taken as written; one
+  without is fenced as `tsx`.
+- A component's description is still the JSDoc above its declaration (for a compound
+  part, above that part's own component), and `@deprecated` still goes on components.
+  A module is deprecated when all of its components are.
+
+#### Card
+
+The same layout for every module, one component or ten: module description → import →
+examples → parts. Each part is the component as named in code, its description,
+`@remarks` usage guidance, deprecation and a props table with exhaustive union values:
 
 ````md
-## Button
+## form
 
-A primary call-to-action button.
+Native form with a field grid.
+
+Two columns. `Form.Field` and every `Form.*` span both; any other child takes one —
+give it `col-span-full`.
 
 ```tsx
-import { Button } from "@acme/ui";
+import { Form } from "@acme/ui/form";
 ```
 
-**Usage**
+**Example**
 
-Use one primary button per view; pair it with a `variant="ghost"` button for
-secondary actions. Put the label in `children`; don't nest interactive elements.
+```tsx
+<Form.Root>
+	<Form.Input name="email" label="Email" />
+	<Button type="submit" className="col-span-full">Send</Button>
+</Form.Root>
+```
+
+### Form.Root
+
+Native form and the grid container for `Form.Field`.
 
 | Prop | Type | Default | Required | Description |
 |---|---|---|---|---|
-| `variant` | `"solid" \| "outline" \| "ghost"` | `"solid"` | – | Visual style. |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | – | Controls height and horizontal padding. |
-| `fullWidth` | `boolean` | `false` | – | Stretch to fill the container's width. |
-| `disabled` | `boolean` | `false` | – | Prevent interaction and dim the button. |
-| `leftIcon` | `ReactNode` | – | – | Icon element rendered before the label. |
-| `children` | `ReactNode` | – | ✔ | The button label. |
-| `onPress` | `() => void` | – | – | Called when the button is activated. |
-| `primary` | `boolean` | – | – | ⚠️ deprecated: Use `variant="solid"` instead. |
+| `size` | `"md" \| "sm"` | `"sm"` | – | Size of the fields and controls inside. |
+
+### Form.Input
+
+Input with a label, a description and an error.
+
+| Prop | Type | Default | Required | Description |
+|---|---|---|---|---|
+| `label` | `ReactNode` | – | – | Label text or a ReactNode slot. |
 ````
 
-The usage note comes from the component's `@remarks` JSDoc; the exhaustive prop values come from the union types — both give the agent fewer ways to be wrong.
+The import line carries every binding of the module (a compound part `Form.Root` is
+reached through `Form`). The usage note comes from a component's `@remarks` JSDoc; the
+exhaustive prop values come from the union types — both give the agent fewer ways to be
+wrong. A one-component module is laid out the same, with one part: avoiding a repeated
+description between the `@module` block and the component is up to the JSDoc author.
+
+#### Index
+
+The index is meant to sit in an agent's context whole, so each line is the import
+itself, linking the card:
+
+```md
+# @acme/ui
+
+> Components of the Acme design system.
+
+- [`import { Button } from "@acme/ui/button"`](button.md)
+- [`import { Form } from "@acme/ui/form"`](form.md) — Native form with a field grid · parts: Form.Root, Form.Field, Form.Input
+- [`import { Popover, PopoverTrigger, PopoverContent } from "@acme/ui/popover"`](popover.md) — A panel floating next to an element
+- [`import { Dialog, DialogClose } from "@acme/ui/legacy-dialog"`](legacy-dialog.md) · deprecated
+```
+
+- ` — …` is the first line of the module description, when there is one.
+- ` · parts: …` lists the names the import hides — a compound module's members
+  (`Form.Root` behind `Form`), as in code, in export order. Separate exports (`Popover`)
+  are already in the import, so they aren't repeated. In a module where not everything
+  is deprecated, a deprecated part reads `Name (deprecated)`.
+- ` · deprecated` marks a module whose every component is deprecated.
+- Lines are sorted by module name. Without `importFrom`, the link text is the bindings.
 
 It registers two commands:
 
@@ -247,7 +330,7 @@ It registers two commands:
 | `llm-instructions:check` | fails with the list of differences, writing nothing — run it in CI |
 
 > **`outDir` belongs to the plugin.** `generate` makes it match the scan exactly, which means
-> deleting files it no longer produces — otherwise a deleted component would leave its card
+> deleting files it no longer produces — otherwise a deleted module would leave its card
 > behind forever, and an agent would find it and read documentation for something that no
 > longer exists. `check` counts such a leftover as out of date too. Point `outDir` at a
 > directory only this plugin writes to; don't mix hand-written pages in.
@@ -258,52 +341,74 @@ It registers two commands:
 |---|---|---|
 | `outDir` **(required)** | `string` | The directory everything lands in — absolute, or relative to the project root. Owned by the plugin: `generate` deletes anything in it that it no longer produces. |
 | `indexName` | `string \| false` | Filename of the Markdown index. Default `"index.md"`; `false` skips it. Reference it from your `AGENTS.md`/`CLAUDE.md`. |
-| `fileName` | `(component, { root }) => string` | Filename of a card, relative to `outDir`. Default `` `${c.name}.md` ``. May nest (`` (c) => `forms/${c.name}.md` ``), may not escape the directory. |
-| `filterComponents` | `(component) => boolean` | Which components get a card and index entry (`true` keeps). Defaults to all. Use it to hide deprecated components or re-exports you don't own. |
-| `importFrom` | `string \| (component, { root }) => string` | Module each component is imported from — prints the `import { X } from "…"` line (a compound member `Tabs.Tab` imports its parent, `Tabs`). A string, or a function that gets `{ root }` (derive a subpath from `component.dir`: `` (c, { root }) => `@acme/ui/${path.relative(root, c.dir)}` ``). Omit to skip it. |
+| `fileName` | `(module, { root }) => string` | Filename of a module's card, relative to `outDir`. Default `` `${m.name}.md` ``. May nest (`` (m) => `forms/${m.name}.md` ``), may not escape the directory. |
+| `filterComponents` | `(component) => boolean` | Which components are documented (`true` keeps). Defaults to all. Applied before grouping: a module left with no components gets no card and no index line, and its import loses the dropped bindings. |
+| `importFrom` | `string \| (module, { root }) => string` | Where a module is imported from — prints one `import { A, B } from "…"` with all its bindings, in the card and as the index link. A string, or a function that gets `{ root }` (derive a subpath from `module.dir`: `` (m, { root }) => `@acme/ui/${path.relative(root, m.dir)}` ``). Omit to skip it. |
 | `filterProps` | `PropFilter` (map or predicate) | Which props a card surfaces. A **map** keyed by group or prop name (`{ element: false, href: true }`, prop name wins, unlisted kept) or a predicate. Defaults to `DEFAULT_PROP_FILTER`; spread to override. Configures the default `format` only. |
 | `keepOwnProps` | `boolean` | Keep a component's own props regardless of `filterProps`. Default `true`; `false` filters own props too. |
-| `format` | `(component) => string` | How each component becomes its file's contents. Defaults to `markdownFormat` (the card above). Pass your own for a different shape — full `ComponentInfo` in, string out. |
+| `format` | `(module) => string` | How each module becomes its file's contents. Defaults to `markdownFormat` (the card above). Pass your own for a different shape — the full `ModuleInfo` (after `filterComponents`) in, string out. |
 | `title` / `description` | `string` | H1 title and blockquote summary of the index. |
+
+#### Migrating from per-component cards (≤ 0.7)
+
+The unit changed from a component to a module, so the options that took a component now
+take a module:
+
+| Before | After |
+|---|---|
+| `fileName: (c) => …`, default `` `${c.name}.md` `` | `fileName: (m) => …`, default `` `${m.name}.md` `` — `m.name` is the folder name |
+| `importFrom: (c) => …` | `importFrom: (m) => …` — `m.dir` is the same folder `c.dir` was |
+| `format: (c) => …` | `format: (m) => …` — the components are in `m.components` |
+| `markdownFormat(opts)(component)` | `markdownFormat(opts)(module)` |
+| index line `- [Name](Name.md): description` | `` - [`import { … } from "…"`](module.md) — description `` |
+
+`filterComponents`, `filterProps`, `keepOwnProps`, `outDir`, `indexName`, `title` and
+`description` are unchanged. Two more things to check:
+
+- **Default filenames collide by folder name now.** `components/dialog` and
+  `deprecated/dialog` both default to `dialog.md`; generation fails naming both. Give
+  `fileName` the subpath: `` (m, { root }) => `${path.relative(path.join(root, "src"), m.dir)}.md` ``.
+- **Module prose is opt-in.** Until a scanned file has a `@module` block, its card and
+  index line carry no module description — only the components' own. Add one per entry
+  file, starting with the one-line summary the index shows.
+
+A plugin of your own can read modules too: `ctx.modules()` is lazy and shared like
+`ctx.components()`, and `collectModuleInfos(components)` builds them from a `scan()`.
 
 #### Recipes
 
 **Rename or group the cards** — `fileName` returns a path relative to `outDir`, so it can
-nest. It gets the component (its own folder is `component.dir`) and `{ root }`:
+nest. It gets the module (its folder is `module.dir`) and `{ root }`:
 
 ```ts
 // rename
-llmInstructions({ outDir: "docs", fileName: (c) => `${c.name}.gen.md` });
-
-// group by the component's own folder
-llmInstructions({ outDir: "docs", fileName: (c) => `${path.basename(c.dir)}/${c.name}.md` });
+llmInstructions({ outDir: "docs", fileName: (m) => `${m.name}.gen.md` });
 
 // mirror your source layout — collisions become impossible by construction
 llmInstructions({
   outDir: "docs",
-  fileName: (c, { root }) =>
-    path.join(path.relative(path.join(root, "src/components"), c.dir), `${c.name}.md`),
+  fileName: (m, { root }) => `${path.relative(path.join(root, "src/components"), m.dir)}.md`,
 });
 
-// place one component by hand — key by source file, since names may repeat
+// place one module by hand — key by source file, since folder names may repeat
 const PLACE: Record<string, string> = {
-  "src/components/forms/Button.tsx": "forms/Button.md",
+  "src/legacy/dialog/index.ts": "legacy/dialog.md",
 };
 llmInstructions({
   outDir: "docs",
-  fileName: (c, { root }) => PLACE[path.relative(root, c.sourceFile)] ?? `${c.name}.md`,
+  fileName: (m, { root }) => PLACE[path.relative(root, m.sourceFile)] ?? `${m.name}.md`,
 });
 ```
 
 The index links whatever paths you produce, relative to itself. A name that escapes
 `outDir` is an error — staying inside is what keeps the directory copyable as a unit.
 
-**Same-named components in different folders** (`forms/Button`, `toolbar/Button`) are
-exactly why `fileName` exists. The default flat layout maps both to `Button.md`: one
+**Same-named modules in different folders** (`components/dialog`, `deprecated/dialog`)
+are exactly why `fileName` exists. The default flat layout maps both to `dialog.md`: one
 would silently overwrite the other, and the index would list both under the same link —
-so an agent following one entry would read the other's props. Rather than pick a winner,
-generation fails and names both files; grouping by folder (above) separates them.
-Nothing is written when it fails, so your tree is untouched.
+so an agent following one line would read the other's props. Rather than pick a winner,
+generation fails and names both files; mirroring the source layout (above) separates
+them. Nothing is written when it fails, so your tree is untouched.
 
 **Need the docs somewhere else too?** One generation writes to one place — there is no
 "also copy it there" option, because your build already has better ones. Copy the folder
@@ -332,13 +437,13 @@ llmInstructions({
 
 For arbitrary logic, pass a predicate instead — `(prop, component) => boolean`. Own props stay visible either way unless you set `keepOwnProps: false`.
 
-**Emit a different format** — `format` takes the scanned `ComponentInfo` and returns the file body, so you can produce JSON, MDX, anything (match the extension in `fileName`):
+**Emit a different format** — `format` takes the `ModuleInfo` and returns the file body, so you can produce JSON, MDX, anything (match the extension in `fileName`):
 
 ```ts
 llmInstructions({
   outDir: "docs",
-  fileName: (c) => `${c.name}.json`,
-  format: (c) => JSON.stringify({ name: c.name, props: c.props }, null, 2),
+  fileName: (m) => `${m.name}.json`,
+  format: (m) => JSON.stringify({ import: m.bindings, components: m.components }, null, 2),
 });
 ```
 
@@ -348,7 +453,7 @@ llmInstructions({
 import { markdownFormat } from "@dennation/typebook/plugins/llm-instructions";
 
 const card = markdownFormat({ importFrom: "@acme/ui" });
-llmInstructions({ format: (c) => `<!-- generated by typebook -->\n\n${card(c)}` });
+llmInstructions({ format: (m) => `<!-- generated by typebook -->\n\n${card(m)}` });
 ```
 
 **Title the index** (its H1 + summary header):
@@ -359,7 +464,7 @@ llmInstructions({ title: "Acme UI", description: "Components for the Acme design
 
 #### Shipping to a consumer project
 
-The generated docs are ordinary source files — the cards and their index in one `outDir`. Commit them and run `llm-instructions:check` in CI (they're derived, so it should always pass), then reach a downstream project in two steps. Nothing auto-discovers the index: no agent scans `node_modules` for it, so you reference it (step 2).
+The generated docs are ordinary source files — the module cards and their index in one `outDir`. Commit them and run `llm-instructions:check` in CI (they're derived, so it should always pass), then reach a downstream project in two steps. Nothing auto-discovers the index: no agent scans `node_modules` for it, so you reference it (step 2).
 
 > Prefer to keep generated files out of git? `.gitignore` the folder and run `llm-instructions:generate` as a build step instead. If you do commit them, `llm-instructions:check` in CI keeps them honest.
 
@@ -403,7 +508,7 @@ Built on [unplugin](https://unplugin.unjs.io), so the same `typebook()` factory 
 
 | Import | Description |
 |---|---|
-| `@dennation/typebook` | The core: `scan()`, `loadConfig`, `defineConfig`, `resolveComponentFiles`, the command dispatcher (`runCommands`, `resolveCommand`, `listCommands`), the scanner internals (`collectComponentInfos`, `TypeScriptClient`, `classifyPropGroup`) and the React-free types (`TypebookConfig`, `TypebookPlugin`, `PluginCommand`, `CommandCtx`, `ComponentInfo`, `PropInfo`, …). No bundler involved. |
+| `@dennation/typebook` | The core: `scan()`, `loadConfig`, `defineConfig`, `resolveComponentFiles`, the command dispatcher (`runCommands`, `resolveCommand`, `listCommands`), the scanner internals (`collectComponentInfos`, `collectModuleInfos`, `TypeScriptClient`, `classifyPropGroup`) and the React-free types (`TypebookConfig`, `TypebookPlugin`, `PluginCommand`, `CommandCtx`, `ComponentInfo`, `ModuleInfo`, `PropInfo`, …). No bundler involved. |
 | `@dennation/typebook/plugins/llm-instructions` | `llmInstructions()`, `markdownFormat()`, `hideGroups()`, `DEFAULT_PROP_FILTER`, `DEFAULT_KEPT_PROPS`, and the `LlmInstructionsOptions` / `LlmFormat` / `PropFilter` types. |
 | `@dennation/typebook/{vite,rollup,…}` | The `typebook()` bundler plugin, one entry per bundler. |
 

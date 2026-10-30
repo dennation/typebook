@@ -143,6 +143,26 @@ describe("runCommands", () => {
 		);
 	});
 
+	test("modules group the shared scan, and are shared the same way", async () => {
+		const first = recorder("a", "a:emit");
+		const second = recorder("b", "b:emit");
+
+		await runCommands({
+			config: {
+				components: "modules/form/index.ts",
+				plugins: [first.plugin, second.plugin],
+			},
+			root: FIXTURES,
+			names: ["a:emit", "b:emit"],
+			trigger: "cli",
+		});
+
+		const modules = await first.calls[0].modules();
+		expect(modules).toBe(await second.calls[0].modules());
+		expect(modules.map((m) => m.name)).toEqual(["form"]);
+		expect(modules[0].components).toEqual(await first.calls[0].components());
+	});
+
 	test("an unknown name runs nothing", async () => {
 		const { calls, plugin } = recorder("a", "emit");
 
