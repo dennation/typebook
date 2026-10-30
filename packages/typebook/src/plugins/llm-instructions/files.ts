@@ -31,13 +31,18 @@ export async function diffFiles(
 	files: FileMap,
 	dir: string,
 ): Promise<FileDiff> {
+	const present = await listFiles(dir);
+	// Listed under its exact name, not just readable: on a case-insensitive file system `button.md`
+	// reads `Button.md`, which would pass a renamed card off as current.
+	const listed = new Set(present);
 	const stale = await Promise.all(
 		[...files].map(async ([file, expected]) => {
-			const actual = await readFile(file, "utf8").catch(() => null);
+			const actual = listed.has(file)
+				? await readFile(file, "utf8").catch(() => null)
+				: null;
 			return actual === expected ? null : file;
 		}),
 	);
-	const present = await listFiles(dir);
 	return {
 		stale: stale.filter((file) => file !== null).sort(),
 		extra: present.filter((file) => !files.has(file)).sort(),
@@ -53,11 +58,19 @@ export async function diffFiles(
  * Files whose content is already identical are left untouched. That matters beyond saving a write:
  * a dev server watches the tree it writes into, so rewriting an identical file would wake the
  * watcher, which regenerates, which rewrites… Parent directories are all created before the first
- * write, so an unwritable target fails the call instead of half-updating the output.
+ * write, so an unwritable target fails the call before any card is written.
+ *
+ * Deletion comes **first**. On a case-insensitive file system (APFS, NTFS by default) `Button.md`
+ * and `button.md` are one file: writing the new name overwrites the old one and keeps the old name,
+ * so deleting the old name afterwards would delete the card just written. Removing it first — and
+ * the directories it leaves empty, for a renamed folder — lets the write create the new name.
  */
 export async function writeFiles(files: FileMap, dir: string): Promise<void> {
 	const { stale, extra } = await diffFiles(files, dir);
 	if (stale.length === 0 && extra.length === 0) return;
+
+	await Promise.all(extra.map((file) => rm(file, { force: true })));
+	await pruneEmptyDirs(dir);
 
 	const targets = [...files].filter(([file]) => stale.includes(file));
 	const dirs = new Set(targets.map(([file]) => path.dirname(file)));
@@ -65,8 +78,6 @@ export async function writeFiles(files: FileMap, dir: string): Promise<void> {
 	await Promise.all(
 		targets.map(([file, content]) => writeFile(file, content, "utf8")),
 	);
-	await Promise.all(extra.map((file) => rm(file, { force: true })));
-	await pruneEmptyDirs(dir);
 }
 
 /** Every file under `dir`, absolute; empty when it doesn't exist yet. */
