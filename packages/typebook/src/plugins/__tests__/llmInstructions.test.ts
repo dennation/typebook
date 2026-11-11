@@ -397,6 +397,17 @@ describe("llmInstructions: index", () => {
 		);
 	});
 
+	test("intro lands between the header and the module list", async () => {
+		const text = await index([button], {
+			title: "UI",
+			description: "Components.",
+			intro: "\n## Variants\n\n- `filled` is muted.\n",
+		});
+		expect(text).toBe(
+			"# UI\n\n> Components.\n\n## Variants\n\n- `filled` is muted.\n\n- [`Button`](button.md)\n",
+		);
+	});
+
 	test("a nested card is linked by its path inside the directory", async () => {
 		expect(
 			await index([button], { fileName: (m) => `forms/${m.name}.md` }),

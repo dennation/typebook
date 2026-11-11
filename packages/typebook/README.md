@@ -348,6 +348,7 @@ It registers two commands:
 | `keepOwnProps` | `boolean` | Keep a component's own props regardless of `filterProps`. Default `true`; `false` filters own props too. |
 | `format` | `(module) => string` | How each module becomes its file's contents. Defaults to `markdownFormat` (the card above). Pass your own for a different shape — the full `ModuleInfo` (after `filterComponents`) in, string out. |
 | `title` / `description` | `string` | H1 title and blockquote summary of the index. |
+| `intro` | `string` | Markdown between the index header and the module list — rules every card relies on (shared prop semantics, setup), so an agent reads them once instead of in every card. If it has headings, end it with one that names the list. |
 
 #### Migrating from per-component cards (≤ 0.7)
 
