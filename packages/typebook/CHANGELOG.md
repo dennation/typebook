@@ -1,5 +1,11 @@
 # @dennation/typebook
 
+## 0.9.0
+
+### Minor Changes
+
+- 71c3247: `llm-instructions` takes an `intro`: Markdown placed in the index between the header and the module list, for rules every card relies on.
+
 ## 0.8.1
 
 ### Patch Changes
