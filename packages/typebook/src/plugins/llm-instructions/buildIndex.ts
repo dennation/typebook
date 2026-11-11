@@ -8,12 +8,14 @@ export interface IndexOptions {
 	indexName: string;
 	title: string;
 	description: string | undefined;
+	intro: string | undefined;
 	importFrom: MarkdownFormatOptions["importFrom"];
 	root: string;
 }
 
 /**
- * The module index: H1 + optional blockquote summary + one line per module, sorted by module name.
+ * The module index: H1 + optional blockquote summary + optional intro + one line per module, sorted
+ * by module name.
  * Each line links the module's card under its ready-made import, so the whole index can sit in an
  * agent's context and answer "what can I import, from where" without opening a card.
  */
@@ -21,7 +23,7 @@ export function buildIndex(
 	names: Map<ModuleInfo, string>,
 	options: IndexOptions,
 ): string {
-	const { indexName, title, description, importFrom, root } = options;
+	const { indexName, title, description, intro, importFrom, root } = options;
 	const indexDir = path.dirname(indexName);
 
 	const lines = [...names]
@@ -42,7 +44,7 @@ export function buildIndex(
 			indexLine(module, href, importStatement(importFrom, module, root)),
 		);
 
-	return `${heading(title, description)}${lines.join("\n")}\n`;
+	return `${heading(title, description, intro)}${lines.join("\n")}\n`;
 }
 
 /** `` - [`import …`](href) — summary · parts: A, B · deprecated ``, each tail only when it applies. */
@@ -75,9 +77,16 @@ function isDeprecated(component: ComponentInfo): boolean {
 	return component.deprecated !== undefined;
 }
 
-/** `# title` + optional `> description` blockquote (the index header). */
-function heading(title: string, description: string | undefined): string {
-	return description ? `# ${title}\n\n> ${description}\n\n` : `# ${title}\n\n`;
+/** `# title`, optional `> description` blockquote and optional intro, each followed by a blank line. */
+function heading(
+	title: string,
+	description: string | undefined,
+	intro: string | undefined,
+): string {
+	return [`# ${title}`, description && `> ${description}`, intro?.trim()]
+		.filter(Boolean)
+		.map((block) => `${block}\n\n`)
+		.join("");
 }
 
 /** The description's first line without its closing period — it continues into the line's tail. */

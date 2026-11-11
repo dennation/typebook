@@ -89,6 +89,11 @@ export interface LlmInstructionsOptions {
 	title?: string;
 	/** Blockquote summary under the index title. Optional. */
 	description?: string;
+	/**
+	 * Markdown between the index header and the module list: rules every card relies on, such as
+	 * shared prop semantics or setup. With headings, end it with one that names the list. Optional.
+	 */
+	intro?: string;
 }
 
 /**
@@ -175,6 +180,7 @@ async function buildFiles(
 		format,
 		title = "Components",
 		description,
+		intro,
 	} = options;
 
 	const modules = (await ctx.modules()).flatMap((module) => {
@@ -207,6 +213,7 @@ async function buildFiles(
 					indexName,
 					title,
 					description,
+					intro,
 					importFrom,
 					root: ctx.root,
 				}),
